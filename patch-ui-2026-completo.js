@@ -1,145 +1,97 @@
 /**
- * PATCH UI 2026 COMPLETO — um arquivo só
- * Menu, login persistente, Estado/Cidade, excluir lançamento e medição.
- * NÃO força mês. NÃO reescreve cards do P120.
- *
- * No index.html, ANTES de </body>, só isto:
- *   <script src="/admin-painel.js"></script>
- *   <script src="/patch-ui-2026-completo.js"></script>
+ * PATCH UI 2026 COMPLETO v2
+ * <script src="/admin-painel.js"></script>
+ * <script src="/patch-ui-2026-completo.js"></script>
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026completo) return;
-  window.__patchUi2026completo = true;
+  if (window.__patchUi2026completo2) return;
+  window.__patchUi2026completo2 = true;
 
   var K_SESS = 'painel_seg_sessao_v1';
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
-  var UF_NOME = {AC:'Acre',AL:'Alagoas',AM:'Amazonas',AP:'Amapá',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MG:'Minas Gerais',MS:'Mato Grosso do Sul',MT:'Mato Grosso',PA:'Pará',PB:'Paraíba',PE:'Pernambuco',PI:'Piauí',PR:'Paraná',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RO:'Rondônia',RR:'Roraima',RS:'Rio Grande do Sul',SC:'Santa Catarina',SE:'Sergipe',SP:'São Paulo',TO:'Tocantins'};
+  var UF_NOME = {AC:'Acre',AL:'Alagoas',AM:'Amazonas',AP:'Amapa',BA:'Bahia',CE:'Ceara',DF:'Distrito Federal',ES:'Espirito Santo',GO:'Goias',MA:'Maranhao',MG:'Minas Gerais',MS:'Mato Grosso do Sul',MT:'Mato Grosso',PA:'Para',PB:'Paraiba',PE:'Pernambuco',PI:'Piaui',PR:'Parana',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RO:'Rondonia',RR:'Roraima',RS:'Rio Grande do Sul',SC:'Santa Catarina',SE:'Sergipe',SP:'Sao Paulo',TO:'Tocantins'};
 
   var css = document.createElement('style');
-  css.id = 'pUi2026compCss';
   css.textContent = [
-    '#p86bLogin,#p86bCad{position:fixed!important;inset:0!important;',
-    'align-items:center!important;justify-content:center!important;z-index:2147483400!important}',
-    '#selectObra,label[for="selectObra"]{display:none!important}',
-    '.or-acordeao,.or-grupo,.or-tit,#orObrasAcc{font-size:13px!important;font-weight:800!important;',
-    'letter-spacing:.4px!important;text-transform:uppercase!important;color:#cbd5e1!important;',
-    'padding:12px 14px 8px!important;background:transparent;border:0;width:100%;text-align:left;cursor:pointer}',
-    '#orObrasToggle{display:none!important}',
-    '#orObrasLista{padding:2px 8px 10px}',
     '#locSugBox{display:none}',
-    '#locSugBox.aberto{display:block;position:fixed;z-index:2147483646;background:#fff;color:#0f172a;',
-    'border:1px solid #94a3b8;border-radius:8px;max-height:220px;overflow:auto}',
+    '#locSugBox.aberto{display:block;position:fixed;z-index:2147483646;background:#fff;color:#0f172a;border:1px solid #94a3b8;border-radius:8px;max-height:220px;overflow:auto}',
     '#locSugBox.aberto button{display:block;width:100%;text-align:left;border:0;background:#fff;color:#0f172a;padding:8px 10px}',
     '#locSugBox.aberto button:hover{background:#e2e8f0}',
-    '.pgto-del,.med-del{width:26px;height:26px;border:0;border-radius:7px;background:#fecaca;color:#7f1d1d;cursor:pointer;font-size:16px}',
-    '.loc-wrap{display:flex;flex-direction:column;gap:4px;min-width:150px}',
-    '.loc-wrap label{font-size:11px;color:#64748b;font-weight:700}',
-    '.loc-uf,.loc-cid{padding:6px 8px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#0f172a}'
+    '.pgto-x{width:26px;height:26px;border:0;border-radius:7px;background:#fecaca;color:#7f1d1d;cursor:pointer;font-size:15px;margin-left:4px}',
+    '.loc-cel{display:flex;flex-direction:column;gap:4px;min-width:150px}',
+    '.loc-cel label{font-size:11px;color:#64748b;font-weight:700}',
+    '.loc-uf,.loc-cid{padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box}'
   ].join('');
   document.head.appendChild(css);
 
-  function sessao() {
+  function lerSess() {
     try {
-      var raw = localStorage.getItem(K_SESS) || sessionStorage.getItem(K_SESS);
-      return raw ? JSON.parse(raw) : null;
+      var a = localStorage.getItem(K_SESS) || sessionStorage.getItem(K_SESS);
+      return a ? JSON.parse(a) : null;
     } catch (e) { return null; }
   }
-
+  function gravarSess(s) {
+    if (!s) return;
+    s.exp = Date.now() + 30 * 86400000;
+    var raw = JSON.stringify(s);
+    try { localStorage.setItem(K_SESS, raw); } catch (e) {}
+    try { sessionStorage.setItem(K_SESS, raw); } catch (e2) {}
+  }
+  function temSessao() {
+    var s = lerSess();
+    if (s && s.exp && Date.now() > s.exp) return false;
+    return !!(s && (s.usuario || s.email || s.nome || s.authId));
+  }
+  function fecharLogin() {
+    ['p86bLogin', 'ps79Login'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    });
+  }
+  var s0 = lerSess();
+  if (s0) gravarSess(s0);
+  function vigiaLogin() { if (temSessao()) fecharLogin(); }
+  vigiaLogin();
+  [800, 2600, 4000].forEach(function (ms) { setTimeout(vigiaLogin, ms); });
   try {
-    if (!localStorage.getItem(K_SESS) && sessionStorage.getItem(K_SESS)) {
-      localStorage.setItem(K_SESS, sessionStorage.getItem(K_SESS));
+    if (window._supabase && _supabase.auth) {
+      _supabase.auth.getSession().then(function (r) {
+        var u = r && r.data && r.data.session && r.data.session.user;
+        if (!u) return;
+        var s = lerSess() || {};
+        s.email = u.email;
+        s.usuario = s.usuario || u.email;
+        s.authId = s.authId || u.id;
+        gravarSess(s);
+        fecharLogin();
+      }).catch(function () {});
     }
-  } catch (e0) {}
-
-  function esconderLoginSeLogado() {
-    var s = sessao();
-    var tem = s && (s.email || s.usuario || s.id);
-    var box = document.getElementById('p86bLogin');
-    if (!box) return;
-    if (tem) {
-      box.style.setProperty('display', 'none', 'important');
-      box.classList.remove('on', 'show');
-    }
+  } catch (e) {}
+  function startObs() {
+    new MutationObserver(function () {
+      if (temSessao() && document.getElementById('p86bLogin')) fecharLogin();
+    }).observe(document.body, { childList: true });
   }
+  if (document.body) startObs();
+  else document.addEventListener('DOMContentLoaded', startObs);
 
-  function menu() {
-    document.querySelectorAll('#orLista .or-item, #orLista button').forEach(function (el) {
-      var t = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      if (/^gest[aã]o de obra e equipe$/i.test(t) || el.getAttribute('data-aba') === 'cronograma') {
-        el.style.setProperty('display', 'none', 'important');
-      }
-      var src = el.querySelector('.or-txt') || el;
-      var st = (src.textContent || '').trim();
-      if (/ObraFlow|Plano Mestre/i.test(st)) src.textContent = 'Gestão de Obras e Equipes';
-    });
-
-    var lista = document.getElementById('orLista');
-    if (!lista) return;
-    var box = document.getElementById('orObrasBox');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'orObrasBox';
-      lista.appendChild(box);
-    }
-    var acc = document.getElementById('orObrasAcc');
-    if (!acc) {
-      acc = document.createElement('button');
-      acc.type = 'button';
-      acc.id = 'orObrasAcc';
-      acc.className = 'or-acordeao';
-      acc.innerHTML = '<span>Obra</span><span class="seta" style="margin-left:auto">▸</span>';
-      box.insertBefore(acc, box.firstChild);
-      acc.onclick = function (ev) {
-        ev.preventDefault();
-        var g = document.getElementById('orObrasLista');
-        if (!g) return;
-        var abre = g.style.display !== 'block';
-        g.style.display = abre ? 'block' : 'none';
-        var s = acc.querySelector('.seta');
-        if (s) s.textContent = abre ? '▾' : '▸';
-      };
-    }
-    var g = document.getElementById('orObrasLista');
-    if (!g) {
-      g = document.createElement('div');
-      g.id = 'orObrasLista';
-      g.style.display = 'none';
-      box.appendChild(g);
-    }
-    var db = window.db;
-    if (!db || !Array.isArray(db.obras)) return;
-    var atual = db.obraAtualId;
-    g.innerHTML = db.obras.map(function (o) {
-      var on = o.id === atual ? 'background:#1e293b;' : '';
-      return '<button type="button" class="or-item" data-obra="' + o.id + '" style="' + on + '"><span class="or-txt">' +
-        String(o.nome || o.id) + '</span></button>';
-    }).join('');
-    g.querySelectorAll('[data-obra]').forEach(function (b) {
-      b.onclick = function (ev) {
-        ev.preventDefault();
-        var id = b.getAttribute('data-obra');
-        if (typeof window.trocarObra === 'function') window.trocarObra(id);
-        else { window.db.obraAtualId = id; if (window.render) window.render(); }
-      };
-    });
+  function optsUf() {
+    var h = '<option value="">Todos</option>';
+    UFS.forEach(function (u) { h += '<option value="' + u + ' — ' + UF_NOME[u] + '">' + u + ' — ' + UF_NOME[u] + '</option>'; });
+    return h;
   }
-
   function fecharSug() {
     var b = document.getElementById('locSugBox');
     if (!b) return;
-    b.className = '';
-    b.innerHTML = '';
-    b.style.display = 'none';
+    b.className = ''; b.innerHTML = ''; b.style.display = 'none';
   }
-
-  function ligarCidade(inp, sel) {
-    if (!inp || inp.__ok) return;
-    inp.__ok = true;
+  function ligarCid(inp, sel) {
+    if (!inp || inp.__loc) return;
+    inp.__loc = true;
     inp.addEventListener('input', function () { sugerir(inp, sel); });
     inp.addEventListener('blur', function () { setTimeout(fecharSug, 180); });
   }
-
   async function sugerir(inp, sel) {
     var uf = String((sel && sel.value) || '').match(/[A-Z]{2}/);
     uf = uf ? uf[0] : '';
@@ -173,45 +125,75 @@
       bt.onclick = function () { inp.value = bt.textContent; fecharSug(); };
     });
   }
+  document.addEventListener('click', function (ev) {
+    if (ev.target.closest && (ev.target.closest('#locSugBox') || (ev.target.classList && ev.target.classList.contains('loc-cid')))) return;
+    fecharSug();
+  }, true);
 
   function camposPagamento() {
-    var tab = document.getElementById('tab-pagamento');
-    if (!tab || tab.querySelector('#pgtoUf')) return;
-    var labels = tab.querySelectorAll('label');
-    var ancora = null;
-    labels.forEach(function (l) {
-      if (/^obra$/i.test((l.textContent || '').trim())) ancora = l.parentNode;
-    });
-    var wrap = document.createElement('div');
-    wrap.className = 'loc-wrap pgto-loc-wrap';
-    wrap.innerHTML =
-      '<label>Estado</label><select class="loc-uf" id="pgtoUf">' + optionsUf('') + '</select>' +
-      '<label>Cidade</label><input class="loc-cid" id="pgtoCid" placeholder="Cidade" autocomplete="off">';
-    if (ancora && ancora.parentNode) ancora.parentNode.insertBefore(wrap, ancora.nextSibling);
-    else tab.appendChild(wrap);
-    ligarCidade(wrap.querySelector('.loc-cid'), wrap.querySelector('.loc-uf'));
+    if (document.getElementById('inputLancUf')) return;
+    var obra = document.getElementById('inputLancObra');
+    if (!obra || !obra.parentNode) return;
+    var celUf = document.createElement('div');
+    celUf.className = 'loc-cel';
+    celUf.innerHTML = '<label>Estado</label><select class="loc-uf" id="inputLancUf">' + optsUf() + '</select>';
+    var celCid = document.createElement('div');
+    celCid.className = 'loc-cel';
+    celCid.innerHTML = '<label>Cidade</label><input class="loc-cid" id="inputLancCidade" placeholder="Cidade" autocomplete="off">';
+    obra.parentNode.insertAdjacentElement('afterend', celCid);
+    obra.parentNode.insertAdjacentElement('afterend', celUf);
+    ligarCid(document.getElementById('inputLancCidade'), document.getElementById('inputLancUf'));
   }
 
   function camposCusto() {
-    if (document.getElementById('custoUf')) return;
-    var tab = document.getElementById('tab-custo');
-    if (!tab) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'loc-wrap custo-loc-wrap';
-    wrap.innerHTML =
-      '<label>Estado</label><select class="loc-uf" id="custoUf">' + optionsUf('') + '</select>' +
-      '<label>Cidade</label><input class="loc-cid" id="custoCid" placeholder="Cidade" autocomplete="off">';
-    var mes = document.getElementById('custoFilterMes');
-    if (mes && mes.parentNode && mes.parentNode.parentNode) {
-      mes.parentNode.parentNode.insertBefore(wrap, mes.parentNode);
-    } else {
-      tab.insertBefore(wrap, tab.firstChild);
+    var orig = document.getElementById('custoFilterRegiao');
+    if (!orig || document.getElementById('custoUfVisivel')) return;
+    var cel = document.createElement('div');
+    cel.className = 'loc-cel';
+    cel.innerHTML = '<label>Estado</label><select class="loc-uf" id="custoUfVisivel">' + optsUf() + '</select>' +
+      '<label>Cidade</label><input class="loc-cid" id="custoCidVisivel" placeholder="Cidade" autocomplete="off">';
+    orig.parentNode.appendChild(cel);
+    orig.style.display = 'none';
+    var sel = document.getElementById('custoUfVisivel');
+    var cid = document.getElementById('custoCidVisivel');
+    function sync() {
+      var uf = (sel.value.match(/[A-Z]{2}/) || [''])[0];
+      orig.value = [uf, cid.value].filter(Boolean).join(' ');
+      if (typeof window.renderCustoDashboard === 'function') window.renderCustoDashboard();
     }
-    ligarCidade(wrap.querySelector('.loc-cid'), wrap.querySelector('.loc-uf'));
+    sel.onchange = sync;
+    cid.addEventListener('change', sync);
+    ligarCid(cid, sel);
   }
 
-  function botoesDelLanc() {
-    document.querySelectorAll('td.lanc-actions').forEach(function (td) {
+  function hookSalvar() {
+    if (typeof window.salvarLancamentoPgto !== 'function' || window.salvarLancamentoPgto.__loc) return;
+    var orig = window.salvarLancamentoPgto;
+    window.salvarLancamentoPgto = function () {
+      orig.apply(this, arguments);
+      try {
+        var uf = (document.getElementById('inputLancUf') || {}).value || '';
+        var cid = (document.getElementById('inputLancCidade') || {}).value || '';
+        if (!window.db || !uf && !cid) return;
+        window.db.obras.forEach(function (o) {
+          var arr = o.lancamentosProducao || [];
+          if (!arr.length) return;
+          var last = arr[arr.length - 1];
+          if (last && !last.estado) {
+            last.estado = uf;
+            last.cidade = cid;
+            last.regiao = [uf, cid].filter(Boolean).join(' — ');
+          }
+        });
+        if (typeof window.salvarDB === 'function') window.salvarDB();
+      } catch (e) {}
+    };
+    window.salvarLancamentoPgto.__loc = true;
+  }
+
+  function botoesX() {
+    document.querySelectorAll('#tab-pagamento td.lanc-actions').forEach(function (td) {
+      if (td.querySelector('.pgto-x')) return;
       var ed = td.querySelector('button[onclick*="editarLancamentoPgto"]');
       if (!ed) return;
       var oc = ed.getAttribute('onclick') || '';
@@ -219,66 +201,78 @@
       if (!m) return;
       var nativo = td.querySelector('button[onclick*="excluirLancamentoPgto"]');
       if (nativo) nativo.style.display = 'none';
-      if (td.querySelector('.pgto-del')) return;
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'pgto-del';
-      b.textContent = '×';
-      b.onclick = function (ev) {
+      b.className = 'pgto-x';
+      b.title = 'Excluir este lancamento';
+      b.textContent = '\u00d7';
+      b.addEventListener('click', function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
-        if (!confirm('Excluir este lançamento?')) return;
+        if (!confirm('Excluir este lancamento?')) return;
         if (typeof window.excluirLancamentoPgto === 'function') {
           window.excluirLancamentoPgto(m[1], m[2]);
-        } else if (window.db && window.db.obras) {
-          window.db.obras.forEach(function (o) {
-            o.lancamentosProducao = (o.lancamentosProducao || []).filter(function (l) {
-              return String(l.id) !== String(m[1]);
-            });
-          });
-          if (typeof window.salvarDB === 'function') window.salvarDB();
-          if (typeof window.renderPagamento === 'function') window.renderPagamento();
+          return;
         }
-      };
+        if (!window.db) return;
+        window.db.obras.forEach(function (o) {
+          o.lancamentosProducao = (o.lancamentosProducao || []).filter(function (l) {
+            return String(l.id) !== String(m[1]);
+          });
+        });
+        if (typeof window.salvarDB === 'function') window.salvarDB();
+        if (typeof window.renderPagamento === 'function') window.renderPagamento();
+      });
       td.appendChild(b);
     });
   }
 
-  function botaoDelMedicao() {
-    if (document.getElementById('medDelBtn')) return;
-    var alvo = null;
-    document.querySelectorAll('#tab-medicoes *, #tab-financeiro *').forEach(function (el) {
-      if (alvo) return;
-      if (/navegar medi/i.test(el.textContent || '') && el.children.length <= 4) alvo = el.parentNode || el;
-    });
-    if (!alvo) return;
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.id = 'medDelBtn';
-    b.className = 'med-del';
-    b.textContent = '×';
-    b.title = 'Excluir medição';
-    b.onclick = function (ev) {
-      ev.preventDefault();
-      if (!confirm('Excluir a medição atual?')) return;
-      if (typeof window.excluirMedicaoAtual === 'function') window.excluirMedicaoAtual();
-      else if (typeof window.removerMedicao === 'function') window.removerMedicao();
-      else alert('Não achei a função nativa de excluir medição. Me avise que eu amarro no nome certo.');
+  function hookCustos() {
+    var fn = window.getCustosFiltered || (typeof getCustosFiltered === 'function' ? getCustosFiltered : null);
+    if (!fn || fn.__mix) return;
+    var orig = fn;
+    var wrap = function () {
+      var base = orig.apply(this, arguments) || [];
+      var db = window.db;
+      if (!db || !db.obras) return base;
+      var mesEl = document.getElementById('custoFilterMes');
+      var mes = mesEl ? mesEl.value : '';
+      var extra = [];
+      db.obras.forEach(function (o) {
+        (o.lancamentosProducao || []).forEach(function (l) {
+          var d = l.data || '';
+          if (mes && d.substring(0, 7) !== mes) return;
+          extra.push({
+            id: 'pgto-' + l.id,
+            data: d,
+            valor: (Number(l.valorProf) || 0) + (Number(l.valorAjud) || 0),
+            categoria: 'Pagamento producao',
+            descricao: l.material || 'Pagamento',
+            obraId: o.id,
+            obraNome: o.nome,
+            regiao: l.regiao || l.estado || l.cidade || '',
+            empresa: '',
+            colaborador: ''
+          });
+        });
+      });
+      return base.concat(extra);
     };
-    alvo.appendChild(b);
+    wrap.__mix = true;
+    window.getCustosFiltered = wrap;
+    try { getCustosFiltered = wrap; } catch (e) {}
   }
 
   function tick() {
-    esconderLoginSeLogado();
-    menu();
+    vigiaLogin();
     camposPagamento();
     camposCusto();
-    botoesDelLanc();
-    botaoDelMedicao();
+    hookSalvar();
+    hookCustos();
+    botoesX();
   }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tick);
-  else setTimeout(tick, 300);
+  setTimeout(tick, 400);
+  setTimeout(tick, 1600);
   setInterval(tick, 2000);
-  console.log('[UI2026completo] menu + login + estado/cidade + excluir');
+  console.log('[UI2026completo2] login + estado/cidade + excluir + custos');
 })();
