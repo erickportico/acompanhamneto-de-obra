@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto6) return;
-  window.__patchUi2026gavetaPgto6 = true;
+  if (window.__patchUi2026gavetaPgto7) return;
+  window.__patchUi2026gavetaPgto7 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -73,17 +73,22 @@
         var s = this.querySelector('.seta');
         if (s) s.textContent = box.classList.contains('fechada') ? '▸' : '▾';
       }, true);
-      box.classList.remove('fechada');
-    } else if (lista.firstChild !== box) {
-      lista.insertBefore(box, lista.firstChild);
     }
-    var chave = chaveObras() + '#' + ((window.db && window.db.obraAtualId) || '');
-    if (chave === ultimaObras) return;
-    ultimaObras = chave;
+    box.classList.remove('fechada');
+    if (lista.firstChild !== box) lista.insertBefore(box, lista.firstChild);
+    var obras = (window.db && window.db.obras) || [];
+    var chave = obras.map(function (o) { return o.id; }).join('|');
     var ul = document.getElementById('orObrasLista');
     if (!ul) return;
+    ul.style.display = 'block';
+    if (chave === ultimaObras && ul.childNodes.length) return;
+    ultimaObras = chave;
     var atual = String((document.getElementById('selectObra') || {}).value || (window.db && window.db.obraAtualId) || '');
-    ul.innerHTML = (window.db && window.db.obras || []).map(function (o) {
+    if (!obras.length) {
+      ul.innerHTML = '<div class="or-item" style="opacity:.7">Nenhuma obra no banco deste navegador</div>';
+      return;
+    }
+    ul.innerHTML = obras.map(function (o) {
       var on = String(o.id) === atual ? ' or-ativo' : '';
       return '<button type="button" class="or-item or-obra' + on + '" data-obra="' + String(o.id).replace(/"/g, '') + '"><span class="or-txt">' + String(o.nome || o.id).replace(/</g, '') + '</span></button>';
     }).join('');
