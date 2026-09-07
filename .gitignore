@@ -1,0 +1,4 @@
+node_modules/
+.env
+backup_painel_dados_*.json
+*.log
