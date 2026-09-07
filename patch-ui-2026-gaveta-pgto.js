@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto4) return;
-  window.__patchUi2026gavetaPgto4 = true;
+  if (window.__patchUi2026gavetaPgto5) return;
+  window.__patchUi2026gavetaPgto5 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -339,43 +339,43 @@
     if (!(total > 0)) {
       return '<div style="padding:20px;color:#64748b">Sem valores para o filtro.</div>';
     }
-    var r = 38, circ = 2 * Math.PI * r, acc = 0, rings = '', leg = '';
+    var r = 36, circ = 2 * Math.PI * r, acc = 0, rings = '', leg = '';
     partes.forEach(function (p, i) {
       var cor = p.cor || CORES[i % CORES.length];
       p.cor = cor;
       var dash = (p.valor / total) * circ;
       var pc = (p.valor / total) * 100;
-      var tip = p.nome + ' — ' + brl(p.valor) + ' (' + pc.toFixed(1) + '%)';
-      rings += '<circle class="custo-bar-linha" data-tip="' + tip.replace(/"/g, '') +
-        '" cx="50" cy="50" r="' + r + '" fill="none" stroke="' + cor +
-        '" stroke-width="16" stroke-linecap="butt" style="cursor:pointer" stroke-dasharray="' +
+      rings += '<circle data-i="' + i + '" cx="50" cy="50" r="' + r + '" fill="none" stroke="' + cor +
+        '" stroke-width="14" stroke-linecap="butt" style="cursor:pointer" stroke-dasharray="' +
         dash.toFixed(2) + ' ' + (circ - dash).toFixed(2) +
         '" stroke-dashoffset="' + (-acc).toFixed(2) + '" transform="rotate(-90 50 50)"></circle>';
       acc += dash;
-      leg += '<div class="custo-bar-linha" data-tip="' + tip.replace(/"/g, '') +
-        '" style="display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0;cursor:default">' +
+      leg += '<div data-i="' + i + '" class="custo-leg" style="display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0;cursor:pointer">' +
         '<span style="width:10px;height:10px;border-radius:3px;background:' + cor + ';flex:none"></span>' +
         '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.nome + '</span>' +
         '<strong style="color:' + cor + '">' + pc.toFixed(1) + '%</strong></div>';
     });
-    return '<svg viewBox="0 0 100 100" width="200" height="200">' + rings +
-      '<text x="50" y="47" text-anchor="middle" font-size="7" fill="#64748b">Total</text>' +
-      '<text x="50" y="58" text-anchor="middle" font-size="8" font-weight="700" fill="#0f172a">' +
-      brl(total).replace('R$ ','') + '</text></svg>' +
-      '<div style="margin-top:8px;text-align:left;max-width:220px">' + leg + '</div>';
+    return '<div class="custo-rosca" data-partes="' + encodeURIComponent(JSON.stringify(partes.map(function (p) {
+      return { nome: p.nome, valor: p.valor, cor: p.cor };
+    }))) + '">' +
+      '<div style="position:relative;width:200px;height:200px;margin:0 auto">' +
+      '<svg viewBox="0 0 100 100" width="200" height="200">' + rings + '</svg>' +
+      '<div class="custo-rosca-centro" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:20px">' +
+      '<div style="font-size:11px;color:#64748b">Total</div>' +
+      '<div style="font-size:16px;font-weight:800">' + brl(total).replace('R$ ', '') + '</div></div></div>' +
+      '<div style="margin-top:8px;text-align:left;max-width:240px">' + leg + '</div></div>';
   }
   function barras(partes) {
     var max = 1, tot = 0;
     partes.forEach(function (p) { if (p.valor > max) max = p.valor; tot += p.valor; });
     return partes.map(function (p, i) {
-      var w = Math.max(2, (p.valor / max) * 100);
       var pc = tot ? (p.valor / tot) * 100 : 0;
-      var tip = p.nome + ' — ' + brl(p.valor) + ' (' + pc.toFixed(1) + '%)';
-      return '<div class="custo-bar-linha" data-tip="' + tip.replace(/"/g, '') + '" style="margin:0 0 10px;cursor:default">' +
-        '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">' +
+      var cor = p.cor || CORES[i % CORES.length];
+      return '<div data-i="' + i + '" style="margin:0 0 12px">' +
+        '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;gap:8px">' +
         '<span>' + p.nome + '</span><span>' + brl(p.valor) + ' · ' + pc.toFixed(1) + '%</span></div>' +
-        '<div style="height:10px;background:#e8eef5;border-radius:8px;overflow:hidden">' +
-        '<div style="height:100%;width:' + w + '%;background:' + (p.cor || CORES[i % CORES.length]) + '"></div></div></div>';
+        '<div style="display:flex;height:12px;background:#e8eef5;border-radius:8px;overflow:hidden">' +
+        '<div style="flex:0 0 ' + pc.toFixed(2) + '%;background:' + cor + ';min-width:' + (pc > 0 ? '6px' : '0') + '"></div></div></div>';
     }).join('') || '<p style="color:#64748b">Sem dados neste filtro.</p>';
   }
   function agrupar(lista, chave) {
@@ -427,15 +427,49 @@
     tip.id = 'custoHoverTip';
     tip.style.cssText = 'display:none;position:fixed;z-index:2147483000;background:#0f172a;color:#fff;font-size:12px;line-height:1.3;padding:6px 10px;border-radius:8px;pointer-events:none;width:auto;max-width:240px;white-space:nowrap;box-shadow:0 8px 20px rgba(15,23,42,.35)';
     document.body.appendChild(tip);
-    document.addEventListener('mousemove', function (ev) {
-      var lin = ev.target.closest && ev.target.closest('.custo-bar-linha');
-      if (!lin) { tip.style.display = 'none'; return; }
-      tip.textContent = lin.getAttribute('data-tip') || '';
-      tip.style.display = 'block';
-      tip.style.left = (ev.clientX + 12) + 'px';
-      tip.style.top = (ev.clientY + 12) + 'px';
-    });
+    tip.style.display = 'none';
   }
+  function destacarRosca(caixa, i) {
+    if (!caixa) return;
+    var partes = [];
+    try { partes = JSON.parse(decodeURIComponent(caixa.getAttribute('data-partes') || '[]')); } catch (e) {}
+    var tot = 0;
+    partes.forEach(function (p) { tot += Number(p.valor) || 0; });
+    var centro = caixa.querySelector('.custo-rosca-centro');
+    var rings = caixa.querySelectorAll('circle');
+    rings.forEach(function (c, n) {
+      c.setAttribute('stroke-width', (i === n) ? '20' : '12');
+      c.style.opacity = (i < 0 || i === n) ? '1' : '0.35';
+    });
+    if (!centro) return;
+    if (i < 0 || !partes[i]) {
+      centro.innerHTML = '<div style="font-size:11px;color:#64748b">Total</div><div style="font-size:16px;font-weight:800">' + brl(tot).replace('R$ ', '') + '</div>';
+    } else {
+      var p = partes[i];
+      var pc = tot ? (p.valor / tot) * 100 : 0;
+      centro.innerHTML = '<div style="font-size:11px;color:' + p.cor + ';font-weight:700">' + p.nome + '</div>' +
+        '<div style="font-size:15px;font-weight:800">' + brl(p.valor).replace('R$ ', '') + '</div>' +
+        '<div style="font-size:11px;color:' + p.cor + '">' + pc.toFixed(1) + '% do total</div>';
+    }
+  }
+  document.addEventListener('mousemove', function (ev) {
+    var dica = document.getElementById('p120Dica');
+    if (dica) dica.style.display = 'none';
+    var tip = document.getElementById('custoHoverTip');
+    if (tip) tip.style.display = 'none';
+    var caixa = ev.target.closest && ev.target.closest('.custo-rosca');
+    if (!caixa) return;
+    var circ = ev.target.closest('circle');
+    var i = circ ? Number(circ.getAttribute('data-i')) : -1;
+    destacarRosca(caixa, isNaN(i) ? -1 : i);
+  }, true);
+  document.addEventListener('click', function (ev) {
+    var caixa = ev.target.closest && ev.target.closest('.custo-rosca');
+    if (!caixa) return;
+    var el = ev.target.closest('circle, .custo-leg');
+    if (!el) { destacarRosca(caixa, -1); return; }
+    destacarRosca(caixa, Number(el.getAttribute('data-i')));
+  }, true);
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest ? ev.target.closest('.custo-sub-btn') : null;
     if (!b) return;
