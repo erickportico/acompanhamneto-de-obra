@@ -114,6 +114,63 @@ app.get('/sync-local.js', (_req, res) => {
   res.sendFile(path.join(__dirname, 'sync-local.js'));
 });
 
+app.get('/admin-painel.js', (_req, res) => {
+  const local = path.join(__dirname, 'admin-painel.js');
+  const raiz = path.join(ROOT, 'admin-painel.js');
+  const arq = fs.existsSync(raiz) ? raiz : local;
+  res.type('application/javascript');
+  res.sendFile(arq);
+});
+
+app.post('/api/backup-urgencia', async (req, res) => {
+  try {
+    garantirPastas();
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const nome = 'urgencia_' + stamp + '.json';
+    const arquivo = path.join(BACKUP_DIR, nome);
+    const pacote = {
+      motivo: (req.body && req.body.motivo) || 'urgencia',
+      quando: stamp,
+      usuario: (req.body && req.body.usuario) || '',
+      dados: (req.body && req.body.dados) || null,
+    };
+    fs.writeFileSync(arquivo, JSON.stringify(pacote, null, 2), 'utf8');
+
+    const token = process.env.GITHUB_TOKEN;
+    const repo = process.env.GITHUB_REPO || 'erickportico/acompanhamneto-de-obra';
+    const branch = process.env.GITHUB_BRANCH || 'main';
+    if (!token) {
+      return res.json({ ok: true, git: false, arquivo: nome, aviso: 'GITHUB_TOKEN nao configurado' });
+    }
+
+    const dest = 'backups/' + nome;
+    const conteudo = Buffer.from(fs.readFileSync(arquivo)).toString('base64');
+    const url = 'https://api.github.com/repos/' + repo + '/contents/' + dest;
+    const resp = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'painel-obras',
+      },
+      body: JSON.stringify({
+        message: 'backup urgencia ' + (pacote.motivo || ''),
+        content: conteudo,
+        branch: branch,
+      }),
+    });
+    const j = await resp.json();
+    if (!resp.ok) {
+      return res.status(500).json({ ok: false, arquivo: nome, git: false, erro: j.message || resp.status });
+    }
+    res.json({ ok: true, git: true, arquivo: nome, path: dest });
+  } catch (e) {
+    res.status(500).json({ ok: false, erro: String(e.message || e) });
+  }
+});
+
+
 app.use(express.static(ROOT, {
   extensions: ['html'],
   index: 'index.html',
@@ -133,8 +190,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('  Acompanhamento de Obras');
   console.log('  Pasta : ' + ROOT);
-  console.log('  URL   : http://0.0.0.0:' + PORT + '/index.html');
+  console.log('  Porta : ' + PORT);
+  console.log('  Bind  : 0.0.0.0');
   console.log('  Copia : ' + DATA_FILE);
-  console.log('  Encerrar: Ctrl+C');
   console.log('');
 });
