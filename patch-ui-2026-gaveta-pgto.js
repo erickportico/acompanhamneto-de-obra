@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto8) return;
-  window.__patchUi2026gavetaPgto8 = true;
+  if (window.__patchUi2026gavetaPgto9) return;
+  window.__patchUi2026gavetaPgto9 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -45,7 +45,8 @@
     '#orObrasLista .or-ativo{background:rgba(96,165,250,.28)!important;color:#fff!important}',
     '#tab-admin.adm-aberto{position:fixed!important;inset:0!important;z-index:6000!important;display:flex!important;align-items:center;justify-content:center;background:rgba(15,23,42,.5)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:24px;overflow:auto}',
     '#tab-admin.adm-aberto .adm-wrap,#tab-admin.adm-aberto .adm-box{max-width:880px;margin:0 auto}',
-    '.or-item:empty{display:none!important}'
+    '.or-item:empty{display:none!important}',
+    '#p146Bt,#p146Tela,#p146Cx,#p146Fundo{display:none!important}'
   ].join('');
   if (!s.parentNode) document.head.appendChild(s);
 
