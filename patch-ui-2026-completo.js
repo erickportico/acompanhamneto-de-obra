@@ -272,7 +272,10 @@
     botoesX();
   }
   setTimeout(tick, 400);
-  setTimeout(tick, 1600);
-  setInterval(tick, 2000);
+  setTimeout(tick, 2000);
+  setInterval(function () {
+    if (document.hidden) return;
+    tick();
+  }, 8000);
   console.log('[UI2026completo2] login + estado/cidade + excluir + custos');
 })();

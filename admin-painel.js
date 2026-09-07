@@ -315,7 +315,10 @@
       aplicarAbas();
       if (document.getElementById('btn-tab-admin') || n > 20) clearInterval(t);
     }, 500);
-    setInterval(aplicarAbas, 4000);
+    setInterval(function () {
+      if (document.hidden) return;
+      aplicarAbas();
+    }, 12000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);

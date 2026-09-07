@@ -32,8 +32,7 @@
     '#locSugBox{display:none}#locSugBox.aberto{display:block;position:fixed;z-index:2147483646;background:#fff;color:#0f172a;border:1px solid #94a3b8;border-radius:8px;max-height:220px;overflow:auto}',
     '#locSugBox.aberto button{display:block;width:100%;text-align:left;border:0;background:#fff;padding:8px 10px}',
     '.p120-kpi{border-radius:14px}',
-    '#p137Faixa{border-radius:12px}',
-    '#custoUfVisivel,#custoCidVisivel,.loc-cel{display:none!important}'
+    '#p137Faixa{border-radius:12px}'
   ].join('');
   if (!s.parentNode) document.head.appendChild(s);
 
@@ -206,6 +205,27 @@
     });
   }
 
+  function consertarFiltroEstado() {
+    var el = document.getElementById('custoFilterRegiao');
+    if (!el) return;
+    if (el.tagName === 'SELECT' && el.getAttribute('data-uf') === '1') return;
+    var atual = normalizarUf(el.value);
+    var sel = document.createElement('select');
+    sel.id = 'custoFilterRegiao';
+    sel.setAttribute('data-uf', '1');
+    sel.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;background:#fff';
+    sel.innerHTML = '<option value="">Todos</option>' + UFS.map(function (u) {
+      return '<option value="' + u + '">' + u + '</option>';
+    }).join('');
+    if (atual) sel.value = atual;
+    sel.onchange = function () {
+      if (typeof window.renderCustoDashboard === 'function') window.renderCustoDashboard();
+    };
+    el.parentNode.replaceChild(sel, el);
+    var lab = sel.parentNode && sel.parentNode.querySelector('label');
+    if (lab) lab.textContent = 'ESTADO';
+  }
+
   function coletarCustos() {
     var db = window.db;
     if (!db || !Array.isArray(db.obras)) return [];
@@ -216,20 +236,22 @@
     var obraId = val('custoFilterObra');
     var mes = val('custoFilterMes');
     var empresa = val('custoFilterEmpresa').toUpperCase();
-    var uf = val('custoFilterEstado') || val('custoFilterRegiao');
+    var uf = normalizarUf(val('custoFilterEstado') || val('custoFilterRegiao'));
     var lista = [];
     db.obras.forEach(function (o) {
       (o.centrosCusto || []).forEach(function (c) {
-        lista.push(Object.assign({ obraId: o.id, obraNome: o.nome }, c));
+        var item = Object.assign({ obraId: o.id, obraNome: o.nome }, c);
+        item.valor = Number(item.valor) || 0;
+        lista.push(item);
       });
     });
     return lista.filter(function (c) {
-      if (obraId && String(c.obraId) !== String(obraId)) return false;
+      if (obraId && String(c.obraId) !== String(obraId) && String(c.obraId || '') !== String(obraId)) return false;
       if (mes && String(c.data || '').substring(0, 7) !== mes) return false;
       if (empresa && String(c.empresa || '').toUpperCase() !== empresa) return false;
       if (uf) {
         var r = String(c.regiao || c.estado || '').toUpperCase();
-        if (r.indexOf(String(uf).toUpperCase().slice(0, 2)) < 0 && r.indexOf(String(uf).toUpperCase()) < 0) return false;
+        if (r.indexOf(uf) < 0) return false;
       }
       return true;
     });
@@ -237,15 +259,30 @@
   window.getCustosFiltered = coletarCustos;
   try { getCustosFiltered = coletarCustos; } catch (e) {}
 
+  function pintarCustos() {
+    try {
+      if (typeof window.renderCustoDashboard === 'function') window.renderCustoDashboard();
+    } catch (e) {}
+  }
+
   function tick() {
     montarObras();
     acordeao();
     camposPagamento();
     hookSalvar();
     arrumarMenu();
+    consertarFiltroEstado();
     window.getCustosFiltered = coletarCustos;
+    try { getCustosFiltered = coletarCustos; } catch (e) {}
   }
   setTimeout(tick, 800);
-  setInterval(tick, 4000);
+  setTimeout(function () {
+    window.getCustosFiltered = coletarCustos;
+    pintarCustos();
+  }, 1500);
+  setInterval(function () {
+    if (document.hidden) return;
+    tick();
+  }, 10000);
   console.log('[UI2026gavetaLite] menu e pagamento sem loop pesado');
 })();
