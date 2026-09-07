@@ -102,7 +102,7 @@
       '</div>' +
       '<p id="admMsg"></p></div>' +
       '<div class="adm-box"><h3>Usuários</h3><div class="table-responsive"><table id="admTabela"><thead><tr>' +
-      '<th>E-mail</th><th>Nome</th><th>Perfil</th><th>Ativo</th><th></th>' +
+      '<th>E-mail</th><th>Nome</th><th>Perfil</th><th>Abas</th><th>Ativo</th><th></th>' +
       '</tr></thead><tbody></tbody></table></div></div></div>';
     host.appendChild(tab);
 
@@ -188,6 +188,11 @@
         '<option value="editor"' + (u.perfil === 'editor' ? ' selected' : '') + '>Leitura e edição</option>' +
         '<option value="admin"' + (u.perfil === 'admin' ? ' selected' : '') + '>Admin</option>' +
         '</select></td>' +
+        '<td class="admAbas" data-id="' + u.id + '">' + ABAS.map(function (a) {
+          var on = !u.abas || (String(u.abas).indexOf(a.id) >= 0);
+          if (Array.isArray(u.abas)) on = u.abas.indexOf(a.id) >= 0;
+          return '<label style="display:inline-block;margin:0 6px 4px 0;font-size:11px"><input type="checkbox" data-aba="' + a.id + '"' + (on ? ' checked' : '') + '> ' + a.rotulo + '</label>';
+        }).join('') + '</td>' +
         '<td>' + (u.ativo === false ? 'não' : 'sim') + '</td>' +
         '<td><button type="button" class="perigo admDel" data-id="' + u.id + '">Desativar</button></td>';
       tb.appendChild(tr);
@@ -196,6 +201,13 @@
       sel.onchange = async function () {
         var up = await sb().from('painel_perfis').update({ perfil: sel.value }).eq('id', sel.getAttribute('data-id'));
         msg(up.error ? up.error.message : 'Perfil atualizado', !up.error);
+      };
+    });
+    tb.querySelectorAll('.admAbas').forEach(function (cel) {
+      cel.onchange = async function () {
+        var ids = Array.prototype.map.call(cel.querySelectorAll('input:checked'), function (i) { return i.getAttribute('data-aba'); });
+        var up = await sb().from('painel_perfis').update({ abas: ids }).eq('id', cel.getAttribute('data-id'));
+        msg(up.error ? up.error.message : 'Abas atualizadas', !up.error);
       };
     });
     tb.querySelectorAll('.admDel').forEach(function (bt) {
@@ -232,6 +244,10 @@
   function aplicarAbas() {
     var r = regra();
     var permitidas = r.abas || [];
+    try {
+      var se = sessao();
+      if (se && se.abas && se.abas.length) permitidas = se.abas;
+    } catch (e) {}
     document.querySelectorAll('#meu-menu-abas .tab-btn').forEach(function (el) {
       var id = (el.id || '').replace('btn-tab-', '');
       if (id === 'admin' || el.getAttribute('data-aba') === 'admin') {

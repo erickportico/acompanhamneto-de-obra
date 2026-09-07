@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto5) return;
-  window.__patchUi2026gavetaPgto5 = true;
+  if (window.__patchUi2026gavetaPgto6) return;
+  window.__patchUi2026gavetaPgto6 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -36,7 +36,12 @@
     '#custoFilterEstado,#custoFilterCidade,#custoUfVisivel,#custoCidVisivel,.loc-cel{display:none!important}',
     '#custoUfVisivel,#custoCidVisivel{display:none!important}',
     '#tab-custo #custoUfVisivel, #tab-custo #custoCidVisivel{display:none!important}',
-    '#p137Faixa{display:none!important}'
+    '#p137Faixa{display:none!important}',
+    '#orObrasLista{display:block!important;padding:0 6px 8px}',
+    '#orObrasBox.fechada #orObrasLista{display:none!important}',
+    '#tab-admin.adm-aberto{position:fixed!important;inset:0!important;z-index:6000!important;display:flex!important;align-items:center;justify-content:center;background:rgba(15,23,42,.5)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:24px;overflow:auto}',
+    '#tab-admin.adm-aberto .adm-wrap,#tab-admin.adm-aberto .adm-box{max-width:880px;margin:0 auto}',
+    '.or-item:empty{display:none!important}'
   ].join('');
   if (!s.parentNode) document.head.appendChild(s);
 
@@ -67,7 +72,8 @@
         box.classList.toggle('fechada');
         var s = this.querySelector('.seta');
         if (s) s.textContent = box.classList.contains('fechada') ? '▸' : '▾';
-      });
+      }, true);
+      box.classList.remove('fechada');
     } else if (lista.firstChild !== box) {
       lista.insertBefore(box, lista.firstChild);
     }
@@ -327,9 +333,13 @@
     window.getCustosFiltered = coletarCustos;
     try { getCustosFiltered = coletarCustos; } catch (e) {}
     pintarGraficosCusto();
-    document.querySelectorAll('#tab-admin div, #tab-custo > div, #tab-admin p').forEach(function (el) {
+    var tad = document.getElementById('tab-admin');
+    if (tad && tad.style.display !== 'none' && tad.offsetHeight) tad.classList.add('adm-aberto');
+    else if (tad) tad.classList.remove('adm-aberto');
+    document.querySelectorAll('div,p,span,button').forEach(function (el) {
+      if (el.closest && el.closest('#orMenu')) return;
       var t = (el.textContent || '').replace(/\s+/g, '').trim();
-      if (!el.children.length && /^[→▸▾>]+$/.test(t)) el.style.display = 'none';
+      if (!el.children.length && /^[→▸▾>]+$/.test(t) && t.length >= 2) el.style.setProperty('display', 'none', 'important');
     });
   }
 
