@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto3) return;
-  window.__patchUi2026gavetaPgto3 = true;
+  if (window.__patchUi2026gavetaPgto4) return;
+  window.__patchUi2026gavetaPgto4 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -339,18 +339,30 @@
     if (!(total > 0)) {
       return '<div style="padding:20px;color:#64748b">Sem valores para o filtro.</div>';
     }
-    var r = 38, circ = 2 * Math.PI * r, acc = 0, rings = '';
+    var r = 38, circ = 2 * Math.PI * r, acc = 0, rings = '', leg = '';
     partes.forEach(function (p, i) {
+      var cor = p.cor || CORES[i % CORES.length];
+      p.cor = cor;
       var dash = (p.valor / total) * circ;
-      rings += '<circle cx="50" cy="50" r="' + r + '" fill="none" stroke="' + (p.cor || CORES[i % CORES.length]) +
-        '" stroke-width="14" stroke-dasharray="' + dash.toFixed(2) + ' ' + (circ - dash).toFixed(2) +
+      var pc = (p.valor / total) * 100;
+      var tip = p.nome + ' — ' + brl(p.valor) + ' (' + pc.toFixed(1) + '%)';
+      rings += '<circle class="custo-bar-linha" data-tip="' + tip.replace(/"/g, '') +
+        '" cx="50" cy="50" r="' + r + '" fill="none" stroke="' + cor +
+        '" stroke-width="16" stroke-linecap="butt" style="cursor:pointer" stroke-dasharray="' +
+        dash.toFixed(2) + ' ' + (circ - dash).toFixed(2) +
         '" stroke-dashoffset="' + (-acc).toFixed(2) + '" transform="rotate(-90 50 50)"></circle>';
       acc += dash;
+      leg += '<div class="custo-bar-linha" data-tip="' + tip.replace(/"/g, '') +
+        '" style="display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0;cursor:default">' +
+        '<span style="width:10px;height:10px;border-radius:3px;background:' + cor + ';flex:none"></span>' +
+        '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.nome + '</span>' +
+        '<strong style="color:' + cor + '">' + pc.toFixed(1) + '%</strong></div>';
     });
     return '<svg viewBox="0 0 100 100" width="200" height="200">' + rings +
-      '<text x="50" y="48" text-anchor="middle" font-size="8" fill="#64748b">Total</text>' +
-      '<text x="50" y="58" text-anchor="middle" font-size="7" font-weight="700" fill="#0f172a">' +
-      brl(total).replace('R$ ','') + '</text></svg>';
+      '<text x="50" y="47" text-anchor="middle" font-size="7" fill="#64748b">Total</text>' +
+      '<text x="50" y="58" text-anchor="middle" font-size="8" font-weight="700" fill="#0f172a">' +
+      brl(total).replace('R$ ','') + '</text></svg>' +
+      '<div style="margin-top:8px;text-align:left;max-width:220px">' + leg + '</div>';
   }
   function barras(partes) {
     var max = 1, tot = 0;
@@ -413,7 +425,7 @@
   if (!document.getElementById('custoHoverTip')) {
     var tip = document.createElement('div');
     tip.id = 'custoHoverTip';
-    tip.style.cssText = 'display:none;position:fixed;z-index:2147483000;background:#0f172a;color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;pointer-events:none';
+    tip.style.cssText = 'display:none;position:fixed;z-index:2147483000;background:#0f172a;color:#fff;font-size:12px;line-height:1.3;padding:6px 10px;border-radius:8px;pointer-events:none;width:auto;max-width:240px;white-space:nowrap;box-shadow:0 8px 20px rgba(15,23,42,.35)';
     document.body.appendChild(tip);
     document.addEventListener('mousemove', function (ev) {
       var lin = ev.target.closest && ev.target.closest('.custo-bar-linha');
