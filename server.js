@@ -129,11 +129,11 @@ app.get('/', (_req, res) => {
 
 garantirPastas();
 
-app.listen(PORT, '127.0.0.1', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('  Acompanhamento de Obras');
   console.log('  Pasta : ' + ROOT);
-  console.log('  URL   : http://127.0.0.1:' + PORT + '/index.html');
+  console.log('  URL   : http://0.0.0.0:' + PORT + '/index.html');
   console.log('  Copia : ' + DATA_FILE);
   console.log('  Encerrar: Ctrl+C');
   console.log('');
