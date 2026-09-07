@@ -21,7 +21,8 @@
     '#orLista .or-grupo.fechado + .or-bloco,#orObrasBox.fechada #orObrasLista{display:none!important}',
     '#orLista .or-item{border-radius:10px!important;margin:2px 4px!important}',
     '#orLista .or-item.or-ativo{background:rgba(96,165,250,.22)!important}',
-    '#tab-pagamento .lanc-form-grid{align-items:end}',
+    '#tab-pagamento .lanc-form-grid{display:grid!important;grid-template-columns:repeat(4,minmax(140px,1fr))!important;gap:10px 12px!important;align-items:end}',
+    '#tab-pagamento .lanc-form-grid #inputLancProfissionais,#tab-pagamento .lanc-form-grid #inputLancAjudantes{min-height:92px;width:100%}',
     '#tab-pagamento .card,#tab-custo.card{border-radius:16px}',
     '#tab-pagamento .btn-add{border-radius:10px;font-weight:700}',
     '.pgto-loc{display:flex;flex-direction:column;gap:4px;min-width:86px}',
@@ -148,6 +149,24 @@
     cid.innerHTML = '<label>Cidade</label><input id="inputLancCidade" placeholder="Ex: João Pessoa" autocomplete="off">';
     obra.parentNode.insertAdjacentElement('afterend', cid);
     obra.parentNode.insertAdjacentElement('afterend', uf);
+    organizarFormPgto();
+  }
+  function organizarFormPgto() {
+    var grid = document.querySelector('#tab-pagamento .lanc-form-grid');
+    if (!grid) return;
+    function box(id) {
+      var el = document.getElementById(id);
+      if (!el) return null;
+      var p = el.parentNode;
+      while (p && p !== grid && p.parentNode !== grid) p = p.parentNode;
+      return (p && p.parentNode === grid) ? p : el.parentNode;
+    }
+    ['inputLancObra','inputLancUf','inputLancCidade','inputLancMaterial',
+     'inputLancInstalacaoM2','inputLancTaxaProf','inputLancTaxaAjud',
+     'inputLancProfissionais','inputLancAjudantes'].forEach(function (id) {
+      var b = box(id);
+      if (b && b.parentNode === grid) grid.appendChild(b);
+    });
   }
   window.camposPagamento = camposPagamento;
   if (typeof window.renderPagamento === 'function' && !window.renderPagamento.__uf) {
