@@ -32,7 +32,10 @@
     '#locSugBox{display:none}#locSugBox.aberto{display:block;position:fixed;z-index:2147483646;background:#fff;color:#0f172a;border:1px solid #94a3b8;border-radius:8px;max-height:220px;overflow:auto}',
     '#locSugBox.aberto button{display:block;width:100%;text-align:left;border:0;background:#fff;padding:8px 10px}',
     '.p120-kpi{border-radius:14px}',
-    '#p137Faixa{border-radius:12px}'
+    '#custoFilterEstado,#custoFilterCidade,#custoUfVisivel,#custoCidVisivel,.loc-cel{display:none!important}',
+    '#custoUfVisivel,#custoCidVisivel{display:none!important}',
+    '#tab-custo #custoUfVisivel, #tab-custo #custoCidVisivel{display:none!important}',
+    '#p137Faixa{display:none!important}'
   ].join('');
   if (!s.parentNode) document.head.appendChild(s);
 
@@ -235,8 +238,9 @@
     }
     var obraId = val('custoFilterObra');
     var mes = val('custoFilterMes');
+    if (mes && !/^\d{4}-\d{2}$/.test(mes)) mes = '';
     var empresa = val('custoFilterEmpresa').toUpperCase();
-    var uf = normalizarUf(val('custoFilterEstado') || val('custoFilterRegiao'));
+    var uf = normalizarUf(val('custoFilterRegiao'));
     var lista = [];
     db.obras.forEach(function (o) {
       (o.centrosCusto || []).forEach(function (c) {
@@ -272,6 +276,21 @@
     hookSalvar();
     arrumarMenu();
     consertarFiltroEstado();
+    document.querySelectorAll('#tab-custo label').forEach(function (lab) {
+      var t = (lab.textContent || '').replace(/\s+/g, ' ').trim();
+      var box = lab.parentNode;
+      if (!box) return;
+      if (/^cidade$/i.test(t)) box.style.setProperty('display', 'none', 'important');
+      if (/^estado$/i.test(t) && !box.querySelector('#custoFilterRegiao')) {
+        box.style.setProperty('display', 'none', 'important');
+      }
+    });
+    ['custoFilterEstado', 'custoFilterCidade', 'custoUfVisivel', 'custoCidVisivel'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var box = el.closest ? (el.closest('div') || el) : el;
+      box.style.setProperty('display', 'none', 'important');
+    });
     window.getCustosFiltered = coletarCustos;
     try { getCustosFiltered = coletarCustos; } catch (e) {}
   }
