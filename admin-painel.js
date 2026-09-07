@@ -103,19 +103,49 @@
       '</tr></thead><tbody></tbody></table></div></div>';
     host.appendChild(tab);
 
-    var menu = document.getElementById('meu-menu-abas') || document.querySelector('.tabs') || document.querySelector('nav');
-    if (menu && !document.getElementById('btn-admin')) {
+    var tabs = document.querySelector('#meu-menu-abas .tabs');
+    if (tabs && !document.getElementById('btn-tab-admin')) {
       var b = document.createElement('button');
-      b.id = 'btn-admin';
+      b.className = 'tab-btn';
+      b.id = 'btn-tab-admin';
       b.type = 'button';
-      b.textContent = 'Admin';
+      b.textContent = '⚙️ Administração';
       b.setAttribute('data-aba', 'admin');
-      b.addEventListener('click', function () {
-        document.querySelectorAll('[id^="tab-"]').forEach(function (el) { el.style.display = 'none'; });
-        tab.style.display = 'block';
-        listar();
-      });
-      menu.appendChild(b);
+      b.onclick = function () {
+        if (typeof window.trocarAba === 'function') window.trocarAba('admin');
+        else {
+          document.querySelectorAll('[id^="tab-"]').forEach(function (el) {
+            el.style.display = el.id === 'tab-admin' ? 'block' : 'none';
+          });
+          listar();
+        }
+      };
+      tabs.appendChild(b);
+    }
+
+    if (typeof window.trocarAba === 'function' && !window.trocarAba.__admWrap) {
+      var orig = window.trocarAba;
+      window.trocarAba = function (aba) {
+        if (aba === 'admin') {
+          document.querySelectorAll('[id^="tab-"]').forEach(function (el) {
+            el.style.display = el.id === 'tab-admin' ? 'block' : 'none';
+          });
+          document.querySelectorAll('#meu-menu-abas .tab-btn').forEach(function (bt) {
+            bt.classList.toggle('active', bt.id === 'btn-tab-admin');
+          });
+          var menu = document.getElementById('meu-menu-abas');
+          if (menu) menu.removeAttribute('open');
+          listar();
+          return;
+        }
+        var r = orig.apply(this, arguments);
+        var t = document.getElementById('tab-admin');
+        if (t) t.style.display = 'none';
+        var bb = document.getElementById('btn-tab-admin');
+        if (bb) bb.classList.remove('active');
+        return r;
+      };
+      window.trocarAba.__admWrap = true;
     }
 
     document.getElementById('admCriar').onclick = cadastrar;
@@ -190,16 +220,17 @@
   function aplicarAbas() {
     var r = regra();
     var permitidas = r.abas || [];
-    document.querySelectorAll('[data-aba]').forEach(function (el) {
-      var id = el.getAttribute('data-aba');
-      if (id === 'admin') {
+    document.querySelectorAll('#meu-menu-abas .tab-btn').forEach(function (el) {
+      var id = (el.id || '').replace('btn-tab-', '');
+      if (id === 'admin' || el.getAttribute('data-aba') === 'admin') {
         el.style.display = ehAdmin() ? '' : 'none';
         return;
       }
-      if (permitidas.indexOf(id) < 0) el.style.display = 'none';
-      else el.style.display = '';
+      if (!r.editar && permitidas.indexOf(id) < 0 && id) {
+        el.style.display = 'none';
+      }
     });
-    var btnAdmin = document.getElementById('btn-admin');
+    var btnAdmin = document.getElementById('btn-tab-admin') || document.getElementById('btn-admin');
     if (btnAdmin) btnAdmin.style.display = ehAdmin() ? '' : 'none';
     document.body.classList.toggle('adm-so-leitura', !r.editar);
   }
@@ -277,6 +308,13 @@
     garantirAba();
     aplicarAbas();
     protegerExclusoes();
+    var n = 0;
+    var t = setInterval(function () {
+      n += 1;
+      garantirAba();
+      aplicarAbas();
+      if (document.getElementById('btn-tab-admin') || n > 20) clearInterval(t);
+    }, 500);
     setInterval(aplicarAbas, 4000);
   }
 
