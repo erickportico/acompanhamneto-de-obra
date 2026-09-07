@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto7) return;
-  window.__patchUi2026gavetaPgto7 = true;
+  if (window.__patchUi2026gavetaPgto8) return;
+  window.__patchUi2026gavetaPgto8 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -37,8 +37,12 @@
     '#custoUfVisivel,#custoCidVisivel{display:none!important}',
     '#tab-custo #custoUfVisivel, #tab-custo #custoCidVisivel{display:none!important}',
     '#p137Faixa{display:none!important}',
-    '#orObrasLista{display:block!important;padding:0 6px 8px}',
+    '#orObrasBox,#orObrasLista{height:auto!important;max-height:none!important;overflow:visible!important}',
+    '#orObrasLista{display:block!important;padding:0 6px 10px}',
     '#orObrasBox.fechada #orObrasLista{display:none!important}',
+    '#orObrasLista .or-item,#orObrasLista .or-obra{display:flex!important;align-items:center;color:#e2e8f0!important;min-height:36px;width:100%;background:transparent;border:0;text-align:left;padding:8px 10px;border-radius:8px;cursor:pointer}',
+    '#orObrasLista .or-item:hover{background:rgba(148,163,184,.18)}',
+    '#orObrasLista .or-ativo{background:rgba(96,165,250,.28)!important;color:#fff!important}',
     '#tab-admin.adm-aberto{position:fixed!important;inset:0!important;z-index:6000!important;display:flex!important;align-items:center;justify-content:center;background:rgba(15,23,42,.5)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:24px;overflow:auto}',
     '#tab-admin.adm-aberto .adm-wrap,#tab-admin.adm-aberto .adm-box{max-width:880px;margin:0 auto}',
     '.or-item:empty{display:none!important}'
