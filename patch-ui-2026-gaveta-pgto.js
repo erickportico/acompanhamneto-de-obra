@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgtoLite) return;
-  window.__patchUi2026gavetaPgtoLite = true;
+  if (window.__patchUi2026gavetaPgto3) return;
+  window.__patchUi2026gavetaPgto3 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -127,23 +127,37 @@
   }
 
   function camposPagamento() {
-    if (document.getElementById('inputLancUf')) return;
-    var grid = document.querySelector('.lanc-form-grid');
-    if (!grid) return;
     var obra = document.getElementById('inputLancObra');
+    if (!obra) return;
+    var ufEl = document.getElementById('inputLancUf');
+    var noForm = ufEl && obra.parentNode && obra.parentNode.parentNode &&
+      obra.parentNode.parentNode.contains(ufEl);
+    if (noForm) return;
+    if (ufEl && ufEl.parentNode) ufEl.parentNode.remove();
+    var cidOld = document.getElementById('inputLancCidade');
+    if (cidOld && cidOld.parentNode && cidOld.id === 'inputLancCidade') {
+      if (cidOld.closest && !cidOld.closest('.lanc-form-grid')) cidOld.parentNode.remove();
+    }
     var uf = document.createElement('div');
     uf.className = 'pgto-loc';
-    uf.innerHTML = '<label>UF</label><select id="inputLancUf"><option value="">UF</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select>';
+    uf.innerHTML = '<label>UF</label><select id="inputLancUf"><option value="">UF</option>' +
+      UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select>';
     var cid = document.createElement('div');
     cid.className = 'pgto-loc';
     cid.style.minWidth = '170px';
     cid.innerHTML = '<label>Cidade</label><input id="inputLancCidade" placeholder="Ex: João Pessoa" autocomplete="off">';
-    if (obra && obra.parentNode) {
-      obra.parentNode.insertAdjacentElement('afterend', cid);
-      obra.parentNode.insertAdjacentElement('afterend', uf);
-    } else {
-      grid.appendChild(uf); grid.appendChild(cid);
-    }
+    obra.parentNode.insertAdjacentElement('afterend', cid);
+    obra.parentNode.insertAdjacentElement('afterend', uf);
+  }
+  window.camposPagamento = camposPagamento;
+  if (typeof window.renderPagamento === 'function' && !window.renderPagamento.__uf) {
+    var rp = window.renderPagamento;
+    window.renderPagamento = function () {
+      var r = rp.apply(this, arguments);
+      setTimeout(camposPagamento, 0);
+      return r;
+    };
+    window.renderPagamento.__uf = true;
   }
 
   function pessoa(id) {
@@ -293,7 +307,91 @@
     });
     window.getCustosFiltered = coletarCustos;
     try { getCustosFiltered = coletarCustos; } catch (e) {}
+    pintarGraficosCusto();
   }
+
+  var CORES = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#84cc16'];
+  function brl(n) {
+    return 'R$ ' + (Number(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function svgRosca(partes) {
+    var total = 0;
+    partes.forEach(function (p) { total += p.valor; });
+    if (!(total > 0)) {
+      return '<div style="padding:20px;color:#64748b">Sem valores para o filtro.</div>';
+    }
+    var r = 38, circ = 2 * Math.PI * r, acc = 0, rings = '';
+    partes.forEach(function (p, i) {
+      var dash = (p.valor / total) * circ;
+      rings += '<circle cx="50" cy="50" r="' + r + '" fill="none" stroke="' + (p.cor || CORES[i % CORES.length]) +
+        '" stroke-width="14" stroke-dasharray="' + dash.toFixed(2) + ' ' + (circ - dash).toFixed(2) +
+        '" stroke-dashoffset="' + (-acc).toFixed(2) + '" transform="rotate(-90 50 50)"></circle>';
+      acc += dash;
+    });
+    return '<svg viewBox="0 0 100 100" width="200" height="200">' + rings +
+      '<text x="50" y="48" text-anchor="middle" font-size="8" fill="#64748b">Total</text>' +
+      '<text x="50" y="58" text-anchor="middle" font-size="7" font-weight="700" fill="#0f172a">' +
+      brl(total).replace('R$ ','') + '</text></svg>';
+  }
+  function barras(partes) {
+    var max = 1;
+    partes.forEach(function (p) { if (p.valor > max) max = p.valor; });
+    return partes.map(function (p, i) {
+      var pct = Math.max(2, (p.valor / max) * 100);
+      return '<div style="margin:0 0 8px">' +
+        '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">' +
+        '<span>' + p.nome + '</span><strong>' + brl(p.valor) + '</strong></div>' +
+        '<div style="height:8px;background:#e2e8f0;border-radius:6px;overflow:hidden">' +
+        '<div style="height:100%;width:' + pct + '%;background:' + (p.cor || CORES[i % CORES.length]) + '"></div></div></div>';
+    }).join('');
+  }
+  function agrupar(lista, chave) {
+    var mapa = {};
+    lista.forEach(function (c) {
+      var k = String(c[chave] || '').trim() || (chave === 'empresa' ? 'SEM EMPRESA' : 'Sem colaborador');
+      if (chave === 'empresa') k = k.toUpperCase();
+      if (!mapa[k]) mapa[k] = 0;
+      mapa[k] += Number(c.valor) || 0;
+    });
+    return Object.keys(mapa).map(function (n, i) {
+      return { nome: n, valor: mapa[n], cor: CORES[i % CORES.length] };
+    }).sort(function (a, b) { return b.valor - a.valor; });
+  }
+  function pintarGraficosCusto() {
+    var lista = coletarCustos();
+    var boxEmp = document.getElementById('containerCustoPorEmpresa');
+    if (boxEmp) {
+      var porEmp = agrupar(lista, 'empresa');
+      var porCol = agrupar(lista, 'colaborador');
+      boxEmp.innerHTML =
+        '<div style="display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start">' +
+        '<div style="text-align:center">' + svgRosca(porEmp) + '<div style="font-size:12px;color:#64748b;margin-top:6px">Por empresa</div></div>' +
+        '<div><h4 style="margin:0 0 10px">Empresa</h4>' + (barras(porEmp) || '<p>Sem empresa neste filtro.</p>') +
+        '<h4 style="margin:16px 0 10px">Colaborador</h4>' + barras(porCol) + '</div></div>';
+    }
+    var boxObra = document.getElementById('containerCustoResumoObra');
+    if (boxObra && !boxObra.querySelector('#roscaObra')) {
+      var porObra = agrupar(lista, 'obraNome');
+      var wrap = document.createElement('div');
+      wrap.id = 'roscaObra';
+      wrap.style.cssText = 'display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:14px;align-items:start';
+      wrap.innerHTML = '<div style="text-align:center">' + svgRosca(porObra) +
+        '<div style="font-size:12px;color:#64748b;margin-top:6px">Custo por obra</div></div>' +
+        '<div><h4 style="margin:0 0 10px">Por obra</h4>' + barras(porObra) + '</div>';
+      boxObra.appendChild(wrap);
+    } else if (boxObra && boxObra.querySelector('#roscaObra')) {
+      var porObra2 = agrupar(lista, 'obraNome');
+      boxObra.querySelector('#roscaObra').innerHTML =
+        '<div style="text-align:center">' + svgRosca(porObra2) +
+        '<div style="font-size:12px;color:#64748b;margin-top:6px">Custo por obra</div></div>' +
+        '<div><h4 style="margin:0 0 10px">Por obra</h4>' + barras(porObra2) + '</div>';
+    }
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest ? ev.target.closest('.custo-sub-btn') : null;
+    if (!b) return;
+    setTimeout(pintarGraficosCusto, 80);
+  }, true);
   setTimeout(tick, 800);
   setTimeout(function () {
     window.getCustosFiltered = coletarCustos;
