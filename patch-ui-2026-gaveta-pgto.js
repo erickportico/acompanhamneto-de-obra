@@ -353,16 +353,18 @@
       brl(total).replace('R$ ','') + '</text></svg>';
   }
   function barras(partes) {
-    var max = 1;
-    partes.forEach(function (p) { if (p.valor > max) max = p.valor; });
+    var max = 1, tot = 0;
+    partes.forEach(function (p) { if (p.valor > max) max = p.valor; tot += p.valor; });
     return partes.map(function (p, i) {
-      var pct = Math.max(2, (p.valor / max) * 100);
-      return '<div style="margin:0 0 8px">' +
-        '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">' +
-        '<span>' + p.nome + '</span><strong>' + brl(p.valor) + '</strong></div>' +
-        '<div style="height:8px;background:#e2e8f0;border-radius:6px;overflow:hidden">' +
-        '<div style="height:100%;width:' + pct + '%;background:' + (p.cor || CORES[i % CORES.length]) + '"></div></div></div>';
-    }).join('');
+      var w = Math.max(2, (p.valor / max) * 100);
+      var pc = tot ? (p.valor / tot) * 100 : 0;
+      var tip = p.nome + ' — ' + brl(p.valor) + ' (' + pc.toFixed(1) + '%)';
+      return '<div class="custo-bar-linha" data-tip="' + tip.replace(/"/g, '') + '" style="margin:0 0 10px;cursor:default">' +
+        '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">' +
+        '<span>' + p.nome + '</span><span>' + brl(p.valor) + ' · ' + pc.toFixed(1) + '%</span></div>' +
+        '<div style="height:10px;background:#e8eef5;border-radius:8px;overflow:hidden">' +
+        '<div style="height:100%;width:' + w + '%;background:' + (p.cor || CORES[i % CORES.length]) + '"></div></div></div>';
+    }).join('') || '<p style="color:#64748b">Sem dados neste filtro.</p>';
   }
   function agrupar(lista, chave) {
     var mapa = {};
@@ -376,40 +378,62 @@
       return { nome: n, valor: mapa[n], cor: CORES[i % CORES.length] };
     }).sort(function (a, b) { return b.valor - a.valor; });
   }
+  function blocoRosca(titulo, partes) {
+    return '<div style="display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:start;background:var(--card-bg,#fff);border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-top:10px">' +
+      '<div style="text-align:center">' + svgRosca(partes) +
+      '<div style="font-size:12px;color:#64748b;margin-top:8px">' + titulo + '</div></div>' +
+      '<div>' + barras(partes) + '</div></div>';
+  }
   function pintarGraficosCusto() {
     var lista = coletarCustos();
-    var boxEmp = document.getElementById('containerCustoPorEmpresa');
-    if (boxEmp) {
-      var porEmp = agrupar(lista, 'empresa');
-      var porCol = agrupar(lista, 'colaborador');
-      boxEmp.innerHTML =
-        '<div style="display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start">' +
-        '<div style="text-align:center">' + svgRosca(porEmp) + '<div style="font-size:12px;color:#64748b;margin-top:6px">Por empresa</div></div>' +
-        '<div><h4 style="margin:0 0 10px">Empresa</h4>' + (barras(porEmp) || '<p>Sem empresa neste filtro.</p>') +
-        '<h4 style="margin:16px 0 10px">Colaborador</h4>' + barras(porCol) + '</div></div>';
+    var emp = document.getElementById('containerCustoPorEmpresa');
+    if (emp) emp.innerHTML = blocoRosca('Por empresa', agrupar(lista, 'empresa'));
+    var col = document.getElementById('containerCustoPorColaborador');
+    if (col) col.innerHTML = blocoRosca('Por colaborador', agrupar(lista, 'colaborador'));
+    var reg = document.getElementById('containerCustoPorRegiao');
+    if (reg) {
+      var partesR = agrupar(lista.map(function (c) {
+        return Object.assign({}, c, { _r: c.regiao || c.cidade || c.estado || 'Sem região' });
+      }), '_r');
+      if (!partesR.length) partesR = agrupar(lista, 'regiao');
+      partesR.forEach(function (p) { if (p.nome === '_r') p.nome = 'Sem região'; });
+      reg.innerHTML = blocoRosca('Por região', partesR.length ? partesR : agrupar(lista.map(function (c) {
+        c.regiao = c.regiao || [c.cidade, c.estado].filter(Boolean).join(' - ') || 'Sem região';
+        return c;
+      }), 'regiao'));
     }
-    var boxObra = document.getElementById('containerCustoResumoObra');
-    if (boxObra && !boxObra.querySelector('#roscaObra')) {
-      var porObra = agrupar(lista, 'obraNome');
-      var wrap = document.createElement('div');
-      wrap.id = 'roscaObra';
-      wrap.style.cssText = 'display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:14px;align-items:start';
-      wrap.innerHTML = '<div style="text-align:center">' + svgRosca(porObra) +
-        '<div style="font-size:12px;color:#64748b;margin-top:6px">Custo por obra</div></div>' +
-        '<div><h4 style="margin:0 0 10px">Por obra</h4>' + barras(porObra) + '</div>';
-      boxObra.appendChild(wrap);
-    } else if (boxObra && boxObra.querySelector('#roscaObra')) {
-      var porObra2 = agrupar(lista, 'obraNome');
-      boxObra.querySelector('#roscaObra').innerHTML =
-        '<div style="text-align:center">' + svgRosca(porObra2) +
-        '<div style="font-size:12px;color:#64748b;margin-top:6px">Custo por obra</div></div>' +
-        '<div><h4 style="margin:0 0 10px">Por obra</h4>' + barras(porObra2) + '</div>';
+    var obr = document.getElementById('containerCustoResumoObra');
+    if (obr) {
+      var extra = obr.querySelector('#roscaObra') || document.createElement('div');
+      extra.id = 'roscaObra';
+      extra.innerHTML = blocoRosca('Por obra', agrupar(lista, 'obraNome'));
+      if (!extra.parentNode) obr.appendChild(extra);
     }
+  }
+  if (!document.getElementById('custoHoverTip')) {
+    var tip = document.createElement('div');
+    tip.id = 'custoHoverTip';
+    tip.style.cssText = 'display:none;position:fixed;z-index:2147483000;background:#0f172a;color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;pointer-events:none';
+    document.body.appendChild(tip);
+    document.addEventListener('mousemove', function (ev) {
+      var lin = ev.target.closest && ev.target.closest('.custo-bar-linha');
+      if (!lin) { tip.style.display = 'none'; return; }
+      tip.textContent = lin.getAttribute('data-tip') || '';
+      tip.style.display = 'block';
+      tip.style.left = (ev.clientX + 12) + 'px';
+      tip.style.top = (ev.clientY + 12) + 'px';
+    });
   }
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest ? ev.target.closest('.custo-sub-btn') : null;
     if (!b) return;
-    setTimeout(pintarGraficosCusto, 80);
+    setTimeout(function () {
+      var cxp = document.getElementById('custoSubPainel-p86bcxp');
+      if (cxp && b.id !== 'custoSubBtn-p86bcxp') cxp.style.display = 'none';
+      var p120 = document.getElementById('p120Area');
+      if (p120) p120.style.display = (b.id === 'custoSubBtn-geral') ? '' : 'none';
+      pintarGraficosCusto();
+    }, 50);
   }, true);
   setTimeout(tick, 800);
   setTimeout(function () {
