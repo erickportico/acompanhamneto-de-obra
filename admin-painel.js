@@ -5,8 +5,8 @@
  */
 (function () {
   'use strict';
-  if (window.__adminPainel) return;
-  window.__adminPainel = true;
+  if (window.__adminPainel2) return;
+  window.__adminPainel2 = true;
 
   var ABAS = [
     { id: 'itens', rotulo: 'Itens' },
@@ -55,8 +55,10 @@
     var s = document.createElement('style');
     s.id = 'adminPainelCss';
     s.textContent =
-      '#tab-admin{padding:16px}' +
-      '.adm-box{max-width:920px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin:12px 0}' +
+      '#tab-admin{position:relative;padding:24px;min-height:70vh}' +
+      '#tab-admin.adm-aberto{position:fixed;inset:0;z-index:5000;display:flex!important;align-items:center;justify-content:center;background:rgba(15,23,42,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:24px;overflow:auto}' +
+      '#tab-admin .adm-wrap{width:min(920px,100%);max-height:90vh;overflow:auto}' +
+      '.adm-box{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin:0 0 14px;box-shadow:0 18px 40px rgba(15,23,42,.18)}' +
       '.adm-box h3{margin:0 0 8px;color:#16304f}' +
       '.adm-box p{margin:0 0 12px;color:#64748b;font-size:13px}' +
       '.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
@@ -80,6 +82,7 @@
     tab.className = 'card';
     tab.style.display = 'none';
     tab.innerHTML =
+      '<div class="adm-wrap">' +
       '<div class="adm-box">' +
       '<h3>Administração de usuários</h3>' +
       '<p>Cadastro no Supabase Auth + perfil em painel_perfis. Exclusão de itens só com admin ou senha de administrador.</p>' +
@@ -100,7 +103,7 @@
       '<p id="admMsg"></p></div>' +
       '<div class="adm-box"><h3>Usuários</h3><div class="table-responsive"><table id="admTabela"><thead><tr>' +
       '<th>E-mail</th><th>Nome</th><th>Perfil</th><th>Ativo</th><th></th>' +
-      '</tr></thead><tbody></tbody></table></div></div>';
+      '</tr></thead><tbody></tbody></table></div></div></div>';
     host.appendChild(tab);
 
     var tabs = document.querySelector('#meu-menu-abas .tabs');
@@ -135,12 +138,14 @@
           });
           var menu = document.getElementById('meu-menu-abas');
           if (menu) menu.removeAttribute('open');
+          var tAdm = document.getElementById('tab-admin');
+          if (tAdm) tAdm.classList.add('adm-aberto');
           listar();
           return;
         }
         var r = orig.apply(this, arguments);
         var t = document.getElementById('tab-admin');
-        if (t) t.style.display = 'none';
+        if (t) { t.style.display = 'none'; t.classList.remove('adm-aberto'); }
         var bb = document.getElementById('btn-tab-admin');
         if (bb) bb.classList.remove('active');
         return r;
@@ -164,8 +169,15 @@
     var tb = document.querySelector('#admTabela tbody');
     if (!tb || !sb()) return;
     var r = await sb().from('painel_perfis').select('*').order('email');
-    if (r.error) { msg(r.error.message); return; }
+    if (r.error) {
+      msg(r.error.message);
+      tb.innerHTML = '<tr><td colspan="5">' + r.error.message + ' — RLS de painel_perfis pode estar bloqueando a leitura.</td></tr>';
+      return;
+    }
     tb.innerHTML = '';
+    if (!(r.data || []).length) {
+      tb.innerHTML = '<tr><td colspan="5">Nenhum perfil em painel_perfis. Cadastre acima ou confira a tabela no Supabase.</td></tr>';
+    }
     (r.data || []).forEach(function (u) {
       var tr = document.createElement('tr');
       tr.innerHTML =

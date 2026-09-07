@@ -327,6 +327,10 @@
     window.getCustosFiltered = coletarCustos;
     try { getCustosFiltered = coletarCustos; } catch (e) {}
     pintarGraficosCusto();
+    document.querySelectorAll('#tab-admin div, #tab-custo > div, #tab-admin p').forEach(function (el) {
+      var t = (el.textContent || '').replace(/\s+/g, '').trim();
+      if (!el.children.length && /^[→▸▾>]+$/.test(t)) el.style.display = 'none';
+    });
   }
 
   var CORES = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#84cc16'];
