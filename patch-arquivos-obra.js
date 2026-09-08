@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchArquivosObra6) return;
-  window.__patchArquivosObra6 = true;
+  if (window.__patchArquivosObra7) return;
+  window.__patchArquivosObra7 = true;
 
   var TIPOS = [
     { id: 'esquadria', nome: 'Esquadrias / contramarcos' },
@@ -49,6 +49,10 @@
     '#tab-arquivos .arq-btn.perigo{background:#dc2626}' +
     '#tab-arquivos .arq-msg{font-size:13px;color:#64748b;margin:8px 0}';
   document.head.appendChild(css);
+  var hs=document.getElementById('arqSetasHide')||document.createElement('style');
+  hs.id='arqSetasHide';
+  hs.textContent='body > div:has(> span), .or-item:empty{ } .lixo-setas{display:none!important}';
+  document.head.appendChild(hs);
 
   function garantirAba() {
     if (document.getElementById('tab-arquivos')) return;
@@ -312,53 +316,59 @@
     var buf = await d.data.arrayBuffer();
     var wb = XLSX.read(buf, { type: 'array' });
     var sh = wb.Sheets[wb.SheetNames[0]];
-    var rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '' });
+    var rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '', raw: false, blankrows: false });
     if (!rows.length) { msg('Planilha vazia.'); return; }
-    var hi = 0, map = {};
-    for (var i = 0; i < Math.min(rows.length, 20); i++) {
-      var line = (rows[i] || []).map(cab);
-      var ok = line.some(function (c) {
-        return c.indexOf('REFERENCIA') >= 0 || c.indexOf('CODIGO LISTA') >= 0 || c === 'REF' || c.indexOf('DESCRICAO') >= 0;
-      });
-      if (ok) {
+    function norm(v) { return cab(v).replace(/\s+/g, ' '); }
+    var hi = -1, map = {};
+    for (var i = 0; i < rows.length; i++) {
+      var line = (rows[i] || []).map(norm);
+      if (line.some(function (c) { return c.indexOf('REFERENCIA') >= 0 || c.indexOf('CODIGO LISTA') >= 0; })) {
         hi = i;
         line.forEach(function (c, idx) { if (c) map[c] = idx; });
         break;
       }
     }
-    if (!Object.keys(map).length && rows[0]) {
-      (rows[0] || []).map(cab).forEach(function (c, idx) { if (c) map[c] = idx; });
-    }
     function col(aliases) {
+      var keys = Object.keys(map);
       for (var k = 0; k < aliases.length; k++) {
         if (map[aliases[k]] != null) return map[aliases[k]];
-      }
-      var keys = Object.keys(map);
-      for (var a2 = 0; a2 < aliases.length; a2++) {
         for (var k2 = 0; k2 < keys.length; k2++) {
-          if (keys[k2].indexOf(aliases[a2]) >= 0) return map[keys[k2]];
+          if (keys[k2].indexOf(aliases[k]) >= 0) return map[keys[k2]];
         }
       }
       return -1;
     }
     var iCod = col(['CODIGO LISTA', 'CODIGO']);
-    var iRef = col(['REFERENCIA']);
+    var iRef = col(['REFERENCIA', 'REF']);
     var iDesc = col(['DESCRICAO']);
     var iQtd = col(['QTD CONTRATO', 'QTD']);
     var iEnt = -1;
     Object.keys(map).forEach(function (k) { if (k.indexOf('ENTREGA') === 0 && iEnt < 0) iEnt = map[k]; });
+    if (iRef < 0) {
+      for (var r0 = 0; r0 < Math.min(rows.length, 40); r0++) {
+        var line = rows[r0] || [];
+        for (var c0 = 0; c0 < line.length; c0++) {
+          if (/^[JP]\d/i.test(String(line[c0] || '').trim())) { iRef = c0; break; }
+        }
+        if (iRef >= 0) break;
+      }
+    }
     var obra = (typeof getObraAtual === 'function') ? getObraAtual() : ((window.db && window.db.obras || []).find(function (o) { return String(o.id) === obraId(); }));
     if (!obra) { msg('Obra atual não encontrada.'); return; }
     if (!obra.recebimentos) obra.recebimentos = [];
     var n = 0;
-    for (var r = hi + 1; r < rows.length; r++) {
-      var row = rows[r];
+    var ini = hi >= 0 ? hi + 1 : 0;
+    for (var r = ini; r < rows.length; r++) {
+      var row = rows[r] || [];
       var ref = iRef >= 0 ? String(row[iRef] || '').trim() : '';
       var desc = iDesc >= 0 ? String(row[iDesc] || '').trim() : '';
+      if (!ref && row.length > 1) ref = String(row[1] || '').trim();
+      if (!desc && row.length > 3) desc = String(row[3] || '').trim();
       if (!ref && !desc) continue;
-      if (/^TOTAL$/i.test(ref) || /^TOTAL$/i.test(String(row[0] || ''))) continue;
-      var prev = iQtd >= 0 ? num(row[iQtd]) : 0;
-      var recb = iEnt >= 0 ? num(row[iEnt]) : 0;
+      if (/^TOTAL/i.test(ref) || /^TOTAL/i.test(String(row[0] || '')) || /^MARCELO/i.test(ref)) continue;
+      if (!/^[A-Z]{0,3}\d/i.test(ref) && !desc) continue;
+      var prev = iQtd >= 0 ? num(row[iQtd]) : num(row[4]);
+      var recb = iEnt >= 0 ? num(row[iEnt]) : num(row[10]);
       var st = recb <= 0 ? 'Pendente' : (prev > 0 && recb < prev ? 'Parcial' : 'Recebido');
       obra.recebimentos.push({
         id: Date.now() + Math.random() + r,
@@ -382,7 +392,7 @@
       });
       n++;
     }
-    if (!n) { msg('Nenhuma linha útil no romaneio.'); return; }
+    if (!n) { msg('Nenhuma linha útil no romaneio. Abra o arquivo e confira se a aba tem REFERÊNCIA / J01.'); return; }
     try { if (typeof salvarDB === 'function') salvarDB(); } catch (e) {}
     msg(n + ' itens foram para Recebimento desta obra.', true);
     if (typeof window.trocarAba === 'function') window.trocarAba('recebimento');
@@ -441,6 +451,22 @@
     };
     window.trocarAba.__arq = true;
   }
+
+  function limparSetas() {
+    var nos = document.querySelectorAll('body *');
+    for (var i = 0; i < nos.length; i++) {
+      var el = nos[i];
+      if (el.children && el.children.length) continue;
+      var tx = (el.textContent || '').replace(/\s+/g, '');
+      if (/^[→▸▾]+$/.test(tx) && tx.length >= 3) {
+        el.style.display = 'none';
+        el.classList.add('lixo-setas');
+      }
+    }
+  }
+  setTimeout(limparSetas, 800);
+  setTimeout(limparSetas, 2500);
+
   window.abrirArquivosObra = abrir;
   setTimeout(function () { garantirAba(); injetarRecebimento(); }, 1200);
   console.log('[arquivos-obra] aba pronta');
