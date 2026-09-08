@@ -600,10 +600,20 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Bibliotecas de Gráficos (Chart.js) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Importação estável do PDF.js + Worker alinhado -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script>
-        window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+
+
+
+
+
+
+    <!-- PDF.js unificado (v4.10.38 ES module) -->
+    <script type="module">
+      /* Carrega pdfjs como modulo ES e expoe globalmente */
+      import * as _pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
+      _pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+      window.pdfjsLib = _pdfjs;
+      window["pdfjs-dist/build/pdf"] = _pdfjs;
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -6919,7 +6929,7 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                 </div>
             </div>
 
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
+
             <script>
                 let modoNovaObra = false;
                 let tipoImportacaoAtual = 'producao';
@@ -11023,16 +11033,16 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
             
                     if (!file) return;
             
-                    // Obtem a instancia global do PDF.js (carregado no <head> via CDN v2.16.105)
-                    const pdfjs = window['pdfjs-dist/build/pdf'] || window.pdfjsLib;
+                    // PDF.js: usa global do <head> ou importacao dinamica (v4.10.38)
+                    const pdfjs = window.pdfjsLib || (await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs'));
             
                     if (!pdfjs) {
                         alert('A biblioteca PDF.js nao foi carregada. Verifique a conexao com a internet.');
                         return;
                     }
             
-                    // OBRIGATORIO: define o worker do PDF.js
-                    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                    // Worker do PDF.js (v4.10.38)
+                    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
             
                     statusEl.innerText = "\u23f3 Lendo PDF...";
                     statusEl.style.color = "#d97706";
@@ -72081,6 +72091,7 @@ if (false) { /* PATCH154_DISABLED */
 <script src="/patch-ui-2026-completo.js"></script>
 <script src="/patch-ui-2026-gaveta-pgto.js"></script>
 <script src="/patch-arquivos-obra.js"></script>
+<script src="/patch-estoque-obra.js"></script>
 <!-- FIM PATCH150_CAMADA_ABSTRACAO -->
 </body>
 </html>
