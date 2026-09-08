@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto10) return;
-  window.__patchUi2026gavetaPgto10 = true;
+  if (window.__patchUi2026gavetaPgto11) return;
+  window.__patchUi2026gavetaPgto11 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -21,11 +21,14 @@
     '#orLista .or-grupo.fechado + .or-bloco,#orObrasBox.fechada #orObrasLista{display:none!important}',
     '#orLista .or-item{border-radius:10px!important;margin:2px 4px!important}',
     '#orLista .or-item.or-ativo{background:rgba(96,165,250,.22)!important}',
-    '#tab-pagamento .lanc-form-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px 10px!important;align-items:end;max-width:980px}',
+    '#tab-pagamento .lanc-form-grid{display:grid!important;grid-template-columns:2fr 88px 1.2fr 1.4fr!important;gap:10px 12px!important;align-items:start;width:100%!important;max-width:none!important}',
     '#tab-pagamento .lanc-form-grid > *{min-width:0}',
-    '#tab-pagamento .lanc-form-grid label{margin:0 0 4px;font-size:11px}',
-    '#tab-pagamento .lanc-form-grid input,#tab-pagamento .lanc-form-grid select{width:100%;box-sizing:border-box}',
-    '#tab-pagamento .lanc-form-grid #inputLancProfissionais,#tab-pagamento .lanc-form-grid #inputLancAjudantes{min-height:72px;width:100%;max-height:88px}',
+    '#tab-pagamento .lanc-form-grid .pgto-cel{display:flex;flex-direction:column;gap:4px}',
+    '#tab-pagamento .lanc-form-grid label{margin:0;font-size:11px;font-weight:700;color:#64748b}',
+    '#tab-pagamento .lanc-form-grid input,#tab-pagamento .lanc-form-grid select{width:100%;box-sizing:border-box;height:38px}',
+    '#tab-pagamento .lanc-form-grid #inputLancProfissionais,#tab-pagamento .lanc-form-grid #inputLancAjudantes{min-height:96px;height:96px;width:100%}',
+    '#tab-pagamento .lanc-form-grid .pgto-span2{grid-column:span 2}',
+    '#tab-pagamento .lanc-form-grid .pgto-span4{grid-column:1/-1}',
     '@media print{#tab-pagamento .lanc-form-grid,#tab-pagamento .btn-add,#tab-pagamento button.btn-add,header.top-bar,.top-bar,#orMenu,#orBtn,.lanc-toolbar,#tab-pagamento .lanc-acoes{display:none!important}#tab-pagamento table{width:100%!important}body{background:#fff!important}}',
     '#tab-pagamento .card,#tab-custo.card{border-radius:16px}',
     '#tab-pagamento .btn-add{border-radius:10px;font-weight:700}',
@@ -181,11 +184,23 @@
       while (p && p !== grid && p.parentNode !== grid) p = p.parentNode;
       return (p && p.parentNode === grid) ? p : el.parentNode;
     }
-    ['inputLancObra','inputLancUf','inputLancCidade','inputLancMaterial',
-     'inputLancInstalacaoM2','inputLancTaxaProf','inputLancTaxaAjud',
-     'inputLancProfissionais','inputLancAjudantes'].forEach(function (id) {
-      var b = box(id);
-      if (b && b.parentNode === grid) grid.appendChild(b);
+    var ordem = [
+      ['inputLancObra', ''],
+      ['inputLancUf', ''],
+      ['inputLancCidade', ''],
+      ['inputLancMaterial', ''],
+      ['inputLancInstalacaoM2', ''],
+      ['inputLancTaxaProf', ''],
+      ['inputLancTaxaAjud', ''],
+      ['inputLancProfissionais', 'pgto-span2'],
+      ['inputLancAjudantes', 'pgto-span2']
+    ];
+    ordem.forEach(function (par) {
+      var b = box(par[0]);
+      if (!b) return;
+      if (b.parentNode === grid) grid.appendChild(b);
+      b.classList.add('pgto-cel');
+      if (par[1]) b.classList.add(par[1]);
     });
   }
   window.camposPagamento = camposPagamento;
