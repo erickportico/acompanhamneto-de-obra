@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchArquivosObra4) return;
-  window.__patchArquivosObra4 = true;
+  if (window.__patchArquivosObra5) return;
+  window.__patchArquivosObra5 = true;
 
   var TIPOS = [
     { id: 'esquadria', nome: 'Esquadrias / contramarcos' },
@@ -58,7 +58,7 @@
     tab.className = 'card';
     tab.style.display = 'none';
     tab.innerHTML =
-      '<div class="arq-topo"><h3 style="margin:0">Arquivos da obra</h3><span id="arqObraNome"></span></div>' +
+      '<div class="arq-topo"><div><button type="button" class="arq-btn lado" id="arqVoltar">← Voltar</button></div><h3 style="margin:0">Arquivos da obra</h3><span id="arqObraNome"></span></div>' +
       '<div class="arq-tipos" id="arqTipos"></div>' +
       '<div class="arq-box">' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
@@ -91,6 +91,8 @@
     });
     document.getElementById('arqEnviar').onclick = enviar;
     document.getElementById('arqAtualizar').onclick = listar;
+    var bv = document.getElementById('arqVoltar');
+    if (bv) bv.onclick = voltar;
 
     var menu = document.querySelector('#orLista');
     if (menu && !document.getElementById('orArqBtn')) {
@@ -191,8 +193,12 @@
         '<td>' + (a.codigo_lista || '-') + '</td>' +
         '<td>' + (a.tipo || '') + '</td>' +
         '<td>' + (a.criado_por || '') + '</td>' +
-        '<td><button type="button" class="arq-btn lado arq-baixar">Baixar</button> ' +
+        '<td><button type="button" class="arq-btn lado arq-ver">Abrir</button> ' +
+        '<button type="button" class="arq-btn lado arq-imp">Importar recebimento</button> ' +
+        '<button type="button" class="arq-btn lado arq-baixar">Baixar</button> ' +
         '<button type="button" class="arq-btn perigo arq-apagar">Excluir</button></td>';
+      tr.querySelector('.arq-ver').onclick = function () { abrirArquivo(a); };
+      tr.querySelector('.arq-imp').onclick = function () { importarRecebimento(a); };
       tr.querySelector('.arq-baixar').onclick = function () { baixar(a); };
       tr.querySelector('.arq-apagar').onclick = function () { apagar(a); };
       tb.appendChild(tr);
@@ -221,6 +227,114 @@
     if (del.error) { msg(del.error.message); return; }
     msg('Removido.', true);
     listar();
+  }
+
+
+  var ultimaAba = 'recebimento';
+  function voltar() {
+    try {
+      if (typeof window.voltarAba === 'function') { window.voltarAba(); return; }
+    } catch (e) {}
+    if (typeof window.trocarAba === 'function') window.trocarAba(ultimaAba || 'recebimento');
+  }
+  async function abrirArquivo(a) {
+    var cliente = sb();
+    if (!cliente) return;
+    var s = await cliente.storage.from('painel-arquivos').createSignedUrl(a.caminho, 3600);
+    if (s.error || !s.data || !s.data.signedUrl) {
+      var d = await cliente.storage.from('painel-arquivos').download(a.caminho);
+      if (d.error) { msg(d.error.message); return; }
+      var url = URL.createObjectURL(d.data);
+      window.open(url, '_blank');
+      return;
+    }
+    window.open(s.data.signedUrl, '_blank');
+  }
+  function num(v) {
+    if (v == null || v === '') return 0;
+    if (typeof v === 'number') return v;
+    return Number(String(v).replace(/\./g, '').replace(',', '.')) || Number(v) || 0;
+  }
+  function cab(h) { return String(h || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
+  async function importarRecebimento(a) {
+    var cliente = sb();
+    if (!cliente) return;
+    var nome = String(a.nome_arquivo || '').toLowerCase();
+    if (!/\.xlsx?$/.test(nome)) { msg('Importar recebimento só lê Excel (.xls/.xlsx).'); return; }
+    var d = await cliente.storage.from('painel-arquivos').download(a.caminho);
+    if (d.error) { msg(d.error.message); return; }
+    if (typeof XLSX === 'undefined') { msg('Planilha XLSX não carregou no painel.'); return; }
+    var buf = await d.data.arrayBuffer();
+    var wb = XLSX.read(buf, { type: 'array' });
+    var sh = wb.Sheets[wb.SheetNames[0]];
+    var rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '' });
+    if (!rows.length) { msg('Planilha vazia.'); return; }
+    var hi = 0, map = {};
+    for (var i = 0; i < Math.min(rows.length, 8); i++) {
+      var line = rows[i].map(cab);
+      if (line.some(function (c) { return c.indexOf('REFERENCIA') >= 0 || c.indexOf('CODIGO LISTA') >= 0; })) {
+        hi = i;
+        line.forEach(function (c, idx) { map[c] = idx; });
+        break;
+      }
+    }
+    function col(aliases) {
+      for (var k = 0; k < aliases.length; k++) {
+        if (map[aliases[k]] != null) return map[aliases[k]];
+      }
+      var keys = Object.keys(map);
+      for (var a2 = 0; a2 < aliases.length; a2++) {
+        for (var k2 = 0; k2 < keys.length; k2++) {
+          if (keys[k2].indexOf(aliases[a2]) >= 0) return map[keys[k2]];
+        }
+      }
+      return -1;
+    }
+    var iCod = col(['CODIGO LISTA', 'CODIGO']);
+    var iRef = col(['REFERENCIA']);
+    var iDesc = col(['DESCRICAO']);
+    var iQtd = col(['QTD CONTRATO', 'QTD']);
+    var iEnt = -1;
+    Object.keys(map).forEach(function (k) { if (k.indexOf('ENTREGA') === 0 && iEnt < 0) iEnt = map[k]; });
+    var obra = (typeof getObraAtual === 'function') ? getObraAtual() : ((window.db && window.db.obras || []).find(function (o) { return String(o.id) === obraId(); }));
+    if (!obra) { msg('Obra atual não encontrada.'); return; }
+    if (!obra.recebimentos) obra.recebimentos = [];
+    var n = 0;
+    for (var r = hi + 1; r < rows.length; r++) {
+      var row = rows[r];
+      var ref = iRef >= 0 ? String(row[iRef] || '').trim() : '';
+      var desc = iDesc >= 0 ? String(row[iDesc] || '').trim() : '';
+      if (!ref && !desc) continue;
+      if (/^TOTAL$/i.test(ref) || /^TOTAL$/i.test(String(row[0] || ''))) continue;
+      var prev = iQtd >= 0 ? num(row[iQtd]) : 0;
+      var recb = iEnt >= 0 ? num(row[iEnt]) : 0;
+      var st = recb <= 0 ? 'Pendente' : (prev > 0 && recb < prev ? 'Parcial' : 'Recebido');
+      obra.recebimentos.push({
+        id: Date.now() + Math.random() + r,
+        data: a.data_romaneio || (a.criado_em || '').slice(0, 10),
+        listaCorte: (iCod >= 0 ? String(row[iCod] || a.codigo_lista || '') : (a.codigo_lista || '')),
+        nf: '',
+        fornecedor: 'Romaneio',
+        classe: tipoAtual,
+        marca: '',
+        codigoCor: '',
+        descricao: desc,
+        material: desc,
+        ref: ref,
+        qtdPrevista: prev,
+        qtdRecebida: recb,
+        unidade: 'UN',
+        status: st,
+        responsavel: a.criado_por || '',
+        local: obra.nome || '',
+        obs: 'Importado de ' + (a.nome_arquivo || '')
+      });
+      n++;
+    }
+    if (!n) { msg('Nenhuma linha útil no romaneio.'); return; }
+    try { if (typeof salvarDB === 'function') salvarDB(); } catch (e) {}
+    msg(n + ' itens foram para Recebimento desta obra.', true);
+    if (typeof window.trocarAba === 'function') window.trocarAba('recebimento');
   }
 
   function injetarRecebimento() {
