@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchArquivosObra5) return;
-  window.__patchArquivosObra5 = true;
+  if (window.__patchArquivosObra6) return;
+  window.__patchArquivosObra6 = true;
 
   var TIPOS = [
     { id: 'esquadria', nome: 'Esquadrias / contramarcos' },
@@ -237,20 +237,65 @@
     } catch (e) {}
     if (typeof window.trocarAba === 'function') window.trocarAba(ultimaAba || 'recebimento');
   }
-  async function abrirArquivo(a) {
-    var cliente = sb();
-    if (!cliente) return;
-    var s = await cliente.storage.from('painel-arquivos').createSignedUrl(a.caminho, 3600);
-    if (s.error || !s.data || !s.data.signedUrl) {
-      var d = await cliente.storage.from('painel-arquivos').download(a.caminho);
-      if (d.error) { msg(d.error.message); return; }
-      var url = URL.createObjectURL(d.data);
-      window.open(url, '_blank');
-      return;
-    }
-    window.open(s.data.signedUrl, '_blank');
+  function verModal(html) {
+    var old = document.getElementById('arqVerModal');
+    if (old) old.remove();
+    var m = document.createElement('div');
+    m.id = 'arqVerModal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:20px';
+    m.innerHTML = '<div style="background:#fff;max-width:96vw;max-height:90vh;overflow:auto;border-radius:12px;padding:14px;min-width:280px">' +
+      '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:10px">' +
+      '<strong>Romaneio</strong><button type="button" class="arq-btn lado" id="arqVerX">Fechar</button></div>' + html + '</div>';
+    document.body.appendChild(m);
+    document.getElementById('arqVerX').onclick = function () { m.remove(); };
+    m.addEventListener('click', function (e) { if (e.target === m) m.remove(); });
   }
-  function num(v) {
+  async function blobArquivo(a) {
+    var cliente = sb();
+    var d = await cliente.storage.from('painel-arquivos').download(a.caminho);
+    if (d.error) throw d.error;
+    return d.data;
+  }
+  async function abrirArquivo(a) {
+    try {
+      var nome = String(a.nome_arquivo || a.caminho || '').toLowerCase();
+      if (/\.xlsx?$/.test(nome)) {
+        if (typeof XLSX === 'undefined') { msg('Abra o Excel pelo Baixar: o leitor XLSX não está na página.'); return; }
+        var blob = await blobArquivo(a);
+        var wb = XLSX.read(await blob.arrayBuffer(), { type: 'array' });
+        var sh = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '' });
+        var html = '<div style="overflow:auto;max-height:70vh"><table style="border-collapse:collapse;font-size:12px">';
+        rows.slice(0, 80).forEach(function (row, i) {
+          html += '<tr>';
+          (row || []).slice(0, 16).forEach(function (c) {
+            var tag = i === 0 ? 'th' : 'td';
+            html += '<' + tag + ' style="border:1px solid #e2e8f0;padding:4px 6px;white-space:nowrap">' + String(c == null ? '' : c).replace(/</g, '') + '</' + tag + '>';
+          });
+          html += '</tr>';
+        });
+        html += '</table></div>';
+        verModal(html);
+        return;
+      }
+      if (/\.pdf$/.test(nome) || /\.(png|jpe?g|gif|webp)$/.test(nome)) {
+        var blob = await blobArquivo(a);
+        var url = URL.createObjectURL(blob);
+        var tag = /\.pdf$/.test(nome)
+          ? '<iframe src="' + url + '" style="width:86vw;height:75vh;border:0"></iframe>'
+          : '<img src="' + url + '" style="max-width:86vw;max-height:75vh">';
+        verModal(tag);
+        return;
+      }
+      var cliente = sb();
+      var s = await cliente.storage.from('painel-arquivos').createSignedUrl(a.caminho, 3600);
+      if (s.data && s.data.signedUrl) window.open(s.data.signedUrl, '_blank');
+      else baixar(a);
+    } catch (e) {
+      msg(e.message || String(e));
+    }
+  }
+    function num(v) {
     if (v == null || v === '') return 0;
     if (typeof v === 'number') return v;
     return Number(String(v).replace(/\./g, '').replace(',', '.')) || Number(v) || 0;
@@ -270,13 +315,19 @@
     var rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '' });
     if (!rows.length) { msg('Planilha vazia.'); return; }
     var hi = 0, map = {};
-    for (var i = 0; i < Math.min(rows.length, 8); i++) {
-      var line = rows[i].map(cab);
-      if (line.some(function (c) { return c.indexOf('REFERENCIA') >= 0 || c.indexOf('CODIGO LISTA') >= 0; })) {
+    for (var i = 0; i < Math.min(rows.length, 20); i++) {
+      var line = (rows[i] || []).map(cab);
+      var ok = line.some(function (c) {
+        return c.indexOf('REFERENCIA') >= 0 || c.indexOf('CODIGO LISTA') >= 0 || c === 'REF' || c.indexOf('DESCRICAO') >= 0;
+      });
+      if (ok) {
         hi = i;
-        line.forEach(function (c, idx) { map[c] = idx; });
+        line.forEach(function (c, idx) { if (c) map[c] = idx; });
         break;
       }
+    }
+    if (!Object.keys(map).length && rows[0]) {
+      (rows[0] || []).map(cab).forEach(function (c, idx) { if (c) map[c] = idx; });
     }
     function col(aliases) {
       for (var k = 0; k < aliases.length; k++) {
