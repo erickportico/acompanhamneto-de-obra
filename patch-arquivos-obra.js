@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchArquivosObra2) return;
-  window.__patchArquivosObra2 = true;
+  if (window.__patchArquivosObra4) return;
+  window.__patchArquivosObra4 = true;
 
   var TIPOS = [
     { id: 'esquadria', nome: 'Esquadrias / contramarcos' },
@@ -104,8 +104,11 @@
       Array.prototype.forEach.call(menu.querySelectorAll('.or-grupo,.or-item'), function (n) {
         if (/financeiro/i.test(n.textContent || '')) fin = n;
       });
-      if (fin && fin.nextSibling) menu.insertBefore(item, fin.nextSibling);
-      else menu.appendChild(item);
+      var alvo = (fin && fin.parentNode) ? fin.parentNode : menu;
+      try {
+        if (fin && fin.nextSibling && fin.nextSibling.parentNode === alvo) alvo.insertBefore(item, fin.nextSibling);
+        else alvo.appendChild(item);
+      } catch (e) { menu.appendChild(item); }
     }
   }
 
@@ -141,8 +144,8 @@
     if (!file) { msg('Escolha o arquivo.'); return; }
     var path = caminho(file);
     msg('Enviando…');
-    var up = await cliente.storage.from('painel-arquivos').upload(path, file, { upsert: false });
-    if (up.error) { msg(up.error.message); return; }
+    var up = await cliente.storage.from('painel-arquivos').upload(path, file, { upsert: true, contentType: file.type || 'application/octet-stream' });
+    if (up.error) { msg('Storage: ' + (up.error.message || JSON.stringify(up.error))); console.warn(up.error); return; }
     var row = {
       obra_id: oid,
       tipo: tipoAtual,
