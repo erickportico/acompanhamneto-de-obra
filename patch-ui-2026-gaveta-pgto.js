@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto11) return;
-  window.__patchUi2026gavetaPgto11 = true;
+  if (window.__patchUi2026gavetaPgto12) return;
+  window.__patchUi2026gavetaPgto12 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -44,6 +44,9 @@
     '#custoUfVisivel,#custoCidVisivel{display:none!important}',
     '#tab-custo #custoUfVisivel, #tab-custo #custoCidVisivel{display:none!important}',
     '#p137Faixa{display:none!important}',
+    '#containerLancamentosPgto .lanc-obra-group{margin:0 0 18px;border:1px solid #dbe3ee;border-radius:10px;overflow:hidden;background:#fff;page-break-inside:avoid}',
+    '#containerLancamentosPgto .lanc-obra-header{background:#0f2744!important;color:#fff!important;display:flex;justify-content:space-between;align-items:center;padding:10px 14px}',
+    '@media print{.lanc-form-grid,.pgto-action-bar,.pgto-sub-tabs,.pgto-month-nav,.lanc-actions{display:none!important}.lanc-obra-group{page-break-after:always;page-break-inside:avoid}.lanc-obra-group:last-child{page-break-after:auto}}',
     '#orObrasBox,#orObrasLista{height:auto!important;max-height:none!important;overflow:visible!important}',
     '#orObrasLista{display:block!important;padding:0 6px 10px}',
     '#orObrasBox.fechada #orObrasLista{display:none!important}',
