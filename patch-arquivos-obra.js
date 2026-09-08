@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchArquivosObra9) return;
-  window.__patchArquivosObra9 = true;
+  if (window.__patchArquivosObra10) return;
+  window.__patchArquivosObra10 = true;
 
   var TIPOS = [
     { id: 'esquadria', nome: 'Esquadrias / contramarcos' },
@@ -469,80 +469,69 @@
 
 
   function botaoExcluirRecebimento() {
-    var tab = document.getElementById('tab-recebimento');
-    if (!tab) return;
-    tab.querySelectorAll('.materiais-consolidados .arq-exc-rec, #tabelaMateriaisConsolidados .arq-exc-rec').forEach(function (b) { b.remove(); });
-    var tabela = null;
-    var titulos = tab.querySelectorAll('h2,h3,.card-title,div');
-    for (var i = 0; i < titulos.length; i++) {
-      if (/Controle de Recebimento de Materiais/i.test(titulos[i].textContent || '')) {
-        var box = titulos[i].parentNode;
-        tabela = box && box.querySelector('table');
-        if (!tabela && box) tabela = box.parentNode && box.parentNode.querySelector('.recebimento-table, table');
-        break;
-      }
-    }
-    if (!tabela) tabela = tab.querySelector('.recebimento-table') || tab.querySelector('table');
-    var rows = tabela ? tabela.querySelectorAll('tbody tr') : [];
-    rows.forEach(function (tr) {
-      if (tr.querySelector('.arq-exc-rec')) return;
+    var tb = document.getElementById('tbodyRecebimento');
+    if (!tb) return;
+    Array.prototype.forEach.call(tb.rows, function (tr) {
       var last = tr.cells[tr.cells.length - 1];
       if (!last) return;
+      last.querySelectorAll('.arq-exc-rec').forEach(function (b) { b.remove(); });
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'arq-exc-rec';
       btn.textContent = 'Excluir';
-      btn.style.cssText = 'border:0;background:#dc2626;color:#fff;border-radius:6px;padding:4px 8px;font-size:12px;font-weight:700;cursor:pointer';
+      btn.style.cssText = 'border:0;background:#dc2626;color:#fff;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap';
       btn.onclick = function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
+        if (!confirm('Excluir este recebimento?')) return;
         var obra = (typeof getObraAtual === 'function') ? getObraAtual() : null;
-        if (!obra || !obra.recebimentos) return;
-        var ref = '';
-        var cells = tr.querySelectorAll('input,select,td');
-        cells.forEach(function (c) {
-          var v = c.value || c.textContent || '';
-          if (/^[JP]\d/i.test(v.trim()) && !ref) ref = v.trim();
-        });
-        if (!confirm('Excluir este recebimento' + (ref ? ' (' + ref + ')' : '') + '?')) return;
-        var idx = Array.prototype.indexOf.call(tr.parentNode.children, tr);
-        /* tenta pelo texto da descrição + ref */
-        var desc = '';
-        var inputs = tr.querySelectorAll('input');
-        if (inputs[5]) desc = inputs[5].value || '';
-        var antes = obra.recebimentos.length;
-        obra.recebimentos = obra.recebimentos.filter(function (r, i) {
-          if (ref && String(r.ref || r.codigoCor || '') === ref && String(r.descricao || r.material || '') === desc) return false;
+        if (!obra || !obra.recebimentos) { tr.remove(); return; }
+        var inp = tr.querySelectorAll('input');
+        var ref = inp[5] ? String(inp[5].value || '') : '';
+        var desc = inp[6] ? String(inp[6].value || '') : '';
+        obra.recebimentos = obra.recebimentos.filter(function (r) {
+          var rr = String(r.ref || r.codigoCor || '');
+          var dd = String(r.descricao || r.material || '');
+          if (ref && rr === ref && (!desc || dd === desc)) return false;
           return true;
         });
-        if (obra.recebimentos.length === antes && obra.recebimentos[idx]) {
-          obra.recebimentos.splice(idx, 1);
-        }
         try { if (typeof salvarDB === 'function') salvarDB(); } catch (e) {}
         tr.remove();
       };
       last.appendChild(btn);
-    });
-    var ths = tab.querySelectorAll('thead th:last-child, tbody td:last-child');
-    ths.forEach(function (c) {
-      c.style.position = 'sticky';
-      c.style.right = '0';
-      c.style.background = '#fff';
-      c.style.zIndex = '2';
+      last.style.position = 'sticky';
+      last.style.right = '0';
+      last.style.background = '#fff';
+      last.style.minWidth = '88px';
     });
   }
-  if (typeof window.trocarAba === 'function') {
-    var _ta2 = window.trocarAba;
-    if (!_ta2.__excRec) {
-      window.trocarAba = function (aba) {
-        var r = _ta2.apply(this, arguments);
-        if (aba === 'recebimento') setTimeout(botaoExcluirRecebimento, 200);
-        return r;
-      };
-      window.trocarAba.__excRec = true;
+  function limparSetasForte() {
+    var all = document.body.querySelectorAll('div,span,p,li,button');
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i];
+      if (el.closest && (el.closest('#tab-arquivos') || el.closest('input'))) continue;
+      var t1 = (el.textContent || '').trim();
+      if (!t1) continue;
+      if (/^(→\s*){2,}$/.test(t1) || /^[→▸]{3,}$/.test(t1.replace(/\s/g, ''))) {
+        el.style.setProperty('display', 'none', 'important');
+      }
     }
   }
-  setTimeout(botaoExcluirRecebimento, 1800);
+  if (typeof window.renderRecebimentos === 'function' && !window.renderRecebimentos.__excBtn) {
+    var _rr = window.renderRecebimentos;
+    window.renderRecebimentos = function () {
+      var r = _rr.apply(this, arguments);
+      setTimeout(botaoExcluirRecebimento, 30);
+      return r;
+    };
+    window.renderRecebimentos.__excBtn = true;
+  }
+  setInterval(function () {
+    botaoExcluirRecebimento();
+    limparSetasForte();
+  }, 4000);
+  setTimeout(function () { botaoExcluirRecebimento(); limparSetasForte(); }, 500);
+  window.abrirArquivosObra = abrir;
   window.abrirArquivosObra = abrir;
   setTimeout(function () { garantirAba(); injetarRecebimento(); }, 1200);
   console.log('[arquivos-obra] aba pronta');
