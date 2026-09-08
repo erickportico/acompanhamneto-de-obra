@@ -1884,17 +1884,101 @@ body.dark-mode #panelPgtoColaboradores .btn-icon-sm:hover { background: var(--ca
 
 /* --- Lançamentos form --- */
 #tab-pagamento .lanc-form-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px; padding: 16px; background: #f8fafc; border-radius: 10px;
-    border: 1px solid #e2e8f0; margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 12px;
+    overflow: hidden;
 }
-#tab-pagamento .lanc-form-grid label {
-    font-size: 0.78rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;
+#tab-pagamento .lanc-form-grid .lanc-section {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
 }
-#tab-pagamento .lanc-form-grid input,
-#tab-pagamento .lanc-form-grid select {
-    width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
-    font-size: 0.85rem; box-sizing: border-box;
+#tab-pagamento .lanc-form-grid .lanc-section:last-child {
+    border-bottom: none;
+}
+#tab-pagamento .lanc-form-grid .lanc-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+#tab-pagamento .lanc-form-grid .lanc-fields-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+#tab-pagamento .lanc-form-grid .lanc-field {
+    flex: 1 1 140px;
+    min-width: 0;
+}
+#tab-pagamento .lanc-form-grid .lanc-field.lanc-field-wide {
+    flex: 2 1 200px;
+}
+#tab-pagamento .lanc-form-grid .lanc-field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    display: block;
+    margin-bottom: 4px;
+}
+#tab-pagamento .lanc-form-grid .lanc-field input,
+#tab-pagamento .lanc-form-grid .lanc-field select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+}
+/* Checkbox list (replaces <select multiple>) */
+#tab-pagamento .lanc-checkbox-list {
+    max-height: 96px;
+    overflow-y: auto;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    padding: 4px 0;
+}
+#tab-pagamento .lanc-checkbox-list::-webkit-scrollbar { width: 6px; }
+#tab-pagamento .lanc-checkbox-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+#tab-pagamento .lanc-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+#tab-pagamento .lanc-checkbox-item:hover { background: #f1f5f9; }
+#tab-pagamento .lanc-checkbox-item input[type="checkbox"] {
+    width: 15px; height: 15px; accent-color: #1e3a5f; cursor: pointer;
+}
+#tab-pagamento .lanc-checkbox-empty {
+    padding: 12px 10px;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    text-align: center;
+}
+/* Botão dentro do card */
+#tab-pagamento .lanc-form-grid .lanc-submit-row {
+    padding: 12px 16px;
+    background: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 /* --- Action bar --- */
@@ -1975,6 +2059,19 @@ td.lanc-actions { overflow: visible !important; white-space: nowrap; }
 .btn-icon-sm:hover { background: #f1f5f9; }
 
 /* --- Lancamentos table DARK MODE --- */
+/* Dark mode: lanc-form-grid sections */
+body.dark-mode .lanc-form-grid { background: var(--card-bg,#1e293b); border-color: var(--border,#334155); }
+body.dark-mode .lanc-form-grid .lanc-section { border-color: var(--border,#334155); }
+body.dark-mode .lanc-form-grid .lanc-section-title { color: var(--text-light,#94a3b8); }
+body.dark-mode .lanc-form-grid .lanc-field label { color: var(--text-light,#94a3b8); }
+body.dark-mode .lanc-form-grid .lanc-field input,
+body.dark-mode .lanc-form-grid .lanc-field select { background: var(--card-bg,#1e293b); border-color: var(--border,#334155); color: var(--text,#f8fafc); }
+body.dark-mode .lanc-checkbox-list { background: var(--card-bg,#1e293b); border-color: var(--border,#334155); }
+body.dark-mode .lanc-checkbox-item:hover { background: rgba(255,255,255,0.06); }
+body.dark-mode .lanc-checkbox-item { color: var(--text,#f8fafc); }
+body.dark-mode .lanc-checkbox-empty { color: var(--text-light,#64748b); }
+body.dark-mode .lanc-submit-row { background: var(--card-bg,#162032); border-top-color: var(--border,#334155); }
+
 body.dark-mode .lanc-obra-group { border-color: var(--border,#334155); }
 body.dark-mode .lanc-obra-header { background: var(--card-bg,#1e293b); color: var(--text,#f8fafc); border-color: var(--border,#334155); }
 body.dark-mode .lanc-table th { background: #162032; color: var(--text-light,#94a3b8); border-color: var(--border,#334155); }
@@ -6421,56 +6518,84 @@ body.p53-travado { overflow: hidden !important; }
 
                 <!-- ===== PAINEL: LANÇAMENTOS ===== -->
                 <div id="panelPgtoLancamentos">
-                    <!-- Formulário de registro -->
+                    <!-- Formulário de registro (layout em seções) -->
                     <div class="lanc-form-grid">
-                        <div>
-                            <label>Instalação M²</label>
-                            <input type="number" id="inputLancInstalacaoM2" step="0.01" min="0" placeholder="0,00">
+                        <!-- Seção 1: Dados da Tarefa -->
+                        <div class="lanc-section">
+                            <div class="lanc-section-title">📝 Dados da Tarefa</div>
+                            <div class="lanc-fields-row">
+                                <div class="lanc-field lanc-field-wide">
+                                    <label>Obra</label>
+                                    <select id="inputLancObra"></select>
+                                </div>
+                                <div class="lanc-field lanc-field-wide">
+                                    <label>Material Instalado</label>
+                                    <input type="text" id="inputLancMaterial" placeholder="Ex: Porta, Janela...">
+                                </div>
+                                <div class="lanc-field">
+                                    <label>Instalação M²</label>
+                                    <input type="number" id="inputLancInstalacaoM2" step="0.01" min="0" placeholder="0,00">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label>Material Instalado</label>
-                            <input type="text" id="inputLancMaterial" placeholder="Ex: Porta, Janela...">
+
+                        <!-- Seção 2: Taxas -->
+                        <div class="lanc-section">
+                            <div class="lanc-section-title">💲 Taxas (R$/m²)</div>
+                            <div class="lanc-fields-row">
+                                <div class="lanc-field">
+                                    <label>Profissional</label>
+                                    <input type="number" id="inputLancTaxaProf" step="0.01" min="0" value="6.00">
+                                </div>
+                                <div class="lanc-field">
+                                    <label>Ajudante</label>
+                                    <input type="number" id="inputLancTaxaAjud" step="0.01" min="0" value="4.00">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label>Taxa Profissional R$/m²</label>
-                            <input type="number" id="inputLancTaxaProf" step="0.01" min="0" value="6.00">
+
+                        <!-- Seção 3: Equipe -->
+                        <div class="lanc-section">
+                            <div class="lanc-section-title">👥 Equipe</div>
+                            <div class="lanc-fields-row">
+                                <div class="lanc-field lanc-field-wide">
+                                    <label>Profissional(is)</label>
+                                    <div class="lanc-checkbox-list" id="checklistLancProfissionais">
+                                        <div class="lanc-checkbox-empty">Selecione uma obra primeiro</div>
+                                    </div>
+                                </div>
+                                <div class="lanc-field lanc-field-wide">
+                                    <label>Ajudante(s)</label>
+                                    <div class="lanc-checkbox-list" id="checklistLancAjudantes">
+                                        <div class="lanc-checkbox-empty">Selecione uma obra primeiro</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label>Taxa Ajudante R$/m²</label>
-                            <input type="number" id="inputLancTaxaAjud" step="0.01" min="0" value="4.00">
-                        </div>
-                        <div>
-                            <label>Obra</label>
-                            <select id="inputLancObra" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">
-                            </select>
-                        </div>
-                        <div>
-                            <label>Profissional(is)</label>
-                            <select id="inputLancProfissionais" multiple style="width:100%;min-height:60px;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">
-                            </select>
-                        </div>
-                        <div>
-                            <label>Ajudante(s)</label>
-                            <select id="inputLancAjudantes" multiple style="width:100%;min-height:60px;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">
-                            </select>
+
+                        <!-- Botão de adicionar -->
+                        <!-- Selects ocultos para compatibilidade JS -->
+                        <select id="inputLancProfissionais" multiple style="display:none;"></select>
+                        <select id="inputLancAjudantes" multiple style="display:none;"></select>
+                        <div class="lanc-submit-row">
+                            <button class="btn-add" onclick="salvarLancamentoPgto()" style="margin-bottom:0;">➕ Adicionar Tarefa</button>
                         </div>
                     </div>
-                    <button class="btn-add" onclick="salvarLancamentoPgto()" style="margin-bottom:14px;">➕ Adicionar Tarefa</button>
 
-                    <!-- Action bar -->
-                    <div class="pgto-action-bar">
-                        <button class="btn-action btn-export" onclick="exportarBackupPgto()">📤 Exportar Backup</button>
-                        <button class="btn-action btn-import-backup" onclick="document.getElementById('inputBackupPgto').click()">📥 Importar Backup</button>
+                    <!-- Action bar + Month nav (compacto) -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                        <div class="pgto-month-nav" style="margin-bottom:0;">
+                            <button onclick="mudarMesPgto(-1)">◀</button>
+                            <span id="pgtoMesAnoLabel">Jan/2026</span>
+                            <button onclick="mudarMesPgto(1)">▶</button>
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn-action btn-export" onclick="exportarBackupPgto()" style="padding:5px 12px;font-size:0.78rem;">📤 Backup</button>
+                            <button class="btn-action btn-import-backup" onclick="document.getElementById('inputBackupPgto').click()" style="padding:5px 12px;font-size:0.78rem;">📥 Restaurar</button>
+                            <button class="btn-action btn-limpar-mes" onclick="limparMesPgto()" style="padding:5px 12px;font-size:0.78rem;">🗑️ Limpar</button>
+                            <button onclick="imprimirPaginaPgtoResumo()" style="padding:5px 12px;font-size:0.78rem;border:1px solid #cbd5e1;border-radius:6px;background:#fff;cursor:pointer;">🖨️ Imprimir</button>
+                        </div>
                         <input type="file" id="inputBackupPgto" accept=".json" onchange="importarBackupPgto(event)" style="display:none;">
-                        <button class="btn-action btn-limpar-mes" onclick="limparMesPgto()">🗑️ Limpar Mês</button>
-                    </div>
-
-                    <!-- Month navigation -->
-                    <div class="pgto-month-nav">
-                        <button onclick="mudarMesPgto(-1)">◀</button>
-                        <span id="pgtoMesAnoLabel">Jan/2026</span>
-                        <button onclick="mudarMesPgto(1)">▶</button>
-                        <button onclick="imprimirPaginaPgtoResumo()" style="font-size:0.8rem;margin-left:8px;">🖨️ Imprimir</button>
                     </div>
 
                     <!-- Lançamentos table (grouped by obra) -->
@@ -12510,7 +12635,104 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
               var mesInput = document.getElementById("custoFilterMes"); if(mesInput) { mesInput.value = getChaveMesPgto(); renderCustoDashboard(); }
             }
             
-            function trocarSubTabPgtoNovo(tab) {
+            
+/* === Funções auxiliares para checkbox lists (substitui <select multiple>) === */
+function renderChecklist(containerId, items, selectedIds) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    if (!items || items.length === 0) {
+        el.innerHTML = '<div class="lanc-checkbox-empty">Nenhum colaborador nesta obra</div>';
+        return;
+    }
+    var html = '';
+    items.forEach(function(item) {
+        var checked = (selectedIds && selectedIds.indexOf(item.id) !== -1) ? 'checked' : '';
+        html += '<label class="lanc-checkbox-item">'
+            + '<input type="checkbox" value="' + item.id + '" ' + checked + '> '
+            + item.nome
+            + '</label>';
+    });
+    el.innerHTML = html;
+}
+
+function getCheckedIds(containerId) {
+    var el = document.getElementById(containerId);
+    if (!el) return [];
+    var checks = el.querySelectorAll('input[type="checkbox"]:checked');
+    return Array.from(checks).map(function(c) { return c.value; });
+}
+
+
+/* Sincroniza checkbox lists quando os selects são populados */
+(function() {
+    var origOnchange = document.getElementById('inputLancObra');
+    if (origOnchange) {
+        var oldHandler = origOnchange.onchange;
+        origOnchange.onchange = function(e) {
+            if (oldHandler) oldHandler.call(this, e);
+            setTimeout(function() {
+                syncChecklistsFromSelects();
+            }, 50);
+        };
+    }
+})();
+
+function syncChecklistsFromSelects() {
+    var selProf = document.getElementById('inputLancProfissionais');
+    var selAjud = document.getElementById('inputLancAjudantes');
+    var clProf = document.getElementById('checklistLancProfissionais');
+    var clAjud = document.getElementById('checklistLancAjudantes');
+
+    if (selProf && clProf) {
+        var items = [];
+        Array.from(selProf.options).forEach(function(opt) {
+            if (opt.value) items.push({ id: opt.value, nome: opt.textContent });
+        });
+        var selected = Array.from(selProf.selectedOptions).map(function(o) { return o.value; });
+        renderChecklist('checklistLancProfissionais', items, selected);
+    }
+
+    if (selAjud && clAjud) {
+        var items2 = [];
+        Array.from(selAjud.options).forEach(function(opt) {
+            if (opt.value) items2.push({ id: opt.value, nome: opt.textContent });
+        });
+        var selected2 = Array.from(selAjud.selectedOptions).map(function(o) { return o.value; });
+        renderChecklist('checklistLancAjudantes', items2, selected2);
+    }
+}
+
+/* Sincroniza checkboxes → selects antes de salvar */
+(function() {
+    var origSalvar = window.salvarLancamentoPgto;
+    if (origSalvar) {
+        window.salvarLancamentoPgto = function() {
+            syncSelectsFromChecklists();
+            origSalvar.call(this);
+        };
+    }
+})();
+
+function syncSelectsFromChecklists() {
+    var selProf = document.getElementById('inputLancProfissionais');
+    var clProf = document.getElementById('checklistLancProfissionais');
+    if (selProf && clProf) {
+        var checkedIds = getCheckedIds('checklistLancProfissionais');
+        Array.from(selProf.options).forEach(function(opt) {
+            opt.selected = (checkedIds.indexOf(opt.value) !== -1);
+        });
+    }
+    var selAjud = document.getElementById('inputLancAjudantes');
+    var clAjud = document.getElementById('checklistLancAjudantes');
+    if (selAjud && clAjud) {
+        var checkedIds2 = getCheckedIds('checklistLancAjudantes');
+        Array.from(selAjud.options).forEach(function(opt) {
+            opt.selected = (checkedIds2.indexOf(opt.value) !== -1);
+        });
+    }
+}
+
+function trocarSubTabPgtoNovo(tab) {
               pgtoSubTab = tab;
               document.getElementById('subTabPgtoLancamentos').classList.toggle('active', tab === 'lancamentos');
               document.getElementById('subTabPgtoResumo').classList.toggle('active', tab === 'resumo');
@@ -12852,8 +13074,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
               const material = document.getElementById('inputLancMaterial').value.trim();
               const taxaProf = parseFloat(document.getElementById('inputLancTaxaProf').value) || 6;
               const taxaAjud = parseFloat(document.getElementById('inputLancTaxaAjud').value) || 4;
-              const profIds = Array.from(document.getElementById('inputLancProfissionais').selectedOptions).map(o => o.value);
-              const ajudIds = Array.from(document.getElementById('inputLancAjudantes').selectedOptions).map(o => o.value);            
+              const profIds = getCheckedIds('checklistLancProfissionais');
+              const ajudIds = getCheckedIds('checklistLancAjudantes');            
             
               if (!obraId) { alert('Selecione uma obra.'); return; }
               if (m2 <= 0) { alert('Informe a metragem (M²).'); return; }
@@ -44382,8 +44604,12 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       '#p87Botao{background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;margin:4px;font-size:13px}',
       '#p87Botao:hover{filter:brightness(1.1)}',
       '#meu-menu-abas #p87Botao{display:block;width:100%;box-sizing:border-box;margin:3px 0 !important;text-align:left}',
-      '#p87Fundo{position:fixed;inset:0;z-index:2147483200;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Segoe UI,Arial,sans-serif}',
-      '#p87Caixa{background:#fff;border-radius:14px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}',
+      '#p87Fundo{position:fixed;inset:0;z-index:2147483200;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Segoe UI,Arial,sans-serif}'
+      /* PATCH_cadastroAdmin: centralização já no CSS base para evitar pulo visual */
+      '#p87Caixa{position:fixed !important;left:50% !important;top:50% !important;right:auto !important;bottom:auto !important;transform:translate(-50%,-50%) !important;margin:0 !important;width:760px !important;max-width:94vw !important;max-height:86vh !important;height:auto !important}',
+      '#p87Caixa{background:#fff;border-radius:14px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:p87FadeIn .2s ease-out}'
+      /* PATCH_cadastroAdmin: animação suave de entrada */
+      '@keyframes p87FadeIn{from{opacity:0;transform:translate(-50%,-50%) scale(.97)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}',
       '#p87Caixa header{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#16304f;color:#fff;padding:12px 16px}',
       '#p87Caixa header h3{margin:0;font-size:16px}',
       '#p87Corpo{padding:16px;overflow:auto}',
@@ -45032,7 +45258,11 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
 
   function ehAdmin() {
     var s = sessao();
-    if (!s) { return true; }
+    /* PATCH_cadastroAdmin: fallback P128.estado */
+    if (!s && window.P128 && window.P128.estado && window.P128.estado.perfil) {
+      s = { usuario: window.P128.estado.email, perfil: window.P128.estado.perfil };
+    }
+    if (!s) { return false; }
     return String(s.perfil || '').toLowerCase() === 'admin';
   }
 
