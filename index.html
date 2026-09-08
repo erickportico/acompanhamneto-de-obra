@@ -38301,10 +38301,18 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   function sessao() {
     var s = null;
     try { s = JSON.parse(sessionStorage.getItem(K_SESS) || 'null'); } catch (e) { s = null; }
+    /* PATCH_podeMexer: se sessão do sessionStorage expirou, limpa e cai para localStorage */
+    if (s && s.exp && Date.now() > s.exp) {
+      try { sessionStorage.removeItem(K_SESS); } catch (e3) {}
+      s = null;
+    }
     if (!s) {
       try { s = JSON.parse(localStorage.getItem(K_SESS) || 'null'); } catch (e) { s = null; }
     }
-    if (s && s.exp && Date.now() > s.exp) { s = null; }
+    if (s && s.exp && Date.now() > s.exp) {
+      try { localStorage.removeItem(K_SESS); } catch (e4) {}
+      s = null;
+    }
     return s;
   }
 
@@ -38597,9 +38605,11 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
             authId: usuarioAuth.id,
             at: Date.now()
           };
-          if (typeof gravarJson === 'function' && typeof K_SESS !== 'undefined') {
-            gravarJson(K_SESS, sessaoSupabase);
-          }
+          /* PATCH_podeMexer: gravar no sessionStorage TAMBÉM para que PainelNucleo.sessao() encontre */
+    try { sessionStorage.setItem(K_SESS, JSON.stringify(sessaoSupabase)); } catch (e7) {}
+    if (typeof gravarJson === 'function' && typeof K_SESS !== 'undefined') {
+      gravarJson(K_SESS, sessaoSupabase);
+    }
           registrar('login-supabase', perfil.usuario);
           if (ov.parentNode) { ov.parentNode.removeChild(ov); }
           barra();
@@ -44559,10 +44569,22 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   function podeMexer() {
     try {
       var s = (window.PainelNucleo && PainelNucleo.sessao) ? PainelNucleo.sessao() : sessao();
-      if (!s) return false;
+      /* PATCH_podeMexer: fallback para estado do P128 quando sessão expirou */
+      if (!s && window.P128 && window.P128.estado) {
+        var est = window.P128.estado;
+        if (est.perfil && est.email) {
+          s = { usuario: est.email, nome: '', perfil: est.perfil };
+        }
+      }
+      if (!s) {
+        try { console.warn('[podeMexer] sem sessão — verifique login/expiração'); } catch(e0){}
+        return false;
+      }
       var p = String(s.perfil || '').toLowerCase();
+      try { console.log('[podeMexer] perfil =', p, '| sessão.usuario =', s.usuario || s.nome || '?'); } catch(e1){}
       return p === 'admin' || p === 'editor';
     } catch (e) {
+      try { console.error('[podeMexer] exceção:', e); } catch(e2){}
       return false;
     }
   }
@@ -54254,9 +54276,27 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   }
 
   function sessaoPainel() {
-    var v = null;
-    try { v = sessionStorage.getItem('painel_seg_sessao_v1') || localStorage.getItem('painel_seg_sessao_v1'); } catch (e) {}
-    try { return v ? JSON.parse(v) : null; } catch (e) { return null; }
+    var v = null, s = null;
+    try { v = sessionStorage.getItem('painel_seg_sessao_v1'); } catch (e) {}
+    /* PATCH_podeMexer: mesma correção — verifica expiração antes de cair para localStorage */
+    if (v) {
+      try { s = JSON.parse(v); } catch (e) { s = null; }
+      if (s && s.exp && Date.now() > s.exp) {
+        try { sessionStorage.removeItem('painel_seg_sessao_v1'); } catch (e5) {}
+        s = null; v = null;
+      }
+    }
+    if (!s) {
+      try { v = localStorage.getItem('painel_seg_sessao_v1'); } catch (e) {}
+      if (v) {
+        try { s = JSON.parse(v); } catch (e) { s = null; }
+        if (s && s.exp && Date.now() > s.exp) {
+          try { localStorage.removeItem('painel_seg_sessao_v1'); } catch (e6) {}
+          s = null;
+        }
+      }
+    }
+    return s;
   }
 
   function souAdmin() {
