@@ -1961,11 +1961,12 @@ body.dark-mode #panelPgtoColaboradores .btn-icon-sm:hover { background: var(--ca
 #tab-pagamento .lanc-actions .btn-del-icon { color: #dc2626; }
 
 /* --- Lancamentos table (light mode) --- */
-.lanc-obra-group { margin-bottom: 16px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+.lanc-obra-group { margin-bottom: 16px; border: 1px solid #e2e8f0; border-radius: 8px;overflow:visible; }
 .lanc-obra-header { background: #f1f5f9; color: #334155; padding: 10px 14px; font-weight: 700; font-size: 0.9rem; border-bottom: 1px solid #cbd5e1; }
 .lanc-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
 .lanc-table th { background: #f8fafc; color: #475569; padding: 8px 10px; text-align: left; font-weight: 600; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
 .lanc-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+td.lanc-actions { overflow: visible !important; white-space: nowrap; }
 .lanc-table tbody tr:nth-child(even) { background: #fafbfc; }
 .lanc-table tfoot tr { border-top: 2px solid #facc15; }
 .lanc-totals-row { background: #fef9c3; font-weight: 700; }
@@ -12716,7 +12717,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                 return;
               }
               var html = '<table class="lanc-table"><thead><tr>';
-              html += '<th>Nome</th><th>Função</th><th>EMPRESA</th><th>Obra</th><th style="width:80px;">Ações</th>';
+              html += '<th>Nome</th><th>Função</th><th>EMPRESA</th><th>Obra</th><th style="width:120px;">Ações</th>';
               html += '</tr></thead><tbody>';
               db.obras.forEach(function(obra){
                 (obra.colaboradores || []).forEach(function(c){
@@ -15046,7 +15047,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                   var html = "";
                   Object.keys(groups).sort().forEach(function(obraNome){
                     html += '<div class="lanc-obra-group"><div class="lanc-obra-header">' + escaparHTML(obraNome) + '</div><table class="lanc-table"><thead><tr>';
-                    html += '<th>Data</th><th>Categoria</th><th>Descrição</th><th>Região</th><th>Colaborador</th><th>Valor</th><th style="width:80px;">Ações</th></tr></thead><tbody>';
+                    html += '<th>Data</th><th>Categoria</th><th>Descrição</th><th>Região</th><th>Colaborador</th><th>Valor</th><th style="width:120px;">Ações</th></tr></thead><tbody>';
                     var gTotal = 0;
                     groups[obraNome].forEach(function(c){
                       gTotal += c.valor;
@@ -58585,10 +58586,12 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
       'position:sticky;top:0;}',
       '#tab-custo table tbody tr:hover{background:rgba(99,102,241,.07);}',
       '#tab-custo .lanc-obra-group{border:1px solid var(--border,#e2e8f0);border-radius:14px;',
-      'overflow:hidden;margin-bottom:12px;background:var(--card-bg,#fff);}',
+      'overflow:visible;margin-bottom:12px;background:var(--card-bg,#fff);}',
       '#tab-custo .lanc-obra-header{background:linear-gradient(90deg,#4f46e5,#6366f1);',
       'color:#fff;font-weight:700;padding:10px 14px;font-size:.86rem;}',
       '#tab-custo .btn-icon-sm{border-radius:8px;transition:transform .12s;}',
+      '#tab-custo .lanc-actions{display:flex;gap:6px;flex-wrap:nowrap;overflow:visible;}',
+      '#tab-custo .lanc-actions .btn-icon-sm{flex-shrink:0;}',
       '#tab-custo .btn-icon-sm:hover{transform:scale(1.14);}',
       '#containerCustoTotal>div{border-radius:12px!important;',
       'background:linear-gradient(90deg,#4f46e5,#6366f1)!important;',
