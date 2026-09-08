@@ -5442,13 +5442,95 @@ body.p53-travado { overflow: hidden !important; }
 /* PATCH158 - Ocultar aba Gestao de Obra e Equipe (sem funcionalidade) */
 #btn-tab-cronograma { display: none !important; }
 #tab-cronograma { display: none !important; }
-</style>
 
+/* === GAVETA OBRAS v4 === */
+.ob-launcher {
+  display:inline-flex!important;
+  align-items:center;
+  gap:10px;
+  margin:0 0 0 8px!important;
+  padding:8px 14px 8px 11px!important;
+  font:600 13.5px/1.2 inherit;
+  color:#e8eefc;
+  background:linear-gradient(135deg,#1b2540 0%,#111827 100%);
+  border:1px solid rgba(255,255,255,.14)!important;
+  border-radius:10px!important;
+  box-shadow:0 4px 14px rgba(2,8,23,.3);
+  cursor:pointer;
+  user-select:none;
+  transition:transform .15s,box-shadow .15s,border-color .15s;
+}
+.ob-launcher:hover {
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px rgba(59,130,246,.25);
+  border-color:rgba(59,130,246,.4)!important;
+}
+.ob-launcher:focus-visible { outline:2px solid #60a5fa; outline-offset:2px; }
+.ob-launcher .ob-ico { font-size:1.3em; }
+.ob-launcher .ob-rot { font-weight:600; color:#c3d1ea; }
+.ob-launcher .ob-atual { font-size:.78em; color:#93c5fd; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ob-launcher .ob-atual:before { content:"•"; margin-right:8px; color:#3b82f6; }
+
+#obMenu {
+  position:fixed!important;
+  top:0; left:0;
+  width:310px; height:100vh;
+  max-width:90vw;
+  background:#0f172a;
+  border-right:1px solid rgba(255,255,255,.1);
+  box-shadow:4px 0 24px rgba(0,0,0,.55);
+  z-index:99999!important;
+  transform:translateX(-100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;
+  padding:14px 12px 24px;
+  font-family:inherit;
+}
+#obMenu.ob-open { transform:translateX(0)!important; }
+#obMenu .ob-tit { font:700 15px/1.3 inherit; color:#e8eefc; padding:10px 0 6px; border-bottom:1px solid rgba(255,255,255,.1); margin:0 0 8px; }
+#obMenu .ob-item { display:flex!important; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; transition:background .15s; color:#c3d1ea; font:500 13.5px/1.3 inherit; border:none; background:transparent; width:100%; text-align:left; }
+#obMenu .ob-item:hover { background:rgba(59,130,246,.12); }
+#obMenu .ob-item.ob-sel { background:rgba(59,130,246,.18)!important; color:#60a5fa; font-weight:600; }
+#obMenu .ob-ico2 { font-size:1.1em; width:22px; text-align:center; }
+#obMenu .ob-sep { height:1px; background:rgba(255,255,255,.08); margin:8px 0; }
+#obMenu .ob-foot { padding:10px 0 0; border-top:1px solid rgba(255,255,255,.1); margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+#obMenu .ob-foot button { font:500 12px/1.3 inherit; padding:7px 12px; border-radius:6px; border:1px solid rgba(255,255,255,.12); cursor:pointer; transition:background .15s,opacity .15s; }
+#obMenu .ob-foot .ob-btn-add { background:#166534; color:#fff; border-color:#22c55e!important; }
+#obMenu .ob-foot .ob-btn-add:hover { background:#15803d; }
+#obMenu .ob-foot .ob-btn-mgr { background:#92400e; color:#fff; border-color:#f59e0b!important; }
+#obMenu .ob-foot .ob-btn-mgr:hover { background:#a16207; }
+#obMenu .ob-foot .ob-btn-del { background:#991b1b; color:#fff; border-color:#ef4444!important; }
+#obMenu .ob-foot .ob-btn-del:hover { background:#b91c1c; }
+
+#obOverlay { position:fixed!important; inset:0; background:rgba(0,0,0,.45); z-index:99998; display:none; }
+#obOverlay.ob-show { display:block!important; }
+
+/* selectObra escondido */
+#selectObra.ob-hide { position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important; pointer-events:none!important; }
+
+/* botoes obra escondidos no header */
+.ob-hide-btn { display:none!important; }
+
+/* nuvem buttons padronizados */
+.ob-nuvem-row { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; align-items:center; }
+.ob-nuvem-btn { display:inline-flex!important; align-items:center; justify-content:center; min-width:38px!important; height:32px!important; padding:4px 10px!important; border-radius:6px!important; font:500 .75rem/1.2 inherit!important; border:1px solid rgba(255,255,255,.12)!important; background:transparent!important; color:#c3d1ea!important; cursor:pointer; transition:background .15s; white-space:nowrap; }
+.ob-nuvem-btn:hover { background:rgba(255,255,255,.08)!important; }
+
+/* Configuracoes dentro das tabs */
+.tabs > .ob-settings-block { margin-top:8px; border-top:1px solid rgba(255,255,255,.1); padding-top:8px; }
+.tabs > .ob-settings-block > button { width:100%; text-align:left; margin:0 0 6px; }
+.tabs > .ob-settings-block .settings-dropdown { position:relative!important; top:auto!important; right:auto!important; }
+
+@media (max-width:520px) { .ob-launcher .ob-atual{display:none} #obMenu{width:290px!important} }
+@media print { #obMenu,.ob-launcher{display:none!important;visibility:hidden!important} }
+
+</style>
 </head>
 
 <body class="dark-mode">
 
-    <div class="container">
+    <div id="obOverlay"></div><nav id="obMenu" role="navigation" aria-label="Menu de Obras">  <div class="ob-tit">🏗️ Obras</div>  <div id="obList"></div>  <div class="ob-sep"></div>  <div class="ob-foot">    <button class="ob-btn-add" onclick="abrirModalNovaObra()">+ Nova Obra</button>    <button class="ob-btn-mgr" onclick="abrirModalObra()">⚙️ Gerenciar</button>    <button class="ob-btn-del" onclick="excluirObraAtual()">🗑️ Excluir</button>  </div></nav>
+<div class="container">
         <header>
             <div class="header-title-container">
                 <div class="header-title-info">
@@ -5464,41 +5546,18 @@ body.p53-travado { overflow: hidden !important; }
                         <span class="label">Nº Contrato</span>
                         <span class="val" id="headerNumContrato">—</span>
                     </div>
-                </div>
+                <div class="ob-nuvem-row"><span id="statusNuvem" class="ob-nuvem-btn" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️
+                Local</span><button class="secondary ob-nuvem-btn" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem (Render.com)" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button><button class="secondary ob-nuvem-btn" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button></div>
+</div>
             </div>
             <div class="project-selector">
-                <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️
-                Local</span>
-                <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem (Render.com)" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
-                <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
-                <select id="selectObra" onchange="trocarObra(this.value)" class="ob-escondido"></select>
+                
+                <select id="selectObra" class="ob-hide" onchange="trocarObra(this.value)" class="ob-escondido"></select>
 <button type="button" id="obMenuBtn" class="ob-launcher" aria-haspopup="true" aria-expanded="false" aria-controls="obMenu"><span class="ob-ico" aria-hidden="true">🏗️</span><span class="ob-rot">Obra</span><span class="ob-atual" id="obAtual"></span></button>
-                <span style="display:none!important"><button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button></span>
-                <span style="display:none!important"><button class="success" onclick="abrirModalNovaObra()">+ Nova Obra</button></span>
-                <span style="display:none!important"><button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button></span>
-                <div class="settings-menu">
-                    <button type="button" class="secondary" onclick="toggleSettingsMenu()">
-                        ⚙ Configurações
-                    </button>
-
-                    <div id="settingsMenu" class="settings-dropdown">
-                        <button class="secondary" onclick="exportarDados()">💾 Backup</button>
-
-                        <button class="secondary" onclick="document.getElementById('fileRestoreInput').click()">
-                            📥 Restaurar
-                        </button>
-
-                        <button class="warning" onclick="abrirRecuperacaoDados()">
-                            🧿 Recuperar Dados Antigos
-                        </button>
-
-                        <button class="primary" onclick="abrirBancoCompartilhado()">
-                            🌐 Banco Compartilhado
-                        </button>
-                    </div>
-                </div>
-
-                <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
+                <span style="display:none!important"><span class="ob-hide-btn"><button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button></span>
+                <span style="display:none!important"><span class="ob-hide-btn"><button class="success" onclick="abrirModalNovaObra()">+ Nova Obra</button></span>
+                <span style="display:none!important"><span class="ob-hide-btn"><button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button></span>
+                
             </div>
         </header>
         <!-- INÍCIO DO MENU LATERAL E CONTEÚDO -->
@@ -5524,13 +5583,15 @@ body.p53-travado { overflow: hidden !important; }
                         <button class="tab-btn" id="btn-tab-ctm" onclick="trocarAba('ctm')">🔲 Contramarco (CTM)</button>
                         <button class="tab-btn" id="btn-tab-custo" onclick="trocarAba('custo')">📊 Centro de Custos</button>
                         <button class="tab-btn" id="btn-tab-fpdo" type="button" onclick="if (window.p92AbrirFpdo) { window.p92AbrirFpdo(); } else { alert('O Relatório FPDO ainda está carregando. Tente novamente.'); }">📋 Relatório FPDO</button>
-                    </div>
+                    <div class="ob-settings-block"><button type="button" class="secondary" onclick="toggleSettingsMenu()" style="width:100%;text-align:left;margin:0 0 6px 0;">⚙️ Configurações</button><div id="settingsMenu" class="settings-dropdown" style="position:relative!important;top:auto!important;right:auto!important;display:none;"><button class="secondary" onclick="exportarDados()" style="text-align:left;">💾 Backup</button><button class="secondary" onclick="document.getElementById('fileRestoreInput').click()" style="text-align:left;">📥 Restaurar</button><button class="warning" onclick="abrirRecuperacaoDados()" style="text-align:left;">🧿 Recuperar Dados Antigos</button><button class="primary" onclick="abrirBancoCompartilhado()" style="text-align:left;">🌐 Banco Compartilhado</button></div></div><input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
+</div>
 
                     <!-- 3. Seu conteúdo principal ocupa a tela inteira -->
                     <main style="width: 100%;">
                         <!-- Todo o conteúdo dos cartões (Centro de Custos, etc) aqui -->
                     </main>
                 </details>
+<button type="button" id="obMenuBtn" class="ob-launcher" aria-haspopup="true" aria-expanded="false" aria-controls="obMenu"><span class="ob-ico" aria-hidden="true">🏗️</span><span class="ob-rot">Obra</span><span class="ob-atual" id="obAtual"></span></button>
 
                 <!-- ÁREA DO CONTEÚDO FORÇADA A 100% DE LARGURA -->
                 <div class="content-area" style="width: 100% !important; flex: 1 1 100% !important; margin-left: 0 !important; padding-top: 45px;">
@@ -72736,6 +72797,148 @@ if (false) { /* PATCH154_DISABLED */
   else { window.addEventListener("load", function () { hookVoltarObra(); observarSelect(); }); }
 
 }());
+</script>
+<script>
+/* === PATCH OBRA DRAWER v4: gaveta lateral de Obras === */
+(function () {
+  "use strict";
+
+  var O = window.OBMENU = window.OBMENU || {};
+  if (O.__v4) { return; }
+  O.__v4 = true;
+
+  var D = document;
+  function el(id) { return D.getElementById(id); }
+
+  /* --- Abrir / Fechar --- */
+  function abrir() {
+    el("obMenu").classList.add("ob-open");
+    el("obOverlay").classList.add("ob-show");
+    el("obMenuBtn").setAttribute("aria-expanded","true");
+    renderLista();
+  }
+  function fechar() {
+    el("obMenu").classList.remove("ob-open");
+    el("obOverlay").classList.remove("ob-show");
+    el("obMenuBtn").setAttribute("aria-expanded","false");
+  }
+  function toggle() { el("obMenu").classList.contains("ob-open") ? fechar() : abrir(); }
+
+  /* --- Render lista de obras --- */
+  function renderLista() {
+    var lista = el("obList");
+    if (!lista) return;
+    var db = window.db;
+    if (!db || !db.obras) { lista.innerHTML = '<p style="color:#94a3b8;padding:8px">Nenhuma obra cadastrada.</p>'; return; }
+    var itens = db.obras.map(function(o) {
+      var sel = (db.obraAtualId === o.id) ? " ob-sel" : "";
+      return '<button class="ob-item' + sel + '" data-obra-id="' + o.id + '">' +
+        '<span class="ob-ico2">🏗️</span>' +
+        '<span>' + (o.nome || o.titulo || "Obra " + o.id) + '</span>' +
+        '</button>';
+    }).join("");
+    lista.innerHTML = itens;
+    /* Atualiza badge do launcher */
+    var atual = el("obAtual");
+    if (atual && db.obraAtualId) {
+      var ob = db.obras.find(function(o){ return o.id === db.obraAtualId; });
+      if (ob) atual.textContent = ob.nome || ob.titulo || "";
+    }
+  }
+
+  /* --- Trocar obra ao clicar na lista --- */
+  D.addEventListener("click", function(e) {
+    var btn = e.target.closest("[data-obra-id]");
+    if (btn) {
+      var id = btn.getAttribute("data-obra-id");
+      if (id && window.trocarObra) {
+        window.trocarObra(id);
+        fechar();
+      }
+    }
+  });
+
+  /* --- Eventos do launcher e overlay --- */
+  function bindEvents() {
+    var btn = el("obMenuBtn");
+    var overlay = el("obOverlay");
+    if (btn) btn.addEventListener("click", toggle);
+    if (overlay) overlay.addEventListener("click", fechar);
+  }
+
+  /* --- Manter selectObra escondido apos render --- */
+  function garantirEscondido() {
+    var sel = el("selectObra");
+    if (sel && !sel.classList.contains("ob-hide")) { sel.classList.add("ob-hide"); }
+  }
+
+  /* --- Garantir que o launcher existe (runtime fallback) --- */
+  function garantirLauncher() {
+    if (el("obMenuBtn")) return;
+    var details = D.querySelector("details#meu-menu-abas");
+    if (!details) return;
+    var p = details.parentElement;
+    if (!p) return;
+    var b = D.createElement("button");
+    b.type = "button";
+    b.id = "obMenuBtn";
+    b.className = "ob-launcher";
+    b.setAttribute("aria-haspopup","true");
+    b.setAttribute("aria-expanded","false");
+    b.setAttribute("aria-controls","obMenu");
+    var ico = D.createElement("span");
+    ico.className = "ob-ico";
+    ico.setAttribute("aria-hidden","true");
+    ico.textContent = "🏗️";
+    var rot = D.createElement("span");
+    rot.className = "ob-rot";
+    rot.textContent = "Obra";
+    var atu = D.createElement("span");
+    atu.className = "ob-atual";
+    atu.id = "obAtual";
+    b.appendChild(ico);
+    b.appendChild(rot);
+    b.appendChild(atu);
+    details.insertAdjacentElement("afterend", b);
+  }
+
+  /* --- Hook em render() e trocarObra() para atualizar lista --- */
+  var _render = window.render;
+  if (typeof _render === "function") {
+    window.render = function() {
+      if (_render) _render.apply(this, arguments);
+      garantirEscondido();
+      renderLista();
+    };
+  }
+  var _trocarObra = window.trocarObra;
+  if (typeof _trocarObra === "function") {
+    window.trocarObra = function(id) {
+      if (_trocarObra) _trocarObra.apply(this, arguments);
+      garantirEscondido();
+      renderLista();
+    };
+  }
+
+  /* --- Observar mutacoes para manter selectObra escondido --- */
+  var observer = new MutationObserver(function() { garantirEscondido(); });
+  observer.observe(D.body, { childList:true, subtree:true, attributes:true, attributeFilter:["class","style"] });
+
+  /* --- Init --- */
+  D.addEventListener("DOMContentLoaded", function() {
+    bindEvents();
+    garantirLauncher();
+    garantirEscondido();
+    renderLista();
+  });
+  /* Se DOM ja carregou */
+  if (D.readyState !== "loading") {
+    bindEvents();
+    garantirLauncher();
+    garantirEscondido();
+    renderLista();
+  }
+})();
 </script>
 </body>
 </html>
