@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchArquivosObra8) return;
-  window.__patchArquivosObra8 = true;
+  if (window.__patchArquivosObra9) return;
+  window.__patchArquivosObra9 = true;
 
   var TIPOS = [
     { id: 'esquadria', nome: 'Esquadrias / contramarcos' },
@@ -471,7 +471,19 @@
   function botaoExcluirRecebimento() {
     var tab = document.getElementById('tab-recebimento');
     if (!tab) return;
-    var rows = tab.querySelectorAll('table tbody tr');
+    tab.querySelectorAll('.materiais-consolidados .arq-exc-rec, #tabelaMateriaisConsolidados .arq-exc-rec').forEach(function (b) { b.remove(); });
+    var tabela = null;
+    var titulos = tab.querySelectorAll('h2,h3,.card-title,div');
+    for (var i = 0; i < titulos.length; i++) {
+      if (/Controle de Recebimento de Materiais/i.test(titulos[i].textContent || '')) {
+        var box = titulos[i].parentNode;
+        tabela = box && box.querySelector('table');
+        if (!tabela && box) tabela = box.parentNode && box.parentNode.querySelector('.recebimento-table, table');
+        break;
+      }
+    }
+    if (!tabela) tabela = tab.querySelector('.recebimento-table') || tab.querySelector('table');
+    var rows = tabela ? tabela.querySelectorAll('tbody tr') : [];
     rows.forEach(function (tr) {
       if (tr.querySelector('.arq-exc-rec')) return;
       var last = tr.cells[tr.cells.length - 1];
