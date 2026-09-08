@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchUi2026gavetaPgto9) return;
-  window.__patchUi2026gavetaPgto9 = true;
+  if (window.__patchUi2026gavetaPgto10) return;
+  window.__patchUi2026gavetaPgto10 = true;
 
   var UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
@@ -21,8 +21,12 @@
     '#orLista .or-grupo.fechado + .or-bloco,#orObrasBox.fechada #orObrasLista{display:none!important}',
     '#orLista .or-item{border-radius:10px!important;margin:2px 4px!important}',
     '#orLista .or-item.or-ativo{background:rgba(96,165,250,.22)!important}',
-    '#tab-pagamento .lanc-form-grid{display:grid!important;grid-template-columns:repeat(4,minmax(140px,1fr))!important;gap:10px 12px!important;align-items:end}',
-    '#tab-pagamento .lanc-form-grid #inputLancProfissionais,#tab-pagamento .lanc-form-grid #inputLancAjudantes{min-height:92px;width:100%}',
+    '#tab-pagamento .lanc-form-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px 10px!important;align-items:end;max-width:980px}',
+    '#tab-pagamento .lanc-form-grid > *{min-width:0}',
+    '#tab-pagamento .lanc-form-grid label{margin:0 0 4px;font-size:11px}',
+    '#tab-pagamento .lanc-form-grid input,#tab-pagamento .lanc-form-grid select{width:100%;box-sizing:border-box}',
+    '#tab-pagamento .lanc-form-grid #inputLancProfissionais,#tab-pagamento .lanc-form-grid #inputLancAjudantes{min-height:72px;width:100%;max-height:88px}',
+    '@media print{#tab-pagamento .lanc-form-grid,#tab-pagamento .btn-add,#tab-pagamento button.btn-add,header.top-bar,.top-bar,#orMenu,#orBtn,.lanc-toolbar,#tab-pagamento .lanc-acoes{display:none!important}#tab-pagamento table{width:100%!important}body{background:#fff!important}}',
     '#tab-pagamento .card,#tab-custo.card{border-radius:16px}',
     '#tab-pagamento .btn-add{border-radius:10px;font-weight:700}',
     '.pgto-loc{display:flex;flex-direction:column;gap:4px;min-width:86px}',
