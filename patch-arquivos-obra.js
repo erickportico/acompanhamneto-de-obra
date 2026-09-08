@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchArquivosObra7) return;
-  window.__patchArquivosObra7 = true;
+  if (window.__patchArquivosObra8) return;
+  window.__patchArquivosObra8 = true;
 
   var TIPOS = [
     { id: 'esquadria', nome: 'Esquadrias / contramarcos' },
@@ -467,6 +467,70 @@
   setTimeout(limparSetas, 800);
   setTimeout(limparSetas, 2500);
 
+
+  function botaoExcluirRecebimento() {
+    var tab = document.getElementById('tab-recebimento');
+    if (!tab) return;
+    var rows = tab.querySelectorAll('table tbody tr');
+    rows.forEach(function (tr) {
+      if (tr.querySelector('.arq-exc-rec')) return;
+      var last = tr.cells[tr.cells.length - 1];
+      if (!last) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'arq-exc-rec';
+      btn.textContent = 'Excluir';
+      btn.style.cssText = 'border:0;background:#dc2626;color:#fff;border-radius:6px;padding:4px 8px;font-size:12px;font-weight:700;cursor:pointer';
+      btn.onclick = function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var obra = (typeof getObraAtual === 'function') ? getObraAtual() : null;
+        if (!obra || !obra.recebimentos) return;
+        var ref = '';
+        var cells = tr.querySelectorAll('input,select,td');
+        cells.forEach(function (c) {
+          var v = c.value || c.textContent || '';
+          if (/^[JP]\d/i.test(v.trim()) && !ref) ref = v.trim();
+        });
+        if (!confirm('Excluir este recebimento' + (ref ? ' (' + ref + ')' : '') + '?')) return;
+        var idx = Array.prototype.indexOf.call(tr.parentNode.children, tr);
+        /* tenta pelo texto da descrição + ref */
+        var desc = '';
+        var inputs = tr.querySelectorAll('input');
+        if (inputs[5]) desc = inputs[5].value || '';
+        var antes = obra.recebimentos.length;
+        obra.recebimentos = obra.recebimentos.filter(function (r, i) {
+          if (ref && String(r.ref || r.codigoCor || '') === ref && String(r.descricao || r.material || '') === desc) return false;
+          return true;
+        });
+        if (obra.recebimentos.length === antes && obra.recebimentos[idx]) {
+          obra.recebimentos.splice(idx, 1);
+        }
+        try { if (typeof salvarDB === 'function') salvarDB(); } catch (e) {}
+        tr.remove();
+      };
+      last.appendChild(btn);
+    });
+    var ths = tab.querySelectorAll('thead th:last-child, tbody td:last-child');
+    ths.forEach(function (c) {
+      c.style.position = 'sticky';
+      c.style.right = '0';
+      c.style.background = '#fff';
+      c.style.zIndex = '2';
+    });
+  }
+  if (typeof window.trocarAba === 'function') {
+    var _ta2 = window.trocarAba;
+    if (!_ta2.__excRec) {
+      window.trocarAba = function (aba) {
+        var r = _ta2.apply(this, arguments);
+        if (aba === 'recebimento') setTimeout(botaoExcluirRecebimento, 200);
+        return r;
+      };
+      window.trocarAba.__excRec = true;
+    }
+  }
+  setTimeout(botaoExcluirRecebimento, 1800);
   window.abrirArquivosObra = abrir;
   setTimeout(function () { garantirAba(); injetarRecebimento(); }, 1200);
   console.log('[arquivos-obra] aba pronta');
