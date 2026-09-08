@@ -3,8 +3,8 @@
  */
 (function () {
   'use strict';
-  if (window.__patchArquivosObra10) return;
-  window.__patchArquivosObra10 = true;
+  if (window.__patchArquivosObra11) return;
+  window.__patchArquivosObra11 = true;
 
   var TIPOS = [
     { id: 'esquadria', nome: 'Esquadrias / contramarcos' },
@@ -512,7 +512,7 @@
       if (el.closest && (el.closest('#tab-arquivos') || el.closest('input'))) continue;
       var t1 = (el.textContent || '').trim();
       if (!t1) continue;
-      if (/^(→\s*){2,}$/.test(t1) || /^[→▸]{3,}$/.test(t1.replace(/\s/g, ''))) {
+      if (/^[→▸\s]+$/.test(t1) && /[→▸]/.test(t1)) {
         el.style.setProperty('display', 'none', 'important');
       }
     }
