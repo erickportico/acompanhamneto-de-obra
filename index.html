@@ -5465,7 +5465,6 @@ body.p53-travado { overflow: hidden !important; }
                         <span class="val" id="headerNumContrato">—</span>
                     </div>
 
-<div class="ob-nuvem-row"><span id="statusNuvem" class="ob-nuvem-chip ob-status">☁️ Local</span><button class="ob-nuvem-chip" onclick="carregarBancoDaNuvem()" title="Carregar da nuvem">☁ Nuvem</button><button class="ob-nuvem-chip" onclick="alternarTema()" id="btnThemeToggle">☀️ Tema</button></div>
 </div>
             </div>
             <div class="project-selector">
@@ -27739,79 +27738,6 @@ body.or-aberto { overflow: hidden !important; }
 @media print {
   #orMenu, .or-launcher { display: none !important; visibility: hidden !important; }
 }
-/* === GAVETA OBRAS — launcher + painel lateral === */
-.ob-launcher {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 0 4px !important;
-  padding: 7px 14px 7px 11px !important;
-  font: 600 13.5px/1.2 inherit;
-  color: #e8eefc;
-  background: linear-gradient(135deg, #1b2540 0%, #111827 100%);
-  border: 1px solid rgba(255,255,255,.14) !important;
-  border-radius: 10px !important;
-  box-shadow: 0 4px 14px rgba(2,8,23,.3);
-  cursor: pointer;
-  user-select: none;
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-}
-.ob-launcher:hover {
-  transform: translateY(-1px);
-  border-color: rgba(96,165,250,.55) !important;
-  box-shadow: 0 8px 20px rgba(2,8,23,.4);
-}
-.ob-launcher:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
-.ob-launcher .ob-ico {
-  display: grid; place-items: center;
-  width: 26px; height: 26px; font-size: 15px;
-  background: rgba(96,165,250,.16); border-radius: 8px;
-}
-.ob-launcher .ob-rot { font-weight: 600; color: #c3d1ea; }
-.ob-launcher .ob-atual {
-  max-width: 200px; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
-  font-weight: 500; color: #9fb3d9;
-}
-.ob-launcher .ob-atual:before { content: "2"; margin-right: 8px; color: #3b82f6; }
-
-#obMenu:not(.ob-on) { display:none!important; visibility:hidden!important; pointer-events:none!important; opacity:0!important; }
-#obMenu.ob-on { display:block!important; visibility:visible!important; pointer-events:auto!important; opacity:1!important; position:fixed!important; top:0!important; left:0!important; right:0!important; bottom:0!important; width:100%!important; height:100%!important; max-width:none!important; margin:0!important; padding:0!important; z-index:100095!important; }
-.ob-fundo { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; background:rgba(3,7,18,.62); backdrop-filter:blur(3px); animation:obFade .18s ease; }
-@keyframes obFade { from{opacity:0} to{opacity:1} }
-@keyframes obSlide { from{transform:translateX(-24px);opacity:.4} to{transform:none;opacity:1} }
-.ob-painel { position:absolute!important; top:0!important; left:0!important; bottom:0!important; right:auto!important; display:flex!important; flex-direction:column!important; width:340px!important; max-width:90vw!important; height:100%!important; margin:0!important; padding:0!important; background:#0d1424; border-right:1px solid rgba(255,255,255,.08); box-shadow:24px 0 60px rgba(2,6,23,.55); animation:obSlide .2s ease; overflow:hidden; }
-.ob-topo { display:flex!important; align-items:center; gap:12px; width:auto!important; padding:18px 16px 14px 18px!important; border-bottom:1px solid rgba(255,255,255,.07); }
-.ob-logo { display:grid!important; place-items:center; width:38px!important; height:38px; flex:0 0 38px; font:800 15px/1 inherit; color:#fff; background:linear-gradient(135deg,#f59e0b,#d97706); border-radius:11px; box-shadow:0 6px 16px rgba(245,158,11,.35); }
-.ob-nomes { flex:1 1 auto; min-width:0; width:auto!important; }
-.ob-nomes b { display:block; font-size:13.5px; letter-spacing:.3px; color:#f1f5f9; }
-.ob-nomes span { display:block; font-size:11.5px; color:#7f92b5; margin-top:2px; }
-.ob-x { width:32px!important; height:32px; flex:0 0 32px; padding:0!important; font-size:18px; line-height:1; color:#9fb3d9; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1)!important; border-radius:9px!important; cursor:pointer; }
-.ob-x:hover { color:#fff; background:rgba(239,68,68,.22); }
-.ob-lista { flex:1 1 auto; width:auto!important; padding:8px 10px 14px 10px!important; overflow-y:auto; overflow-x:hidden; }
-.ob-grupo { padding:12px 8px 6px 8px; font:700 10.5px/1 inherit; letter-spacing:1.2px; text-transform:uppercase; color:#5d708f; }
-.ob-obra { display:flex!important; align-items:center; gap:11px; width:100%!important; max-width:100%!important; margin:3px 0!important; padding:10px 12px!important; font:500 13.5px/1.25 inherit; text-align:left!important; color:#c3d1ea; background:transparent!important; border:1px solid transparent!important; border-radius:10px!important; cursor:pointer; box-sizing:border-box; transition:background .14s ease,color .14s ease,transform .14s ease; }
-.ob-obra:hover { color:#fff; background:rgba(245,158,11,.1)!important; transform:translateX(2px); }
-.ob-obra:focus-visible { outline:2px solid #f59e0b; outline-offset:1px; }
-.ob-obra .ob-ico2 { display:grid; place-items:center; width:28px; height:28px; flex:0 0 28px; font-size:15px; background:rgba(255,255,255,.05); border-radius:8px; }
-.ob-obra .ob-txt { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.ob-obra.ob-ativo { color:#fff; background:linear-gradient(90deg,rgba(245,158,11,.22),rgba(245,158,11,.06))!important; border-color:rgba(245,158,11,.3)!important; font-weight:700; }
-.ob-obra.ob-ativo .ob-ico2 { background:rgba(245,158,11,.22); }
-.ob-obra.ob-ativo:after { content:""; width:6px; height:6px; flex:0 0 6px; border-radius:50%; background:#f59e0b; box-shadow:0 0 8px #f59e0b; }
-.ob-vazio { padding:18px 12px; font-size:12.5px; color:#6b7f9f; text-align:center; }
-.ob-rodape { width:auto!important; padding:12px 14px 16px 14px!important; border-top:1px solid rgba(255,255,255,.07); display:flex; flex-direction:column; gap:8px; }
-.ob-rodape button { width:100%; padding:9px 12px!important; font:500 13px/1.2 inherit; border-radius:8px!important; cursor:pointer; border:1px solid rgba(255,255,255,.1)!important; transition:background .14s ease; }
-.ob-btn-gerenciar { color:#000!important; background:#f59e0b!important; border-color:rgba(245,158,11,.4)!important; }
-.ob-btn-gerenciar:hover { background:#d97706!important; }
-.ob-btn-nova { color:#fff!important; background:#16a34a!important; border-color:rgba(22,163,74,.4)!important; }
-.ob-btn-nova:hover { background:#15803d!important; }
-.ob-btn-excluir { color:#fff!important; background:#dc2626!important; border-color:rgba(220,38,38,.4)!important; }
-.ob-btn-excluir:hover { background:#b91c1c!important; }
-.ob-pe { width:auto!important; padding:8px 16px 12px 16px!important; font-size:11px; color:#5d708f; border-top:1px solid rgba(255,255,255,.05); }
-body.ob-aberto { overflow:hidden!important; }
-#selectObra.ob-escondido { position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important; pointer-events:none!important; }
-@media (max-width:520px) { .ob-launcher .ob-atual{display:none} .ob-painel{width:290px!important} }
-@media print { #obMenu,.ob-launcher{display:none!important;visibility:hidden!important} }
 </style>
 <script>
 /* === PATCH 62: GAVETA MAIS RAPIDA (carregamento otimizado) === */
@@ -72427,7 +72353,6 @@ if (false) { /* PATCH154_DISABLED */
 <script src="/patch-arquivos-obra.js"></script>
 <script src="/patch-estoque-obra.js"></script>
 <!-- FIM PATCH150_CAMADA_ABSTRACAO -->
-
 
 
 </body>
