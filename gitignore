@@ -1,0 +1,81 @@
+# Ambiente e segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Sistema
+Thumbs.db
+Desktop.ini
+.DS_Store
+ehthumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Copias e backups do painel
+Nova pasta/
+Nova pasta/**
+backups/
+*.bak
+*.bak_*
+*.backup
+* - Copia.html
+* - Copy.html
+index.html.bak*
+index1.html
+index3.html
+index5.html
+
+# Dumps de banco (dados reais nao entram no Git)
+Banco_*.json
+Banco_Obras_*.json
+backup_painel_dados_*.json
+*.sql.bak
+
+# Arquivos vazios / acidentes de linha de comando
+/git
+/main
+
+# Patches locais nao usados no ar
+patch_gavetaObras_v1.js
+patch_gavetaObras_v3.js
+patch_removeApiEstoque.js
+patch_undoObraDrawer.js
+patch_undoObraDrawer_v2.js
+patch_undoObraDrawer_v3.js
+patch_obraDrawer_v2.js
+patch_obraDrawer_v4.js
+patch_obraDrawer_v5.js
+patch_obraDrawer_v6.js
+patch_cadastro_admin.py
+patch_cadastro_admin_v2.py
+patch_cadastroAdmin_v3.py
+patch_custo_exclusao.py
+patch_layout_lancamentos.py
+patch_pdfjs_unificar.py
+patch_podeMexer_admin.py
+
+# Logs e temporarios
+*.log
+tmp/
+temp/
+.cache/
