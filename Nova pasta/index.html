@@ -2,62 +2,13 @@
 <html lang="pt-BR">
 
 <head>
-<!-- PATCH154: CSS forçado – esconder overlays de senha/bloqueio -->
+<!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
 <style id="p154Remocao">
-/* PATCH154: remove todos os overlays de autenticacao/bloqueio */
-#p131Trava, #p139Trava, #p138Faixa, #p131Faixa, #p131Tela,
-#p128Tela, #p128Cracha, .p139-moldura, .p139-overlay,
-[data-p131-trava], [data-p139-bloqueio],
-#p128Senha, #p128Caixa, #p129Selo, #p129Solta {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-/* Garantir que o body nao esta travado */
-html, body {
-  overflow: auto !important;
-  filter: none !important;
-  pointer-events: auto !important;
-  user-select: auto !important;
-}
+/* vazio de proposito — overlays de login ativos */
 </style>
-<!-- PATCH154: script de limpeza de overlays de senha -->
 <script>
-/* PATCH154: remove fisicamente overlays de senha/bloqueio ao carregar */
-(function() {
-  var _ids = ["p131Trava","p139Trava","p138Faixa","p131Faixa","p131Tela",
-             "p128Tela","p128Cracha","p139Moldura","p139Overlay",
-             "p128Senha","p128Caixa","p129Selo","p129Solta"];
-  function remover() {
-    _ids.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el && el.parentNode) { el.parentNode.removeChild(el); }
-    });
-    try {
-      var todos = document.querySelectorAll("div, section, aside");
-      for (var i = 0; i < todos.length; i++) {
-        var z = getComputedStyle(todos[i]).zIndex;
-        if (z && parseInt(z) > 2147482000) {
-          var t = (todos[i].textContent || "").toLowerCase();
-          if (t.indexOf("senha") >= 0 || t.indexOf("crach") >= 0 ||
-              t.indexOf("bloqueio") >= 0 || t.indexOf("trava") >= 0 ||
-              t.indexOf("login") >= 0 || t.indexOf("sign in") >= 0) {
-            todos[i].style.display = "none";
-            todos[i].style.visibility = "hidden";
-            todos[i].style.pointerEvents = "none";
-          }
-        }
-      }
-    } catch(e) {}
-  }
-  remover();
-  setTimeout(remover, 200);
-  setTimeout(remover, 500);
-  setTimeout(remover, 1000);
-  setTimeout(remover, 2000);
-  setTimeout(remover, 5000);
-  setInterval(remover, 10000);
-})();
+/* PATCH154 desligado: nao remove mais a tela de login */
+console.log('[P154] desativado — tela de login habilitada');
 </script>
 
     <link rel="icon" href="data:image/x-icon;base64,=">
@@ -565,11 +516,10 @@ if (typeof window.popularCustoObraSelect !== 'function') window.popularCustoObra
 if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard = function() {};
         // 2. Inicializa a variável global _supabase imediatamente
         const SUPABASE_URL = 'https://eqtxfpjrqlkhqgckbyxb.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxdHhmcGpycWxraHFnY2tieXhiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODc0NjExOCwiZXhwIjoyMTA0MzIyMTE4fQ.kaMeBU3BqgKVEyIOCFo9zKh3fTvy0_aFy_hk0N-AtNY';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxdHhmcGpycWxraHFnY2tieXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NDYxMTgsImV4cCI6MjEwNDMyMjExOH0.9foJNAUKPqeygHjPL6P-7jP94zn-jEOaEh_kgF3VU5I';
 
-        var _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
+            var _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            window._supabase = _supabase;
 
         /* ──── PATCH156_AUTH_ANONIMO v2c ──── */
         /* Autenticacao anonima + proxy em _supabase.from()
@@ -590,37 +540,18 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
         window.__p156AuthPronto = new Promise(function (resolve) {
             (async function () {
                 var ok = false;
-                /* 1a) Tentar login anonimo */
+                /* Usa sessao ja existente (login com e-mail). Sem Anonymous Auth. */
                 try {
-                    var r = await _supabase.auth.signInAnonymously();
-                    if (r && r.data && r.data.session) {
-                        console.log('[P156] Sessao anonima OK. JWT ativo.');
+                    var atual = await _supabase.auth.getSession();
+                    if (atual && atual.data && atual.data.session) {
+                        console.log('[P156] Sessao Auth existente:', atual.data.session.user && atual.data.session.user.email);
                         ok = true;
                     }
-                } catch (e1) {
-                    console.warn('[P156] signInAnonymously falhou:', e1.message || e1);
-                }
-                /* 1b) Fallback: credenciais de servico */
-                if (!ok) {
-                    var SVC_EMAIL = '';
-                    var SVC_PASS  = '';
-                    if (SVC_EMAIL && SVC_PASS) {
-                        try {
-                            var r2 = await _supabase.auth.signInWithPassword({
-                                email: SVC_EMAIL, password: SVC_PASS
-                            });
-                            if (r2 && r2.data && r2.data.session) {
-                                console.log('[P156] Sessao de servico OK.');
-                                ok = true;
-                            }
-                        } catch (e2) {
-                            console.warn('[P156] Login servico falhou:', e2.message || e2);
-                        }
-                    }
+                } catch (e0) {
+                    console.warn('[P156] getSession falhou:', e0.message || e0);
                 }
                 if (!ok) {
-                    console.warn('[P156] ATENCAO: sem sessao Supabase. Dados ficam so no localStorage.');
-                    console.warn('[P156] Habilite Anonymous Auth em: https://supabase.com/dashboard > Authentication > Providers > Anonymous');
+                    console.warn('[P156] Sem sessao Supabase ainda. Entre com e-mail e senha na tela de login.');
                 }
                 resolve({ authOk: ok });
             })();
@@ -669,10 +600,20 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Bibliotecas de Gráficos (Chart.js) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Importação estável do PDF.js + Worker alinhado -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script>
-        window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+
+
+
+
+
+
+    <!-- PDF.js unificado (v4.10.38 ES module) -->
+    <script type="module">
+      /* Carrega pdfjs como modulo ES e expoe globalmente */
+      import * as _pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
+      _pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+      window.pdfjsLib = _pdfjs;
+      window["pdfjs-dist/build/pdf"] = _pdfjs;
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1943,17 +1884,101 @@ body.dark-mode #panelPgtoColaboradores .btn-icon-sm:hover { background: var(--ca
 
 /* --- Lançamentos form --- */
 #tab-pagamento .lanc-form-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px; padding: 16px; background: #f8fafc; border-radius: 10px;
-    border: 1px solid #e2e8f0; margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 12px;
+    overflow: hidden;
 }
-#tab-pagamento .lanc-form-grid label {
-    font-size: 0.78rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;
+#tab-pagamento .lanc-form-grid .lanc-section {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
 }
-#tab-pagamento .lanc-form-grid input,
-#tab-pagamento .lanc-form-grid select {
-    width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
-    font-size: 0.85rem; box-sizing: border-box;
+#tab-pagamento .lanc-form-grid .lanc-section:last-child {
+    border-bottom: none;
+}
+#tab-pagamento .lanc-form-grid .lanc-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+#tab-pagamento .lanc-form-grid .lanc-fields-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+#tab-pagamento .lanc-form-grid .lanc-field {
+    flex: 1 1 140px;
+    min-width: 0;
+}
+#tab-pagamento .lanc-form-grid .lanc-field.lanc-field-wide {
+    flex: 2 1 200px;
+}
+#tab-pagamento .lanc-form-grid .lanc-field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    display: block;
+    margin-bottom: 4px;
+}
+#tab-pagamento .lanc-form-grid .lanc-field input,
+#tab-pagamento .lanc-form-grid .lanc-field select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+}
+/* Checkbox list (replaces <select multiple>) */
+#tab-pagamento .lanc-checkbox-list {
+    max-height: 96px;
+    overflow-y: auto;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    padding: 4px 0;
+}
+#tab-pagamento .lanc-checkbox-list::-webkit-scrollbar { width: 6px; }
+#tab-pagamento .lanc-checkbox-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+#tab-pagamento .lanc-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+#tab-pagamento .lanc-checkbox-item:hover { background: #f1f5f9; }
+#tab-pagamento .lanc-checkbox-item input[type="checkbox"] {
+    width: 15px; height: 15px; accent-color: #1e3a5f; cursor: pointer;
+}
+#tab-pagamento .lanc-checkbox-empty {
+    padding: 12px 10px;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    text-align: center;
+}
+/* Botão dentro do card */
+#tab-pagamento .lanc-form-grid .lanc-submit-row {
+    padding: 12px 16px;
+    background: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 /* --- Action bar --- */
@@ -2020,11 +2045,12 @@ body.dark-mode #panelPgtoColaboradores .btn-icon-sm:hover { background: var(--ca
 #tab-pagamento .lanc-actions .btn-del-icon { color: #dc2626; }
 
 /* --- Lancamentos table (light mode) --- */
-.lanc-obra-group { margin-bottom: 16px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+.lanc-obra-group { margin-bottom: 16px; border: 1px solid #e2e8f0; border-radius: 8px;overflow:visible; }
 .lanc-obra-header { background: #f1f5f9; color: #334155; padding: 10px 14px; font-weight: 700; font-size: 0.9rem; border-bottom: 1px solid #cbd5e1; }
 .lanc-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
 .lanc-table th { background: #f8fafc; color: #475569; padding: 8px 10px; text-align: left; font-weight: 600; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
 .lanc-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+td.lanc-actions { overflow: visible !important; white-space: nowrap; }
 .lanc-table tbody tr:nth-child(even) { background: #fafbfc; }
 .lanc-table tfoot tr { border-top: 2px solid #facc15; }
 .lanc-totals-row { background: #fef9c3; font-weight: 700; }
@@ -2033,6 +2059,19 @@ body.dark-mode #panelPgtoColaboradores .btn-icon-sm:hover { background: var(--ca
 .btn-icon-sm:hover { background: #f1f5f9; }
 
 /* --- Lancamentos table DARK MODE --- */
+/* Dark mode: lanc-form-grid sections */
+body.dark-mode .lanc-form-grid { background: var(--card-bg,#1e293b); border-color: var(--border,#334155); }
+body.dark-mode .lanc-form-grid .lanc-section { border-color: var(--border,#334155); }
+body.dark-mode .lanc-form-grid .lanc-section-title { color: var(--text-light,#94a3b8); }
+body.dark-mode .lanc-form-grid .lanc-field label { color: var(--text-light,#94a3b8); }
+body.dark-mode .lanc-form-grid .lanc-field input,
+body.dark-mode .lanc-form-grid .lanc-field select { background: var(--card-bg,#1e293b); border-color: var(--border,#334155); color: var(--text,#f8fafc); }
+body.dark-mode .lanc-checkbox-list { background: var(--card-bg,#1e293b); border-color: var(--border,#334155); }
+body.dark-mode .lanc-checkbox-item:hover { background: rgba(255,255,255,0.06); }
+body.dark-mode .lanc-checkbox-item { color: var(--text,#f8fafc); }
+body.dark-mode .lanc-checkbox-empty { color: var(--text-light,#64748b); }
+body.dark-mode .lanc-submit-row { background: var(--card-bg,#162032); border-top-color: var(--border,#334155); }
+
 body.dark-mode .lanc-obra-group { border-color: var(--border,#334155); }
 body.dark-mode .lanc-obra-header { background: var(--card-bg,#1e293b); color: var(--text,#f8fafc); border-color: var(--border,#334155); }
 body.dark-mode .lanc-table th { background: #162032; color: var(--text-light,#94a3b8); border-color: var(--border,#334155); }
@@ -5405,6 +5444,232 @@ body.p53-travado { overflow: hidden !important; }
 #tab-cronograma { display: none !important; }
 </style>
 
+
+<style>
+
+</style>
+
+<style>
+/* === GAVETA OBRAS v1 — launcher + painel lateral (prefixo obr-) === */
+
+/* launcher — botao que abre a gaveta */
+.obr-launcher {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 6px !important;
+  padding: 6px 13px 6px 10px !important;
+  font: 600 13px/1.2 inherit;
+  color: #e8eefc;
+  background: linear-gradient(135deg, #1b2540 0%, #111827 100%);
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 14px rgba(2,8,23,.3);
+  cursor: pointer;
+  user-select: none;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.obr-launcher:hover {
+  transform: translateY(-1px);
+  border-color: rgba(245,158,11,.55) !important;
+  box-shadow: 0 8px 20px rgba(2,8,23,.4);
+}
+.obr-launcher:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+.obr-launcher .obr-ico {
+  display: grid; place-items: center;
+  width: 24px; height: 24px; font-size: 15px;
+  background: rgba(245,158,11,.18); border-radius: 7px;
+}
+.obr-launcher .obr-rot {
+  font-weight: 600; color: #c3d1ea; font-size: 12.5px;
+}
+.obr-launcher .obr-atual {
+  max-width: 200px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  font-weight: 500; color: #9fb3d9; font-size: 12px;
+}
+.obr-launcher .obr-atual:before { content: '•'; margin-right: 6px; color: #f59e0b; }
+
+/* gaveta lateral — overlay + painel */
+#obrGaveta:not(.obr-on) {
+  display: none !important; visibility: hidden !important;
+  pointer-events: none !important; opacity: 0 !important;
+}
+#obrGaveta.obr-on {
+  display: block !important; visibility: visible !important;
+  pointer-events: auto !important; opacity: 1 !important;
+  position: fixed !important; top: 0 !important; left: 0 !important;
+  right: 0 !important; bottom: 0 !important;
+  width: 100% !important; height: 100% !important;
+  max-width: none !important; margin: 0 !important; padding: 0 !important;
+  z-index: 100095 !important;
+}
+.obr-fundo {
+  position: absolute !important; inset: 0 !important;
+  width: 100% !important; height: 100% !important;
+  background: rgba(3,7,18,.62);
+  backdrop-filter: blur(3px);
+  animation: obrFade .18s ease;
+}
+@keyframes obrFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes obrSlide { from { transform: translateX(-24px); opacity: .4; } to { transform: none; opacity: 1; } }
+
+.obr-painel {
+  position: absolute !important; top: 0 !important; left: 0 !important;
+  bottom: 0 !important; right: auto !important;
+  display: flex !important; flex-direction: column !important;
+  width: 340px !important; max-width: 90vw !important;
+  height: 100% !important; margin: 0 !important; padding: 0 !important;
+  background: #0d1424;
+  border-right: 1px solid rgba(255,255,255,.08);
+  box-shadow: 24px 0 60px rgba(2,6,23,.55);
+  animation: obrSlide .2s ease;
+  overflow: hidden;
+}
+
+/* topo da gaveta */
+.obr-topo {
+  display: flex !important; align-items: center; gap: 12px;
+  width: auto !important;
+  padding: 18px 16px 14px 18px !important;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.obr-logo {
+  display: grid !important; place-items: center;
+  width: 38px !important; height: 38px; flex: 0 0 38px;
+  font: 800 15px/1 inherit; color: #fff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 11px;
+  box-shadow: 0 6px 16px rgba(245,158,11,.35);
+}
+.obr-nomes { flex: 1 1 auto; min-width: 0; width: auto !important; }
+.obr-nomes b { display: block; font-size: 13.5px; letter-spacing: .3px; color: #f1f5f9; }
+.obr-nomes span { display: block; font-size: 11.5px; color: #7f92b5; margin-top: 2px; }
+.obr-x {
+  width: 32px !important; height: 32px; flex: 0 0 32px;
+  padding: 0 !important; font-size: 18px; line-height: 1;
+  color: #9fb3d9; background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 9px !important; cursor: pointer;
+}
+.obr-x:hover { color: #fff; background: rgba(239,68,68,.22); }
+
+/* busca */
+.obr-buscabox { padding: 10px 14px 6px 14px !important; width: auto !important; }
+.obr-busca {
+  width: 100% !important; max-width: 100% !important;
+  padding: 8px 11px !important; font: 400 12.5px/1.3 inherit;
+  color: #e8eefc; background: #131c2f !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 10px !important; box-sizing: border-box;
+}
+.obr-busca::placeholder { color: #6b7f9f; }
+.obr-busca:focus { outline: none; border-color: rgba(245,158,11,.6) !important; background: #16203a !important; }
+
+/* lista de obras */
+.obr-lista {
+  flex: 1 1 auto; width: auto !important;
+  padding: 8px 10px 14px 10px !important;
+  overflow-y: auto; overflow-x: hidden;
+}
+.obr-grupo {
+  padding: 12px 8px 6px 8px;
+  font: 700 10.5px/1 inherit;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: #5d708f;
+}
+.obr-obra {
+  display: flex !important; align-items: center; gap: 11px;
+  width: 100% !important; max-width: 100% !important;
+  margin: 3px 0 !important; padding: 10px 12px !important;
+  font: 500 13.5px/1.25 inherit;
+  text-align: left !important; color: #c3d1ea;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important; cursor: pointer;
+  box-sizing: border-box;
+  transition: background .14s ease, color .14s ease, transform .14s ease;
+}
+.obr-obra:hover {
+  color: #fff; background: rgba(245,158,11,.1) !important;
+  transform: translateX(2px);
+}
+.obr-obra:focus-visible { outline: 2px solid #f59e0b; outline-offset: 1px; }
+.obr-obra .obr-ico2 {
+  display: grid; place-items: center;
+  width: 28px; height: 28px; flex: 0 0 28px; font-size: 14px;
+  background: rgba(255,255,255,.05); border-radius: 8px;
+}
+.obr-obra .obr-txt {
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.obr-obra.obr-ativo {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(245,158,11,.22), rgba(245,158,11,.06)) !important;
+  border-color: rgba(245,158,11,.3) !important;
+  font-weight: 700;
+}
+.obr-obra.obr-ativo .obr-ico2 { background: rgba(245,158,11,.22); }
+.obr-obra.obr-ativo:after {
+  content: ''; width: 6px; height: 6px; flex: 0 0 6px;
+  border-radius: 50%; background: #f59e0b; box-shadow: 0 0 8px #f59e0b;
+}
+.obr-vazio { padding: 18px 12px; font-size: 12.5px; color: #6b7f9f; text-align: center; }
+.obr-esconde { display: none !important; }
+
+/* rodape com botoes de acao */
+.obr-rodape {
+  width: auto !important; padding: 12px 14px 16px 14px !important;
+  border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.obr-rodape button {
+  width: 100%; padding: 9px 12px !important;
+  font: 500 13px/1.2 inherit; border-radius: 8px !important;
+  cursor: pointer; border: 1px solid rgba(255,255,255,.1) !important;
+  transition: background .14s ease;
+}
+.obr-btn-gerenciar {
+  color: #000 !important; background: #f59e0b !important;
+  border-color: rgba(245,158,11,.4) !important;
+}
+.obr-btn-gerenciar:hover { background: #d97706 !important; }
+.obr-btn-nova {
+  color: #fff !important; background: #16a34a !important;
+  border-color: rgba(22,163,74,.4) !important;
+}
+.obr-btn-nova:hover { background: #15803d !important; }
+.obr-btn-excluir {
+  color: #fff !important; background: #dc2626 !important;
+  border-color: rgba(220,38,38,.4) !important;
+}
+.obr-btn-excluir:hover { background: #b91c1c !important; }
+
+/* info de contrato no rodape */
+.obr-info {
+  width: auto !important; padding: 8px 16px 10px 16px !important;
+  font-size: 11px; color: #5d708f;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+
+/* esconder elementos antigos do project-selector */
+.obr-substitui {
+  position: absolute !important; left: -9999px !important;
+  width: 1px !important; height: 1px !important;
+  opacity: 0 !important; pointer-events: none !important;
+}
+
+body.obr-aberto { overflow: hidden !important; }
+
+@media (max-width: 520px) {
+  .obr-launcher .obr-atual { display: none; }
+  .obr-painel { width: 290px !important; }
+}
+@media print {
+  #obrGaveta, .obr-launcher { display: none !important; visibility: hidden !important; }
+}
+</style>
 </head>
 
 <body class="dark-mode">
@@ -5416,7 +5681,7 @@ body.p53-travado { overflow: hidden !important; }
                     <h1 id="obraTitle">BURJ LAVIE</h1>
                     <p>Painel de Acompanhamento de Produção e Instalação</p>
                 </div>
-                <div class="header-badges-right">
+                <div class="header-badges-right" >
                     <div class="contract-badge">
                         <span class="label">Contrato Global</span>
                         <span class="val" id="headerValorContrato">R$ 0,00</span>
@@ -5425,40 +5690,27 @@ body.p53-travado { overflow: hidden !important; }
                         <span class="label">Nº Contrato</span>
                         <span class="val" id="headerNumContrato">—</span>
                     </div>
-                </div>
+
+</div>
             </div>
             <div class="project-selector">
-                <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️
-                Local</span>
+<span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
                 <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem (Render.com)" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
                 <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
-                <select id="selectObra" onchange="trocarObra(this.value)"></select>
-                <button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button>
-                <button class="success" onclick="abrirModalNovaObra()">+ Nova Obra</button>
-                <button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button>
                 <div class="settings-menu">
-                    <button type="button" class="secondary" onclick="toggleSettingsMenu()">
-                        ⚙ Configurações
-                    </button>
-
+                    <button type="button" class="secondary" onclick="toggleSettingsMenu()">⚙ Configurações</button>
                     <div id="settingsMenu" class="settings-dropdown">
                         <button class="secondary" onclick="exportarDados()">💾 Backup</button>
-
-                        <button class="secondary" onclick="document.getElementById('fileRestoreInput').click()">
-                            📥 Restaurar
-                        </button>
-
-                        <button class="warning" onclick="abrirRecuperacaoDados()">
-                            🧿 Recuperar Dados Antigos
-                        </button>
-
-                        <button class="primary" onclick="abrirBancoCompartilhado()">
-                            🌐 Banco Compartilhado
-                        </button>
+                        <button class="secondary" onclick="document.getElementById('fileRestoreInput').click()">📥 Restaurar</button>
+                        <button class="warning" onclick="abrirRecuperacaoDados()">🧿 Recuperar Dados Antigos</button>
+                        <button class="primary" onclick="abrirBancoCompartilhado()">🌐 Banco Compartilhado</button>
                     </div>
                 </div>
-
                 <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
+<select id="selectObra" onchange="trocarObra(this.value)"></select>
+<button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button>
+                <button class="success" onclick="abrirModalNovaObra()">+ Nova Obra</button>
+                <button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button>
             </div>
         </header>
         <!-- INÍCIO DO MENU LATERAL E CONTEÚDO -->
@@ -5491,8 +5743,7 @@ body.p53-travado { overflow: hidden !important; }
                         <!-- Todo o conteúdo dos cartões (Centro de Custos, etc) aqui -->
                     </main>
                 </details>
-
-                <!-- ÁREA DO CONTEÚDO FORÇADA A 100% DE LARGURA -->
+<!-- ÁREA DO CONTEÚDO FORÇADA A 100% DE LARGURA -->
                 <div class="content-area" style="width: 100% !important; flex: 1 1 100% !important; margin-left: 0 !important; padding-top: 45px;">
                     <!-- Seus cards (Centro de Custos, Cronograma, etc) ficam aqui dentro -->
                 </div>
@@ -5993,15 +6244,15 @@ body.p53-travado { overflow: hidden !important; }
                 <div id="tab-medicoes" class="card" style="display:none;">
                     <div class="print-style-bar">
                         <div class="print-card">
-                            <span class="title" style="text-align:center;">NAVEGAR MEDIÇÃO</span>
+                            <span class="title" style="text-align:center;">NAVEGAR MEDIÇÃO
                             <div class="nav-medicao-box">
                                 <button class="nav-btn" onclick="navegarMedicao(-1)">◀</button>
-                                <span class="nav-text" id="lblNavMedicaoNum">Nº 1</span>
+                                <span class="nav-text" id="lblNavMedicaoNum">Nº 1
                                 <button class="nav-btn" onclick="navegarMedicao(1)">▶</button>
                             </div>
                         </div>
                         <div class="print-card">
-                            <span class="title">M² TOTAL DO CONTRATO</span>
+                            <span class="title">M² TOTAL DO CONTRATO
                             <span class="value" id="medHeaderM2Contrato">0.00 m²</span>
                         </div>
                         <div class="print-card">
@@ -6479,56 +6730,84 @@ body.p53-travado { overflow: hidden !important; }
 
                 <!-- ===== PAINEL: LANÇAMENTOS ===== -->
                 <div id="panelPgtoLancamentos">
-                    <!-- Formulário de registro -->
+                    <!-- Formulário de registro (layout em seções) -->
                     <div class="lanc-form-grid">
-                        <div>
-                            <label>Instalação M²</label>
-                            <input type="number" id="inputLancInstalacaoM2" step="0.01" min="0" placeholder="0,00">
+                        <!-- Seção 1: Dados da Tarefa -->
+                        <div class="lanc-section">
+                            <div class="lanc-section-title">📝 Dados da Tarefa</div>
+                            <div class="lanc-fields-row">
+                                <div class="lanc-field lanc-field-wide">
+                                    <label>Obra</label>
+                                    <select id="inputLancObra"></select>
+                                </div>
+                                <div class="lanc-field lanc-field-wide">
+                                    <label>Material Instalado</label>
+                                    <input type="text" id="inputLancMaterial" placeholder="Ex: Porta, Janela...">
+                                </div>
+                                <div class="lanc-field">
+                                    <label>Instalação M²</label>
+                                    <input type="number" id="inputLancInstalacaoM2" step="0.01" min="0" placeholder="0,00">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label>Material Instalado</label>
-                            <input type="text" id="inputLancMaterial" placeholder="Ex: Porta, Janela...">
+
+                        <!-- Seção 2: Taxas -->
+                        <div class="lanc-section">
+                            <div class="lanc-section-title">💲 Taxas (R$/m²)</div>
+                            <div class="lanc-fields-row">
+                                <div class="lanc-field">
+                                    <label>Profissional</label>
+                                    <input type="number" id="inputLancTaxaProf" step="0.01" min="0" value="6.00">
+                                </div>
+                                <div class="lanc-field">
+                                    <label>Ajudante</label>
+                                    <input type="number" id="inputLancTaxaAjud" step="0.01" min="0" value="4.00">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label>Taxa Profissional R$/m²</label>
-                            <input type="number" id="inputLancTaxaProf" step="0.01" min="0" value="6.00">
+
+                        <!-- Seção 3: Equipe -->
+                        <div class="lanc-section">
+                            <div class="lanc-section-title">👥 Equipe</div>
+                            <div class="lanc-fields-row">
+                                <div class="lanc-field lanc-field-wide">
+                                    <label>Profissional(is)</label>
+                                    <div class="lanc-checkbox-list" id="checklistLancProfissionais">
+                                        <div class="lanc-checkbox-empty">Selecione uma obra primeiro</div>
+                                    </div>
+                                </div>
+                                <div class="lanc-field lanc-field-wide">
+                                    <label>Ajudante(s)</label>
+                                    <div class="lanc-checkbox-list" id="checklistLancAjudantes">
+                                        <div class="lanc-checkbox-empty">Selecione uma obra primeiro</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label>Taxa Ajudante R$/m²</label>
-                            <input type="number" id="inputLancTaxaAjud" step="0.01" min="0" value="4.00">
-                        </div>
-                        <div>
-                            <label>Obra</label>
-                            <select id="inputLancObra" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">
-                            </select>
-                        </div>
-                        <div>
-                            <label>Profissional(is)</label>
-                            <select id="inputLancProfissionais" multiple style="width:100%;min-height:60px;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">
-                            </select>
-                        </div>
-                        <div>
-                            <label>Ajudante(s)</label>
-                            <select id="inputLancAjudantes" multiple style="width:100%;min-height:60px;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">
-                            </select>
+
+                        <!-- Botão de adicionar -->
+                        <!-- Selects ocultos para compatibilidade JS -->
+                        <select id="inputLancProfissionais" multiple style="display:none;"></select>
+                        <select id="inputLancAjudantes" multiple style="display:none;"></select>
+                        <div class="lanc-submit-row">
+                            <button class="btn-add" onclick="salvarLancamentoPgto()" style="margin-bottom:0;">➕ Adicionar Tarefa</button>
                         </div>
                     </div>
-                    <button class="btn-add" onclick="salvarLancamentoPgto()" style="margin-bottom:14px;">➕ Adicionar Tarefa</button>
 
-                    <!-- Action bar -->
-                    <div class="pgto-action-bar">
-                        <button class="btn-action btn-export" onclick="exportarBackupPgto()">📤 Exportar Backup</button>
-                        <button class="btn-action btn-import-backup" onclick="document.getElementById('inputBackupPgto').click()">📥 Importar Backup</button>
+                    <!-- Action bar + Month nav (compacto) -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                        <div class="pgto-month-nav" style="margin-bottom:0;">
+                            <button onclick="mudarMesPgto(-1)">◀</button>
+                            <span id="pgtoMesAnoLabel">Jan/2026</span>
+                            <button onclick="mudarMesPgto(1)">▶</button>
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn-action btn-export" onclick="exportarBackupPgto()" style="padding:5px 12px;font-size:0.78rem;">📤 Backup</button>
+                            <button class="btn-action btn-import-backup" onclick="document.getElementById('inputBackupPgto').click()" style="padding:5px 12px;font-size:0.78rem;">📥 Restaurar</button>
+                            <button class="btn-action btn-limpar-mes" onclick="limparMesPgto()" style="padding:5px 12px;font-size:0.78rem;">🗑️ Limpar</button>
+                            <button onclick="imprimirPaginaPgtoResumo()" style="padding:5px 12px;font-size:0.78rem;border:1px solid #cbd5e1;border-radius:6px;background:#fff;cursor:pointer;">🖨️ Imprimir</button>
+                        </div>
                         <input type="file" id="inputBackupPgto" accept=".json" onchange="importarBackupPgto(event)" style="display:none;">
-                        <button class="btn-action btn-limpar-mes" onclick="limparMesPgto()">🗑️ Limpar Mês</button>
-                    </div>
-
-                    <!-- Month navigation -->
-                    <div class="pgto-month-nav">
-                        <button onclick="mudarMesPgto(-1)">◀</button>
-                        <span id="pgtoMesAnoLabel">Jan/2026</span>
-                        <button onclick="mudarMesPgto(1)">▶</button>
-                        <button onclick="imprimirPaginaPgtoResumo()" style="font-size:0.8rem;margin-left:8px;">🖨️ Imprimir</button>
                     </div>
 
                     <!-- Lançamentos table (grouped by obra) -->
@@ -6988,7 +7267,7 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                 </div>
             </div>
 
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
+
             <script>
                 let modoNovaObra = false;
                 let tipoImportacaoAtual = 'producao';
@@ -11092,16 +11371,16 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
             
                     if (!file) return;
             
-                    // Obtem a instancia global do PDF.js (carregado no <head> via CDN v2.16.105)
-                    const pdfjs = window['pdfjs-dist/build/pdf'] || window.pdfjsLib;
+                    // PDF.js: usa global do <head> ou importacao dinamica (v4.10.38)
+                    const pdfjs = window.pdfjsLib || (await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs'));
             
                     if (!pdfjs) {
                         alert('A biblioteca PDF.js nao foi carregada. Verifique a conexao com a internet.');
                         return;
                     }
             
-                    // OBRIGATORIO: define o worker do PDF.js
-                    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                    // Worker do PDF.js (v4.10.38)
+                    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
             
                     statusEl.innerText = "\u23f3 Lendo PDF...";
                     statusEl.style.color = "#d97706";
@@ -12568,7 +12847,104 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
               var mesInput = document.getElementById("custoFilterMes"); if(mesInput) { mesInput.value = getChaveMesPgto(); renderCustoDashboard(); }
             }
             
-            function trocarSubTabPgtoNovo(tab) {
+            
+/* === Funções auxiliares para checkbox lists (substitui <select multiple>) === */
+function renderChecklist(containerId, items, selectedIds) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    if (!items || items.length === 0) {
+        el.innerHTML = '<div class="lanc-checkbox-empty">Nenhum colaborador nesta obra</div>';
+        return;
+    }
+    var html = '';
+    items.forEach(function(item) {
+        var checked = (selectedIds && selectedIds.indexOf(item.id) !== -1) ? 'checked' : '';
+        html += '<label class="lanc-checkbox-item">'
+            + '<input type="checkbox" value="' + item.id + '" ' + checked + '> '
+            + item.nome
+            + '</label>';
+    });
+    el.innerHTML = html;
+}
+
+function getCheckedIds(containerId) {
+    var el = document.getElementById(containerId);
+    if (!el) return [];
+    var checks = el.querySelectorAll('input[type="checkbox"]:checked');
+    return Array.from(checks).map(function(c) { return c.value; });
+}
+
+
+/* Sincroniza checkbox lists quando os selects são populados */
+(function() {
+    var origOnchange = document.getElementById('inputLancObra');
+    if (origOnchange) {
+        var oldHandler = origOnchange.onchange;
+        origOnchange.onchange = function(e) {
+            if (oldHandler) oldHandler.call(this, e);
+            setTimeout(function() {
+                syncChecklistsFromSelects();
+            }, 50);
+        };
+    }
+})();
+
+function syncChecklistsFromSelects() {
+    var selProf = document.getElementById('inputLancProfissionais');
+    var selAjud = document.getElementById('inputLancAjudantes');
+    var clProf = document.getElementById('checklistLancProfissionais');
+    var clAjud = document.getElementById('checklistLancAjudantes');
+
+    if (selProf && clProf) {
+        var items = [];
+        Array.from(selProf.options).forEach(function(opt) {
+            if (opt.value) items.push({ id: opt.value, nome: opt.textContent });
+        });
+        var selected = Array.from(selProf.selectedOptions).map(function(o) { return o.value; });
+        renderChecklist('checklistLancProfissionais', items, selected);
+    }
+
+    if (selAjud && clAjud) {
+        var items2 = [];
+        Array.from(selAjud.options).forEach(function(opt) {
+            if (opt.value) items2.push({ id: opt.value, nome: opt.textContent });
+        });
+        var selected2 = Array.from(selAjud.selectedOptions).map(function(o) { return o.value; });
+        renderChecklist('checklistLancAjudantes', items2, selected2);
+    }
+}
+
+/* Sincroniza checkboxes → selects antes de salvar */
+(function() {
+    var origSalvar = window.salvarLancamentoPgto;
+    if (origSalvar) {
+        window.salvarLancamentoPgto = function() {
+            syncSelectsFromChecklists();
+            origSalvar.call(this);
+        };
+    }
+})();
+
+function syncSelectsFromChecklists() {
+    var selProf = document.getElementById('inputLancProfissionais');
+    var clProf = document.getElementById('checklistLancProfissionais');
+    if (selProf && clProf) {
+        var checkedIds = getCheckedIds('checklistLancProfissionais');
+        Array.from(selProf.options).forEach(function(opt) {
+            opt.selected = (checkedIds.indexOf(opt.value) !== -1);
+        });
+    }
+    var selAjud = document.getElementById('inputLancAjudantes');
+    var clAjud = document.getElementById('checklistLancAjudantes');
+    if (selAjud && clAjud) {
+        var checkedIds2 = getCheckedIds('checklistLancAjudantes');
+        Array.from(selAjud.options).forEach(function(opt) {
+            opt.selected = (checkedIds2.indexOf(opt.value) !== -1);
+        });
+    }
+}
+
+function trocarSubTabPgtoNovo(tab) {
               pgtoSubTab = tab;
               document.getElementById('subTabPgtoLancamentos').classList.toggle('active', tab === 'lancamentos');
               document.getElementById('subTabPgtoResumo').classList.toggle('active', tab === 'resumo');
@@ -12775,7 +13151,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                 return;
               }
               var html = '<table class="lanc-table"><thead><tr>';
-              html += '<th>Nome</th><th>Função</th><th>EMPRESA</th><th>Obra</th><th style="width:80px;">Ações</th>';
+              html += '<th>Nome</th><th>Função</th><th>EMPRESA</th><th>Obra</th><th style="width:120px;">Ações</th>';
               html += '</tr></thead><tbody>';
               db.obras.forEach(function(obra){
                 (obra.colaboradores || []).forEach(function(c){
@@ -12910,8 +13286,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
               const material = document.getElementById('inputLancMaterial').value.trim();
               const taxaProf = parseFloat(document.getElementById('inputLancTaxaProf').value) || 6;
               const taxaAjud = parseFloat(document.getElementById('inputLancTaxaAjud').value) || 4;
-              const profIds = Array.from(document.getElementById('inputLancProfissionais').selectedOptions).map(o => o.value);
-              const ajudIds = Array.from(document.getElementById('inputLancAjudantes').selectedOptions).map(o => o.value);            
+              const profIds = getCheckedIds('checklistLancProfissionais');
+              const ajudIds = getCheckedIds('checklistLancAjudantes');            
             
               if (!obraId) { alert('Selecione uma obra.'); return; }
               if (m2 <= 0) { alert('Informe a metragem (M²).'); return; }
@@ -15105,7 +15481,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                   var html = "";
                   Object.keys(groups).sort().forEach(function(obraNome){
                     html += '<div class="lanc-obra-group"><div class="lanc-obra-header">' + escaparHTML(obraNome) + '</div><table class="lanc-table"><thead><tr>';
-                    html += '<th>Data</th><th>Categoria</th><th>Descrição</th><th>Região</th><th>Colaborador</th><th>Valor</th><th style="width:80px;">Ações</th></tr></thead><tbody>';
+                    html += '<th>Data</th><th>Categoria</th><th>Descrição</th><th>Região</th><th>Colaborador</th><th>Valor</th><th style="width:120px;">Ações</th></tr></thead><tbody>';
                     var gTotal = 0;
                     groups[obraNome].forEach(function(c){
                       gTotal += c.valor;
@@ -27589,7 +27965,6 @@ body.or-aberto { overflow: hidden !important; }
   #orMenu, .or-launcher { display: none !important; visibility: hidden !important; }
 }
 </style>
-
 <script>
 /* === PATCH 62: GAVETA MAIS RAPIDA (carregamento otimizado) === */
 (function () {
@@ -27803,14 +28178,14 @@ body.or-aberto { overflow: hidden !important; }
     g.id = 'orMenu';
     g.setAttribute('role', 'dialog');
     g.setAttribute('aria-modal', 'true');
-    g.setAttribute('aria-label', 'Menu de navega' + ACENTO_C + ACENTO_A + 'o');
+    g.setAttribute('aria-label', 'Menu de navegação');
     g.setAttribute('aria-hidden', 'true');
     g.innerHTML =
       '<div class="or-fundo" id="orFundo"></div>' +
       '<div class="or-painel">' +
         '<div class="or-topo">' +
           '<span class="or-logo" aria-hidden="true">PS</span>' +
-          '<span class="or-nomes"><b>Painel Servidor</b><span>Navega' + ACENTO_C + ACENTO_A + 'o r' + A_AGUDO + 'pida</span></span>' +
+          '<span class="or-nomes"><b>Painel Servidor</b><span>Navegação Rápida</span></span>' +
           '<button type="button" class="or-x" id="orFechar" title="Fechar" aria-label="Fechar menu">\u00d7</button>' +
         '</div>' +
         '<div class="or-buscabox">' +
@@ -38359,10 +38734,18 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   function sessao() {
     var s = null;
     try { s = JSON.parse(sessionStorage.getItem(K_SESS) || 'null'); } catch (e) { s = null; }
+    /* PATCH_podeMexer: se sessão do sessionStorage expirou, limpa e cai para localStorage */
+    if (s && s.exp && Date.now() > s.exp) {
+      try { sessionStorage.removeItem(K_SESS); } catch (e3) {}
+      s = null;
+    }
     if (!s) {
       try { s = JSON.parse(localStorage.getItem(K_SESS) || 'null'); } catch (e) { s = null; }
     }
-    if (s && s.exp && Date.now() > s.exp) { s = null; }
+    if (s && s.exp && Date.now() > s.exp) {
+      try { localStorage.removeItem(K_SESS); } catch (e4) {}
+      s = null;
+    }
     return s;
   }
 
@@ -38655,9 +39038,11 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
             authId: usuarioAuth.id,
             at: Date.now()
           };
-          if (typeof gravarJson === 'function' && typeof K_SESS !== 'undefined') {
-            gravarJson(K_SESS, sessaoSupabase);
-          }
+          /* PATCH_podeMexer: gravar no sessionStorage TAMBÉM para que PainelNucleo.sessao() encontre */
+    try { sessionStorage.setItem(K_SESS, JSON.stringify(sessaoSupabase)); } catch (e7) {}
+    if (typeof gravarJson === 'function' && typeof K_SESS !== 'undefined') {
+      gravarJson(K_SESS, sessaoSupabase);
+    }
           registrar('login-supabase', perfil.usuario);
           if (ov.parentNode) { ov.parentNode.removeChild(ov); }
           barra();
@@ -41715,7 +42100,457 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       '.pr-ass{margin-top:20px;text-align:center;font-size:9pt}' +
       '</style>';
     janelaImpressao.document.open();
-    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diário de Obra</title>' + cssImpressao + '</head><body>' + h + '</body></html>');
+    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diário de Obra</title>' + cssImpressao + '</head><body>' + h + '
+<script>
+/* === GAVETA OBRAS v1 — gaveta lateral para gerenciar obras === */
+(function () {
+  "use strict";
+
+  var G = window.GAVETA_OBRAS = window.GAVETA_OBRAS || {};
+  if (G.__v1) { return; }
+  G.__v1 = true;
+
+  var D = document;
+
+  /* estado */
+  var gaveta = null;
+  var launcher = null;
+  var montada = false;
+  var sigAtual = "";
+  var nos = {};
+  var noVazio = null;
+
+  function el(id) { return D.getElementById(id); }
+
+  /* ler db.obras de forma segura */
+  function obras() {
+    try {
+      if (typeof db !== "undefined" && db.obras && Array.isArray(db.obras)) { return db.obras; }
+    } catch (e) { }
+    return [];
+  }
+  function obraAtualId() {
+    try {
+      if (typeof db !== "undefined" && db.obraAtualId) { return db.obraAtualId; }
+    } catch (e) { }
+    return "";
+  }
+  function obraAtual() {
+    var id = obraAtualId();
+    var lista = obras();
+    var o = lista.find(function (x) { return x.id === id; });
+    return o || lista[0] || null;
+  }
+
+  function assinatura() {
+    var lista = obras();
+    return lista.length + ":" + lista.map(function (o) { return o.id; }).join(",");
+  }
+
+  function nomeAtual() {
+    var o = obraAtual();
+    return o ? (o.nome || "Sem nome") : "Sem obras";
+  }
+
+  function esconderAntigos() {
+    var sel = el("selectObra");
+    if (sel && !sel.classList.contains("obr-substitui")) {
+      sel.classList.add("obr-substitui");
+    }
+    var ps = D.querySelector(".project-selector");
+    if (!ps) { return; }
+    var btns = ps.querySelectorAll("button");
+    for (var i = 0; i < btns.length; i++) {
+      var txt = (btns[i].textContent || "").trim();
+      var onc = btns[i].getAttribute("onclick") || "";
+      if (txt.indexOf("Gerenciar Obra") >= 0 ||
+          txt.indexOf("Nova Obra") >= 0 ||
+          onc === "excluirObraAtual()") {
+        if (!btns[i].classList.contains("obr-substitui")) {
+          btns[i].classList.add("obr-substitui");
+        }
+      }
+    }
+  }
+
+  function garantirLauncher() {
+    var antigo = D.querySelector(".project-selector");
+    if (!antigo) { return null; }
+    var b = el("obrGavetaBtn");
+    if (!b) {
+      b = D.createElement("button");
+      b.id = "obrGavetaBtn";
+      b.type = "button";
+      b.className = "obr-launcher";
+      b.setAttribute("aria-haspopup", "true");
+      b.setAttribute("aria-expanded", "false");
+      b.setAttribute("aria-controls", "obrGaveta");
+      b.innerHTML = 
+        '<span class="obr-ico" aria-hidden="true">🏗️</span>' +
+        '<span class="obr-rot">Obras</span>' +
+        '<span class="obr-atual" id="obrAtual"></span>';
+      b.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        G.abrir();
+      });
+    }
+    if (b.parentNode !== antigo) {
+      antigo.insertBefore(b, antigo.firstChild);
+    }
+    launcher = b;
+    return b;
+  }
+
+  function criarGaveta() {
+    var g = el("obrGaveta");
+    if (g) { gaveta = g; return g; }
+    g = D.createElement("div");
+    g.id = "obrGaveta";
+    g.setAttribute("role", "dialog");
+    g.setAttribute("aria-modal", "true");
+    g.setAttribute("aria-label", "Gaveta de Obras");
+    g.setAttribute("aria-hidden", "true");
+    g.innerHTML =
+      '<div class="obr-fundo" id="obrFundo"></div>' +
+      '<div class="obr-painel">' +
+        '<div class="obr-topo">' +
+          '<span class="obr-logo" aria-hidden="true">OB</span>' +
+          '<span class="obr-nomes"><b>Gaveta de Obras</b><span>Gerenciar projetos</span></span>' +
+          '<button type="button" class="obr-x" id="obrFechar" title="Fechar" aria-label="Fechar gaveta">×</button>' +
+        '</div>' +
+        '<div class="obr-buscabox">' +
+          '<input type="text" class="obr-busca" id="obrBusca" placeholder="Buscar obra..." autocomplete="off">' +
+        '</div>' +
+        '<div class="obr-lista" id="obrLista"></div>' +
+        '<div class="obr-rodape">' +
+          '<button type="button" class="obr-btn-nova" id="obrNovaObra">+ Nova Obra</button>' +
+          '<button type="button" class="obr-btn-gerenciar" id="obrGerenciar">⚙️ Gerenciar Obra</button>' +
+          '<button type="button" class="obr-btn-excluir" id="obrExcluir">🗑️ Excluir Obra</button>' +
+        '</div>' +
+        '<div class="obr-info" id="obrInfo"></div>' +
+      '</div>';
+    D.body.appendChild(g);
+
+    g.addEventListener("click", function (ev) {
+      if (ev.target === g || ev.target.id === "obrFundo") { G.fechar(); }
+    });
+    var x = g.querySelector("#obrFechar");
+    if (x) { x.addEventListener("click", function () { G.fechar(); }); }
+
+    var busca = g.querySelector("#obrBusca");
+    if (busca) {
+      busca.addEventListener("input", function () { filtrar(busca.value); });
+      busca.addEventListener("keydown", function (ev) {
+        if (ev.key !== "Enter") { return; }
+        var alvo = g.querySelector(".obr-obra:not(.obr-esconde)");
+        if (alvo) { alvo.click(); }
+      });
+    }
+
+    var btnNova = g.querySelector("#obrNovaObra");
+    if (btnNova) {
+      btnNova.addEventListener("click", function () {
+        G.fechar();
+        if (typeof abrirModalNovaObra === "function") { abrirModalNovaObra(); }
+      });
+    }
+    var btnGerenciar = g.querySelector("#obrGerenciar");
+    if (btnGerenciar) {
+      btnGerenciar.addEventListener("click", function () {
+        G.fechar();
+        if (typeof abrirModalObra === "function") { abrirModalObra(); }
+      });
+    }
+    var btnExcluir = g.querySelector("#obrExcluir");
+    if (btnExcluir) {
+      btnExcluir.addEventListener("click", function () {
+        G.fechar();
+        if (typeof excluirObraAtual === "function") { excluirObraAtual(); }
+      });
+    }
+
+    gaveta = g;
+    return g;
+  }
+
+  function noVazioNode() {
+    if (!noVazio) {
+      noVazio = D.createElement("div");
+      noVazio.className = "obr-vazio obr-esconde";
+      noVazio.textContent = "Nenhuma obra encontrada.";
+    }
+    return noVazio;
+  }
+
+  function noItemObra(obra) {
+    var b = nos[obra.id];
+    if (b) {
+      var t = b.querySelector(".obr-txt");
+      if (t && t.textContent !== obra.nome) { t.textContent = obra.nome; }
+      return b;
+    }
+    b = D.createElement("button");
+    b.type = "button";
+    b.className = "obr-obra";
+    b.setAttribute("data-obra-id", obra.id);
+    var ico = D.createElement("span");
+    ico.className = "obr-ico2";
+    ico.setAttribute("aria-hidden", "true");
+    ico.textContent = "🏗️";
+    var txt = D.createElement("span");
+    txt.className = "obr-txt";
+    txt.textContent = obra.nome || "Sem nome";
+    b.appendChild(ico);
+    b.appendChild(txt);
+
+    var oid = obra.id;
+    b.addEventListener("click", function () {
+      G.fechar();
+      if (typeof trocarObra === "function") { trocarObra(oid); }
+    });
+    nos[obra.id] = b;
+    return b;
+  }
+
+  function montarLista() {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var lista = obras();
+    var frag = D.createDocumentFragment();
+    var titulo = D.createElement("div");
+    titulo.className = "obr-grupo";
+    titulo.textContent = "PROJETOS";
+    frag.appendChild(titulo);
+    for (var i = 0; i < lista.length; i++) {
+      frag.appendChild(noItemObra(lista[i]));
+    }
+    frag.appendChild(noVazioNode());
+    caixa.textContent = "";
+    caixa.appendChild(frag);
+    montada = true;
+    marcarAtivo();
+  }
+
+  function marcarAtivo() {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var idAtual = obraAtualId();
+    var itens = caixa.querySelectorAll(".obr-obra");
+    for (var i = 0; i < itens.length; i++) {
+      var on = itens[i].getAttribute("data-obra-id") === idAtual;
+      if (on === itens[i].classList.contains("obr-ativo")) { continue; }
+      if (on) {
+        itens[i].classList.add("obr-ativo");
+        itens[i].setAttribute("aria-current", "true");
+      } else {
+        itens[i].classList.remove("obr-ativo");
+        itens[i].removeAttribute("aria-current");
+      }
+    }
+    var info = el("obrInfo");
+    var o = obraAtual();
+    if (info && o) {
+      var contrato = o.numContrato || "—";
+      var valor = o.valorContrato ? "R$ " + Number(o.valorContrato).toLocaleString("pt-BR", {minimumFractionDigits:2}) : "—";
+      var pct = (o.pctServico !== undefined && o.pctServico !== null) ? o.pctServico + "%" : "—";
+      info.textContent = "Contrato: " + contrato + "  |  Valor: " + valor + "  |  Serviço: " + pct;
+    }
+  }
+
+  function mostrar(n, ok) {
+    if (!n) { return; }
+    var escondido = n.classList.contains("obr-esconde");
+    if (ok === escondido) {
+      if (ok) { n.classList.remove("obr-esconde"); } else { n.classList.add("obr-esconde"); }
+    }
+  }
+
+  function filtrar(txt) {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var busca = (txt || "").toLowerCase().trim();
+    var f = caixa.children;
+    var grupo = null;
+    var vistos = 0;
+    var achou = 0;
+    for (var i = 0; i < f.length; i++) {
+      var n = f[i];
+      var cls = n.className || "";
+      if (cls.indexOf("obr-grupo") >= 0) {
+        if (grupo) { mostrar(grupo, vistos > 0); }
+        grupo = n;
+        vistos = 0;
+        continue;
+      }
+      if (cls.indexOf("obr-vazio") >= 0) { continue; }
+      var nome = (n.querySelector(".obr-txt") || {}).textContent || "";
+      var ok = !busca || nome.toLowerCase().indexOf(busca) >= 0;
+      mostrar(n, ok);
+      if (ok) { achou++; vistos++; }
+    }
+    if (grupo) { mostrar(grupo, vistos > 0); }
+    mostrar(noVazioNode(), achou === 0);
+  }
+
+  function atualizarRotulo() {
+    var r = el("obrAtual");
+    if (!r) { return; }
+    var t = nomeAtual();
+    if (r.textContent !== t) { r.textContent = t; }
+  }
+
+  function prepararGaveta() {
+    if (!D.body) { return null; }
+    var g = criarGaveta();
+    var sig = assinatura();
+    if (montada && sig !== sigAtual) { montada = false; }
+    if (!montada) { montarLista(); filtrar(""); }
+    sigAtual = sig;
+    return g;
+  }
+  G.preparar = prepararGaveta;
+
+  G.abrir = function () {
+    var g = prepararGaveta();
+    if (!g) { return; }
+    if (D.body.lastElementChild !== g) { D.body.appendChild(g); }
+    var b = el("obrBusca");
+    if (b && b.value !== "") { b.value = ""; }
+    marcarAtivo();
+    filtrar("");
+    g.classList.add("obr-on");
+    g.setAttribute("aria-hidden", "false");
+    D.body.classList.add("obr-aberto");
+    if (launcher || el("obrGavetaBtn")) {
+      (launcher || el("obrGavetaBtn")).setAttribute("aria-expanded", "true");
+    }
+    if (window.ORMENU && window.ORMENU.aberto && window.ORMENU.aberto()) {
+      window.ORMENU.fechar();
+    }
+    if (b && b.focus) { try { b.focus(); } catch (e) { } }
+  };
+
+  G.fechar = function () {
+    var g = el("obrGaveta");
+    if (g) {
+      g.classList.remove("obr-on");
+      g.setAttribute("aria-hidden", "true");
+    }
+    D.body.classList.remove("obr-aberto");
+    var lb = el("obrGavetaBtn");
+    if (lb) { lb.setAttribute("aria-expanded", "false"); }
+  };
+
+  G.aberto = function () {
+    var g = el("obrGaveta");
+    return !!(g && g.classList.contains("obr-on"));
+  };
+
+  G.alternar = function () {
+    if (G.aberto()) { G.fechar(); } else { G.abrir(); }
+  };
+
+  G.arrumar = function () {
+    if (!D.body) { return; }
+    garantirLauncher();
+    esconderAntigos();
+    var sig = assinatura();
+    if (montada && sig !== sigAtual) { montada = false; }
+    if (!montada && G.aberto()) { prepararGaveta(); }
+    atualizarRotulo();
+    marcarAtivo();
+  };
+
+  function ligarTeclado() {
+    if (G.__teclado) { return; }
+    G.__teclado = true;
+    D.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape" && G.aberto()) { G.fechar(); return; }
+      var comAtalho = (ev.ctrlKey || ev.metaKey) && ev.shiftKey;
+      if (comAtalho && (ev.key === "o" || ev.key === "O")) {
+        ev.preventDefault(); G.alternar();
+      }
+    });
+  }
+
+  function ligarVigia() {
+    if (G.__vigia || typeof MutationObserver !== "function") { return; }
+    var agendado = false;
+    function agenda() {
+      if (agendado) { return; }
+      agendado = true;
+      setTimeout(function () { agendado = false; G.arrumar(); }, 80);
+    }
+    var sel = el("selectObra");
+    if (sel) {
+      var o1 = new MutationObserver(agenda);
+      o1.observe(sel, { childList: true, attributes: true, attributeFilter: ["class"] });
+      G.__vigia = o1;
+    }
+    var ps = D.querySelector(".project-selector");
+    if (ps) {
+      var o2 = new MutationObserver(agenda);
+      o2.observe(ps, { childList: true, subtree: true });
+      G.__vigia2 = o2;
+    }
+  }
+
+  function ligarHooks() {
+    if (G.__hooks) { return; }
+    G.__hooks = true;
+    var trocarOriginal = (typeof window.trocarObra === "function") ? window.trocarObra : null;
+    if (trocarOriginal) {
+      window.trocarObra = function (id) {
+        trocarOriginal(id);
+        setTimeout(function () { G.arrumar(); }, 50);
+      };
+    }
+    var salvarOriginal = (typeof window.salvarDB === "function") ? window.salvarDB : null;
+    if (salvarOriginal) {
+      window.salvarDB = function () {
+        salvarOriginal();
+        setTimeout(function () { G.arrumar(); }, 80);
+      };
+    }
+  }
+
+  function partirAgora() {
+    if (!D.body) { return; }
+    garantirLauncher();
+    esconderAntigos();
+    atualizarRotulo();
+    ligarTeclado();
+    ligarVigia();
+    setTimeout(ligarHooks, 500);
+    G.__pronto = true;
+  }
+
+  if (D.body) { partirAgora(); }
+  else { D.addEventListener("DOMContentLoaded", partirAgora); }
+
+  D.addEventListener("DOMContentLoaded", function () {
+    garantirLauncher();
+    esconderAntigos();
+    atualizarRotulo();
+  });
+
+  if (D.readyState === "complete") {
+    setTimeout(function () {
+      G.arrumar();
+      console.log("GAVETA OBRAS v1 ativa — launcher + gaveta pronta.");
+    }, 200);
+  } else {
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        G.arrumar();
+        console.log("GAVETA OBRAS v1 ativa — launcher + gaveta pronta.");
+      }, 200);
+    });
+  }
+
+}());
+</script>
+</body></html>');
     janelaImpressao.document.close();
     var imprimirJanela = function () {
       try { janelaImpressao.focus(); janelaImpressao.print(); } catch (erro) {}
@@ -44430,8 +45265,14 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       '#p87Botao{background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;margin:4px;font-size:13px}',
       '#p87Botao:hover{filter:brightness(1.1)}',
       '#meu-menu-abas #p87Botao{display:block;width:100%;box-sizing:border-box;margin:3px 0 !important;text-align:left}',
-      '#p87Fundo{position:fixed;inset:0;z-index:2147483200;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Segoe UI,Arial,sans-serif}',
-      '#p87Caixa{background:#fff;border-radius:14px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}',
+      '#p87Fundo{position:fixed;inset:0;z-index:2147483200;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Segoe UI,Arial,sans-serif}'
+      /* PATCH_cadastroAdmin_v2: centralização no CSS base — sem pulo */
+      '#p87Caixa{position:fixed !important;left:50% !important;top:50% !important;right:auto !important;bottom:auto !important;transform:translate(-50%,-50%) !important;margin:0 !important;width:760px !important;max-width:94vw !important;max-height:86vh !important;height:auto !important}'
+      /* PATCH_cadastroAdmin: centralização já no CSS base para evitar pulo visual */
+      '#p87Caixa{position:fixed !important;left:50% !important;top:50% !important;right:auto !important;bottom:auto !important;transform:translate(-50%,-50%) !important;margin:0 !important;width:760px !important;max-width:94vw !important;max-height:86vh !important;height:auto !important}',
+      '#p87Caixa{background:#fff;border-radius:14px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:p87FadeIn .2s ease-out}'
+      /* PATCH_cadastroAdmin: animação suave de entrada */
+      '@keyframes p87FadeIn{from{opacity:0;transform:translate(-50%,-50%) scale(.97)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}',
       '#p87Caixa header{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#16304f;color:#fff;padding:12px 16px}',
       '#p87Caixa header h3{margin:0;font-size:16px}',
       '#p87Corpo{padding:16px;overflow:auto}',
@@ -44615,7 +45456,26 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   function sessao() { return window.PainelNucleo.sessao(); }
 
   function podeMexer() {
-    return true; /* PATCH154: sempre pode mexer */
+    try {
+      var s = (window.PainelNucleo && PainelNucleo.sessao) ? PainelNucleo.sessao() : sessao();
+      /* PATCH_podeMexer: fallback para estado do P128 quando sessão expirou */
+      if (!s && window.P128 && window.P128.estado) {
+        var est = window.P128.estado;
+        if (est.perfil && est.email) {
+          s = { usuario: est.email, nome: '', perfil: est.perfil };
+        }
+      }
+      if (!s) {
+        try { console.warn('[podeMexer] sem sessão — verifique login/expiração'); } catch(e0){}
+        return false;
+      }
+      var p = String(s.perfil || '').toLowerCase();
+      try { console.log('[podeMexer] perfil =', p, '| sessão.usuario =', s.usuario || s.nome || '?'); } catch(e1){}
+      return p === 'admin' || p === 'editor';
+    } catch (e) {
+      try { console.error('[podeMexer] exceção:', e); } catch(e2){}
+      return false;
+    }
   }
 
   /* PATCH108: nome do tipo de acesso vem do nucleo unico. */
@@ -44884,7 +45744,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     if (a === 'csv') { baixarCsv(); return; }
 
     if (a === 'novo') {
-      if (!podeMexer()) { aviso('Somente o administrador pode cadastrar.', 'err'); return; }
+      if (!ehAdmin()) { aviso('Somente o administrador pode cadastrar.', 'err'); return; }
       var cx = document.getElementById('p87Novo');
       if (cx) {
         cx.classList.add('on');
@@ -45061,7 +45921,11 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
 
   function ehAdmin() {
     var s = sessao();
-    if (!s) { return true; }
+    /* PATCH_cadastroAdmin: fallback P128.estado */
+    if (!s && window.P128 && window.P128.estado && window.P128.estado.perfil) {
+      s = { usuario: window.P128.estado.email, perfil: window.P128.estado.perfil };
+    }
+    if (!s) { return false; }
     return String(s.perfil || '').toLowerCase() === 'admin';
   }
 
@@ -54305,9 +55169,27 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   }
 
   function sessaoPainel() {
-    var v = null;
-    try { v = sessionStorage.getItem('painel_seg_sessao_v1') || localStorage.getItem('painel_seg_sessao_v1'); } catch (e) {}
-    try { return v ? JSON.parse(v) : null; } catch (e) { return null; }
+    var v = null, s = null;
+    try { v = sessionStorage.getItem('painel_seg_sessao_v1'); } catch (e) {}
+    /* PATCH_podeMexer: mesma correção — verifica expiração antes de cair para localStorage */
+    if (v) {
+      try { s = JSON.parse(v); } catch (e) { s = null; }
+      if (s && s.exp && Date.now() > s.exp) {
+        try { sessionStorage.removeItem('painel_seg_sessao_v1'); } catch (e5) {}
+        s = null; v = null;
+      }
+    }
+    if (!s) {
+      try { v = localStorage.getItem('painel_seg_sessao_v1'); } catch (e) {}
+      if (v) {
+        try { s = JSON.parse(v); } catch (e) { s = null; }
+        if (s && s.exp && Date.now() > s.exp) {
+          try { localStorage.removeItem('painel_seg_sessao_v1'); } catch (e6) {}
+          s = null;
+        }
+      }
+    }
+    return s;
   }
 
   function souAdmin() {
@@ -58637,10 +59519,12 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
       'position:sticky;top:0;}',
       '#tab-custo table tbody tr:hover{background:rgba(99,102,241,.07);}',
       '#tab-custo .lanc-obra-group{border:1px solid var(--border,#e2e8f0);border-radius:14px;',
-      'overflow:hidden;margin-bottom:12px;background:var(--card-bg,#fff);}',
+      'overflow:visible;margin-bottom:12px;background:var(--card-bg,#fff);}',
       '#tab-custo .lanc-obra-header{background:linear-gradient(90deg,#4f46e5,#6366f1);',
       'color:#fff;font-weight:700;padding:10px 14px;font-size:.86rem;}',
       '#tab-custo .btn-icon-sm{border-radius:8px;transition:transform .12s;}',
+      '#tab-custo .lanc-actions{display:flex;gap:6px;flex-wrap:nowrap;overflow:visible;}',
+      '#tab-custo .lanc-actions .btn-icon-sm{flex-shrink:0;}',
       '#tab-custo .btn-icon-sm:hover{transform:scale(1.14);}',
       '#containerCustoTotal>div{border-radius:12px!important;',
       'background:linear-gradient(90deg,#4f46e5,#6366f1)!important;',
@@ -63078,28 +63962,16 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
 <!-- FIM PATCH127 -->
 
 
-<!-- PATCH154: stubs P128 para nao quebrar refs externas -->
+<!-- PATCH128_LOGIN_NO_SERVIDOR -->
 <script>
-/* PATCH154: P128 desabilitado – stubs para referencias externas */
-window.P128 = {
-  conferir: function() { return Promise.resolve({ data: { session: null }, error: null }); },
-  _desmarcarTrocarSenha: function() { try { console.log("[P154] P128 stub: desmarcarTrocarSenha desabilitado"); } catch(e){} },
-  _trocarPendente: function() { return Promise.resolve(false); },
-  gravarSessao: function() {},
-  modoOffline: function() {}
-};
-window.__P128 = true;
-try { console.log("[PATCH154] P128 stub carregado – login/cracha desabilitado"); } catch(e){}
-</script>
-<!-- PATCH154: P128 DESABILITADO – INI -->
-<!-- PATCH154_HIDDEN: <!-- PATCH128_LOGIN_NO_SERVIDOR --> -->
-<script>
-if (false) { /* PATCH154_DISABLED */
-/* ===== PATCH128 - login conferido no servidor, perfil vindo do banco ===== */
+if (true) {
+/* ===== PATCH128 - login conferido no servidor ... */
 (function () {
   'use strict';
-  if (window.__P128) { return; }
-  window.__P128 = true;
+  if (window.__P128) 
+  { return; }
+})();
+} /* /PATCH154_DISABLED */
 
   var K_SESS  = 'painel_seg_sessao_v1';
   var K_USERS = 'painel_seg_usuarios_v1';
@@ -72151,7 +73023,462 @@ if (false) { /* PATCH154_DISABLED */
 
 })();
 </script>
+<script src="/admin-painel.js"></script>
+<script src="/patch-ui-2026-completo.js"></script>
+<script src="/patch-ui-2026-gaveta-pgto.js"></script>
+<script src="/patch-arquivos-obra.js"></script>
 <!-- FIM PATCH150_CAMADA_ABSTRACAO -->
- <script src="/sync-local.js"></script>
+
+
+
+<script>
+/* === GAVETA OBRAS v1 — gaveta lateral para gerenciar obras === */
+(function () {
+  "use strict";
+
+  var G = window.GAVETA_OBRAS = window.GAVETA_OBRAS || {};
+  if (G.__v1) { return; }
+  G.__v1 = true;
+
+  var D = document;
+
+  /* estado */
+  var gaveta = null;
+  var launcher = null;
+  var montada = false;
+  var sigAtual = "";
+  var nos = {};
+  var noVazio = null;
+
+  function el(id) { return D.getElementById(id); }
+
+  /* ler db.obras de forma segura */
+  function obras() {
+    try {
+      if (typeof db !== "undefined" && db.obras && Array.isArray(db.obras)) { return db.obras; }
+    } catch (e) { }
+    return [];
+  }
+  function obraAtualId() {
+    try {
+      if (typeof db !== "undefined" && db.obraAtualId) { return db.obraAtualId; }
+    } catch (e) { }
+    return "";
+  }
+  function obraAtual() {
+    var id = obraAtualId();
+    var lista = obras();
+    var o = lista.find(function (x) { return x.id === id; });
+    return o || lista[0] || null;
+  }
+
+  function assinatura() {
+    var lista = obras();
+    return lista.length + ":" + lista.map(function (o) { return o.id; }).join(",");
+  }
+
+  function nomeAtual() {
+    var o = obraAtual();
+    return o ? (o.nome || "Sem nome") : "Sem obras";
+  }
+
+  function esconderAntigos() {
+    var sel = el("selectObra");
+    if (sel && !sel.classList.contains("obr-substitui")) {
+      sel.classList.add("obr-substitui");
+    }
+    var ps = D.querySelector(".project-selector");
+    if (!ps) { return; }
+    var btns = ps.querySelectorAll("button");
+    for (var i = 0; i < btns.length; i++) {
+      var txt = (btns[i].textContent || "").trim();
+      var onc = btns[i].getAttribute("onclick") || "";
+      if (txt.indexOf("Gerenciar Obra") >= 0 ||
+          txt.indexOf("Nova Obra") >= 0 ||
+          onc === "excluirObraAtual()") {
+        if (!btns[i].classList.contains("obr-substitui")) {
+          btns[i].classList.add("obr-substitui");
+        }
+      }
+    }
+  }
+
+  function garantirLauncher() {
+    var antigo = D.querySelector(".project-selector");
+    if (!antigo) { return null; }
+    var b = el("obrGavetaBtn");
+    if (!b) {
+      b = D.createElement("button");
+      b.id = "obrGavetaBtn";
+      b.type = "button";
+      b.className = "obr-launcher";
+      b.setAttribute("aria-haspopup", "true");
+      b.setAttribute("aria-expanded", "false");
+      b.setAttribute("aria-controls", "obrGaveta");
+      b.innerHTML = 
+        '<span class="obr-ico" aria-hidden="true">🏗️</span>' +
+        '<span class="obr-rot">Obras</span>' +
+        '<span class="obr-atual" id="obrAtual"></span>';
+      b.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        G.abrir();
+      });
+    }
+    if (b.parentNode !== antigo) {
+      antigo.insertBefore(b, antigo.firstChild);
+    }
+    launcher = b;
+    return b;
+  }
+
+  function criarGaveta() {
+    var g = el("obrGaveta");
+    if (g) { gaveta = g; return g; }
+    g = D.createElement("div");
+    g.id = "obrGaveta";
+    g.setAttribute("role", "dialog");
+    g.setAttribute("aria-modal", "true");
+    g.setAttribute("aria-label", "Gaveta de Obras");
+    g.setAttribute("aria-hidden", "true");
+    g.innerHTML =
+      '<div class="obr-fundo" id="obrFundo"></div>' +
+      '<div class="obr-painel">' +
+        '<div class="obr-topo">' +
+          '<span class="obr-logo" aria-hidden="true">OB</span>' +
+          '<span class="obr-nomes"><b>Gaveta de Obras</b><span>Gerenciar projetos</span></span>' +
+          '<button type="button" class="obr-x" id="obrFechar" title="Fechar" aria-label="Fechar gaveta">×</button>' +
+        '</div>' +
+        '<div class="obr-buscabox">' +
+          '<input type="text" class="obr-busca" id="obrBusca" placeholder="Buscar obra..." autocomplete="off">' +
+        '</div>' +
+        '<div class="obr-lista" id="obrLista"></div>' +
+        '<div class="obr-rodape">' +
+          '<button type="button" class="obr-btn-nova" id="obrNovaObra">+ Nova Obra</button>' +
+          '<button type="button" class="obr-btn-gerenciar" id="obrGerenciar">⚙️ Gerenciar Obra</button>' +
+          '<button type="button" class="obr-btn-excluir" id="obrExcluir">🗑️ Excluir Obra</button>' +
+        '</div>' +
+        '<div class="obr-info" id="obrInfo"></div>' +
+      '</div>';
+    D.body.appendChild(g);
+
+    g.addEventListener("click", function (ev) {
+      if (ev.target === g || ev.target.id === "obrFundo") { G.fechar(); }
+    });
+    var x = g.querySelector("#obrFechar");
+    if (x) { x.addEventListener("click", function () { G.fechar(); }); }
+
+    var busca = g.querySelector("#obrBusca");
+    if (busca) {
+      busca.addEventListener("input", function () { filtrar(busca.value); });
+      busca.addEventListener("keydown", function (ev) {
+        if (ev.key !== "Enter") { return; }
+        var alvo = g.querySelector(".obr-obra:not(.obr-esconde)");
+        if (alvo) { alvo.click(); }
+      });
+    }
+
+    var btnNova = g.querySelector("#obrNovaObra");
+    if (btnNova) {
+      btnNova.addEventListener("click", function () {
+        G.fechar();
+        if (typeof abrirModalNovaObra === "function") { abrirModalNovaObra(); }
+      });
+    }
+    var btnGerenciar = g.querySelector("#obrGerenciar");
+    if (btnGerenciar) {
+      btnGerenciar.addEventListener("click", function () {
+        G.fechar();
+        if (typeof abrirModalObra === "function") { abrirModalObra(); }
+      });
+    }
+    var btnExcluir = g.querySelector("#obrExcluir");
+    if (btnExcluir) {
+      btnExcluir.addEventListener("click", function () {
+        G.fechar();
+        if (typeof excluirObraAtual === "function") { excluirObraAtual(); }
+      });
+    }
+
+    gaveta = g;
+    return g;
+  }
+
+  function noVazioNode() {
+    if (!noVazio) {
+      noVazio = D.createElement("div");
+      noVazio.className = "obr-vazio obr-esconde";
+      noVazio.textContent = "Nenhuma obra encontrada.";
+    }
+    return noVazio;
+  }
+
+  function noItemObra(obra) {
+    var b = nos[obra.id];
+    if (b) {
+      var t = b.querySelector(".obr-txt");
+      if (t && t.textContent !== obra.nome) { t.textContent = obra.nome; }
+      return b;
+    }
+    b = D.createElement("button");
+    b.type = "button";
+    b.className = "obr-obra";
+    b.setAttribute("data-obra-id", obra.id);
+    var ico = D.createElement("span");
+    ico.className = "obr-ico2";
+    ico.setAttribute("aria-hidden", "true");
+    ico.textContent = "🏗️";
+    var txt = D.createElement("span");
+    txt.className = "obr-txt";
+    txt.textContent = obra.nome || "Sem nome";
+    b.appendChild(ico);
+    b.appendChild(txt);
+
+    var oid = obra.id;
+    b.addEventListener("click", function () {
+      G.fechar();
+      if (typeof trocarObra === "function") { trocarObra(oid); }
+    });
+    nos[obra.id] = b;
+    return b;
+  }
+
+  function montarLista() {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var lista = obras();
+    var frag = D.createDocumentFragment();
+    var titulo = D.createElement("div");
+    titulo.className = "obr-grupo";
+    titulo.textContent = "PROJETOS";
+    frag.appendChild(titulo);
+    for (var i = 0; i < lista.length; i++) {
+      frag.appendChild(noItemObra(lista[i]));
+    }
+    frag.appendChild(noVazioNode());
+    caixa.textContent = "";
+    caixa.appendChild(frag);
+    montada = true;
+    marcarAtivo();
+  }
+
+  function marcarAtivo() {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var idAtual = obraAtualId();
+    var itens = caixa.querySelectorAll(".obr-obra");
+    for (var i = 0; i < itens.length; i++) {
+      var on = itens[i].getAttribute("data-obra-id") === idAtual;
+      if (on === itens[i].classList.contains("obr-ativo")) { continue; }
+      if (on) {
+        itens[i].classList.add("obr-ativo");
+        itens[i].setAttribute("aria-current", "true");
+      } else {
+        itens[i].classList.remove("obr-ativo");
+        itens[i].removeAttribute("aria-current");
+      }
+    }
+    var info = el("obrInfo");
+    var o = obraAtual();
+    if (info && o) {
+      var contrato = o.numContrato || "—";
+      var valor = o.valorContrato ? "R$ " + Number(o.valorContrato).toLocaleString("pt-BR", {minimumFractionDigits:2}) : "—";
+      var pct = (o.pctServico !== undefined && o.pctServico !== null) ? o.pctServico + "%" : "—";
+      info.textContent = "Contrato: " + contrato + "  |  Valor: " + valor + "  |  Serviço: " + pct;
+    }
+  }
+
+  function mostrar(n, ok) {
+    if (!n) { return; }
+    var escondido = n.classList.contains("obr-esconde");
+    if (ok === escondido) {
+      if (ok) { n.classList.remove("obr-esconde"); } else { n.classList.add("obr-esconde"); }
+    }
+  }
+
+  function filtrar(txt) {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var busca = (txt || "").toLowerCase().trim();
+    var f = caixa.children;
+    var grupo = null;
+    var vistos = 0;
+    var achou = 0;
+    for (var i = 0; i < f.length; i++) {
+      var n = f[i];
+      var cls = n.className || "";
+      if (cls.indexOf("obr-grupo") >= 0) {
+        if (grupo) { mostrar(grupo, vistos > 0); }
+        grupo = n;
+        vistos = 0;
+        continue;
+      }
+      if (cls.indexOf("obr-vazio") >= 0) { continue; }
+      var nome = (n.querySelector(".obr-txt") || {}).textContent || "";
+      var ok = !busca || nome.toLowerCase().indexOf(busca) >= 0;
+      mostrar(n, ok);
+      if (ok) { achou++; vistos++; }
+    }
+    if (grupo) { mostrar(grupo, vistos > 0); }
+    mostrar(noVazioNode(), achou === 0);
+  }
+
+  function atualizarRotulo() {
+    var r = el("obrAtual");
+    if (!r) { return; }
+    var t = nomeAtual();
+    if (r.textContent !== t) { r.textContent = t; }
+  }
+
+  function prepararGaveta() {
+    if (!D.body) { return null; }
+    var g = criarGaveta();
+    var sig = assinatura();
+    if (montada && sig !== sigAtual) { montada = false; }
+    if (!montada) { montarLista(); filtrar(""); }
+    sigAtual = sig;
+    return g;
+  }
+  G.preparar = prepararGaveta;
+
+  G.abrir = function () {
+    var g = prepararGaveta();
+    if (!g) { return; }
+    if (D.body.lastElementChild !== g) { D.body.appendChild(g); }
+    var b = el("obrBusca");
+    if (b && b.value !== "") { b.value = ""; }
+    marcarAtivo();
+    filtrar("");
+    g.classList.add("obr-on");
+    g.setAttribute("aria-hidden", "false");
+    D.body.classList.add("obr-aberto");
+    if (launcher || el("obrGavetaBtn")) {
+      (launcher || el("obrGavetaBtn")).setAttribute("aria-expanded", "true");
+    }
+    if (window.ORMENU && window.ORMENU.aberto && window.ORMENU.aberto()) {
+      window.ORMENU.fechar();
+    }
+    if (b && b.focus) { try { b.focus(); } catch (e) { } }
+  };
+
+  G.fechar = function () {
+    var g = el("obrGaveta");
+    if (g) {
+      g.classList.remove("obr-on");
+      g.setAttribute("aria-hidden", "true");
+    }
+    D.body.classList.remove("obr-aberto");
+    var lb = el("obrGavetaBtn");
+    if (lb) { lb.setAttribute("aria-expanded", "false"); }
+  };
+
+  G.aberto = function () {
+    var g = el("obrGaveta");
+    return !!(g && g.classList.contains("obr-on"));
+  };
+
+  G.alternar = function () {
+    if (G.aberto()) { G.fechar(); } else { G.abrir(); }
+  };
+
+  G.arrumar = function () {
+    if (!D.body) { return; }
+    garantirLauncher();
+    esconderAntigos();
+    var sig = assinatura();
+    if (montada && sig !== sigAtual) { montada = false; }
+    if (!montada && G.aberto()) { prepararGaveta(); }
+    atualizarRotulo();
+    marcarAtivo();
+  };
+
+  function ligarTeclado() {
+    if (G.__teclado) { return; }
+    G.__teclado = true;
+    D.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape" && G.aberto()) { G.fechar(); return; }
+      var comAtalho = (ev.ctrlKey || ev.metaKey) && ev.shiftKey;
+      if (comAtalho && (ev.key === "o" || ev.key === "O")) {
+        ev.preventDefault(); G.alternar();
+      }
+    });
+  }
+
+  function ligarVigia() {
+    if (G.__vigia || typeof MutationObserver !== "function") { return; }
+    var agendado = false;
+    function agenda() {
+      if (agendado) { return; }
+      agendado = true;
+      setTimeout(function () { agendado = false; G.arrumar(); }, 80);
+    }
+    var sel = el("selectObra");
+    if (sel) {
+      var o1 = new MutationObserver(agenda);
+      o1.observe(sel, { childList: true, attributes: true, attributeFilter: ["class"] });
+      G.__vigia = o1;
+    }
+    var ps = D.querySelector(".project-selector");
+    if (ps) {
+      var o2 = new MutationObserver(agenda);
+      o2.observe(ps, { childList: true, subtree: true });
+      G.__vigia2 = o2;
+    }
+  }
+
+  function ligarHooks() {
+    if (G.__hooks) { return; }
+    G.__hooks = true;
+    var trocarOriginal = (typeof window.trocarObra === "function") ? window.trocarObra : null;
+    if (trocarOriginal) {
+      window.trocarObra = function (id) {
+        trocarOriginal(id);
+        setTimeout(function () { G.arrumar(); }, 50);
+      };
+    }
+    var salvarOriginal = (typeof window.salvarDB === "function") ? window.salvarDB : null;
+    if (salvarOriginal) {
+      window.salvarDB = function () {
+        salvarOriginal();
+        setTimeout(function () { G.arrumar(); }, 80);
+      };
+    }
+  }
+
+  function partirAgora() {
+    if (!D.body) { return; }
+    garantirLauncher();
+    esconderAntigos();
+    atualizarRotulo();
+    ligarTeclado();
+    ligarVigia();
+    setTimeout(ligarHooks, 500);
+    G.__pronto = true;
+  }
+
+  if (D.body) { partirAgora(); }
+  else { D.addEventListener("DOMContentLoaded", partirAgora); }
+
+  D.addEventListener("DOMContentLoaded", function () {
+    garantirLauncher();
+    esconderAntigos();
+    atualizarRotulo();
+  });
+
+  if (D.readyState === "complete") {
+    setTimeout(function () {
+      G.arrumar();
+      console.log("GAVETA OBRAS v1 ativa — launcher + gaveta pronta.");
+    }, 200);
+  } else {
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        G.arrumar();
+        console.log("GAVETA OBRAS v1 ativa — launcher + gaveta pronta.");
+      }, 200);
+    });
+  }
+
+}());
+</script>
 </body>
 </html>
