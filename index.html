@@ -5442,308 +5442,20 @@ body.p53-travado { overflow: hidden !important; }
 /* PATCH158 - Ocultar aba Gestao de Obra e Equipe (sem funcionalidade) */
 #btn-tab-cronograma { display: none !important; }
 #tab-cronograma { display: none !important; }
-
-/* === GAVETA OBRAS v4 === */
-.ob-launcher {
-  display:inline-flex!important;
-  align-items:center;
-  gap:10px;
-  margin:0 0 0 8px!important;
-  padding:8px 14px 8px 11px!important;
-  font:600 13.5px/1.2 inherit;
-  color:#e8eefc;
-  background:linear-gradient(135deg,#1b2540 0%,#111827 100%);
-  border:1px solid rgba(255,255,255,.14)!important;
-  border-radius:10px!important;
-  box-shadow:0 4px 14px rgba(2,8,23,.3);
-  cursor:pointer;
-  user-select:none;
-  transition:transform .15s,box-shadow .15s,border-color .15s;
-}
-.ob-launcher:hover {
-  transform:translateY(-1px);
-  box-shadow:0 6px 20px rgba(59,130,246,.25);
-  border-color:rgba(59,130,246,.4)!important;
-}
-.ob-launcher:focus-visible { outline:2px solid #60a5fa; outline-offset:2px; }
-.ob-launcher .ob-ico { font-size:1.3em; }
-.ob-launcher .ob-rot { font-weight:600; color:#c3d1ea; }
-.ob-launcher .ob-atual { font-size:.78em; color:#93c5fd; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.ob-launcher .ob-atual:before { content:"•"; margin-right:8px; color:#3b82f6; }
-
-#obMenu {
-  position:fixed!important;
-  top:0; left:0;
-  width:310px; height:100vh;
-  max-width:90vw;
-  background:#0f172a;
-  border-right:1px solid rgba(255,255,255,.1);
-  box-shadow:4px 0 24px rgba(0,0,0,.55);
-  z-index:99999!important;
-  transform:translateX(-100%);
-  transition:transform .28s cubic-bezier(.4,0,.2,1);
-  overflow-y:auto;
-  padding:14px 12px 24px;
-  font-family:inherit;
-}
-#obMenu.ob-open { transform:translateX(0)!important; }
-#obMenu .ob-tit { font:700 15px/1.3 inherit; color:#e8eefc; padding:10px 0 6px; border-bottom:1px solid rgba(255,255,255,.1); margin:0 0 8px; }
-#obMenu .ob-item { display:flex!important; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; transition:background .15s; color:#c3d1ea; font:500 13.5px/1.3 inherit; border:none; background:transparent; width:100%; text-align:left; }
-#obMenu .ob-item:hover { background:rgba(59,130,246,.12); }
-#obMenu .ob-item.ob-sel { background:rgba(59,130,246,.18)!important; color:#60a5fa; font-weight:600; }
-#obMenu .ob-ico2 { font-size:1.1em; width:22px; text-align:center; }
-#obMenu .ob-sep { height:1px; background:rgba(255,255,255,.08); margin:8px 0; }
-#obMenu .ob-foot { padding:10px 0 0; border-top:1px solid rgba(255,255,255,.1); margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
-#obMenu .ob-foot button { font:500 12px/1.3 inherit; padding:7px 12px; border-radius:6px; border:1px solid rgba(255,255,255,.12); cursor:pointer; transition:background .15s,opacity .15s; }
-#obMenu .ob-foot .ob-btn-add { background:#166534; color:#fff; border-color:#22c55e!important; }
-#obMenu .ob-foot .ob-btn-add:hover { background:#15803d; }
-#obMenu .ob-foot .ob-btn-mgr { background:#92400e; color:#fff; border-color:#f59e0b!important; }
-#obMenu .ob-foot .ob-btn-mgr:hover { background:#a16207; }
-#obMenu .ob-foot .ob-btn-del { background:#991b1b; color:#fff; border-color:#ef4444!important; }
-#obMenu .ob-foot .ob-btn-del:hover { background:#b91c1c; }
-
-#obOverlay { position:fixed!important; inset:0; background:rgba(0,0,0,.45); z-index:99998; display:none; }
-#obOverlay.ob-show { display:block!important; }
-
-/* selectObra escondido */
-#selectObra.ob-hide { position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important; pointer-events:none!important; }
-
-/* botoes obra escondidos no header */
-.ob-hide-btn { display:none!important; }
-
-/* nuvem buttons padronizados */
-.ob-nuvem-row { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; align-items:center; }
-.ob-nuvem-btn { display:inline-flex!important; align-items:center; justify-content:center; min-width:38px!important; height:32px!important; padding:4px 10px!important; border-radius:6px!important; font:500 .75rem/1.2 inherit!important; border:1px solid rgba(255,255,255,.12)!important; background:transparent!important; color:#c3d1ea!important; cursor:pointer; transition:background .15s; white-space:nowrap; }
-.ob-nuvem-btn:hover { background:rgba(255,255,255,.08)!important; }
-
-/* Configuracoes dentro das tabs */
-.tabs > .ob-settings-block { margin-top:8px; border-top:1px solid rgba(255,255,255,.1); padding-top:8px; }
-.tabs > .ob-settings-block > button { width:100%; text-align:left; margin:0 0 6px; }
-.tabs > .ob-settings-block .settings-dropdown { position:relative!important; top:auto!important; right:auto!important; }
-
-@media (max-width:520px) { .ob-launcher .ob-atual{display:none} #obMenu{width:290px!important} }
-@media print { #obMenu,.ob-launcher{display:none!important;visibility:hidden!important} }
-
-
-/* === GAVETA OBRAS v5 === */
-.ob-menu-row {
-  display:flex!important;
-  align-items:flex-start!important;
-  gap:8px!important;
-  margin:10px 0 20px 0!important;
-  position:relative!important;
-  z-index:9999!important;
-}
-.ob-menu-row > details,
-.ob-menu-row > .ob-launcher {
-  flex-shrink:0!important;
-}
-.ob-launcher {
-  display:inline-flex!important;
-  align-items:center!important;
-  gap:8px!important;
-  padding:8px 16px!important;
-  font:bold 14px/1.2 inherit!important;
-  color:#fff!important;
-  background:#1e293b!important;
-  border:1px solid rgba(255,255,255,.2)!important;
-  border-radius:6px!important;
-  box-shadow:0 4px 10px rgba(0,0,0,.3)!important;
-  cursor:pointer!important;
-  user-select:none!important;
-  transition:transform .12s,box-shadow .12s,border-color .12s!important;
-}
-.ob-launcher:hover {
-  transform:translateY(-1px)!important;
-  box-shadow:0 6px 18px rgba(59,130,246,.22)!important;
-  border-color:rgba(59,130,246,.45)!important;
-}
-.ob-launcher:focus-visible { outline:2px solid #60a5fa; outline-offset:2px; }
-.ob-launcher .ob-ico { font-size:1.15em!important; }
-.ob-launcher .ob-rot { font-weight:700!important; }
-.ob-launcher .ob-atual { font-size:.8em!important; color:#93c5fd!important; max-width:110px!important; overflow:hidden!important; text-overflow:ellipsis!important; white-space:nowrap!important; }
-.ob-launcher .ob-atual:before { content:"•"!important; margin-right:6px!important; color:#3b82f6!important; }
-
-#obMenu {
-  position:fixed!important;
-  top:0; left:0;
-  width:310px; height:100vh;
-  max-width:90vw;
-  background:#0f172a;
-  border-right:1px solid rgba(255,255,255,.1);
-  box-shadow:4px 0 24px rgba(0,0,0,.55);
-  z-index:99999!important;
-  transform:translateX(-100%);
-  transition:transform .28s cubic-bezier(.4,0,.2,1);
-  overflow-y:auto;
-  padding:14px 12px 24px;
-  font-family:inherit;
-}
-#obMenu.ob-open { transform:translateX(0)!important; }
-#obMenu .ob-tit { font:700 15px/1.3 inherit; color:#e8eefc; padding:10px 0 6px; border-bottom:1px solid rgba(255,255,255,.1); margin:0 0 8px; }
-#obMenu .ob-item { display:flex!important; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; transition:background .15s; color:#c3d1ea; font:500 13.5px/1.3 inherit; border:none; background:transparent; width:100%; text-align:left; }
-#obMenu .ob-item:hover { background:rgba(59,130,246,.12); }
-#obMenu .ob-item.ob-sel { background:rgba(59,130,246,.18)!important; color:#60a5fa; font-weight:600; }
-#obMenu .ob-ico2 { font-size:1.1em; width:22px; text-align:center; }
-#obMenu .ob-sep { height:1px; background:rgba(255,255,255,.08); margin:8px 0; }
-#obMenu .ob-foot { padding:10px 0 0; border-top:1px solid rgba(255,255,255,.1); margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
-#obMenu .ob-foot button { font:500 12px/1.3 inherit; padding:7px 12px; border-radius:6px; border:1px solid rgba(255,255,255,.12); cursor:pointer; transition:background .15s; }
-#obMenu .ob-foot .ob-btn-add { background:#166534; color:#fff; border-color:#22c55e!important; }
-#obMenu .ob-foot .ob-btn-add:hover { background:#15803d; }
-#obMenu .ob-foot .ob-btn-mgr { background:#92400e; color:#fff; border-color:#f59e0b!important; }
-#obMenu .ob-foot .ob-btn-mgr:hover { background:#a16207; }
-#obMenu .ob-foot .ob-btn-del { background:#991b1b; color:#fff; border-color:#ef4444!important; }
-#obMenu .ob-foot .ob-btn-del:hover { background:#b91c1c; }
-
-#obOverlay { position:fixed!important; inset:0; background:rgba(0,0,0,.45); z-index:99998; display:none; }
-#obOverlay.ob-show { display:block!important; }
-
-/* selectObra escondido */
-#selectObra.ob-hide { position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important; pointer-events:none!important; }
-
-/* botoes obra escondidos no header */
-.ob-hide-btn { display:none!important; }
-
-/* header-badges-right: coluna para colocar nuvem ABAIXO do contrato */
-.header-badges-right.ob-col {
-  flex-direction:column!important;
-  align-items:flex-end!important;
-  gap:4px!important;
-}
-
-/* nuvem buttons padronizados */
-.ob-nuvem-row { display:flex!important; flex-wrap:wrap!important; gap:4px!important; align-items:center!important; justify-content:flex-end!important; width:100%!important; }
-.ob-nuvem-btn { display:inline-flex!important; align-items:center!important; justify-content:center!important; min-width:38px!important; height:32px!important; padding:4px 10px!important; border-radius:6px!important; font:500 .75rem/1.2 inherit!important; border:1px solid rgba(255,255,255,.12)!important; background:transparent!important; color:#c3d1ea!important; cursor:pointer!important; transition:background .15s!important; white-space:nowrap!important; }
-.ob-nuvem-btn:hover { background:rgba(255,255,255,.08)!important; }
-
-/* Configuracoes dentro das tabs */
-.tabs > .ob-settings-block { margin-top:8px; border-top:1px solid rgba(255,255,255,.1); padding-top:8px; }
-.tabs > .ob-settings-block > button { width:100%; text-align:left; margin:0 0 6px; }
-.tabs > .ob-settings-block .settings-dropdown { position:relative!important; top:auto!important; right:auto!important; }
-
-@media (max-width:520px) { .ob-launcher .ob-atual{display:none!important} #obMenu{width:290px!important} }
-@media print { #obMenu,.ob-launcher,.ob-menu-row{display:none!important;visibility:hidden!important} }
-
-
-/* === GAVETA OBRAS v6 === */
-.ob-menu-row {
-  display:flex!important;
-  align-items:center!important;
-  gap:6px!important;
-  margin:0!important;
-  padding:0!important;
-  position:relative!important;
-  z-index:9999!important;
-}
-.ob-menu-row > details,
-.ob-menu-row > .ob-launcher {
-  flex-shrink:0!important;
-}
-.ob-launcher {
-  display:inline-flex!important;
-  align-items:center!important;
-  gap:6px!important;
-  padding:8px 14px!important;
-  font:bold 14px/1.2 inherit!important;
-  color:#fff!important;
-  background:#1e293b!important;
-  border:1px solid rgba(255,255,255,.2)!important;
-  border-radius:6px!important;
-  box-shadow:0 2px 6px rgba(0,0,0,.25)!important;
-  cursor:pointer!important;
-  user-select:none!important;
-  transition:background .15s,border-color .15s!important;
-}
-.ob-launcher:hover {
-  background:#253347!important;
-  border-color:rgba(59,130,246,.35)!important;
-}
-.ob-launcher:focus-visible { outline:2px solid #60a5fa; outline-offset:2px; }
-.ob-launcher .ob-ico { font-size:1.1em!important; }
-.ob-launcher .ob-rot { font-weight:700!important; }
-
-#obMenu {
-  position:fixed!important;
-  top:0; left:0;
-  width:280px; height:100vh;
-  max-width:85vw;
-  background:#0f172a;
-  border-right:1px solid rgba(255,255,255,.1);
-  box-shadow:4px 0 20px rgba(0,0,0,.5);
-  z-index:99999!important;
-  transform:translateX(-100%);
-  transition:transform .25s cubic-bezier(.4,0,.2,1);
-  overflow-y:auto;
-  padding:12px 10px 20px;
-  font-family:inherit;
-}
-#obMenu.ob-open { transform:translateX(0)!important; }
-#obMenu .ob-tit { font:700 14px/1.3 inherit; color:#e8eefc; padding:8px 0 4px; border-bottom:1px solid rgba(255,255,255,.1); margin:0 0 6px; }
-#obMenu .ob-item { display:flex!important; align-items:center; gap:8px; padding:8px 10px; border-radius:6px; cursor:pointer; transition:background .12s; color:#c3d1ea; font:500 13px/1.3 inherit; border:none; background:transparent; width:100%; text-align:left; }
-#obMenu .ob-item:hover { background:rgba(59,130,246,.1); }
-#obMenu .ob-item.ob-sel { background:rgba(59,130,246,.16)!important; color:#60a5fa; font-weight:600; }
-#obMenu .ob-ico2 { font-size:1em; width:20px; text-align:center; }
-#obMenu .ob-sep { height:1px; background:rgba(255,255,255,.06); margin:6px 0; }
-#obMenu .ob-foot { padding:8px 0 0; border-top:1px solid rgba(255,255,255,.08); margin-top:8px; display:flex; flex-wrap:wrap; gap:5px; }
-#obMenu .ob-foot button { font:500 11.5px/1.3 inherit; padding:5px 10px; border-radius:5px; border:1px solid rgba(255,255,255,.1); cursor:pointer; transition:background .12s; }
-#obMenu .ob-foot .ob-btn-add { background:#166534; color:#fff; border-color:#22c55e!important; }
-#obMenu .ob-foot .ob-btn-add:hover { background:#15803d; }
-#obMenu .ob-foot .ob-btn-mgr { background:#92400e; color:#fff; border-color:#f59e0b!important; }
-#obMenu .ob-foot .ob-btn-mgr:hover { background:#a16207; }
-#obMenu .ob-foot .ob-btn-del { background:#991b1b; color:#fff; border-color:#ef4444!important; }
-#obMenu .ob-foot .ob-btn-del:hover { background:#b91c1c; }
-
-#obOverlay { position:fixed!important; inset:0; background:rgba(0,0,0,.4); z-index:99998; display:none; }
-#obOverlay.ob-show { display:block!important; }
-
-/* selectObra escondido — fica no body, fora do fluxo */
-#selectObra.ob-hide { position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important; pointer-events:none!important; }
-
-/* botoes obra escondidos no header — nunca mais aparecem */
-.ob-hide-btn { display:none!important; }
-
-/* project-selector limpo (vazio = some) */
-.project-selector[data-ob-empty] { display:none!important; margin:0!important; padding:0!important; height:0!important; overflow:hidden!important; }
-
-/* nuvem row MINIMAL */
-.ob-nuvem-row { display:flex!important; gap:4px!important; align-items:center!important; justify-content:flex-end!important; }
-.ob-nuvem-chip { display:inline-flex!important; align-items:center!important; height:24px!important; padding:2px 8px!important; border-radius:4px!important; font:500 .65rem/1.2 inherit!important; border:1px solid rgba(255,255,255,.1)!important; background:transparent!important; color:#94a3b8!important; cursor:pointer!important; white-space:nowrap!important; transition:background .12s!important; }
-.ob-nuvem-chip:hover { background:rgba(255,255,255,.06)!important; }
-.ob-nuvem-chip.ob-status { background:rgba(34,197,94,.12)!important; color:#86efac!important; border-color:rgba(34,197,94,.2)!important; }
-.ob-nuvem-chip.ob-status.ob-off { background:rgba(245,158,11,.12)!important; color:#fcd34d!important; border-color:rgba(245,158,11,.2)!important; }
-
-/* header-badges-right: coluna, nuvem ABAIXO */
-.header-badges-right.ob-col {
-  flex-direction:column!important;
-  align-items:flex-end!important;
-  gap:6px!important;
-}
-
-/* Config dentro das tabs */
-.tabs > .ob-settings-block { margin-top:6px; border-top:1px solid rgba(255,255,255,.08); padding-top:6px; }
-.tabs > .ob-settings-block > button { width:100%; text-align:left; margin:0 0 4px; font-size:.8rem!important; padding:5px 8px!important; }
-.tabs > .ob-settings-block .settings-dropdown { position:relative!important; top:auto!important; right:auto!important; }
-.tabs > .ob-settings-block .settings-dropdown button { font-size:.78rem!important; padding:4px 8px!important; text-align:left; }
-
-@media (max-width:520px) { #obMenu{width:260px!important} }
-@media print { #obMenu,.ob-launcher,.ob-menu-row,.ob-nuvem-row{display:none!important;visibility:hidden!important} }
-
 </style>
+
 </head>
 
 <body class="dark-mode">
 
-    <div id="obOverlay"></div><nav id="obMenu" role="navigation" aria-label="Menu de Obras">  <div class="ob-tit">🏗️ Obras</div>  <div id="obList"></div>  <div class="ob-sep"></div>  <div class="ob-foot">    <span class="ob-hide-btn"><span class="ob-hide-btn"><button class="ob-btn-add" onclick="abrirModalNovaObra()">+ Nova Obra</button>    <span class="ob-hide-btn"><span class="ob-hide-btn"><button class="ob-btn-mgr" onclick="abrirModalObra()">⚙️ Gerenciar</button>    <span class="ob-hide-btn"><span class="ob-hide-btn"><button class="ob-btn-del" onclick="excluirObraAtual()">🗑️ Excluir</button>  </div></nav>
-<div id="obOverlay"></div><nav id="obMenu" role="navigation" aria-label="Menu de Obras">  <div class="ob-tit">🏗️ Obras</div>  <div id="obList"></div>  <div class="ob-sep"></div>  <div class="ob-foot">    <button class="ob-btn-add" onclick="abrirModalNovaObra()">+ Nova Obra</button>    <button class="ob-btn-mgr" onclick="abrirModalObra()">⚙️ Gerenciar</button>    <button class="ob-btn-del" onclick="excluirObraAtual()">🗑️ Excluir</button>  </div></nav>
-<div id="obOverlay"></div><nav id="obMenu" role="navigation" aria-label="Menu de Obras">  <div class="ob-tit">🏗️ Obras</div>  <div id="obList"></div>  <div class="ob-sep"></div>  <div class="ob-foot">    <button class="ob-btn-add" onclick="abrirModalNovaObra()">+ Nova</button>    <button class="ob-btn-mgr" onclick="abrirModalObra()">⚙️ Gerenciar</button>    <button class="ob-btn-del" onclick="excluirObraAtual()">🗑️ Excluir</button>  </div></nav>
-<div class="container">
+    <div class="container">
         <header>
             <div class="header-title-container">
                 <div class="header-title-info">
                     <h1 id="obraTitle">BURJ LAVIE</h1>
                     <p>Painel de Acompanhamento de Produção e Instalação</p>
                 </div>
-                <div class="header-badges-right" style="flex-direction:column!important;align-items:flex-end!important;gap:6px!important" style="flex-direction:column!important;align-items:flex-end!important;gap:4px!important" >
+                <div class="header-badges-right" style="flex-direction:column!important;align-items:flex-end!important;gap:4px!important" >
                     <div class="contract-badge">
                         <span class="label">Contrato Global</span>
                         <span class="val" id="headerValorContrato">R$ 0,00</span>
@@ -5752,19 +5464,28 @@ body.p53-travado { overflow: hidden !important; }
                         <span class="label">Nº Contrato</span>
                         <span class="val" id="headerNumContrato">—</span>
                     </div>
-                <div class="ob-nuvem-row"></div>
-<div class="ob-nuvem-row"></div>
+
 <div class="ob-nuvem-row"><span id="statusNuvem" class="ob-nuvem-chip ob-status">☁️ Local</span><button class="ob-nuvem-chip" onclick="carregarBancoDaNuvem()" title="Carregar da nuvem">☁ Nuvem</button><button class="ob-nuvem-chip" onclick="alternarTema()" id="btnThemeToggle">☀️ Tema</button></div>
 </div>
             </div>
-            <div class="project-selector" style="display:none!important">
-                
-                <select id="selectObra" class="ob-hide" class="ob-hide" class="ob-hide" onchange="trocarObra(this.value)" class="ob-escondido"></select>
-<button type="button" id="obMenuBtn" class="ob-launcher" aria-haspopup="true" aria-expanded="false" aria-controls="obMenu"><span class="ob-ico" aria-hidden="true">🏗️</span><span class="ob-rot">Obra</span><span class="ob-atual" id="obAtual"></span></button>
-                <span style="display:none!important"><span class="ob-hide-btn"><button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button></span>
-                <span style="display:none!important"><span class="ob-hide-btn"><button class="success" onclick="abrirModalNovaObra()">+ Nova Obra</button></span>
-                <span style="display:none!important"><span class="ob-hide-btn"><button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button></span>
-                
+            <div class="project-selector">
+                <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
+                <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem (Render.com)" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
+                <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
+                <div class="settings-menu">
+                    <button type="button" class="secondary" onclick="toggleSettingsMenu()">⚙ Configurações</button>
+                    <div id="settingsMenu" class="settings-dropdown">
+                        <button class="secondary" onclick="exportarDados()">💾 Backup</button>
+                        <button class="secondary" onclick="document.getElementById('fileRestoreInput').click()">📥 Restaurar</button>
+                        <button class="warning" onclick="abrirRecuperacaoDados()">🧿 Recuperar Dados Antigos</button>
+                        <button class="primary" onclick="abrirBancoCompartilhado()">🌐 Banco Compartilhado</button>
+                    </div>
+                </div>
+                <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
+<select id="selectObra" onchange="trocarObra(this.value)" class="ob-escondido"></select>
+<span style="display:none!important"><button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button>
+                <span style="display:none!important"><button class="success" onclick="abrirModalNovaObra()">+ Nova Obra</button>
+                <span style="display:none!important"><button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button>
             </div>
         </header>
         <!-- INÍCIO DO MENU LATERAL E CONTEÚDO -->
@@ -5773,7 +5494,7 @@ body.p53-travado { overflow: hidden !important; }
             <!-- Área de Conteúdo Principal -->
             <div class="content-area">
                 <!-- 1. Cabeçalho Superior -->
-                <div class="ob-menu-row"><div class="ob-menu-row"><details id="meu-menu-abas" style="position:relative;z-index:9999;">
+                <details id="meu-menu-abas" style="margin: 10px 0 20px 0; position: relative; z-index: 9999;">
                     <summary style="cursor: pointer; padding: 8px 16px; background: #1e293b; color: #fff; border-radius: 6px; font-weight: bold; width: fit-content; user-select: none; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
                         ☰ Menu de Abas
                     </summary>
@@ -5790,19 +5511,14 @@ body.p53-travado { overflow: hidden !important; }
                         <button class="tab-btn" id="btn-tab-ctm" onclick="trocarAba('ctm')">🔲 Contramarco (CTM)</button>
                         <button class="tab-btn" id="btn-tab-custo" onclick="trocarAba('custo')">📊 Centro de Custos</button>
                         <button class="tab-btn" id="btn-tab-fpdo" type="button" onclick="if (window.p92AbrirFpdo) { window.p92AbrirFpdo(); } else { alert('O Relatório FPDO ainda está carregando. Tente novamente.'); }">📋 Relatório FPDO</button>
-                    <div class="ob-settings-block"><button type="button" class="secondary" onclick="toggleSettingsMenu()" style="width:100%;text-align:left;margin:0 0 6px 0;">⚙️ Configurações</button><div id="settingsMenu" class="settings-dropdown" style="position:relative!important;top:auto!important;right:auto!important;display:none;"><button class="secondary" onclick="exportarDados()" style="text-align:left;">💾 Backup</button><button class="secondary" onclick="document.getElementById('fileRestoreInput').click()" style="text-align:left;">📥 Restaurar</button><button class="warning" onclick="abrirRecuperacaoDados()" style="text-align:left;">🧿 Recuperar Dados Antigos</button><button class="primary" onclick="abrirBancoCompartilhado()" style="text-align:left;">🌐 Banco Compartilhado</button></div></div><input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
-</div>
+                    </div>
 
                     <!-- 3. Seu conteúdo principal ocupa a tela inteira -->
                     <main style="width: 100%;">
                         <!-- Todo o conteúdo dos cartões (Centro de Custos, etc) aqui -->
                     </main>
                 </details>
-<button type="button" id="obMenuBtn" class="ob-launcher" aria-haspopup="true" aria-expanded="false" aria-controls="obMenu"><span class="ob-ico" aria-hidden="true">🏗️</span><span class="ob-rot">Obra</span></button></div>
-<button type="button" id="obMenuBtn" class="ob-launcher" aria-haspopup="true" aria-expanded="false" aria-controls="obMenu"><span class="ob-ico" aria-hidden="true">🏗️</span><span class="ob-rot">Obra</span><span class="ob-atual" id="obAtual"></span></button></div>
-<button type="button" id="obMenuBtn" class="ob-launcher" aria-haspopup="true" aria-expanded="false" aria-controls="obMenu"><span class="ob-ico" aria-hidden="true">🏗️</span><span class="ob-rot">Obra</span><span class="ob-atual" id="obAtual"></span></button>
-
-                <!-- ÁREA DO CONTEÚDO FORÇADA A 100% DE LARGURA -->
+<!-- ÁREA DO CONTEÚDO FORÇADA A 100% DE LARGURA -->
                 <div class="content-area" style="width: 100% !important; flex: 1 1 100% !important; margin-left: 0 !important; padding-top: 45px;">
                     <!-- Seus cards (Centro de Custos, Cronograma, etc) ficam aqui dentro -->
                 </div>
