@@ -1,0 +1,48 @@
+/* Painel — CSS leve. Carregar depois dos estilos do index.
+   <link rel="stylesheet" href="painel-css-leve.css"> */
+
+#pToolbarAbas{
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:nowrap !important;
+  align-items:center !important;
+  gap:10px !important;
+  margin:10px 0 18px !important;
+}
+#pToolbarAbas #orMenuBtn,
+#pToolbarAbas #obrGavetaBtn{
+  height:44px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+  display:inline-flex !important;
+  align-items:center !important;
+}
+
+/* Menos custo de pintura no scroll */
+.card, .kpi, .content-area, table{
+  box-shadow: none;
+}
+header, .header, .banner{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Tabelas grandes: isola layout */
+.table-responsive, #itensTable, table.itens, .gantt-wrap{
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
+}
+
+/* Animações contínuas só se a aba estiver visível */
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Print sem efeito */
+@media print{
+  *{ box-shadow:none !important; backdrop-filter:none !important; }
+}
