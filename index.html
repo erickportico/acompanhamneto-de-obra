@@ -73043,17 +73043,19 @@ if (false) { /* PATCH154_DISABLED */
 <script id="patchObrasMenuV4inline">
 (function () {
   "use strict";
-  if (window.__patchObrasMenuV4) return;
-  window.__patchObrasMenuV4 = true;
+  if (window.__patchObrasMenuV5) return;
+  window.__patchObrasMenuV5 = true;
 
   var css = document.createElement("style");
+  css.id = "pObrasMenuCss";
   css.textContent =
-    "#pToolbarAbas{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 18px;}" +
+    "#pToolbarAbas{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;" +
+    "align-items:center!important;gap:10px!important;margin:10px 0 18px!important;width:100%;}" +
     "#pToolbarAbas #orMenuBtn,#pToolbarAbas #obrGavetaBtn{" +
     "height:44px!important;margin:0!important;box-sizing:border-box!important;" +
     "padding:8px 16px 8px 12px!important;border-radius:12px!important;" +
-    "display:inline-flex!important;align-items:center!important;gap:10px!important;}" +
-    ".project-selector > #obrGavetaBtn{position:absolute!important;left:-9999px!important;}" +
+    "display:inline-flex!important;align-items:center!important;gap:10px!important;" +
+    "flex:0 0 auto!important;}" +
     "#orMenu .or-grupo[data-p-obras='1'],#orMenu .or-item[data-p-obras='1']{display:none!important;}";
   (document.head || document.documentElement).appendChild(css);
 
@@ -73082,18 +73084,22 @@ if (false) { /* PATCH154_DISABLED */
     if (!row) {
       row = document.createElement("div");
       row.id = "pToolbarAbas";
+    }
+    if (row.parentNode !== menu.parentNode && menu.parentNode) {
       menu.parentNode.insertBefore(row, menu);
     }
     if (menu.parentNode !== row) row.appendChild(menu);
     if (obras.parentNode !== row) row.appendChild(obras);
+    if (row.firstChild !== menu) row.insertBefore(menu, row.firstChild);
+    if (menu.nextSibling !== obras) row.insertBefore(obras, menu.nextSibling);
     marcarObrasNoMenu();
     return true;
   }
 
   function hookGaveta() {
     var G = window.GAVETA_OBRAS;
-    if (!G || G.__ladoMenu) return;
-    G.__ladoMenu = true;
+    if (!G || G.__ladoMenuV5) return;
+    G.__ladoMenuV5 = true;
     if (typeof G.arrumar === "function") {
       var orig = G.arrumar;
       G.arrumar = function () {
@@ -73109,13 +73115,10 @@ if (false) { /* PATCH154_DISABLED */
     hookGaveta();
     encaixar();
     n += 1;
-    if (n < 20) setTimeout(tick, 500);
+    if (n < 25) setTimeout(tick, 400);
   }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", tick);
-  } else {
-    tick();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
+  else tick();
 })();
 </script>
 </body>
