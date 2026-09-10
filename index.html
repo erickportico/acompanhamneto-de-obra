@@ -72654,8 +72654,7 @@ if (false) { /* PATCH154_DISABLED */
   }
 
   function garantirLauncher() {
-    var antigo = D.querySelector(".project-selector");
-    if (!antigo) { return null; }
+    var menu = el("orMenuBtn");
     var b = el("obrGavetaBtn");
     if (!b) {
       b = D.createElement("button");
@@ -72665,7 +72664,7 @@ if (false) { /* PATCH154_DISABLED */
       b.setAttribute("aria-haspopup", "true");
       b.setAttribute("aria-expanded", "false");
       b.setAttribute("aria-controls", "obrGaveta");
-      b.innerHTML = 
+      b.innerHTML =
         '<span class="obr-ico" aria-hidden="true">🏗️</span>' +
         '<span class="obr-rot">Obras</span>' +
         '<span class="obr-atual" id="obrAtual"></span>';
@@ -72674,8 +72673,18 @@ if (false) { /* PATCH154_DISABLED */
         G.abrir();
       });
     }
-    if (b.parentNode !== antigo) {
-      antigo.insertBefore(b, antigo.firstChild);
+    var row = el("pToolbarAbas");
+    if (!row && menu && menu.parentNode) {
+      row = D.createElement("div");
+      row.id = "pToolbarAbas";
+      menu.parentNode.insertBefore(row, menu);
+    }
+    if (row) {
+      if (menu && menu.parentNode !== row) { row.appendChild(menu); }
+      if (b.parentNode !== row) { row.appendChild(b); }
+    } else if (menu && b.parentNode !== menu.parentNode) {
+      if (menu.nextSibling) { menu.parentNode.insertBefore(b, menu.nextSibling); }
+      else { menu.parentNode.appendChild(b); }
     }
     launcher = b;
     return b;
@@ -73044,6 +73053,7 @@ if (false) { /* PATCH154_DISABLED */
     "height:44px!important;margin:0!important;box-sizing:border-box!important;" +
     "padding:8px 16px 8px 12px!important;border-radius:12px!important;" +
     "display:inline-flex!important;align-items:center!important;gap:10px!important;}" +
+    ".project-selector > #obrGavetaBtn{position:absolute!important;left:-9999px!important;}" +
     "#orMenu .or-grupo[data-p-obras='1'],#orMenu .or-item[data-p-obras='1']{display:none!important;}";
   (document.head || document.documentElement).appendChild(css);
 
@@ -73055,8 +73065,8 @@ if (false) { /* PATCH154_DISABLED */
       var n = lista.children[i];
       var cls = String(n.className || "");
       if (cls.indexOf("or-grupo") >= 0) {
-        var t = String(n.textContent || "").replace(/\s+/g, " ").trim().toUpperCase();
-        dentro = (t === "OBRAS" || t === "PROJETOS");
+        var tx = String(n.textContent || "").replace(/\s+/g, " ").trim().toUpperCase();
+        dentro = (tx === "OBRAS" || tx === "PROJETOS");
         if (dentro) n.setAttribute("data-p-obras", "1");
         continue;
       }
@@ -73080,18 +73090,32 @@ if (false) { /* PATCH154_DISABLED */
     return true;
   }
 
-  var tentativas = 0;
-  function tentar() {
-    tentativas += 1;
-    if (encaixar() || tentativas > 12) return;
-    setTimeout(tentar, 400);
+  function hookGaveta() {
+    var G = window.GAVETA_OBRAS;
+    if (!G || G.__ladoMenu) return;
+    G.__ladoMenu = true;
+    if (typeof G.arrumar === "function") {
+      var orig = G.arrumar;
+      G.arrumar = function () {
+        var r = orig.apply(this, arguments);
+        encaixar();
+        return r;
+      };
+    }
+  }
+
+  var n = 0;
+  function tick() {
+    hookGaveta();
+    encaixar();
+    n += 1;
+    if (n < 20) setTimeout(tick, 500);
   }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", tentar);
+    document.addEventListener("DOMContentLoaded", tick);
   } else {
-    tentar();
+    tick();
   }
-  window.addEventListener("load", function () { setTimeout(encaixar, 300); });
 })();
 </script>
 </body>
