@@ -73147,6 +73147,7 @@ if (false) { /* PATCH154_DISABLED */
 
 <style id="pPrintPgtoOnly">
 @media print {
+  @page { size: A4 landscape; margin: 8mm; }
   #tab-pagamento .lanc-form-grid,
   #tab-pagamento .lanc-submit-row,
   #tab-pagamento .btn-add,
@@ -73159,13 +73160,47 @@ if (false) { /* PATCH154_DISABLED */
   #tab-pagamento #panelPgtoResumo,
   #tab-pagamento #panelPgtoColaboradores,
   #orMenu, #orMenuBtn, #obrGavetaBtn, #pToolbarAbas,
-  #pbxBotao, #pcalcBotao, header, .top-bar,
-  #meu-menu-abas {
+  #pbxBotao, #pcalcBotao, header, .top-bar, #meu-menu-abas {
     display: none !important;
   }
-  #tab-pagamento #containerLancamentosPgto,
-  #tab-pagamento #containerLancamentosPgto table {
+  #tab-pagamento, #panelPgtoLancamentos, #containerLancamentosPgto {
     display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  #containerLancamentosPgto .lanc-obra-group,
+  #containerLancamentosPgto .obra-group {
+    width: 100% !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  #tab-pagamento .lanc-obra-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    background: #1e3a5f !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #tab-pagamento .lanc-obra-header .p75-selo,
+  #tab-pagamento .lanc-obra-header .p75-m2,
+  #tab-pagamento .lanc-obra-header .p75-custo {
+    display: inline-flex !important;
+    color: #fff !important;
+    visibility: visible !important;
+  }
+  #tab-pagamento table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  #p63BlocoResumo, #p71BlocoResumo, .p63-resumo-bloco {
+    page-break-inside: avoid;
+    break-inside: avoid-page;
+    page-break-before: auto;
     width: 100% !important;
   }
 }
