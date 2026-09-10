@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 
 <head>
-<link rel="stylesheet" href="painel-css-leve.css">
 <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
 <style id="p154Remocao">
 /* vazio de proposito — overlays de login ativos */
@@ -6806,7 +6805,7 @@ body.obr-aberto { overflow: hidden !important; }
                             <button class="btn-action btn-export" onclick="exportarBackupPgto()" style="padding:5px 12px;font-size:0.78rem;">📤 Backup</button>
                             <button class="btn-action btn-import-backup" onclick="document.getElementById('inputBackupPgto').click()" style="padding:5px 12px;font-size:0.78rem;">📥 Restaurar</button>
                             <button class="btn-action btn-limpar-mes" onclick="limparMesPgto()" style="padding:5px 12px;font-size:0.78rem;">🗑️ Limpar</button>
-                            <button onclick="imprimirPaginaPgtoResumo()" style="padding:5px 12px;font-size:0.78rem;border:1px solid #cbd5e1;border-radius:6px;background:#fff;cursor:pointer;">🖨️ Imprimir</button>
+                            <button class="btn-action btn-imprimir" onclick="imprimirPaginaPgtoResumo()" title="Imprimir lançamentos" style="padding:6px 14px;font-size:0.78rem;border:0;border-radius:6px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer;">Imprimir</button>
                         </div>
                         <input type="file" id="inputBackupPgto" accept=".json" onchange="importarBackupPgto(event)" style="display:none;">
                     </div>
@@ -42101,7 +42100,29 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       '.pr-ass{margin-top:20px;text-align:center;font-size:9pt}' +
       '</style>';
     janelaImpressao.document.open();
-    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diario de Obra</title>' + cssImpressao + '</head><body>' + h + '</body></html>');
+    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diário de Obra</title>' + cssImpressao + '</head><body>' + h + '
+<style id="pFixUiPgto">
+#tab-pagamento .lanc-form-grid{
+  display:grid !important;
+  grid-template-columns: 1.2fr 0.7fr 1.4fr !important;
+  gap:0 !important;
+}
+@media (max-width: 1100px){
+  #tab-pagamento .lanc-form-grid{ grid-template-columns: 1fr !important; }
+}
+#tab-pagamento .btn-imprimir,
+#tab-pagamento button[onclick="imprimirPaginaPgtoResumo()"],
+#tab-pagamento button[onclick="imprimirPagina()"]{
+  background:#2563eb !important;
+  color:#fff !important;
+  border:0 !important;
+  font-weight:700 !important;
+}
+#tab-pagamento .lanc-checkbox-list{ min-height:72px; }
+#pToolbarAbas{display:flex!important;flex-direction:row!important;align-items:center!important;gap:10px!important;flex-wrap:nowrap!important;}
+</style>
+
+</body></html>');
     janelaImpressao.document.close();
     var imprimirJanela = function () {
       try { janelaImpressao.focus(); janelaImpressao.print(); } catch (erro) {}
@@ -42187,7 +42208,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   'use strict';
   if (window.__p152) { return; }
   window.__p152 = true;
-  try { console.log('[PATCH152] Correcoes de autenticacao aplicadas (trocarSenha RLS + bloqueio integrado).'); } catch (e) {}
+  try { console.log('[PATCH152] Correções de autenticação aplicadas (trocarSenha RLS + bloqueio integrado).'); } catch (e) {}
 })();
 </script>
 
