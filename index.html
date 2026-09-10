@@ -42100,82 +42100,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       '.pr-ass{margin-top:20px;text-align:center;font-size:9pt}' +
       '</style>';
     janelaImpressao.document.open();
-    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diário de Obra</title>' + cssImpressao + '</head><body>' + h + '
-<style id="pFixUiPgto">
-#orObrasBox,#orObrasTit,#orObrasLista{display:none!important;}
-#tab-pagamento .lanc-form-grid{
-  display:flex!important;flex-direction:column!important;
-  gap:0!important;grid-template-columns:none!important;
-}
-#tab-pagamento .lanc-form-grid .lanc-section,
-#tab-pagamento .lanc-form-grid .pgto-cel,
-#tab-pagamento .lanc-form-grid .pgto-loc{
-  width:100%!important;max-width:none!important;
-}
-#tab-pagamento .lanc-fields-row{display:flex!important;flex-wrap:wrap!important;gap:12px!important;}
-#tab-pagamento .lanc-submit-row{order:99;justify-content:flex-end!important;}
-#tab-pagamento .btn-imprimir,
-#tab-pagamento button[onclick="imprimirPaginaPgtoResumo()"],
-#tab-pagamento button[onclick="imprimirPagina()"]{
-  background:#2563eb!important;color:#fff!important;border:0!important;font-weight:700!important;
-}
-#pToolbarAbas{display:flex!important;flex-direction:row!important;align-items:center!important;gap:10px!important;flex-wrap:nowrap!important;}
-</style>
-<script id="pFixUiPgtoJs">
-(function(){
-  function sumirObrasDoMenu(){
-    var box=document.getElementById("orObrasBox");
-    if(box) box.style.setProperty("display","none","important");
-    var lista=document.getElementById("orLista");
-    if(!lista) return;
-    var n=lista.firstChild;
-    while(n){
-      var nx=n.nextSibling;
-      var tx=String(n.textContent||"").replace(/\s+/g," ").trim().toUpperCase();
-      if(n.id==="orObrasBox" || tx.indexOf("OBRAS")===0){
-        if(n.classList && n.classList.contains("or-grupo")) n.style.display="none";
-        if(n.id==="orObrasBox") n.style.display="none";
-      }
-      n=nx;
-    }
-  }
-  function limparSetas(){
-    var all=document.body ? document.body.getElementsByTagName("*") : [];
-    for(var i=0;i<all.length;i++){
-      var el=all[i];
-      if(el.childElementCount) continue;
-      var t=String(el.textContent||"").replace(/\s+/g,"");
-      if(/^(→)+$/.test(t) || /^(▸|▾)+$/.test(t) && !el.closest("#orMenu")){
-        if(!el.closest("#orMenu") && !el.closest("#obrGaveta") && t.indexOf("→")>=0){
-          el.style.display="none";
-        }
-      }
-    }
-  }
-  function hook(){
-    var M=window.ORMENU;
-    if(M && !M.__escondeObras){
-      M.__escondeObras=true;
-      ["abrir","arrumar"].forEach(function(fn){
-        if(typeof M[fn]==="function"){
-          var o=M[fn];
-          M[fn]=function(){ var r=o.apply(this,arguments); setTimeout(sumirObrasDoMenu,0); return r; };
-        }
-      });
-    }
-  }
-  var n=0;
-  function tick(){
-    hook(); sumirObrasDoMenu(); limparSetas();
-    n++; if(n<30) setTimeout(tick,400);
-  }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",tick);
-  else tick();
-})();
-</script>
-
-
-</body></html>');
+    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diario de Obra</title>' + cssImpressao + '</head><body>' + h + '</body></html>');
     janelaImpressao.document.close();
     var imprimirJanela = function () {
       try { janelaImpressao.focus(); janelaImpressao.print(); } catch (erro) {}
@@ -73196,6 +73121,29 @@ if (false) { /* PATCH154_DISABLED */
   else tick();
 })();
 </script>
+
+<style id="pFixUiPgto">
+#orObrasBox,#orObrasTit,#orObrasLista{display:none!important;}
+#tab-pagamento .lanc-form-grid{display:flex!important;flex-direction:column!important;}
+#tab-pagamento .btn-imprimir,#tab-pagamento button[onclick="imprimirPaginaPgtoResumo()"]{background:#2563eb!important;color:#fff!important;border:0!important;font-weight:700!important;}
+#pToolbarAbas{display:flex!important;flex-direction:row!important;align-items:center!important;gap:10px!important;}
+</style>
+<script id="pFixUiPgtoJs">
+(function(){
+  function sumir(){ var b=document.getElementById("orObrasBox"); if(b) b.style.setProperty("display","none","important"); }
+  function setas(){
+    var all=document.body?document.body.getElementsByTagName("*"):[];
+    for(var i=0;i<all.length;i++){
+      var el=all[i]; if(el.childElementCount) continue;
+      var tx=String(el.textContent||"").replace(/\s+/g,"");
+      if(/^(→)+$/.test(tx) && !el.closest("#orMenu")) el.style.display="none";
+    }
+  }
+  var n=0; function tick(){ sumir(); setas(); n++; if(n<25) setTimeout(tick,400); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",tick); else tick();
+})();
+</script>
+
 </body>
 
 </html>
