@@ -73144,6 +73144,32 @@ if (false) { /* PATCH154_DISABLED */
 })();
 </script>
 
+
+<style id="pPrintPgtoOnly">
+@media print {
+  #tab-pagamento .lanc-form-grid,
+  #tab-pagamento .lanc-submit-row,
+  #tab-pagamento .btn-add,
+  #tab-pagamento .pgto-month-nav,
+  #tab-pagamento .pgto-action-bar,
+  #tab-pagamento .pgto-sub-tabs,
+  #tab-pagamento .lanc-actions,
+  #tab-pagamento .valor-pago-input,
+  #tab-pagamento button,
+  #orMenu, #orMenuBtn, #obrGavetaBtn, #pToolbarAbas,
+  #pbxBotao, #pcalcBotao, header, .top-bar,
+  #meu-menu-abas {
+    display: none !important;
+  }
+  #tab-pagamento #containerLancamentosPgto,
+  #tab-pagamento #panelPgtoResumo,
+  #tab-pagamento table {
+    display: block !important;
+  }
+  #tab-pagamento table { width: 100% !important; }
+}
+</style>
+
 </body>
 
 </html>
