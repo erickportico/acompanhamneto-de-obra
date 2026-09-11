@@ -8925,9 +8925,6 @@ ${(Number(r.qtdRecebida||0)-Number(r.qtdSaida||0)).toLocaleString('pt-BR',{maxim
                     const qtdPrevista = Number(document.getElementById('recQtdPrevista').value) || 0;
                     const qtdRecebida = Number(document.getElementById('recQtdRecebida').value) || 0;
                     const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
-                    const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
-                    const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
-                    const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
                     let status = document.getElementById('recStatus').value;
                     if (status === 'Recebido' && qtdPrevista > 0 && qtdRecebida < qtdPrevista) status = 'Parcial';
                     obra.recebimentos.push({
@@ -44641,12 +44638,10 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       '#p87Botao{background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;margin:4px;font-size:13px}',
       '#p87Botao:hover{filter:brightness(1.1)}',
       '#meu-menu-abas #p87Botao{display:block;width:100%;box-sizing:border-box;margin:3px 0 !important;text-align:left}',
-      '#p87Fundo{position:fixed;inset:0;z-index:2147483200;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Segoe UI,Arial,sans-serif}'
-      /* PATCH_cadastroAdmin_v2: centralização no CSS base — sem pulo */
-      '#p87Caixa{position:fixed !important;left:50% !important;top:50% !important;right:auto !important;bottom:auto !important;transform:translate(-50%,-50%) !important;margin:0 !important;width:760px !important;max-width:94vw !important;max-height:86vh !important;height:auto !important}'
+      '#p87Fundo{position:fixed;inset:0;z-index:2147483200;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Segoe UI,Arial,sans-serif}',
       /* PATCH_cadastroAdmin: centralização já no CSS base para evitar pulo visual */
       '#p87Caixa{position:fixed !important;left:50% !important;top:50% !important;right:auto !important;bottom:auto !important;transform:translate(-50%,-50%) !important;margin:0 !important;width:760px !important;max-width:94vw !important;max-height:86vh !important;height:auto !important}',
-      '#p87Caixa{background:#fff;border-radius:14px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:p87FadeIn .2s ease-out}'
+      '#p87Caixa{background:#fff;border-radius:14px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:p87FadeIn .2s ease-out}',
       /* PATCH_cadastroAdmin: animação suave de entrada */
       '@keyframes p87FadeIn{from{opacity:0;transform:translate(-50%,-50%) scale(.97)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}',
       '#p87Caixa header{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#16304f;color:#fff;padding:12px 16px}',
@@ -63340,14 +63335,10 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
 
 <!-- PATCH128_LOGIN_NO_SERVIDOR -->
 <script>
-if (true) {
 /* ===== PATCH128 - login conferido no servidor ... */
 (function () {
   'use strict';
-  if (window.__P128) 
-  { return; }
-})();
-} /* /PATCH154_DISABLED */
+  if (window.__P128) { return; }
 
   var K_SESS  = 'painel_seg_sessao_v1';
   var K_USERS = 'painel_seg_usuarios_v1';
@@ -63780,7 +63771,6 @@ window.P128._trocarPendente = function () {
     comecar();
   }
 })();
-} /* /PATCH154_DISABLED */
 </script>
 <!-- PATCH154_HIDDEN: <!-- FIM PATCH128_LOGIN_NO_SERVIDOR --> -->
 <!-- PATCH154: P128 DESABILITADO – FIM -->
@@ -72516,7 +72506,7 @@ if (false) { /* PATCH154_DISABLED */
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
   else tick();
 })();
-<script src="patch_relocate_header_buttons.js"></script>
 </script>
+<script src="patch_relocate_header_buttons.js"></script>
 </body>
 </html>
