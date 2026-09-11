@@ -5438,7 +5438,238 @@ body.p53-travado { overflow: hidden !important; }
   #p84PrintStandalone img, #p83PrintStandalone img { max-width: 100% !important; height: auto !important; }
 }
 </style>
+<style>
+/* PATCH158 - Ocultar aba Gestao de Obra e Equipe (sem funcionalidade) */
+#btn-tab-cronograma { display: none !important; }
+#tab-cronograma { display: none !important; }
+</style>
 
+
+<style>
+
+</style>
+
+<style>
+/* === GAVETA OBRAS v1 — launcher + painel lateral (prefixo obr-) === */
+
+/* launcher — botao que abre a gaveta */
+.obr-launcher {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 6px !important;
+  padding: 6px 13px 6px 10px !important;
+  font: 600 13px/1.2 inherit;
+  color: #e8eefc;
+  background: linear-gradient(135deg, #1b2540 0%, #111827 100%);
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 14px rgba(2,8,23,.3);
+  cursor: pointer;
+  user-select: none;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.obr-launcher:hover {
+  transform: translateY(-1px);
+  border-color: rgba(245,158,11,.55) !important;
+  box-shadow: 0 8px 20px rgba(2,8,23,.4);
+}
+.obr-launcher:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+.obr-launcher .obr-ico {
+  display: grid; place-items: center;
+  width: 24px; height: 24px; font-size: 15px;
+  background: rgba(245,158,11,.18); border-radius: 7px;
+}
+.obr-launcher .obr-rot {
+  font-weight: 600; color: #c3d1ea; font-size: 12.5px;
+}
+.obr-launcher .obr-atual {
+  max-width: 200px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  font-weight: 500; color: #9fb3d9; font-size: 12px;
+}
+.obr-launcher .obr-atual:before { content: '•'; margin-right: 6px; color: #f59e0b; }
+
+/* gaveta lateral — overlay + painel */
+#obrGaveta:not(.obr-on) {
+  display: none !important; visibility: hidden !important;
+  pointer-events: none !important; opacity: 0 !important;
+}
+#obrGaveta.obr-on {
+  display: block !important; visibility: visible !important;
+  pointer-events: auto !important; opacity: 1 !important;
+  position: fixed !important; top: 0 !important; left: 0 !important;
+  right: 0 !important; bottom: 0 !important;
+  width: 100% !important; height: 100% !important;
+  max-width: none !important; margin: 0 !important; padding: 0 !important;
+  z-index: 100095 !important;
+}
+.obr-fundo {
+  position: absolute !important; inset: 0 !important;
+  width: 100% !important; height: 100% !important;
+  background: rgba(3,7,18,.62);
+  backdrop-filter: blur(3px);
+  animation: obrFade .18s ease;
+}
+@keyframes obrFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes obrSlide { from { transform: translateX(-24px); opacity: .4; } to { transform: none; opacity: 1; } }
+
+.obr-painel {
+  position: absolute !important; top: 0 !important; left: 0 !important;
+  bottom: 0 !important; right: auto !important;
+  display: flex !important; flex-direction: column !important;
+  width: 340px !important; max-width: 90vw !important;
+  height: 100% !important; margin: 0 !important; padding: 0 !important;
+  background: #0d1424;
+  border-right: 1px solid rgba(255,255,255,.08);
+  box-shadow: 24px 0 60px rgba(2,6,23,.55);
+  animation: obrSlide .2s ease;
+  overflow: hidden;
+}
+
+/* topo da gaveta */
+.obr-topo {
+  display: flex !important; align-items: center; gap: 12px;
+  width: auto !important;
+  padding: 18px 16px 14px 18px !important;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.obr-logo {
+  display: grid !important; place-items: center;
+  width: 38px !important; height: 38px; flex: 0 0 38px;
+  font: 800 15px/1 inherit; color: #fff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 11px;
+  box-shadow: 0 6px 16px rgba(245,158,11,.35);
+}
+.obr-nomes { flex: 1 1 auto; min-width: 0; width: auto !important; }
+.obr-nomes b { display: block; font-size: 13.5px; letter-spacing: .3px; color: #f1f5f9; }
+.obr-nomes span { display: block; font-size: 11.5px; color: #7f92b5; margin-top: 2px; }
+.obr-x {
+  width: 32px !important; height: 32px; flex: 0 0 32px;
+  padding: 0 !important; font-size: 18px; line-height: 1;
+  color: #9fb3d9; background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 9px !important; cursor: pointer;
+}
+.obr-x:hover { color: #fff; background: rgba(239,68,68,.22); }
+
+/* busca */
+.obr-buscabox { padding: 10px 14px 6px 14px !important; width: auto !important; }
+.obr-busca {
+  width: 100% !important; max-width: 100% !important;
+  padding: 8px 11px !important; font: 400 12.5px/1.3 inherit;
+  color: #e8eefc; background: #131c2f !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 10px !important; box-sizing: border-box;
+}
+.obr-busca::placeholder { color: #6b7f9f; }
+.obr-busca:focus { outline: none; border-color: rgba(245,158,11,.6) !important; background: #16203a !important; }
+
+/* lista de obras */
+.obr-lista {
+  flex: 1 1 auto; width: auto !important;
+  padding: 8px 10px 14px 10px !important;
+  overflow-y: auto; overflow-x: hidden;
+}
+.obr-grupo {
+  padding: 12px 8px 6px 8px;
+  font: 700 10.5px/1 inherit;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: #5d708f;
+}
+.obr-obra {
+  display: flex !important; align-items: center; gap: 11px;
+  width: 100% !important; max-width: 100% !important;
+  margin: 3px 0 !important; padding: 10px 12px !important;
+  font: 500 13.5px/1.25 inherit;
+  text-align: left !important; color: #c3d1ea;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important; cursor: pointer;
+  box-sizing: border-box;
+  transition: background .14s ease, color .14s ease, transform .14s ease;
+}
+.obr-obra:hover {
+  color: #fff; background: rgba(245,158,11,.1) !important;
+  transform: translateX(2px);
+}
+.obr-obra:focus-visible { outline: 2px solid #f59e0b; outline-offset: 1px; }
+.obr-obra .obr-ico2 {
+  display: grid; place-items: center;
+  width: 28px; height: 28px; flex: 0 0 28px; font-size: 14px;
+  background: rgba(255,255,255,.05); border-radius: 8px;
+}
+.obr-obra .obr-txt {
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.obr-obra.obr-ativo {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(245,158,11,.22), rgba(245,158,11,.06)) !important;
+  border-color: rgba(245,158,11,.3) !important;
+  font-weight: 700;
+}
+.obr-obra.obr-ativo .obr-ico2 { background: rgba(245,158,11,.22); }
+.obr-obra.obr-ativo:after {
+  content: ''; width: 6px; height: 6px; flex: 0 0 6px;
+  border-radius: 50%; background: #f59e0b; box-shadow: 0 0 8px #f59e0b;
+}
+.obr-vazio { padding: 18px 12px; font-size: 12.5px; color: #6b7f9f; text-align: center; }
+.obr-esconde { display: none !important; }
+
+/* rodape com botoes de acao */
+.obr-rodape {
+  width: auto !important; padding: 12px 14px 16px 14px !important;
+  border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.obr-rodape button {
+  width: 100%; padding: 9px 12px !important;
+  font: 500 13px/1.2 inherit; border-radius: 8px !important;
+  cursor: pointer; border: 1px solid rgba(255,255,255,.1) !important;
+  transition: background .14s ease;
+}
+.obr-btn-gerenciar {
+  color: #000 !important; background: #f59e0b !important;
+  border-color: rgba(245,158,11,.4) !important;
+}
+.obr-btn-gerenciar:hover { background: #d97706 !important; }
+.obr-btn-nova {
+  color: #fff !important; background: #16a34a !important;
+  border-color: rgba(22,163,74,.4) !important;
+}
+.obr-btn-nova:hover { background: #15803d !important; }
+.obr-btn-excluir {
+  color: #fff !important; background: #dc2626 !important;
+  border-color: rgba(220,38,38,.4) !important;
+}
+.obr-btn-excluir:hover { background: #b91c1c !important; }
+
+/* info de contrato no rodape */
+.obr-info {
+  width: auto !important; padding: 8px 16px 10px 16px !important;
+  font-size: 11px; color: #5d708f;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+
+/* esconder elementos antigos do project-selector */
+.obr-substitui {
+  position: absolute !important; left: -9999px !important;
+  width: 1px !important; height: 1px !important;
+  opacity: 0 !important; pointer-events: none !important;
+}
+
+body.obr-aberto { overflow: hidden !important; }
+
+@media (max-width: 520px) {
+  .obr-launcher .obr-atual { display: none; }
+  .obr-painel { width: 290px !important; }
+}
+@media print {
+  #obrGaveta, .obr-launcher { display: none !important; visibility: hidden !important; }
+}
+</style>
 </head>
 
 <body class="dark-mode">
@@ -72348,6 +72579,572 @@ if (false) { /* PATCH154_DISABLED */
 <script src="/patch-arquivos-obra.js"></script>
 <!-- FIM PATCH150_CAMADA_ABSTRACAO -->
 
+
+
+<script>
+/* === GAVETA OBRAS v1 — gaveta lateral para gerenciar obras === */
+(function () {
+  "use strict";
+
+  var G = window.GAVETA_OBRAS = window.GAVETA_OBRAS || {};
+  if (G.__v1) { return; }
+  G.__v1 = true;
+
+  var D = document;
+
+  /* estado */
+  var gaveta = null;
+  var launcher = null;
+  var montada = false;
+  var sigAtual = "";
+  var nos = {};
+  var noVazio = null;
+
+  function el(id) { return D.getElementById(id); }
+
+  /* ler db.obras de forma segura */
+  function obras() {
+    try {
+      if (typeof db !== "undefined" && db.obras && Array.isArray(db.obras)) { return db.obras; }
+    } catch (e) { }
+    return [];
+  }
+  function obraAtualId() {
+    try {
+      if (typeof db !== "undefined" && db.obraAtualId) { return db.obraAtualId; }
+    } catch (e) { }
+    return "";
+  }
+  function obraAtual() {
+    var id = obraAtualId();
+    var lista = obras();
+    var o = lista.find(function (x) { return x.id === id; });
+    return o || lista[0] || null;
+  }
+
+  function assinatura() {
+    var lista = obras();
+    return lista.length + ":" + lista.map(function (o) { return o.id; }).join(",");
+  }
+
+  function nomeAtual() {
+    var o = obraAtual();
+    return o ? (o.nome || "Sem nome") : "Sem obras";
+  }
+
+  function esconderAntigos() {
+    var sel = el("selectObra");
+    if (sel && !sel.classList.contains("obr-substitui")) {
+      sel.classList.add("obr-substitui");
+    }
+    var ps = D.querySelector(".project-selector");
+    if (!ps) { return; }
+    var btns = ps.querySelectorAll("button");
+    for (var i = 0; i < btns.length; i++) {
+      var txt = (btns[i].textContent || "").trim();
+      var onc = btns[i].getAttribute("onclick") || "";
+      if (txt.indexOf("Gerenciar Obra") >= 0 ||
+          txt.indexOf("Nova Obra") >= 0 ||
+          onc === "excluirObraAtual()") {
+        if (!btns[i].classList.contains("obr-substitui")) {
+          btns[i].classList.add("obr-substitui");
+        }
+      }
+    }
+  }
+
+  function garantirLauncher() {
+    var menu = el("orMenuBtn");
+    var b = el("obrGavetaBtn");
+    if (!b) {
+      b = D.createElement("button");
+      b.id = "obrGavetaBtn";
+      b.type = "button";
+      b.className = "obr-launcher";
+      b.setAttribute("aria-haspopup", "true");
+      b.setAttribute("aria-expanded", "false");
+      b.setAttribute("aria-controls", "obrGaveta");
+      b.innerHTML =
+        '<span class="obr-ico" aria-hidden="true">🏗️</span>' +
+        '<span class="obr-rot">Obras</span>' +
+        '<span class="obr-atual" id="obrAtual"></span>';
+      b.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        G.abrir();
+      });
+    }
+    var row = el("pToolbarAbas");
+    if (!row && menu && menu.parentNode) {
+      row = D.createElement("div");
+      row.id = "pToolbarAbas";
+      menu.parentNode.insertBefore(row, menu);
+    }
+    if (row) {
+      if (menu && menu.parentNode !== row) { row.appendChild(menu); }
+      if (b.parentNode !== row) { row.appendChild(b); }
+    } else if (menu && b.parentNode !== menu.parentNode) {
+      if (menu.nextSibling) { menu.parentNode.insertBefore(b, menu.nextSibling); }
+      else { menu.parentNode.appendChild(b); }
+    }
+    launcher = b;
+    return b;
+  }
+
+  function criarGaveta() {
+    var g = el("obrGaveta");
+    if (g) { gaveta = g; return g; }
+    g = D.createElement("div");
+    g.id = "obrGaveta";
+    g.setAttribute("role", "dialog");
+    g.setAttribute("aria-modal", "true");
+    g.setAttribute("aria-label", "Gaveta de Obras");
+    g.setAttribute("aria-hidden", "true");
+    g.innerHTML =
+      '<div class="obr-fundo" id="obrFundo"></div>' +
+      '<div class="obr-painel">' +
+        '<div class="obr-topo">' +
+          '<span class="obr-logo" aria-hidden="true">OB</span>' +
+          '<span class="obr-nomes"><b>Gaveta de Obras</b><span>Gerenciar projetos</span></span>' +
+          '<button type="button" class="obr-x" id="obrFechar" title="Fechar" aria-label="Fechar gaveta">×</button>' +
+        '</div>' +
+        '<div class="obr-buscabox">' +
+          '<input type="text" class="obr-busca" id="obrBusca" placeholder="Buscar obra..." autocomplete="off">' +
+        '</div>' +
+        '<div class="obr-lista" id="obrLista"></div>' +
+        '<div class="obr-rodape">' +
+          '<button type="button" class="obr-btn-nova" id="obrNovaObra">+ Nova Obra</button>' +
+          '<button type="button" class="obr-btn-gerenciar" id="obrGerenciar">⚙️ Gerenciar Obra</button>' +
+          '<button type="button" class="obr-btn-excluir" id="obrExcluir">🗑️ Excluir Obra</button>' +
+        '</div>' +
+        '<div class="obr-info" id="obrInfo"></div>' +
+      '</div>';
+    D.body.appendChild(g);
+
+    g.addEventListener("click", function (ev) {
+      if (ev.target === g || ev.target.id === "obrFundo") { G.fechar(); }
+    });
+    var x = g.querySelector("#obrFechar");
+    if (x) { x.addEventListener("click", function () { G.fechar(); }); }
+
+    var busca = g.querySelector("#obrBusca");
+    if (busca) {
+      busca.addEventListener("input", function () { filtrar(busca.value); });
+      busca.addEventListener("keydown", function (ev) {
+        if (ev.key !== "Enter") { return; }
+        var alvo = g.querySelector(".obr-obra:not(.obr-esconde)");
+        if (alvo) { alvo.click(); }
+      });
+    }
+
+    var btnNova = g.querySelector("#obrNovaObra");
+    if (btnNova) {
+      btnNova.addEventListener("click", function () {
+        G.fechar();
+        if (typeof abrirModalNovaObra === "function") { abrirModalNovaObra(); }
+      });
+    }
+    var btnGerenciar = g.querySelector("#obrGerenciar");
+    if (btnGerenciar) {
+      btnGerenciar.addEventListener("click", function () {
+        G.fechar();
+        if (typeof abrirModalObra === "function") { abrirModalObra(); }
+      });
+    }
+    var btnExcluir = g.querySelector("#obrExcluir");
+    if (btnExcluir) {
+      btnExcluir.addEventListener("click", function () {
+        G.fechar();
+        if (typeof excluirObraAtual === "function") { excluirObraAtual(); }
+      });
+    }
+
+    gaveta = g;
+    return g;
+  }
+
+  function noVazioNode() {
+    if (!noVazio) {
+      noVazio = D.createElement("div");
+      noVazio.className = "obr-vazio obr-esconde";
+      noVazio.textContent = "Nenhuma obra encontrada.";
+    }
+    return noVazio;
+  }
+
+  function noItemObra(obra) {
+    var b = nos[obra.id];
+    if (b) {
+      var t = b.querySelector(".obr-txt");
+      if (t && t.textContent !== obra.nome) { t.textContent = obra.nome; }
+      return b;
+    }
+    b = D.createElement("button");
+    b.type = "button";
+    b.className = "obr-obra";
+    b.setAttribute("data-obra-id", obra.id);
+    var ico = D.createElement("span");
+    ico.className = "obr-ico2";
+    ico.setAttribute("aria-hidden", "true");
+    ico.textContent = "🏗️";
+    var txt = D.createElement("span");
+    txt.className = "obr-txt";
+    txt.textContent = obra.nome || "Sem nome";
+    b.appendChild(ico);
+    b.appendChild(txt);
+
+    var oid = obra.id;
+    b.addEventListener("click", function () {
+      G.fechar();
+      if (typeof trocarObra === "function") { trocarObra(oid); }
+    });
+    nos[obra.id] = b;
+    return b;
+  }
+
+  function montarLista() {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var lista = obras();
+    var frag = D.createDocumentFragment();
+    var titulo = D.createElement("div");
+    titulo.className = "obr-grupo";
+    titulo.textContent = "PROJETOS";
+    frag.appendChild(titulo);
+    for (var i = 0; i < lista.length; i++) {
+      frag.appendChild(noItemObra(lista[i]));
+    }
+    frag.appendChild(noVazioNode());
+    caixa.textContent = "";
+    caixa.appendChild(frag);
+    montada = true;
+    marcarAtivo();
+  }
+
+  function marcarAtivo() {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var idAtual = obraAtualId();
+    var itens = caixa.querySelectorAll(".obr-obra");
+    for (var i = 0; i < itens.length; i++) {
+      var on = itens[i].getAttribute("data-obra-id") === idAtual;
+      if (on === itens[i].classList.contains("obr-ativo")) { continue; }
+      if (on) {
+        itens[i].classList.add("obr-ativo");
+        itens[i].setAttribute("aria-current", "true");
+      } else {
+        itens[i].classList.remove("obr-ativo");
+        itens[i].removeAttribute("aria-current");
+      }
+    }
+    var info = el("obrInfo");
+    var o = obraAtual();
+    if (info && o) {
+      var contrato = o.numContrato || "—";
+      var valor = o.valorContrato ? "R$ " + Number(o.valorContrato).toLocaleString("pt-BR", {minimumFractionDigits:2}) : "—";
+      var pct = (o.pctServico !== undefined && o.pctServico !== null) ? o.pctServico + "%" : "—";
+      info.textContent = "Contrato: " + contrato + "  |  Valor: " + valor + "  |  Serviço: " + pct;
+    }
+  }
+
+  function mostrar(n, ok) {
+    if (!n) { return; }
+    var escondido = n.classList.contains("obr-esconde");
+    if (ok === escondido) {
+      if (ok) { n.classList.remove("obr-esconde"); } else { n.classList.add("obr-esconde"); }
+    }
+  }
+
+  function filtrar(txt) {
+    var caixa = el("obrLista");
+    if (!caixa) { return; }
+    var busca = (txt || "").toLowerCase().trim();
+    var f = caixa.children;
+    var grupo = null;
+    var vistos = 0;
+    var achou = 0;
+    for (var i = 0; i < f.length; i++) {
+      var n = f[i];
+      var cls = n.className || "";
+      if (cls.indexOf("obr-grupo") >= 0) {
+        if (grupo) { mostrar(grupo, vistos > 0); }
+        grupo = n;
+        vistos = 0;
+        continue;
+      }
+      if (cls.indexOf("obr-vazio") >= 0) { continue; }
+      var nome = (n.querySelector(".obr-txt") || {}).textContent || "";
+      var ok = !busca || nome.toLowerCase().indexOf(busca) >= 0;
+      mostrar(n, ok);
+      if (ok) { achou++; vistos++; }
+    }
+    if (grupo) { mostrar(grupo, vistos > 0); }
+    mostrar(noVazioNode(), achou === 0);
+  }
+
+  function atualizarRotulo() {
+    var r = el("obrAtual");
+    if (!r) { return; }
+    var t = nomeAtual();
+    if (r.textContent !== t) { r.textContent = t; }
+  }
+
+  function prepararGaveta() {
+    if (!D.body) { return null; }
+    var g = criarGaveta();
+    var sig = assinatura();
+    if (montada && sig !== sigAtual) { montada = false; }
+    if (!montada) { montarLista(); filtrar(""); }
+    sigAtual = sig;
+    return g;
+  }
+  G.preparar = prepararGaveta;
+
+  G.abrir = function () {
+    var g = prepararGaveta();
+    if (!g) { return; }
+    if (D.body.lastElementChild !== g) { D.body.appendChild(g); }
+    var b = el("obrBusca");
+    if (b && b.value !== "") { b.value = ""; }
+    marcarAtivo();
+    filtrar("");
+    g.classList.add("obr-on");
+    g.setAttribute("aria-hidden", "false");
+    D.body.classList.add("obr-aberto");
+    if (launcher || el("obrGavetaBtn")) {
+      (launcher || el("obrGavetaBtn")).setAttribute("aria-expanded", "true");
+    }
+    if (window.ORMENU && window.ORMENU.aberto && window.ORMENU.aberto()) {
+      window.ORMENU.fechar();
+    }
+    if (b && b.focus) { try { b.focus(); } catch (e) { } }
+  };
+
+  G.fechar = function () {
+    var g = el("obrGaveta");
+    if (g) {
+      g.classList.remove("obr-on");
+      g.setAttribute("aria-hidden", "true");
+    }
+    D.body.classList.remove("obr-aberto");
+    var lb = el("obrGavetaBtn");
+    if (lb) { lb.setAttribute("aria-expanded", "false"); }
+  };
+
+  G.aberto = function () {
+    var g = el("obrGaveta");
+    return !!(g && g.classList.contains("obr-on"));
+  };
+
+  G.alternar = function () {
+    if (G.aberto()) { G.fechar(); } else { G.abrir(); }
+  };
+
+  G.arrumar = function () {
+    if (!D.body) { return; }
+    garantirLauncher();
+    esconderAntigos();
+    var sig = assinatura();
+    if (montada && sig !== sigAtual) { montada = false; }
+    if (!montada && G.aberto()) { prepararGaveta(); }
+    atualizarRotulo();
+    marcarAtivo();
+  };
+
+  function ligarTeclado() {
+    if (G.__teclado) { return; }
+    G.__teclado = true;
+    D.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape" && G.aberto()) { G.fechar(); return; }
+      var comAtalho = (ev.ctrlKey || ev.metaKey) && ev.shiftKey;
+      if (comAtalho && (ev.key === "o" || ev.key === "O")) {
+        ev.preventDefault(); G.alternar();
+      }
+    });
+  }
+
+  function ligarVigia() {
+    if (G.__vigia || typeof MutationObserver !== "function") { return; }
+    var agendado = false;
+    function agenda() {
+      if (agendado) { return; }
+      agendado = true;
+      setTimeout(function () { agendado = false; G.arrumar(); }, 80);
+    }
+    var sel = el("selectObra");
+    if (sel) {
+      var o1 = new MutationObserver(agenda);
+      o1.observe(sel, { childList: true, attributes: true, attributeFilter: ["class"] });
+      G.__vigia = o1;
+    }
+    var ps = D.querySelector(".project-selector");
+    if (ps) {
+      var o2 = new MutationObserver(agenda);
+      o2.observe(ps, { childList: true, subtree: true });
+      G.__vigia2 = o2;
+    }
+  }
+
+  function ligarHooks() {
+    if (G.__hooks) { return; }
+    G.__hooks = true;
+    var trocarOriginal = (typeof window.trocarObra === "function") ? window.trocarObra : null;
+    if (trocarOriginal) {
+      window.trocarObra = function (id) {
+        trocarOriginal(id);
+        setTimeout(function () { G.arrumar(); }, 50);
+      };
+    }
+    var salvarOriginal = (typeof window.salvarDB === "function") ? window.salvarDB : null;
+    if (salvarOriginal) {
+      window.salvarDB = function () {
+        salvarOriginal();
+        setTimeout(function () { G.arrumar(); }, 80);
+      };
+    }
+  }
+
+  function partirAgora() {
+    if (!D.body) { return; }
+    garantirLauncher();
+    esconderAntigos();
+    atualizarRotulo();
+    ligarTeclado();
+    ligarVigia();
+    setTimeout(ligarHooks, 500);
+    G.__pronto = true;
+  }
+
+  if (D.body) { partirAgora(); }
+  else { D.addEventListener("DOMContentLoaded", partirAgora); }
+
+  D.addEventListener("DOMContentLoaded", function () {
+    garantirLauncher();
+    esconderAntigos();
+    atualizarRotulo();
+  });
+
+  if (D.readyState === "complete") {
+    setTimeout(function () {
+      G.arrumar();
+      console.log("GAVETA OBRAS v1 ativa — launcher + gaveta pronta.");
+    }, 200);
+  } else {
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        G.arrumar();
+        console.log("GAVETA OBRAS v1 ativa — launcher + gaveta pronta.");
+      }, 200);
+    });
+  }
+
+}());
+</script>
+
+<script id="patchObrasMenuV4inline">
+(function () {
+  "use strict";
+  if (window.__patchObrasMenuV5) return;
+  window.__patchObrasMenuV5 = true;
+
+  var css = document.createElement("style");
+  css.id = "pObrasMenuCss";
+  css.textContent =
+    "#pToolbarAbas{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;" +
+    "align-items:center!important;gap:10px!important;margin:10px 0 18px!important;width:100%;}" +
+    "#pToolbarAbas #orMenuBtn,#pToolbarAbas #obrGavetaBtn{" +
+    "height:44px!important;margin:0!important;box-sizing:border-box!important;" +
+    "padding:8px 16px 8px 12px!important;border-radius:12px!important;" +
+    "display:inline-flex!important;align-items:center!important;gap:10px!important;" +
+    "flex:0 0 auto!important;}" +
+    "#orMenu .or-grupo[data-p-obras='1'],#orMenu .or-item[data-p-obras='1']{display:none!important;}";
+  (document.head || document.documentElement).appendChild(css);
+
+  function marcarObrasNoMenu() {
+    var lista = document.getElementById("orLista");
+    if (!lista) return;
+    var dentro = false;
+    for (var i = 0; i < lista.children.length; i++) {
+      var n = lista.children[i];
+      var cls = String(n.className || "");
+      if (cls.indexOf("or-grupo") >= 0) {
+        var tx = String(n.textContent || "").replace(/\s+/g, " ").trim().toUpperCase();
+        dentro = (tx === "OBRAS" || tx === "PROJETOS");
+        if (dentro) n.setAttribute("data-p-obras", "1");
+        continue;
+      }
+      if (dentro) n.setAttribute("data-p-obras", "1");
+    }
+  }
+
+  function encaixar() {
+    var menu = document.getElementById("orMenuBtn");
+    var obras = document.getElementById("obrGavetaBtn");
+    if (!menu || !obras) return false;
+    var row = document.getElementById("pToolbarAbas");
+    if (!row) {
+      row = document.createElement("div");
+      row.id = "pToolbarAbas";
+    }
+    if (row.parentNode !== menu.parentNode && menu.parentNode) {
+      menu.parentNode.insertBefore(row, menu);
+    }
+    if (menu.parentNode !== row) row.appendChild(menu);
+    if (obras.parentNode !== row) row.appendChild(obras);
+    if (row.firstChild !== menu) row.insertBefore(menu, row.firstChild);
+    if (menu.nextSibling !== obras) row.insertBefore(obras, menu.nextSibling);
+    marcarObrasNoMenu();
+    return true;
+  }
+
+  function hookGaveta() {
+    var G = window.GAVETA_OBRAS;
+    if (!G || G.__ladoMenuV5) return;
+    G.__ladoMenuV5 = true;
+    if (typeof G.arrumar === "function") {
+      var orig = G.arrumar;
+      G.arrumar = function () {
+        var r = orig.apply(this, arguments);
+        encaixar();
+        return r;
+      };
+    }
+  }
+
+  var n = 0;
+  function tick() {
+    hookGaveta();
+    encaixar();
+    n += 1;
+    if (n < 25) setTimeout(tick, 400);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
+  else tick();
+})();
+</script>
+
+<style id="pFixUiPgto">
+#orObrasBox,#orObrasTit,#orObrasLista{display:none!important;}
+#tab-pagamento .lanc-form-grid{display:flex!important;flex-direction:column!important;}
+#tab-pagamento .btn-imprimir,#tab-pagamento button[onclick="imprimirPaginaPgtoResumo()"]{background:#2563eb!important;color:#fff!important;border:0!important;font-weight:700!important;}
+#pToolbarAbas{display:flex!important;flex-direction:row!important;align-items:center!important;gap:10px!important;}
+</style>
+<script id="pFixUiPgtoJs">
+(function(){
+  function sumir(){ var b=document.getElementById("orObrasBox"); if(b) b.style.setProperty("display","none","important"); }
+  function setas(){
+    var all=document.body?document.body.getElementsByTagName("*"):[];
+    for(var i=0;i<all.length;i++){
+      var el=all[i]; if(el.childElementCount) continue;
+      var tx=String(el.textContent||"").replace(/\s+/g,"");
+      if(/^(→)+$/.test(tx) && !el.closest("#orMenu")) el.style.display="none";
+    }
+  }
+  var n=0; function tick(){ sumir(); setas(); n++; if(n<25) setTimeout(tick,400); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",tick); else tick();
+})();
+</script>
+
+
 <style id="pPrintPgtoOnly">
 @media print {
   @page { size: A4 landscape; margin: 8mm; }
@@ -72362,7 +73159,8 @@ if (false) { /* PATCH154_DISABLED */
   #tab-pagamento button,
   #tab-pagamento #panelPgtoResumo,
   #tab-pagamento #panelPgtoColaboradores,
-  #orMenu, #orMenuBtn, #pbxBotao, #pcalcBotao, header, .top-bar, #meu-menu-abas {
+  #orMenu, #orMenuBtn, #obrGavetaBtn, #pToolbarAbas,
+  #pbxBotao, #pcalcBotao, header, .top-bar, #meu-menu-abas {
     display: none !important;
   }
   #tab-pagamento, #panelPgtoLancamentos, #containerLancamentosPgto {
@@ -72459,7 +73257,6 @@ if (false) { /* PATCH154_DISABLED */
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
   else tick();
 })();
-<script src="patch_relocate_header_buttons.js"></script>
 </script>
 
 </body>
