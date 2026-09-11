@@ -5551,7 +5551,7 @@ body.p53-travado { overflow: hidden !important; }
                         <div class="card-title">Controle de Produção e Instalação</div>
                         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                             <div class="search-box">
-                                <input type="text" id="searchItens" placeholder="Filtrar por ref, tipo, loc..." oninput="debounceRender()">
+                                <input type="text" id="searchItens" placeholder="Filtrar por ref, tipo, loc..." oninput="window.debounceRender()">
                             </div>
                             <button class="btn-primary" onclick="abrirModalListaCorte()" style="background: #4a5568; color: #fff;">Inserir Listas de Corte</button>
                             <button class="warning" style="color:#000" onclick="abrirModalConfig()">Ocultar/Mostrar Colunas</button>
@@ -5584,7 +5584,7 @@ body.p53-travado { overflow: hidden !important; }
                             <div class="card-title">Acompanhamento Detalhado de Liberação Técnica (FEM)</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchLiberacao" placeholder="Filtrar liberação..." oninput="debounceRender()">
+                                    <input type="text" id="searchLiberacao" placeholder="Filtrar liberação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -5645,7 +5645,7 @@ body.p53-travado { overflow: hidden !important; }
                             <div class="card-title">Acompanhamento Detalhado de Fabricação</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchFabricacao" placeholder="Filtrar fabricação..." oninput="debounceRender()">
+                                    <input type="text" id="searchFabricacao" placeholder="Filtrar fabricação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -5706,7 +5706,7 @@ body.p53-travado { overflow: hidden !important; }
                             <div class="card-title">Acompanhamento Detalhado de Instalação</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchInstalacao" placeholder="Filtrar instalação..." oninput="debounceRender()">
+                                    <input type="text" id="searchInstalacao" placeholder="Filtrar instalação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -6042,7 +6042,7 @@ body.p53-travado { overflow: hidden !important; }
                         <div class="card-title">Boletim de Medição Detalhado por Tipologia (Serviço de Instalação)</div>
                         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                             <div class="search-box">
-                                <input type="text" id="searchMedicao" placeholder="Filtrar medição..." oninput="debounceRender()">
+                                <input type="text" id="searchMedicao" placeholder="Filtrar medição..." oninput="window.debounceRender()">
                             </div>
                             <button class="warning" style="color:#000" onclick="sincronizarComInstalacao()">🔄 Sincronizar com Instalação
                             </button>
@@ -6168,7 +6168,7 @@ body.p53-travado { overflow: hidden !important; }
                         <div class="card-title">Controle de Recebimento de Materiais</div>
                         <div class="recebimento-actions">
                             <div class="search-box">
-                                <input type="text" id="searchRecebimento" placeholder="Filtrar NF, fornecedor, material, ref..." oninput="debounceRender()">
+                                <input type="text" id="searchRecebimento" placeholder="Filtrar NF, fornecedor, material, ref..." oninput="window.debounceRender()">
                             </div>
                             <button class="secondary" onclick="abrirModalImportarRecebimento()">Inserir Recebimentos</button>
                             <button class="secondary" onclick="imprimirPagina()">Imprimir / Gerar PDF</button>
@@ -7755,6 +7755,7 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                     renderTimer = setTimeout(() => render(), 250);
                 }
                 window.debounceRender = debounceRender;
+                window.debounceRender = debounceRender;
             
                 function getObraAtual() {
                     let o = db.obras.find(o => o.id === db.obraAtualId);
@@ -8728,6 +8729,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                         if (r.material === undefined) r.material = r.descricao || '';
                         if (r.ref === undefined) r.ref = r.codigoCor || '';
                         if (r.qtdSaida === undefined) r.qtdSaida = 0;
+                        if (r.saldo === undefined) r.saldo = Number(r.qtdRecebida||0) - Number(r.qtdSaida||0);
+                        if (r.qtdSaida === undefined) r.qtdSaida = 0;
                     });
                 }
             
@@ -8765,6 +8768,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                                 descricao: r.descricao || r.material || '',
                                 unidade: r.unidade || 'UN',
                                 qtdRecebida: 0,
+                                qtdSaida: 0,
+                                saldo: 0,
                                 qtdPrevista: 0,
                                 qtdSaida: 0,
                                 ocorrencias: 0,
@@ -8775,10 +8780,12 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
             
                         const item = mapa.get(chave);
                         item.qtdRecebida += Number(r.qtdRecebida || 0);
+                        item.qtdSaida += Number(r.qtdSaida || 0);
                         item.qtdPrevista += Number(r.qtdPrevista || 0);
                         item.qtdSaida += Number(r.qtdSaida || 0);
                         item.qtdSaida += Number(r.qtdSaida || 0);
                         item.qtdSaida += Number(r.qtdSaida || 0);
+                        item.saldo = Number(item.qtdRecebida||0) - Number(item.qtdSaida||0);
                         item.ocorrencias += 1;
                         if (r.listaCorte) item.listasCorte.add(String(r.listaCorte));
             
@@ -8819,6 +8826,9 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                             <td class="text-left">${escaparHTML(m.descricao || '-')}</td>
                             <td>${Number(m.qtdPrevista || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
                             <td>${Number(m.qtdRecebida || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
+                            <td>${Number(m.qtdSaida || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
+                            <td style="font-weight:700;color:${Number(m.saldo||0)<0?'var(--danger,#e74c3c)':'var(--success,#16a34a)'}"
+${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                             <td>${Number(m.qtdSaida || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
                             <td style="font-weight:700;color:${saldo < 0 ? 'var(--danger,#e74c3c)' : 'var(--success,#16a34a)'}">${saldo.toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                             <td>${escaparHTML(m.unidade || 'UN')}</td>
@@ -8880,6 +8890,9 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                                 <td><input type="number" step="0.01" min="0" value="${Number(r.qtdPrevista || 0)}" onchange="editarRecebimento(${r.id},'qtdPrevista',this.value)"></td>
                                 <td><input type="number" step="0.01" min="0" value="${Number(r.qtdRecebida || 0)}" onchange="editarRecebimento(${r.id},'qtdRecebida',this.value)"></td>
                                 <td><input type="number" step="0.01" min="0" value="${Number(r.qtdSaida || 0)}" onchange="editarRecebimento(${r.id},'qtdSaida',this.value)"></td>
+                                <td style="font-weight:700;color:${(Number(r.qtdRecebida||0)-Number(r.qtdSaida||0))<0?'var(--danger,#e74c3c)':'var(--success,#16a34a)'}"
+${(Number(r.qtdRecebida||0)-Number(r.qtdSaida||0)).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
+                                <td><input type="number" step="0.01" min="0" value="${Number(r.qtdSaida || 0)}" onchange="editarRecebimento(${r.id},'qtdSaida',this.value)"></td>
                                 <td style="font-weight:700;color:${(Number(r.qtdRecebida||0) - Number(r.qtdSaida||0)) < 0 ? 'var(--danger,#e74c3c)' : 'var(--success,#16a34a)'}">${(Number(r.qtdRecebida||0) - Number(r.qtdSaida||0)).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                                 <td><select onchange="editarRecebimento(${r.id},'unidade',this.value)">${['UN', 'M', 'M²', 'KG', 'L', 'CX', 'OUTRO'].map(u => `<option value="${u}" ${r.unidade === u ? 'selected' : ''}>${u}</option>`).join('')}</select></td>
                                 <td><select onchange="editarRecebimento(${r.id},'status',this.value)">${['Recebido', 'Parcial', 'Pendente', 'Rejeitado'].map(s => `<option value="${s}" ${status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
@@ -8914,6 +8927,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
                     const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
                     const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
+                    const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
                     let status = document.getElementById('recStatus').value;
                     if (status === 'Recebido' && qtdPrevista > 0 && qtdRecebida < qtdPrevista) status = 'Parcial';
                     obra.recebimentos.push({
@@ -8928,7 +8942,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                         descricao: document.getElementById('recDescricao').value.trim(),
                         material: document.getElementById('recMaterial').value.trim(),
                         ref: document.getElementById('recRef').value.trim(),
-                        qtdPrevista, qtdRecebida, qtdSaida,
+                        qtdPrevista, qtdRecebida, qtdSaida, qtdSaida,
                         unidade: document.getElementById('recUnidade').value,
                         status,
                         responsavel: document.getElementById('recResponsavel').value.trim(),
@@ -9134,6 +9148,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                             ref: codigoCor,
                             qtdPrevista: quantidade,
                             qtdRecebida: 0,
+                            qtdSaida: 0,
+                            saldo: 0,
                             qtdSaida: 0,
                             unidade: 'UN',
                             status: 'Pendente',
@@ -15586,8 +15602,9 @@ function trocarSubTabPgtoNovo(tab) {
                    ================================================================== */
                 function p38ListaColaboradores(obraId){
                   var nomes = [];
+                  var _p38db = (typeof db !== "undefined") ? db : {obras: window.dbObras || []};
                   try {
-                    (db.obras || []).forEach(function(o){
+                    (_p38db.obras || []).forEach(function(o){
                       if(obraId && o.id !== obraId) return;
                       (o.colaboradores || []).forEach(function(c){
                         var n = (c && c.nome) ? String(c.nome).trim() : "";
@@ -72501,7 +72518,5 @@ if (false) { /* PATCH154_DISABLED */
 })();
 <script src="patch_relocate_header_buttons.js"></script>
 </script>
-
 </body>
-
 </html>
