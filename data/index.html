@@ -45038,6 +45038,8 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   function abrirUsuarios() {
     estilo();
     fecharTela();
+    /* [v10] limpar cache para forcar recarga do Supabase */
+    window.__p87ListaSupabase = null;
 
     var f = document.createElement('div');
     f.id = 'p87Fundo';
@@ -45068,8 +45070,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     if (!c) { return; }
     /* PATCH108: tres calculos repetidos logo abaixo foram removidos daqui. */
 
-    /* [v9] SEMPRE recarregar lista do Supabase ao abrir a tela */
-if (window.PainelAuthSupabase && !window.__p87CarregandoSupabase) {
+    if (window.PainelAuthSupabase && !window.__p87ListaSupabase && !window.__p87CarregandoSupabase) {
       window.__p87CarregandoSupabase = true;
       c.innerHTML = '<p class="p87-info">Carregando usuários centralizados do Supabase...</p>';
       window.PainelAuthSupabase.listarPerfis().then(function (remotos) {
@@ -45287,7 +45288,7 @@ if (window.PainelAuthSupabase && !window.__p87CarregandoSupabase) {
     ev.preventDefault();
 
     if (a === 'fechar') { fecharTela(); return; }
-    if (a === 'atualizar') { desenhar(); aviso('Lista atualizada.'); return; }
+    if (a === 'atualizar') { window.__p87ListaSupabase = null; desenhar(); aviso('Lista atualizada.'); return; }
     if (a === 'csv') { baixarCsv(); return; }
 
     if (a === 'novo') {
