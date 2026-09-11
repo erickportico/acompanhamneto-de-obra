@@ -888,11 +888,23 @@ body, main, .app-container {
             color: #38bdf8;
         }
 
+        /* [v9] header compact */
         .project-selector {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
             flex-wrap: wrap;
+            max-width: 100%;
+        }
+        .project-selector select {
+            min-width: 100px;
+            max-width: 220px;
+        }
+        .project-selector .secondary,
+        .project-selector button {
+            font-size: 0.72rem;
+            padding: 4px 8px;
+            white-space: nowrap;
         }
 
         select,
@@ -45056,7 +45068,8 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     if (!c) { return; }
     /* PATCH108: tres calculos repetidos logo abaixo foram removidos daqui. */
 
-    if (window.PainelAuthSupabase && !window.__p87ListaSupabase && !window.__p87CarregandoSupabase) {
+    /* [v9] SEMPRE recarregar lista do Supabase ao abrir a tela */
+if (window.PainelAuthSupabase && !window.__p87CarregandoSupabase) {
       window.__p87CarregandoSupabase = true;
       c.innerHTML = '<p class="p87-info">Carregando usuÃ¡rios centralizados do Supabase...</p>';
       window.PainelAuthSupabase.listarPerfis().then(function (remotos) {
@@ -45122,7 +45135,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     }
 
     h += '<table class="p87-tab"><thead><tr>' +
-         '<th>Nome</th><th>Usu\u00e1rio</th><th>Tipo de acesso</th><th>Criado em</th><th>A\u00e7\u00f5es</th>' +
+         '<th>Nome</th><th>Usu\u00e1rio</th><th>Tipo de acesso</th><th>Criado em</th><th>Abas [v9]</th><th>A\u00e7\u00f5es</th>' +
          '</tr></thead><tbody>';
 
     lista.forEach(function (u, i) {
@@ -45140,6 +45153,20 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
         h += '<td>' + esc(nomePerfil(u.perfil)) + '</td>';
       }
       h += '<td>' + esc(dataBr(u.criadoEm)) + '</td>';
+      /* [v9] coluna Abas */
+      var _ABAS = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.abas) ? window.PainelPermissoes.abas : [];
+      var _ehAdmL = String(u.perfil || '').toLowerCase() === 'admin';
+      var _pLib = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.liberadasDe) ? window.PainelPermissoes.liberadasDe(u.usuario, u.perfil) : _ABAS.map(function(x){return x.id;});
+      var _cfgL = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.configurado) ? window.PainelPermissoes.configurado(u.usuario) : false;
+      h += '<td style="text-align:center">';
+      if (_ehAdmL) {
+        h += '<span style="font-size:11px;color:#2563eb;font-weight:700">Todas</span>';
+      } else if (manda && _ABAS.length) {
+        h += '<button class="p87-btn mini" type="button" data-a="verAbas" data-i="' + i + '" title="Ver/editar abas liberadas" style="background:#7c3aed;color:#fff;border:0;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer">' + (_cfgL ? _pLib.length + '/' + _ABAS.length : 'Tudo') + ' í ½í´‘</button>';
+      } else {
+        h += '<span style="font-size:11px;color:#6b7280">' + (_pLib.length || '?') + '</span>';
+      }
+      h += '</td>';
       h += '<td class="ac">';
       if (manda) {
         h += '<button class="p87-btn mini" type="button" data-a="senha" data-i="' + i + '">Trocar senha</button>';
@@ -45280,8 +45307,73 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     }
     if (a === 'salvarNovo') { salvarNovo(); return; }
 
+    /* [v9] verAbas - expandir permissoes inline */
+    if (a === 'verAbas') {
+      var _lstV = Array.isArray(window.__p87ListaSupabase) ? window.__p87ListaSupabase : usuarios();
+      var _iV = Number(b.getAttribute('data-i'));
+      if (!_lstV || !_lstV[_iV]) { return; }
+      var _uV = _lstV[_iV];
+      if (String(_uV.perfil || '').toLowerCase() === 'admin') {
+        aviso('Administrador ve todas as abas.', 'err'); return;
+      }
+      var _lnV = b.closest('tr');
+      var _pIdV = 'v9aba_' + _iV;
+      var _pElV = document.getElementById(_pIdV);
+      if (_pElV) { _pElV.style.display = _pElV.style.display === 'none' ? '' : 'none'; return; }
+      _pElV = document.createElement('tr'); _pElV.id = _pIdV;
+      var _cV = document.createElement('td'); _cV.colSpan = 6;
+      _cV.style.cssText = 'padding:12px;background:#f0f4ff;border:1px solid #bfdbfe;border-radius:8px;';
+      var _ABASv = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.abas) ? window.PainelPermissoes.abas : [];
+      var _libV = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.liberadasDe) ? window.PainelPermissoes.liberadasDe(_uV.usuario, _uV.perfil) : _ABASv.map(function(x){return x.id;});
+      var _hV = '<div style="margin:6px 0;font-weight:700;color:#1e3a5f;font-size:14px">\ud83d\udd11 Permiss\u00f5es de Abas â€” ' + esc(_uV.nome || _uV.usuario) + '</div>';
+      _hV += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin:8px 0">';
+      for (var _aV = 0; _aV < _ABASv.length; _aV++) {
+        var _abV = _ABASv[_aV];
+        var _onV = _libV.indexOf(_abV.id) >= 0;
+        _hV += '<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;background:' + (_onV ? '#eff6ff' : '#fff') + ';cursor:pointer;font-size:12.5px;color:#1e293b">';
+        _hV += '<input type="checkbox" data-a="v9chk" data-uid="' + esc(_uV.usuario) + '" data-aba="' + esc(_abV.id) + '"' + (_onV ? ' checked' : '') + '>';
+        _hV += '<span>' + esc(_abV.nome || _abV.id) + '</span></label>';
+      }
+      _hV += '</div>';
+      _hV += '<div style="display:flex;gap:8px;margin-top:8px">';
+      _hV += '<button class="p87-btn pri" type="button" data-a="salvarAbasI" data-uid="' + esc(_uV.usuario) + '" data-pid="' + _pIdV + '">Salvar permiss\u00f5es</button>';
+      _hV += '<button class="p87-btn" type="button" data-a="fecharAbasI" data-pid="' + _pIdV + '">Fechar</button>';
+      _hV += '</div>';
+      _cV.innerHTML = _hV;
+      _pElV.appendChild(_cV);
+      if (_lnV && _lnV.nextSibling) { _lnV.parentNode.insertBefore(_pElV, _lnV.nextSibling); }
+      else { _lnV.parentNode.appendChild(_pElV); }
+      return;
+    }
+    /* [v9] salvarAbasI */
+    if (a === 'salvarAbasI') {
+      var _uidS = b.getAttribute('data-uid');
+      var _pidS = b.getAttribute('data-pid');
+      var _cksS = document.querySelectorAll('input[data-a="v9chk"][data-uid="' + _uidS + '"]');
+      var _marcS = [];
+      for (var _cS = 0; _cS < _cksS.length; _cS++) { if (_cksS[_cS].checked) { _marcS.push(String(_cksS[_cS].getAttribute('data-aba'))); } }
+      var _mS = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.mapa) ? window.PainelPermissoes.mapa() : null;
+      if (!_mS || typeof _mS !== 'object') { _mS = {}; }
+      var _kPS = 'painel_seg_permissoes_v1';
+      if (!_marcS.length) { delete _mS[_uidS]; } else { _mS[_uidS] = _marcS; }
+      try { localStorage.setItem(_kPS, JSON.stringify(_mS)); } catch(e) { aviso('Nao consegui salvar.', 'err'); return; }
+      try { if (window.p88Registrar) { window.p88Registrar('Permissoes de abas', _uidS + ': ' + _marcS.join(', ')); } } catch(e){}
+      aviso(_marcS.length ? 'Permiss\u00f5es salvas: ' + _marcS.length + ' aba(s).' : 'Sem limite: volta a ver todas.');
+      try { if (window.PainelPermissoes && window.PainelPermissoes.aplicar) { window.PainelPermissoes.aplicar(true); } } catch(e2){}
+      var _pElS = document.getElementById(_pidS);
+      if (_pElS) { _pElS.style.display = 'none'; }
+      desenhar();
+      return;
+    }
+    /* [v9] fecharAbasI */
+    if (a === 'fecharAbasI') {
+      var _pidF = b.getAttribute('data-pid');
+      var _pElF = document.getElementById(_pidF);
+      if (_pElF) { _pElF.style.display = 'none'; }
+      return;
+    }
     if (!podeMexer()) { return; }
-    var lista = usuarios();
+    var lista = Array.isArray(window.__p87ListaSupabase) ? window.__p87ListaSupabase : usuarios();
     var i = Number(b.getAttribute('data-i'));
     if (!lista[i]) { return; }
 
@@ -54145,14 +54237,16 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       vistos[k] = true;
       saida.push({ usuario: u.usuario, nome: u.nome || u.usuario, perfil: u.perfil || 'visitante' });
     }
+    /* [v9] lista Supabase com fallback email->usuario */
     var rem = window.__p87ListaSupabase;
     if (rem && rem.length) {
       for (i = 0; i < rem.length; i++) {
         var r = rem[i] || {};
-        var kr = chave(r.usuario);
+        var rUsu = r.usuario || r.email || '';
+        var kr = chave(rUsu);
         if (!kr || vistos[kr]) { continue; }
         vistos[kr] = true;
-        saida.push({ usuario: r.usuario, nome: r.nome || r.usuario, perfil: r.perfil || 'visitante' });
+        saida.push({ usuario: rUsu, nome: r.nome || rUsu, perfil: r.perfil || 'visitante' });
       }
     }
     var s = sessao();
