@@ -3081,76 +3081,7 @@ body.dark-mode #modalLancInstalacao .lanc-resumo b {
     display: none !important;
   }
 }
-    
-/* === RELOCATE PATCH: utilities no header direito + config no ORMENU === */
-.header-right-utilities {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
-.header-right-utilities .secondary,
-.header-right-utilities #statusNuvem {
-    font-size: 0.72rem !important;
-    padding: 4px 10px !important;
-    border-radius: 8px !important;
-}
-.or-config {
-    padding: 14px 14px 18px 14px !important;
-    border-top: 1px solid rgba(255,255,255,.1);
-    margin-top: auto;
-}
-.or-config-titulo {
-    font: 700 10.5px/1 inherit;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: #5d708f;
-    padding: 0 2px 8px 2px;
-}
-.or-config-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-}
-.or-config-btn {
-    display: flex !important;
-    align-items: center;
-    gap: 8px;
-    width: 100% !important;
-    padding: 9px 10px !important;
-    font: 500 12.5px/1.25 inherit !important;
-    text-align: left !important;
-    color: #c3d1ea !important;
-    background: transparent !important;
-    border: 1px solid transparent !important;
-    border-radius: 9px !important;
-    cursor: pointer;
-    transition: background .12s ease, color .12s ease;
-}
-.or-config-btn:hover {
-    color: #fff !important;
-    background: rgba(96,165,250,.12) !important;
-}
-.or-config-btn .or-cfg-ico {
-    display: grid;
-    place-items: center;
-    width: 24px;
-    height: 24px;
-    flex: 0 0 24px;
-    font-size: 13px;
-    background: rgba(255,255,255,.05);
-    border-radius: 7px;
-}
-body:not(.dark-mode) .or-config { border-top-color: rgba(0,0,0,.08); }
-body:not(.dark-mode) .or-config-titulo { color: #6b7280; }
-body:not(.dark-mode) .or-config-btn { color: #374151 !important; }
-body:not(.dark-mode) .or-config-btn:hover { color: #1e293b !important; background: rgba(37,99,235,.08) !important; }
-@media(max-width:860px){
-    .header-right-utilities { justify-content: flex-start; }
-}
-/* === FIM RELOCATE PATCH === */
-</style>
+    </style>
 
     <style>
         /* --- ESTILOS DO MENU LATERAL (SIDEBAR) --- */
@@ -5529,16 +5460,21 @@ body.p53-travado { overflow: hidden !important; }
                         <span class="val" id="headerNumContrato">—</span>
                     </div>
 
-                    <div class="header-right-utilities">
-                        <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
-                        <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem (Render.com)" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
-                        <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
-                    </div>
 </div>
             </div>
             <div class="project-selector">
-
-                
+<span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
+                <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem (Render.com)" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
+                <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
+                <div class="settings-menu">
+                    <button type="button" class="secondary" onclick="toggleSettingsMenu()">⚙ Configurações</button>
+                    <div id="settingsMenu" class="settings-dropdown">
+                        <button class="secondary" onclick="exportarDados()">💾 Backup</button>
+                        <button class="secondary" onclick="document.getElementById('fileRestoreInput').click()">📥 Restaurar</button>
+                        <button class="warning" onclick="abrirRecuperacaoDados()">🧿 Recuperar Dados Antigos</button>
+                        <button class="primary" onclick="abrirBancoCompartilhado()">🌐 Banco Compartilhado</button>
+                    </div>
+                </div>
                 <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
 <select id="selectObra" onchange="trocarObra(this.value)"></select>
 <button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button>
@@ -28025,15 +27961,6 @@ body.or-aberto { overflow: hidden !important; }
           '<input type="text" class="or-busca" id="orBusca" placeholder="Buscar aba..." autocomplete="off">' +
         '</div>' +
         '<div class="or-lista" id="orLista"></div>' +
-        '<div class="or-config">' +
-          '<div class="or-config-titulo">Configurações</div>' +
-          '<div class="or-config-grid">' +
-            '<button type="button" class="or-config-btn" id="orCfgBackup"><span class="or-cfg-ico">💾</span><span>Backup</span></button>' +
-            '<button type="button" class="or-config-btn" id="orCfgRestaurar"><span class="or-cfg-ico">📥</span><span>Restaurar</span></button>' +
-            '<button type="button" class="or-config-btn" id="orCfgRecuperar"><span class="or-cfg-ico">🧿</span><span>Recuperar Dados Antigos</span></button>' +
-            '<button type="button" class="or-config-btn" id="orCfgCompartilhado"><span class="or-cfg-ico">🌐</span><span>Banco Compartilhado</span></button>' +
-          '</div>' +
-        '</div>' +
       '</div>';
     D.body.appendChild(g);
 
@@ -72535,79 +72462,6 @@ if (false) { /* PATCH154_DISABLED */
 <script src="patch_relocate_header_buttons.js"></script>
 </script>
 
-
-<!-- settings-menu original (IDs preservados) -->
-<div style="position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;">
-
-</div>
-<script>
-/* === PATCH RELOCATE: handlers do or-config + garantia === */
-(function(){
-  'use strict';
-  if(window.__patchRelocateV2)return;window.__patchRelocateV2=true;
-
-  function ligarConfig(){
-    var p=document.querySelector('#orMenu .or-painel');
-    if(!p||!p.querySelector('.or-config'))return;
-    var bk=document.getElementById('orCfgBackup');
-    if(bk&&!bk._rl){bk._rl=1;bk.addEventListener('click',function(){
-      if(typeof window.exportarDados==='function')window.exportarDados();
-    });}
-    var rs=document.getElementById('orCfgRestaurar');
-    if(rs&&!rs._rl){rs._rl=1;rs.addEventListener('click',function(){
-      var f=document.getElementById('fileRestoreInput');if(f)f.click();
-    });}
-    var rc=document.getElementById('orCfgRecuperar');
-    if(rc&&!rc._rl){rc._rl=1;rc.addEventListener('click',function(){
-      if(typeof window.abrirRecuperacaoDados==='function')window.abrirRecuperacaoDados();
-    });}
-    var cp=document.getElementById('orCfgCompartilhado');
-    if(cp&&!cp._rl){cp._rl=1;cp.addEventListener('click',function(){
-      if(typeof window.abrirBancoCompartilhado==='function')window.abrirBancoCompartilhado();
-    });}
-  }
-
-  function garantirUtilities(){
-    var ps=document.querySelector('.project-selector');
-    var hr=document.querySelector('.header-right-utilities');
-    if(!ps||!hr)return;
-    var sn=document.getElementById('statusNuvem');
-    var cn=hr.querySelector('button[onclick="carregarBancoDaNuvem()"]');
-    var bt=document.getElementById('btnThemeToggle');
-    if(sn&&sn.parentNode===ps)hr.appendChild(sn);
-    if(bt&&bt.parentNode===ps)hr.appendChild(bt);
-  }
-
-  function garantirConfig(){
-    var p=document.querySelector('#orMenu .or-painel');
-    if(!p)return;
-    if(p.querySelector('.or-config')){ligarConfig();return;}
-    var sec=document.createElement('div');sec.className='or-config';
-    sec.innerHTML='<div class="or-config-titulo">Configurações</div>'+
-      '<div class="or-config-grid">'+
-      '<button type="button" class="or-config-btn" id="orCfgBackup"><span class="or-cfg-ico">💾</span><span>Backup</span></button>'+
-      '<button type="button" class="or-config-btn" id="orCfgRestaurar"><span class="or-cfg-ico">📥</span><span>Restaurar</span></button>'+
-      '<button type="button" class="or-config-btn" id="orCfgRecuperar"><span class="or-cfg-ico">🧿</span><span>Recuperar Dados Antigos</span></button>'+
-      '<button type="button" class="or-config-btn" id="orCfgCompartilhado"><span class="or-cfg-ico">🌐</span><span>Banco Compartilhado</span></button>'+
-      '</div>';
-    p.appendChild(sec);ligarConfig();
-  }
-
-  function vigiar(){
-    if(typeof MutationObserver!=='function')return;
-    var ps=document.querySelector('.project-selector');
-    if(ps){new MutationObserver(function(){garantirUtilities();}).observe(ps,{childList:true});}
-    var om=document.getElementById('orMenu');
-    if(om){new MutationObserver(function(){garantirConfig();}).observe(om,{childList:true,subtree:true});}
-  }
-
-  function comecar(){ligarConfig();garantirUtilities();garantirConfig();setTimeout(vigiar,500);}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',comecar);
-  else comecar();
-  setTimeout(comecar,400);setTimeout(comecar,1200);
-  setInterval(function(){garantirUtilities();garantirConfig();},5000);
-})();
-</script>
 </body>
 
 </html>
