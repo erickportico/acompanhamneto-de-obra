@@ -6207,6 +6207,12 @@ body.p53-travado { overflow: hidden !important; }
                                         <div class="th-content">Qtd. Recebida</div>
                                     </th>
                                     <th class="head-base">
+                                        <div class="th-content">Qtd. Saída</div>
+                                    </th>
+                                    <th class="head-base">
+                                        <div class="th-content">Saldo</div>
+                                    </th>
+                                    <th class="head-base">
                                         <div class="th-content">Unid.</div>
                                     </th>
                                     <th class="head-base">
@@ -6263,6 +6269,12 @@ body.p53-travado { overflow: hidden !important; }
                                         </th>
                                         <th class="head-base">
                                             <div class="th-content">Qtd. Recebida</div>
+                                        </th>
+                                        <th class="head-base">
+                                            <div class="th-content">Qtd. Saída</div>
+                                        </th>
+                                        <th class="head-base">
+                                            <div class="th-content">Saldo</div>
                                         </th>
                                         <th class="head-base">
                                             <div class="th-content">Unid.</div>
@@ -6871,6 +6883,10 @@ body.p53-travado { overflow: hidden !important; }
                         <div class="form-group">
                             <label>Quantidade Recebida</label>
                             <input type="number" step="0.01" min="0" id="recQtdRecebida" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantidade Saída</label>
+                            <input type="number" step="0.01" min="0" id="recQtdSaida" value="0">
                         </div>
                         <div class="form-group">
                             <label>Status</label>
@@ -8710,6 +8726,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                         if (r.descricao === undefined) r.descricao = r.material || '';
                         if (r.material === undefined) r.material = r.descricao || '';
                         if (r.ref === undefined) r.ref = r.codigoCor || '';
+                        if (r.qtdSaida === undefined) r.qtdSaida = 0;
                     });
                 }
             
@@ -8748,6 +8765,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                                 unidade: r.unidade || 'UN',
                                 qtdRecebida: 0,
                                 qtdPrevista: 0,
+                                qtdSaida: 0,
                                 ocorrencias: 0,
                                 listasCorte: new Set(),
                                 ultimoRecebimento: r.data || ''
@@ -8757,6 +8775,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                         const item = mapa.get(chave);
                         item.qtdRecebida += Number(r.qtdRecebida || 0);
                         item.qtdPrevista += Number(r.qtdPrevista || 0);
+                        item.qtdSaida += Number(r.qtdSaida || 0);
+                        item.qtdSaida += Number(r.qtdSaida || 0);
                         item.ocorrencias += 1;
                         if (r.listaCorte) item.listasCorte.add(String(r.listaCorte));
             
@@ -8770,7 +8790,10 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     });
             
                     const resultado = Array.from(mapa.values());
-                    resultado.forEach(item => item.listasCorte = Array.from(item.listasCorte).sort());
+                    resultado.forEach(item => {
+                        item.listasCorte = Array.from(item.listasCorte).sort();
+                        item.saldo = Number(item.qtdRecebida || 0) - Number(item.qtdSaida || 0);
+                    });
                     return resultado.sort((a, b) =>
                         `${a.classe} ${a.marca} ${a.codigoCor}`.localeCompare(
                             `${b.classe} ${b.marca} ${b.codigoCor}`, 'pt-BR'
@@ -8784,17 +8807,23 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
             
                     const materiais = obterMateriaisConsolidados(obra);
             
-                    tbody.innerHTML = materiais.map(m => `<tr>
+                    tbody.innerHTML = materiais.map(m => {
+                        const saldo = Number(m.saldo || 0);
+                        return `<tr>
                             <td>${escaparHTML((m.listasCorte || []).join(', ') || '-')}</td>
                             <td><span class="material-badge">${escaparHTML(m.classe || '-')}</span></td>
                             <td class="text-left">${escaparHTML(m.marca || '-')}</td>
                             <td class="text-left">${escaparHTML(m.codigoCor || '-')}</td>
                             <td class="text-left">${escaparHTML(m.descricao || '-')}</td>
+                            <td>${Number(m.qtdPrevista || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
                             <td>${Number(m.qtdRecebida || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
+                            <td>${Number(m.qtdSaida || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
+                            <td style="font-weight:700;color:${saldo < 0 ? 'var(--danger,#e74c3c)' : 'var(--success,#16a34a)'}">${saldo.toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                             <td>${escaparHTML(m.unidade || 'UN')}</td>
                             <td>${m.ocorrencias}</td>
                             <td>${escaparHTML(m.ultimoRecebimento || '-')}</td>
-                        </tr>`).join('');
+                        </tr>`;
+                    }).join('');
                 }
             
                 function exportarMateriaisConsolidados() {
@@ -8806,10 +8835,10 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     }
             
                     const linhas = [
-                        ['Lista(s) de Corte', 'Classe', 'Marca', 'Código - Cor', 'Descrição', 'Quantidade Recebida', 'Unidade', 'Ocorrências', 'Último Recebimento'],
+                        ['Lista(s) de Corte', 'Classe', 'Marca', 'Código - Cor', 'Descrição', 'Quantidade Prevista', 'Quantidade Recebida', 'Quantidade Saída', 'Saldo', 'Unidade', 'Ocorrências', 'Último Recebimento'],
                         ...materiais.map(m => [
                             (m.listasCorte || []).join(', '), m.classe, m.marca, m.codigoCor, m.descricao,
-                            m.qtdRecebida, m.unidade, m.ocorrencias, m.ultimoRecebimento
+                            m.qtdPrevista, m.qtdRecebida, m.qtdSaida, m.saldo, m.unidade, m.ocorrencias, m.ultimoRecebimento
                         ])
                     ];
             
@@ -8865,6 +8894,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     ['recListaCorte', 'recNF', 'recFornecedor', 'recClasse', 'recMarca', 'recCodigoCor', 'recDescricao', 'recMaterial', 'recRef', 'recResponsavel', 'recLocal', 'recObs'].forEach(id => document.getElementById(id).value = '');
                     document.getElementById('recQtdPrevista').value = 0;
                     document.getElementById('recQtdRecebida').value = 0;
+                    document.getElementById('recQtdSaida').value = 0;
+                    document.getElementById('recQtdSaida').value = 0;
                     document.getElementById('recUnidade').value = 'UN';
                     document.getElementById('recStatus').value = 'Recebido';
                     document.getElementById('modalRecebimento').style.display = 'flex';
@@ -8875,6 +8906,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     if (!obra.recebimentos) obra.recebimentos = [];
                     const qtdPrevista = Number(document.getElementById('recQtdPrevista').value) || 0;
                     const qtdRecebida = Number(document.getElementById('recQtdRecebida').value) || 0;
+                    const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
+                    const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
                     let status = document.getElementById('recStatus').value;
                     if (status === 'Recebido' && qtdPrevista > 0 && qtdRecebida < qtdPrevista) status = 'Parcial';
                     obra.recebimentos.push({
@@ -8889,7 +8922,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                         descricao: document.getElementById('recDescricao').value.trim(),
                         material: document.getElementById('recMaterial').value.trim(),
                         ref: document.getElementById('recRef').value.trim(),
-                        qtdPrevista, qtdRecebida,
+                        qtdPrevista, qtdRecebida, qtdSaida,
                         unidade: document.getElementById('recUnidade').value,
                         status,
                         responsavel: document.getElementById('recResponsavel').value.trim(),
@@ -8903,8 +8936,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     const obra = getObraAtual();
                     const item = (obra.recebimentos || []).find(r => r.id === id);
                     if (!item) return;
-                    item[campo] = ['qtdPrevista', 'qtdRecebida'].includes(campo) ? (Number(valor) || 0) : valor;
-                    if ((campo === 'qtdPrevista' || campo === 'qtdRecebida') && item.status !== 'Rejeitado') {
+                    item[campo] = ['qtdPrevista', 'qtdRecebida', 'qtdSaida'].includes(campo) ? (Number(valor) || 0) : valor;
+                    if (['qtdPrevista', 'qtdRecebida', 'qtdSaida'].includes(campo) && item.status !== 'Rejeitado') {
                         if (item.qtdRecebida <= 0) item.status = 'Pendente';
                         else if (item.qtdPrevista > 0 && item.qtdRecebida < item.qtdPrevista) item.status = 'Parcial';
                         else item.status = 'Recebido';
@@ -9095,6 +9128,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                             ref: codigoCor,
                             qtdPrevista: quantidade,
                             qtdRecebida: 0,
+                            qtdSaida: 0,
                             unidade: 'UN',
                             status: 'Pendente',
                             responsavel: '',
