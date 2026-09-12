@@ -15304,6 +15304,8 @@ function trocarSubTabPgtoNovo(tab) {
                   renderCustoDashboard();
                 };
                 
+
+                window.getCustosFiltered = getCustosFiltered;
                 window.renderCustoDashboard = function(){
                   var custos = getCustosFiltered();
                   renderCustoTable(custos);
@@ -45162,7 +45164,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       if (_ehAdmL) {
         h += '<span style="font-size:11px;color:#2563eb;font-weight:700">Todas</span>';
       } else if (manda && _ABAS.length) {
-        h += '<button class="p87-btn mini" type="button" data-a="verAbas" data-i="' + i + '" title="Ver/editar abas liberadas" style="background:#7c3aed;color:#fff;border:0;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer">' + (_cfgL ? _pLib.length + '/' + _ABAS.length : 'Tudo') + ' í ½í´‘</button>';
+        h += '<button class="p87-btn mini" type="button" data-a="verAbas" data-i="' + i + '" title="Ver/editar abas liberadas" style="background:#7c3aed;color:#fff;border:0;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer">' + (_cfgL ? _pLib.length + '/' + _ABAS.length : 'Tudo') + ' ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</button>';
       } else {
         h += '<span style="font-size:11px;color:#6b7280">' + (_pLib.length || '?') + '</span>';
       }
