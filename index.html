@@ -5450,6 +5450,17 @@ body.p53-travado { overflow: hidden !important; }
 }
 </style>
 
+<style id="pV16OverlaySafe">
+  /* PATCH V16-C – seguranca contra overlays presos */
+  #p141Saida:not(.on) { display: none !important; }
+  #p139Trava:not(.on) { display: none !important; }
+  /* PATCH V16-D – overflow e quebra de linha no Centro de Custos */
+  #tab-custo { overflow-x: hidden; word-break: break-word; }
+  .custo-dashboard-card { overflow: hidden; word-break: break-word; }
+  .lanc-obra-group, .lanc-table { overflow-x: auto; }
+  .custo-sub-painel { overflow-x: auto; word-break: break-word; }
+</style>
+
 </head>
 
 <body class="dark-mode">
@@ -64384,7 +64395,7 @@ window.P128._trocarPendente = function () {
     botaoTodosOsMeses(campo);
     if (!forcar && campo.value) { return false; }
     if (campo.getAttribute('data-p129') === '1' && !forcar) { return false; }
-    campo.value = mesVigente();
+    campo.value = "";
     campo.setAttribute('data-p129', '1');
     chamarDireto('renderCustoDashboard');
     return true;
