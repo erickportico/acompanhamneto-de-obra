@@ -5498,7 +5498,7 @@ div:empty,
 </head>
 
 <body class="dark-mode">
-<script id="v19Cleanup">(function(){function clean(){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);var n,r=[];while(n=w.nextNode()){var t=n.textContent;if(/(janelaImpressao|imprimirJanela|function\s+exportar|function\s+importar|function\s+imprimir)/.test(t))r.push(n);}r.forEach(function(nd){try{nd.parentNode.removeChild(nd)}catch(e){}});var els=document.querySelectorAll("#p84Fundo,#p84Impressao,#p83Fundo");for(var i=0;i<els.length;i++){if(els[i].style.display!=="flex")els[i].style.display="none";}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",clean);}else{clean();}setTimeout(clean,500);setTimeout(clean,2000);})();</script>
+<script id="v20Cleanup">(function(){function clean(){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);var n,r=[];while(n=w.nextNode){var t=n.textContent;if(/(window\.P\d+\s*=|janelaImpressao|imprimirJanela|function\s+exportar|function\s+importar|function\s+imprimir|\(function\s*\(\s*\)\s*\{|try\s*\{|catch\s*\()/i.test(t))r.push(n);}r.forEach(function(nd){try{nd.parentNode.removeChild(nd)}catch(e){}});var els=document.querySelectorAll("#p84Fundo,#p84Impressao,#p83Fundo");for(var i=0;i<els.length;i++){if(els[i].style.display!=="flex")els[i].style.display="none";}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",clean);}else{clean();}setTimeout(clean,500);setTimeout(clean,2000);setTimeout(clean,5000);})();</script>
 
     <div class="container">
         <header>
@@ -72300,7 +72300,7 @@ np.files && inp.files[0]; if (!arq) { return; } var fr=n ew FileReader(); fr.onl
     </script>
     <script src="patch_relocate_header_buttons.js"></script>
     <script src="patch_correcao.js"></script>
-<script id="v19CCFix">(function(){function recalcCC(){try{var db=window.db;if(!db||!db.lancamentos||!db.lancamentos.length)return;var cards=document.querySelectorAll("[data-cc-total]");if(!cards.length)return;var byObra={};db.lancamentos.forEach(function(l){var k=l.obra||"_";if(!byObra[k])byObra[k]=0;byObra[k]+=(l.valor||0);});cards.forEach(function(c){var obra=c.getAttribute("data-obra");if(obra&&byObra[obra]!==undefined){var txt=c.textContent||"";if(txt.indexOf("0,00")>=0||txt.indexOf("R$ 0")>=0){c.textContent="lançado R$ "+byObra[obra].toLocaleString("pt-BR",{minimumFractionDigits:2});}}});}catch(e){console.warn("v19 cc recalc",e);}}setTimeout(recalcCC,1000);setTimeout(recalcCC,3000);})();</script>
+<script id="v20CCFix">(function(){function recalcCC(){try{var db=window.db;if(!db||!db.lancamentos||!db.lancamentos.length)return;var cards=document.querySelectorAll("[data-cc-total]");if(!cards.length)return;var byObra={};db.lancamentos.forEach(function(l){var k=l.obra||"_";if(!byObra[k])byObra[k]=0;byObra[k]+=(l.valor||0);});cards.forEach(function(c){var obra=c.getAttribute("data-obra");if(obra&&byObra[obra]!==undefined){var txt=c.textContent||"";if(txt.indexOf("0,00")>=0||txt.indexOf("R$ 0")>=0){c.textContent="lançado R$ "+byObra[obra].toLocaleString("pt-BR",{minimumFractionDigits:2});}}});}catch(e){console.warn("v20 cc recalc",e);}}setTimeout(recalcCC,1000);setTimeout(recalcCC,3000);})();</script>
     </body>
 
     </html>
