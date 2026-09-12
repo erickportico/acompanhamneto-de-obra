@@ -1,4 +1,4 @@
-<!DOCTYPE html
+﻿<!DOCTYPE html
 <html lang="pt-BR">
 
 <head>
@@ -42019,143 +42019,151 @@ function trocarSubTabPgtoNovo(tab) {
                       '.pr-ass{margin-top:20px;text-align:center;font-size:9pt}' +
                       '</style>';
                     janelaImpressao.document.open();
-                    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diario de Obra</title>' + cssImpressao + '</head><body>' + h + '<!-- [v8] DIAGNOSTICO + RECUPERACAO -->
-                <script>
-                (function(){
-                  "use strict";
-                  if (window.__v8Diag) return;
-                  window.__v8Diag = true;
-                
-                  function criarBanner(){
-                    if (document.getElementById('v8DiagBanner')) return;
-                    var bar = document.createElement('div');
-                    bar.id = 'v8DiagBanner';
-                    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483600;'
-                      +'background:#1e293b;color:#e2e8f0;padding:6px 12px;font:12px monospace;'
-                      +'display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .3s;';
-                    bar.innerHTML = '<span id="v8DiagText">…</span>'
-                      +'<button id="v8BtnRecuperar" style="background:#ef4444;color:#fff;border:0;'
-                      +'padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;">'
-                      +'🔄 Recuperar Dados</button>'
-                      +'<button id="v8BtnFechar" style="background:#475569;color:#fff;border:0;'
-                      +'padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;">✕</button>';
-                    document.body.prepend(bar);
-                    document.getElementById('v8BtnFechar').onclick = function(){
-                      bar.style.display = 'none';
-                    };
-                    document.getElementById('v8BtnRecuperar').onclick = function(){
-                      window.recuperarDados();
-                    };
-                  }
-                
-                  function atualizarBanner(){
-                    var el = document.getElementById('v8DiagText');
-                    if (!el) return;
-                    try {
-                      var db_ = (typeof db !== 'undefined') ? db : (window.db || null);
-                      var nObras = (db_ && db_.obras) ? db_.obras.length : 0;
-                      var nItens = 0;
-                      if (db_ && db_.obras) {
-                        db_.obras.forEach(function(o){ nItens += (o.itens||[]).length; });
-                      }
-                      var obraAtual = (typeof getObraAtual === 'function') ? getObraAtual() : null;
-                      var nomeObra = obraAtual ? obraAtual.nome : '—';
-                      var itensObra = obraAtual ? (obraAtual.itens||[]).length : 0;
-                      var cor = (nItens === 0) ? '#f87171' : (nItens < 10) ? '#fbbf24' : '#4ade80';
-                      el.style.color = cor;
-                      el.textContent = '[v8] Obras:' + nObras + ' | Itens total:' + nItens
-                        + ' | Obra: ' + nomeObra + ' (' + itensObra + ' itens)';
-                    } catch(e) {
-                      el.textContent = '[v8] Erro ao ler db: ' + e.message;
-                      el.style.color = '#f87171';
-                    }
-                  }
-                
-                  window.recuperarDados = function(){
-                    try {
-                      var chaves = ['obrasDB_v8', 'obrasDB_v8_pre_nuvem_backup'];
-                      var melhor = null;
-                      var maisItens = 0;
-                      chaves.forEach(function(c){
-                        try {
-                          var raw = localStorage.getItem(c);
-                          if (!raw) return;
-                          var parsed = JSON.parse(raw);
-                          var banco = parsed.db ? parsed.db : parsed;
-                          if (!banco || !banco.obras || banco.obras.length === 0) return;
-                          var total = 0;
-                          banco.obras.forEach(function(o){ total += (o.itens||[]).length; });
-                          if (total > maisItens) {
-                            maisItens = total;
-                            melhor = banco;
-                          }
-                          console.log('[v8] Chave ' + c + ': ' + banco.obras.length + ' obras, ' + total + ' itens');
-                        } catch(e){}
-                      });
-                
-                      if (melhor && maisItens > 0) {
-                        db = melhor;
-                        window.db = db;
-                        window.dbObras = db.obras;
-                        try { if (typeof salvarDB === 'function') salvarDB(false); } catch(e){}
-                        try { if (typeof popularSelectObras === 'function') popularSelectObras(); } catch(e){}
-                        try { if (typeof render === 'function') render(); } catch(e){}
-                        alert('✅ Dados recuperados! ' + maisItens + ' itens restaurados de localStorage.');
-                        atualizarBanner();
-                      } else {
-                        alert('❌ Nenhum backup com itens encontrado no localStorage.');
-                      }
-                    } catch(e){
-                      alert('Erro na recuperacao: ' + e.message);
-                    }
-                  };
-                
-                  function iniciar(){
-                    criarBanner();
-                    atualizarBanner();
-                  }
-                
-                  if (document.readyState === 'loading'){
-                    document.addEventListener('DOMContentLoaded', function(){ setTimeout(iniciar, 500); });
-                  } else {
-                    setTimeout(iniciar, 500);
-                  }
-                
-                  setInterval(atualizarBanner, 3000);
-                  setTimeout(atualizarBanner, 1500);
-                  setTimeout(atualizarBanner, 5000);
-                  setTimeout(atualizarBanner, 10000);
-                
-                  window.addEventListener('error', function(evt){
-                    console.error('[v8-ERR]', evt.message, evt.filename + ':' + evt.lineno);
-                    var el = document.getElementById('v8DiagText');
-                    if (el) { el.textContent = '[v8-ERR] ' + evt.message; el.style.color = '#ef4444'; }
-                  });
-                
-                  try {
-                    console.log('%c[v8] Diagnostico ativo. Use window.recuperarDados() para recuperar dados de localStorage.',
-                      'color:#2563eb;font-weight:bold');
-                  } catch(e){}
-                })();
-            </script>
+                    /* SUBSTITUIR a região corrompida a partir da linha 42022 até antes do
+ * fechamento original do módulo P84. Este trecho permanece dentro da função
+ * imprimir(), portanto usa h, cssImpressao e janelaImpressao já existentes. */
 
-<script id="v21CCFix">(function(){function recalcCC(){try{var db=window.db;if(!db||!db.lancamentos||!db.lancamentos.length)return;var cards=document.querySelectorAll("[data-cc-total]");if(!cards.length)return;var byObra={};db.lancamentos.forEach(function(l){var k=l.obra||"_";if(!byObra[k])byObra[k]=0;byObra[k]+=(l.valor||0);});cards.forEach(function(c){var obra=c.getAttribute("data-obra");if(obra&&byObra[obra]!==undefined){var txt=c.textContent||"";if(txt.indexOf("0,00")>=0||txt.indexOf("R$ 0")>=0){c.textContent="lançado R$ "+byObra[obra].toLocaleString("pt-BR",{minimumFractionDigits:2});}}});}catch(e){console.warn("v21 cc recalc",e);}}setTimeout(recalcCC,1000);setTimeout(recalcCC,3000);})();</script>
-</body>
+janelaImpressao.document.write(
+  '<!doctype html>' +
+  '<html lang="pt-BR"><head>' +
+  '<meta charset="UTF-8">' +
+  '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+  '<title>Diário de Obra</title>' +
+  cssImpressao +
+  '</head><body>' +
+  h +
+  '</body></html>'
+);
+janelaImpressao.document.close();
 
-</html>'); janelaImpressao.document.close(); var imprimirJanela = function () { try { janelaImpressao.focus(); janelaImpressao.print(); } catch (erro) {} }; var imagens = janelaImpressao.document.images; var restantes = imagens.length; if (!restantes) { setTimeout(imprimirJanela,
-150); } else { var pronto = false; var imagemPronta = function () { restantes--; if (restantes
-<=0 && !pronto) { pronto=t rue; setTimeout(imprimirJanela, 150); } }; for (var ii=0 ; ii < imagens.length; ii++) { if (imagens[ii].complete) { imagemPronta();
-} else { imagens[ii].addEventListener( 'load', imagemPronta, { once: true }); imagens[ii].addEventListener( 'error', imagemPronta, { once: true }); } } setTimeout(function () { if (!pronto) { pronto=t rue; imprimirJanela(); } }, 5000); } } /*================================================================*
-* exportar / importar *================================================================* / function exportar() { try { var a=d ocument.createElement( 'a'); a.href=U RL.createObjectURL(new Blob([JSON.stringify(atual)], { type: 'application/json' })); a.download='diario_obra_'
-+ (atual.data || 'dia') + '.json'; document.body.appendChild(a); a.click(); setTimeout(function () { try { URL.revokeObjectURL(a.href); document.body.removeChild(a); } catch (e) {} }, 400); aviso( 'Arquivo do diário gerado.'); } catch (e) { aviso(
-'Nao consegui gerar o arquivo.', 'erro'); } } function importar() { var inp=d ocument.createElement( 'input'); inp.type='file' ; inp.accept='application/json,.json' ; inp.style.display='none' ; document.body.appendChild(inp); inp.addEventListener( 'change', function () { var arq=i
-np.files && inp.files[0]; if (!arq) { return; } var fr=n ew FileReader(); fr.onload=f unction () { try { var r=J SON.parse(String(fr.result)); if (!r || !r.tarefas) { throw new Error( 'formato'); } r.id=n ovoId( 'dia'); atual=r ; guardar(atual, function
-() { desenhar(); aviso( 'Diário importado.'); }); } catch (e) { aviso( 'Arquivo invalido.', 'erro'); } try { document.body.removeChild(inp); } catch (e2) {} }; fr.readAsText(arq); }); inp.click(); } 
+var imprimirJanela = function () {
+  try {
+    janelaImpressao.focus();
+    janelaImpressao.print();
+  } catch (erro) {}
+};
 
+var imagens = janelaImpressao.document.images;
+var restantes = imagens.length;
 
-/*================================================================*
-* inicio *================================================================* / function iniciar() { estilo(); colocarBotao(); window.__varreduraUnica(colocarBotao); } window.p84AbrirDiario=f unction () { abrir(); }; if (document.readyState==='loading'
-) { document.addEventListener( 'DOMContentLoaded', iniciar); } else { iniciar(); } })(); </script>
+if (!restantes) {
+  setTimeout(imprimirJanela, 150);
+} else {
+  var pronto = false;
+  var imagemPronta = function () {
+    restantes--;
+    if (restantes <= 0 && !pronto) {
+      pronto = true;
+      setTimeout(imprimirJanela, 150);
+    }
+  };
+
+  for (var ii = 0; ii < imagens.length; ii++) {
+    if (imagens[ii].complete) {
+      imagemPronta();
+    } else {
+      imagens[ii].addEventListener('load', imagemPronta, { once: true });
+      imagens[ii].addEventListener('error', imagemPronta, { once: true });
+    }
+  }
+
+  setTimeout(function () {
+    if (!pronto) {
+      pronto = true;
+      imprimirJanela();
+    }
+  }, 5000);
+}
+
+}
+
+/* ================================================================ *
+ * exportar / importar
+ * ================================================================ */
+function exportar() {
+  try {
+    var a = document.createElement('a');
+    var url = URL.createObjectURL(new Blob([
+      JSON.stringify(atual)
+    ], { type: 'application/json' }));
+
+    a.href = url;
+    a.download = 'diario_obra_' + (atual.data || 'dia') + '.json';
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(function () {
+      try {
+        URL.revokeObjectURL(url);
+        if (a.parentNode) a.parentNode.removeChild(a);
+      } catch (e) {}
+    }, 400);
+
+    aviso('Arquivo do diário gerado.');
+  } catch (e) {
+    aviso('Nao consegui gerar o arquivo.', 'erro');
+  }
+}
+
+function importar() {
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'application/json,.json';
+  inp.style.display = 'none';
+  document.body.appendChild(inp);
+
+  inp.addEventListener('change', function () {
+    var arq = inp.files && inp.files[0];
+    if (!arq) return;
+
+    var fr = new FileReader();
+    fr.onload = function () {
+      try {
+        var r = JSON.parse(String(fr.result));
+        if (!r || !Array.isArray(r.tarefas)) throw new Error('formato');
+        r.id = novoId('dia');
+        atual = r;
+        guardar(atual, function () {
+          desenhar();
+          aviso('Diário importado.');
+        });
+      } catch (e) {
+        aviso('Arquivo invalido.', 'erro');
+      }
+
+      try {
+        if (inp.parentNode) inp.parentNode.removeChild(inp);
+      } catch (e2) {}
+    };
+    fr.readAsText(arq);
+  });
+
+  inp.click();
+}
+
+/* ================================================================ *
+ * inicio
+ * ================================================================ */
+function iniciar() {
+  estilo();
+  colocarBotao();
+  if (typeof window.__varreduraUnica === 'function') {
+    window.__varreduraUnica(colocarBotao);
+  }
+}
+
+window.p84AbrirDiario = function () {
+  abrir();
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', iniciar, { once: true });
+} else {
+  iniciar();
+}
+
+})();
+</script>
 
     <!-- PATCH155: P152 reposicionado – estava dentro de document.write, causando bug -->
     <script>
