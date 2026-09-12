@@ -5,39 +5,66 @@
     return;
   }
 
-  function ocultarCaixaDeCodigo() {
-    // Procura por qualquer elemento que contenha trechos do código vazado
-    const elementos = document.querySelectorAll('div, p, span, section, footer, td');
+  // 1. Injeta CSS para esconder o container especifico imediatamente via seletores
+  const style = document.createElement('style');
+  style.innerHTML = `
+    /* Oculta divs no rodape que contenham textos gigantes de script */
+    div[style*="font-family: monospace"],
+    div:has(> script),
+    .code-dump-container {
+      display: none !important;
+    }
+  `;
+  document.head.appendChild(style);
 
-    elementos.forEach((el) => {
+  // 2. Limpeza agressiva via JS removendo o no do DOM (nao apenas display:none)
+  function expurgarCodigoVazado() {
+    // Busca todos os nós de texto da página
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false
+    );
+
+    let node;
+    const nosParaRemover = [];
+
+    while ((node = walker.nextNode())) {
       if (
-        el.innerText &&
-        (el.innerText.includes('function exportar()') ||
-         el.innerText.includes('janelaimpressao.document.close()') ||
-         el.innerText.includes('window.P84AbrirDiario'))
+        node.nodeValue &&
+        (node.nodeValue.includes('function exportar()') ||
+         node.nodeValue.includes('janelaimpressao.document.close()') ||
+         node.nodeValue.includes('window.P84AbrirDiario'))
       ) {
-        // Sobe na árvore de elementos para encontrar a div pai container e esconder a caixa inteira
-        let alvo = el;
-        while (alvo.parentElement && alvo.parentElement !== document.body) {
-          // Se o pai tiver classe ou estilo de caixa, pega ele, senão sobe até um nível alto
-          if (alvo.offsetHeight > 50 || alvo.tagName === 'DIV') {
-            alvo.style.display = 'none';
-          }
-          alvo = alvo.parentElement;
+        // Acha o container div principal mais alto antes do body
+        let el = node.parentElement;
+        while (el && el.parentElement && el.parentElement !== document.body) {
+          el = el.parentElement;
         }
-        alvo.style.display = 'none';
+        if (el && el !== document.body) {
+          nosParaRemover.push(el);
+        }
       }
+    }
+
+    // Remove do DOM para garantir que nao ocupe espaco nem renderize
+    nosParaRemover.forEach((el) => {
+      try {
+        el.remove();
+        console.log('[PATCH] Elemento vazado removido com sucesso do DOM.');
+      } catch (e) {}
     });
   }
 
   if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', ocultarCaixaDeCodigo);
+    window.addEventListener('DOMContentLoaded', expurgarCodigoVazado);
   } else {
-    ocultarCaixaDeCodigo();
+    expurgarCodigoVazado();
   }
 
   const observer = new MutationObserver(() => {
-    ocultarCaixaDeCodigo();
+    expurgarCodigoVazado();
   });
 
   observer.observe(document.body, {
