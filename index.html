@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 
 <head>
-<style id="v19SafetyCSS">#p84Fundo,#p84Impressao,#p83Fundo,#p83Impressao,#p86Fundo,#p86Caixa,#p92Fundo,#p92Caixa{display:none!important}</style>
+<style id="v21SafetyCSS">#p84Fundo,#p84Impressao,#p83Fundo,#p83Impressao,#p86Fundo,#p86Caixa,#p92Fundo,#p92Caixa{display:none!important}</style>
     <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
     <style id="p154Remocao">
         /* vazio de proposito — overlays de login ativos */
@@ -5498,7 +5498,8 @@ div:empty,
 </head>
 
 <body class="dark-mode">
-<script id="v20Cleanup">(function(){function clean(){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);var n,r=[];while(n=w.nextNode){var t=n.textContent;if(/(window\.P\d+\s*=|janelaImpressao|imprimirJanela|function\s+exportar|function\s+importar|function\s+imprimir|\(function\s*\(\s*\)\s*\{|try\s*\{|catch\s*\()/i.test(t))r.push(n);}r.forEach(function(nd){try{nd.parentNode.removeChild(nd)}catch(e){}});var els=document.querySelectorAll("#p84Fundo,#p84Impressao,#p83Fundo");for(var i=0;i<els.length;i++){if(els[i].style.display!=="flex")els[i].style.display="none";}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",clean);}else{clean();}setTimeout(clean,500);setTimeout(clean,2000);setTimeout(clean,5000);})();</script>
+<script id="v21Cleanup">(function(){function clean(){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);var n,r=[];while(n=w.nextNode()){var t=n.textContent;if(/(window\.P[0-9]+[ \t\r\n\f]*=|janelaImpressao|imprimirJanela|function[ \t\r\n\f]+exportar|function[ \t\r\n\f]+importar|function[ \t\r\n\f]+imprimir|\(function[ \t]*\([ \t]*\)[ \t]*\{|try[ \t]*\{|catch[ \t]*\()/i.test(t))r.push(n);}r.forEach(function(nd){try{nd.parentNode.removeChild(nd)}catch(e){}});var els=document.querySelectorAll("#p84Fundo,#p84Impressao,#p83Fundo");for(var i=0;i<els.length;i++){if(els[i].style.display!=="flex")els[i].style.display="none";}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",clean);}else{clean();}setTimeout(clean,500);setTimeout(clean,2000);setTimeout(clean,5000);})();</script>
+
 
     <div class="container">
         <header>
@@ -42137,6 +42138,8 @@ function trocarSubTabPgtoNovo(tab) {
                   } catch(e){}
                 })();
             </script>
+
+<script id="v21CCFix">(function(){function recalcCC(){try{var db=window.db;if(!db||!db.lancamentos||!db.lancamentos.length)return;var cards=document.querySelectorAll("[data-cc-total]");if(!cards.length)return;var byObra={};db.lancamentos.forEach(function(l){var k=l.obra||"_";if(!byObra[k])byObra[k]=0;byObra[k]+=(l.valor||0);});cards.forEach(function(c){var obra=c.getAttribute("data-obra");if(obra&&byObra[obra]!==undefined){var txt=c.textContent||"";if(txt.indexOf("0,00")>=0||txt.indexOf("R$ 0")>=0){c.textContent="lançado R$ "+byObra[obra].toLocaleString("pt-BR",{minimumFractionDigits:2});}}});}catch(e){console.warn("v21 cc recalc",e);}}setTimeout(recalcCC,1000);setTimeout(recalcCC,3000);})();</script>
 </body>
 
 </html>'); janelaImpressao.document.close(); var imprimirJanela = function () { try { janelaImpressao.focus(); janelaImpressao.print(); } catch (erro) {} }; var imagens = janelaImpressao.document.images; var restantes = imagens.length; if (!restantes) { setTimeout(imprimirJanela,
@@ -71608,10 +71611,7 @@ np.files && inp.files[0]; if (!arq) { return; } var fr=n ew FileReader(); fr.onl
         })();
     </script>
     <!-- FIM PATCH145_SALVAMENTO_SEGURO -->
-
-    /* [v11] stub: modulo de ocorrencias removido */ window.P146 = { registrar: function () {}, abrir: function () {}, fechar: function () {}, lista: function () { return []; }, emTexto: function () { return ""; }, baixar: function () {}, limpar: function
-    () {}, contar: function () { return 0; } }; /* [v11] stub: modulo de ocorrencias removido */ window.P146 = { registrar: function () {}, abrir: function () {}, fechar: function () {}, lista: function () { return []; }, emTexto: function () { return
-    ""; }, baixar: function () {}, limpar: function () {}, contar: function () { return 0; } };
+
     <!-- INI PATCH147_ECONOMIA_DE_DADOS -->
     <script>
         /* =====================================================================
@@ -72300,7 +72300,7 @@ np.files && inp.files[0]; if (!arq) { return; } var fr=n ew FileReader(); fr.onl
     </script>
     <script src="patch_relocate_header_buttons.js"></script>
     <script src="patch_correcao.js"></script>
-<script id="v20CCFix">(function(){function recalcCC(){try{var db=window.db;if(!db||!db.lancamentos||!db.lancamentos.length)return;var cards=document.querySelectorAll("[data-cc-total]");if(!cards.length)return;var byObra={};db.lancamentos.forEach(function(l){var k=l.obra||"_";if(!byObra[k])byObra[k]=0;byObra[k]+=(l.valor||0);});cards.forEach(function(c){var obra=c.getAttribute("data-obra");if(obra&&byObra[obra]!==undefined){var txt=c.textContent||"";if(txt.indexOf("0,00")>=0||txt.indexOf("R$ 0")>=0){c.textContent="lançado R$ "+byObra[obra].toLocaleString("pt-BR",{minimumFractionDigits:2});}}});}catch(e){console.warn("v20 cc recalc",e);}}setTimeout(recalcCC,1000);setTimeout(recalcCC,3000);})();</script>
+
     </body>
 
     </html>
