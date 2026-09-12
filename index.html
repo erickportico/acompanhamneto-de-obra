@@ -2,6 +2,26 @@
 <html lang="pt-BR">
 
 <head>
+    <style>
+  /* 1. Impede que a caixa do tooltip bloqueie o mouse ou fique travada na tela ao rolar */
+  #p120Dica, 
+  .p120-tooltip-fixed,
+  div[id*="p120Dica"] {
+    pointer-events: none !important; /* Torna a caixa 'transparente' para o mouse */
+    position: fixed !important;
+  }
+</style>
+
+<script>
+  // 2. Esconde o tooltip preto no exato momento em que o usuário rolar a página
+  window.addEventListener('scroll', function() {
+    var dica = document.getElementById('p120Dica') || document.querySelector('.p120-tooltip-fixed');
+    if (dica) {
+      dica.style.display = 'none';
+      dica.style.opacity = '0';
+    }
+  }, { passive: true });
+</script>
 <style id="v21SafetyCSS">#p84Fundo,#p84Impressao,#p83Fundo,#p83Impressao,#p86Fundo,#p86Caixa,#p92Fundo,#p92Caixa,#p128Tela,#p128Estilo{display:none!important}</style>
     <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
 
