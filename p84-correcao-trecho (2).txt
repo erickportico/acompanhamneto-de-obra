@@ -1,0 +1,143 @@
+/* SUBSTITUIR a região corrompida a partir da linha 42022 até antes do
+ * fechamento original do módulo P84. Este trecho permanece dentro da função
+ * imprimir(), portanto usa h, cssImpressao e janelaImpressao já existentes. */
+
+janelaImpressao.document.write(
+  '<!doctype html>' +
+  '<html lang="pt-BR"><head>' +
+  '<meta charset="UTF-8">' +
+  '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+  '<title>Diário de Obra</title>' +
+  cssImpressao +
+  '</head><body>' +
+  h +
+  '</body></html>'
+);
+janelaImpressao.document.close();
+
+var imprimirJanela = function () {
+  try {
+    janelaImpressao.focus();
+    janelaImpressao.print();
+  } catch (erro) {}
+};
+
+var imagens = janelaImpressao.document.images;
+var restantes = imagens.length;
+
+if (!restantes) {
+  setTimeout(imprimirJanela, 150);
+} else {
+  var pronto = false;
+  var imagemPronta = function () {
+    restantes--;
+    if (restantes <= 0 && !pronto) {
+      pronto = true;
+      setTimeout(imprimirJanela, 150);
+    }
+  };
+
+  for (var ii = 0; ii < imagens.length; ii++) {
+    if (imagens[ii].complete) {
+      imagemPronta();
+    } else {
+      imagens[ii].addEventListener('load', imagemPronta, { once: true });
+      imagens[ii].addEventListener('error', imagemPronta, { once: true });
+    }
+  }
+
+  setTimeout(function () {
+    if (!pronto) {
+      pronto = true;
+      imprimirJanela();
+    }
+  }, 5000);
+}
+
+/* ================================================================ *
+ * exportar / importar
+ * ================================================================ */
+function exportar() {
+  try {
+    var a = document.createElement('a');
+    var url = URL.createObjectURL(new Blob([
+      JSON.stringify(atual)
+    ], { type: 'application/json' }));
+
+    a.href = url;
+    a.download = 'diario_obra_' + (atual.data || 'dia') + '.json';
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(function () {
+      try {
+        URL.revokeObjectURL(url);
+        if (a.parentNode) a.parentNode.removeChild(a);
+      } catch (e) {}
+    }, 400);
+
+    aviso('Arquivo do diário gerado.');
+  } catch (e) {
+    aviso('Nao consegui gerar o arquivo.', 'erro');
+  }
+}
+
+function importar() {
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'application/json,.json';
+  inp.style.display = 'none';
+  document.body.appendChild(inp);
+
+  inp.addEventListener('change', function () {
+    var arq = inp.files && inp.files[0];
+    if (!arq) return;
+
+    var fr = new FileReader();
+    fr.onload = function () {
+      try {
+        var r = JSON.parse(String(fr.result));
+        if (!r || !Array.isArray(r.tarefas)) throw new Error('formato');
+        r.id = novoId('dia');
+        atual = r;
+        guardar(atual, function () {
+          desenhar();
+          aviso('Diário importado.');
+        });
+      } catch (e) {
+        aviso('Arquivo invalido.', 'erro');
+      }
+
+      try {
+        if (inp.parentNode) inp.parentNode.removeChild(inp);
+      } catch (e2) {}
+    };
+    fr.readAsText(arq);
+  });
+
+  inp.click();
+}
+
+/* ================================================================ *
+ * inicio
+ * ================================================================ */
+function iniciar() {
+  estilo();
+  colocarBotao();
+  if (typeof window.__varreduraUnica === 'function') {
+    window.__varreduraUnica(colocarBotao);
+  }
+}
+
+window.p84AbrirDiario = function () {
+  abrir();
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', iniciar, { once: true });
+} else {
+  iniciar();
+}
+
+})();
+</script>
