@@ -590,6 +590,7 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
         if (typeof window.popularCustoObraSelect !== 'function') window.popularCustoObraSelect = function() {};
         if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard = function() {};
     </script>
+    <script src="supabase_auth_client.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Acompanhamento de ProduÃ§Ã£o e InstalaÃ§Ã£o</title>
@@ -5449,53 +5450,6 @@ body.p53-travado { overflow: hidden !important; }
   #p84PrintStandalone img, #p83PrintStandalone img { max-width: 100% !important; height: auto !important; }
 }
 </style>
-
-<style id="pV16OverlaySafe">
-  /* PATCH V16-C â€“ seguranca contra overlays presos */
-  #p141Saida:not(.on) { display: none !important; }
-  #p139Trava:not(.on) { display: none !important; }
-  /* PATCH V16-D â€“ overflow e quebra de linha no Centro de Custos */
-  #tab-custo { overflow-x: hidden; word-break: break-word; }
-  .custo-dashboard-card { overflow: hidden; word-break: break-word; }
-  .lanc-obra-group, .lanc-table { overflow-x: auto; }
-  .custo-sub-painel { overflow-x: auto; word-break: break-word; }
-</style>
-
-<style id="pV17Fix">
-  /* PATCH V17-F: esconder script tags visiveis (anti-codigo-vazamento) */
-  script { display: none !important; }
-  /* PATCH V17-Fb: forcar esconder overlays sem .on */
-  #p141Saida:not(.on) { display: none !important; }
-  #p139Trava:not(.on) { display: none !important; }
-  /* PATCH V17-Fc: overflow custo */
-  #tab-custo { overflow-x: hidden; word-break: break-word; }
-  .custo-dashboard-card { overflow: hidden; word-break: break-word; }
-  .custo-sub-painel { overflow-x: auto; word-break: break-word; }
-  .lanc-obra-group, .lanc-table { overflow-x: auto; }
-</style>
-<script id="pV17Diag">
-  /* PATCH V17-G: diagnostico - verifica codigo JS visivel na pagina */
-  (function(){
-    setTimeout(function(){
-      var suspeitos = [];
-      document.querySelectorAll("body > *").forEach(function(el){
-        if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") return;
-        var txt = (el.textContent || "").trim();
-        if (txt.indexOf("function ") >= 0 && txt.indexOf("{") >= 0 && txt.length > 200
-            && el.tagName !== "TEXTAREA" && !el.querySelector("script")) {
-          suspeitos.push({tag: el.tagName, id: el.id, cls: el.className, len: txt.length,
-            preview: txt.substring(0, 80)});
-          el.style.display = "none";
-        }
-      });
-      if (suspeitos.length > 0) {
-        console.warn("[V17-DIAG] Codigo JS visivel encontrado em:", suspeitos);
-      } else {
-        console.log("[V17-DIAG] Nenhum codigo JS visivel detectado.");
-      }
-    }, 3000);
-  })();
-</script>
 
 </head>
 
@@ -15351,8 +15305,6 @@ function trocarSubTabPgtoNovo(tab) {
                   renderCustoDashboard();
                 };
                 
-
-                window.getCustosFiltered = getCustosFiltered;
                 window.renderCustoDashboard = function(){
                   var custos = getCustosFiltered();
                   renderCustoTable(custos);
@@ -38544,7 +38496,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     var nova = function () {
       var r = original.apply(this, arguments);
       try { sincronizar(); } catch (e) { /* ignora */ }
-      try { renderPorEmpresa(typeof window.getCustosFiltered === "function" ? window.getCustosFiltered() : []); } catch (e2) { /* ignora */ }
+      try { renderPorEmpresa(typeof getCustosFiltered === "function" ? getCustosFiltered() : []); } catch (e2) { /* ignora */ }
       return r;
     };
     nova.__p77 = true;
@@ -45211,7 +45163,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       if (_ehAdmL) {
         h += '<span style="font-size:11px;color:#2563eb;font-weight:700">Todas</span>';
       } else if (manda && _ABAS.length) {
-        h += '<button class="p87-btn mini" type="button" data-a="verAbas" data-i="' + i + '" title="Ver/editar abas liberadas" style="background:#7c3aed;color:#fff;border:0;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer">' + (_cfgL ? _pLib.length + '/' + _ABAS.length : 'Tudo') + ' ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</button>';
+        h += '<button class="p87-btn mini" type="button" data-a="verAbas" data-i="' + i + '" title="Ver/editar abas liberadas" style="background:#7c3aed;color:#fff;border:0;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer">' + (_cfgL ? _pLib.length + '/' + _ABAS.length : 'Tudo') + ' í ½í´‘</button>';
       } else {
         h += '<span style="font-size:11px;color:#6b7280">' + (_pLib.length || '?') + '</span>';
       }
@@ -50859,6 +50811,8 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   }
 })();
 </script>
+<script src="fpdo_editor_visual.js"></script>
+<script src="modernizacao_painel_v1.js"></script>
 
 <!-- PATCH96_ENQ_OK inicio -->
 <script>
@@ -59868,7 +59822,7 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
       var r = antigo.apply(this, arguments);
       try {
         cacheEmp = null;
-        E.lista = (typeof window.getCustosFiltered === 'function') ? window.getCustosFiltered() : [];
+        E.lista = (typeof getCustosFiltered === 'function') ? getCustosFiltered() : [];
         E.destaque = -1;
         if (montar()) { pintar(); }
       } catch (e) { if (window.console) { console.error('p120:', e); } }
@@ -59881,7 +59835,7 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
     var painel = document.getElementById('tab-custo');
     if (painel && painel.style.display !== 'none' && document.getElementById('custoBarChart')) {
       try {
-        E.lista = (typeof window.getCustosFiltered === 'function') ? window.getCustosFiltered() : [];
+        E.lista = (typeof getCustosFiltered === 'function') ? getCustosFiltered() : [];
         if (montar()) { pintar(); }
       } catch (e) {}
     }
@@ -64431,7 +64385,7 @@ window.P128._trocarPendente = function () {
     botaoTodosOsMeses(campo);
     if (!forcar && campo.value) { return false; }
     if (campo.getAttribute('data-p129') === '1' && !forcar) { return false; }
-    campo.value = "";
+    campo.value = mesVigente();
     campo.setAttribute('data-p129', '1');
     chamarDireto('renderCustoDashboard');
     return true;
@@ -65621,7 +65575,7 @@ if (false) { /* PATCH154_DISABLED */
   } else {
     setTimeout(comecar, 500);
   }
-  })();
+})();
 } /* /PATCH154_DISABLED */
 </script>
 <!-- PATCH154_HIDDEN: /* PATCH153B_PROTECOES_LOOP */ -->
@@ -71679,8 +71633,6 @@ if (false) { /* PATCH154_DISABLED */
 
 /* [v11] stub: modulo de ocorrencias removido */
 window.P146 = { registrar: function () {}, abrir: function () {}, fechar: function () {}, lista: function () { return []; }, emTexto: function () { return ""; }, baixar: function () {}, limpar: function () {}, contar: function () { return 0; } };
-/* [v11] stub: modulo de ocorrencias removido */
-window.P146 = { registrar: function () {}, abrir: function () {}, fechar: function () {}, lista: function () { return []; }, emTexto: function () { return ""; }, baixar: function () {}, limpar: function () {}, contar: function () { return 0; } };
 <!-- INI PATCH147_ECONOMIA_DE_DADOS -->
 <script>
 /* =====================================================================
@@ -72253,6 +72205,10 @@ window.P146 = { registrar: function () {}, abrir: function () {}, fechar: functi
 
 })();
 </script>
+<script src="/admin-painel.js"></script>
+<script src="/patch-ui-2026-completo.js"></script>
+<script src="/patch-ui-2026-gaveta-pgto.js"></script>
+<script src="/patch-arquivos-obra.js"></script>
 <!-- FIM PATCH150_CAMADA_ABSTRACAO -->
 
 <style id="pPrintPgtoOnly">
@@ -72368,6 +72324,5 @@ window.P146 = { registrar: function () {}, abrir: function () {}, fechar: functi
 })();
 </script>
 <script src="patch_relocate_header_buttons.js"></script>
-<script src="patch_correcao.js"></script>
 </body>
 </html>

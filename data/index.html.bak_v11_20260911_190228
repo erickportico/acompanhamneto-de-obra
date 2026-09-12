@@ -590,6 +590,7 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
         if (typeof window.popularCustoObraSelect !== 'function') window.popularCustoObraSelect = function() {};
         if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard = function() {};
     </script>
+    <script src="supabase_auth_client.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Acompanhamento de ProduÃ§Ã£o e InstalaÃ§Ã£o</title>
@@ -5449,53 +5450,6 @@ body.p53-travado { overflow: hidden !important; }
   #p84PrintStandalone img, #p83PrintStandalone img { max-width: 100% !important; height: auto !important; }
 }
 </style>
-
-<style id="pV16OverlaySafe">
-  /* PATCH V16-C â€“ seguranca contra overlays presos */
-  #p141Saida:not(.on) { display: none !important; }
-  #p139Trava:not(.on) { display: none !important; }
-  /* PATCH V16-D â€“ overflow e quebra de linha no Centro de Custos */
-  #tab-custo { overflow-x: hidden; word-break: break-word; }
-  .custo-dashboard-card { overflow: hidden; word-break: break-word; }
-  .lanc-obra-group, .lanc-table { overflow-x: auto; }
-  .custo-sub-painel { overflow-x: auto; word-break: break-word; }
-</style>
-
-<style id="pV17Fix">
-  /* PATCH V17-F: esconder script tags visiveis (anti-codigo-vazamento) */
-  script { display: none !important; }
-  /* PATCH V17-Fb: forcar esconder overlays sem .on */
-  #p141Saida:not(.on) { display: none !important; }
-  #p139Trava:not(.on) { display: none !important; }
-  /* PATCH V17-Fc: overflow custo */
-  #tab-custo { overflow-x: hidden; word-break: break-word; }
-  .custo-dashboard-card { overflow: hidden; word-break: break-word; }
-  .custo-sub-painel { overflow-x: auto; word-break: break-word; }
-  .lanc-obra-group, .lanc-table { overflow-x: auto; }
-</style>
-<script id="pV17Diag">
-  /* PATCH V17-G: diagnostico - verifica codigo JS visivel na pagina */
-  (function(){
-    setTimeout(function(){
-      var suspeitos = [];
-      document.querySelectorAll("body > *").forEach(function(el){
-        if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") return;
-        var txt = (el.textContent || "").trim();
-        if (txt.indexOf("function ") >= 0 && txt.indexOf("{") >= 0 && txt.length > 200
-            && el.tagName !== "TEXTAREA" && !el.querySelector("script")) {
-          suspeitos.push({tag: el.tagName, id: el.id, cls: el.className, len: txt.length,
-            preview: txt.substring(0, 80)});
-          el.style.display = "none";
-        }
-      });
-      if (suspeitos.length > 0) {
-        console.warn("[V17-DIAG] Codigo JS visivel encontrado em:", suspeitos);
-      } else {
-        console.log("[V17-DIAG] Nenhum codigo JS visivel detectado.");
-      }
-    }, 3000);
-  })();
-</script>
 
 </head>
 
@@ -15351,8 +15305,6 @@ function trocarSubTabPgtoNovo(tab) {
                   renderCustoDashboard();
                 };
                 
-
-                window.getCustosFiltered = getCustosFiltered;
                 window.renderCustoDashboard = function(){
                   var custos = getCustosFiltered();
                   renderCustoTable(custos);
@@ -38544,7 +38496,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     var nova = function () {
       var r = original.apply(this, arguments);
       try { sincronizar(); } catch (e) { /* ignora */ }
-      try { renderPorEmpresa(typeof window.getCustosFiltered === "function" ? window.getCustosFiltered() : []); } catch (e2) { /* ignora */ }
+      try { renderPorEmpresa(typeof getCustosFiltered === "function" ? getCustosFiltered() : []); } catch (e2) { /* ignora */ }
       return r;
     };
     nova.__p77 = true;
@@ -45211,7 +45163,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       if (_ehAdmL) {
         h += '<span style="font-size:11px;color:#2563eb;font-weight:700">Todas</span>';
       } else if (manda && _ABAS.length) {
-        h += '<button class="p87-btn mini" type="button" data-a="verAbas" data-i="' + i + '" title="Ver/editar abas liberadas" style="background:#7c3aed;color:#fff;border:0;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer">' + (_cfgL ? _pLib.length + '/' + _ABAS.length : 'Tudo') + ' ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</button>';
+        h += '<button class="p87-btn mini" type="button" data-a="verAbas" data-i="' + i + '" title="Ver/editar abas liberadas" style="background:#7c3aed;color:#fff;border:0;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer">' + (_cfgL ? _pLib.length + '/' + _ABAS.length : 'Tudo') + ' í ½í´‘</button>';
       } else {
         h += '<span style="font-size:11px;color:#6b7280">' + (_pLib.length || '?') + '</span>';
       }
@@ -50859,6 +50811,8 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   }
 })();
 </script>
+<script src="fpdo_editor_visual.js"></script>
+<script src="modernizacao_painel_v1.js"></script>
 
 <!-- PATCH96_ENQ_OK inicio -->
 <script>
@@ -59868,7 +59822,7 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
       var r = antigo.apply(this, arguments);
       try {
         cacheEmp = null;
-        E.lista = (typeof window.getCustosFiltered === 'function') ? window.getCustosFiltered() : [];
+        E.lista = (typeof getCustosFiltered === 'function') ? getCustosFiltered() : [];
         E.destaque = -1;
         if (montar()) { pintar(); }
       } catch (e) { if (window.console) { console.error('p120:', e); } }
@@ -59881,7 +59835,7 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
     var painel = document.getElementById('tab-custo');
     if (painel && painel.style.display !== 'none' && document.getElementById('custoBarChart')) {
       try {
-        E.lista = (typeof window.getCustosFiltered === 'function') ? window.getCustosFiltered() : [];
+        E.lista = (typeof getCustosFiltered === 'function') ? getCustosFiltered() : [];
         if (montar()) { pintar(); }
       } catch (e) {}
     }
@@ -64431,7 +64385,7 @@ window.P128._trocarPendente = function () {
     botaoTodosOsMeses(campo);
     if (!forcar && campo.value) { return false; }
     if (campo.getAttribute('data-p129') === '1' && !forcar) { return false; }
-    campo.value = "";
+    campo.value = mesVigente();
     campo.setAttribute('data-p129', '1');
     chamarDireto('renderCustoDashboard');
     return true;
@@ -65621,7 +65575,7 @@ if (false) { /* PATCH154_DISABLED */
   } else {
     setTimeout(comecar, 500);
   }
-  })();
+})();
 } /* /PATCH154_DISABLED */
 </script>
 <!-- PATCH154_HIDDEN: /* PATCH153B_PROTECOES_LOOP */ -->
@@ -71677,10 +71631,436 @@ if (false) { /* PATCH154_DISABLED */
 </script>
 <!-- FIM PATCH145_SALVAMENTO_SEGURO -->
 
-/* [v11] stub: modulo de ocorrencias removido */
-window.P146 = { registrar: function () {}, abrir: function () {}, fechar: function () {}, lista: function () { return []; }, emTexto: function () { return ""; }, baixar: function () {}, limpar: function () {}, contar: function () { return 0; } };
-/* [v11] stub: modulo de ocorrencias removido */
-window.P146 = { registrar: function () {}, abrir: function () {}, fechar: function () {}, lista: function () { return []; }, emTexto: function () { return ""; }, baixar: function () {}, limpar: function () {}, contar: function () { return 0; } };
+<!-- INI PATCH146_PAINEL_DE_ERROS -->
+<style>
+#p146Bt{position:fixed;right:14px;bottom:14px;z-index:2147482000;border:0;border-radius:22px;
+  padding:9px 13px;font:600 12px Inter,Arial,sans-serif;cursor:pointer;color:#fff;
+  background:#5d6d7e;box-shadow:0 3px 10px rgba(0,0,0,.28)}
+#p146Bt.temErro{background:#c0392b}
+#p146Bt.pisca{animation:p146pisca .7s ease-in-out 3}
+@keyframes p146pisca{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+#p146Tela{position:fixed;inset:0;z-index:2147482100;display:none;background:rgba(0,0,0,.45)}
+#p146Tela.aberto{display:block}
+#p146Cx{position:absolute;right:0;top:0;bottom:0;width:min(560px,100%);background:#fff;
+  display:flex;flex-direction:column;font:13px/1.4 Inter,Arial,sans-serif;color:#222}
+#p146Cx header{padding:12px 14px;background:#2c3e50;color:#fff;font-weight:700;
+  display:flex;justify-content:space-between;align-items:center;gap:8px}
+#p146Cx .p146acoes{padding:8px 14px;border-bottom:1px solid #e3e6e8;display:flex;flex-wrap:wrap;gap:6px}
+#p146Cx .p146acoes button,#p146Cx header button{font:600 12px Inter,Arial,sans-serif;
+  border:1px solid #cfd6dc;background:#f4f6f7;color:#222;border-radius:6px;padding:5px 9px;cursor:pointer}
+#p146Cx header button{background:rgba(255,255,255,.18);color:#fff;border-color:transparent}
+#p146Lista{overflow:auto;padding:8px 14px 20px}
+.p146item{border:1px solid #e3e6e8;border-left:4px solid #c0392b;border-radius:6px;
+  padding:8px 10px;margin-bottom:8px;background:#fdfdfd}
+.p146item.aviso{border-left-color:#c88a00}
+.p146item.rede{border-left-color:#8e44ad}
+.p146item .p146top{font-size:11px;color:#667}
+.p146item .p146msg{font-weight:600;margin:3px 0;word-break:break-word}
+.p146item .p146de{font-size:11px;color:#667;word-break:break-all}
+.p146item pre{white-space:pre-wrap;font-size:11px;background:#f7f9fa;border-radius:4px;
+  padding:6px;margin:6px 0 0;max-height:170px;overflow:auto}
+.p146vazio{color:#667;padding:14px 0}
+</style>
+<script>
+/* =====================================================================
+ * PATCH 146 - painel de erros e registro de ocorrencias
+ * ===================================================================== */
+(function () {
+  'use strict';
+  if (window.P146) { return; }
+
+  var LIMITE = 300;          /* quanto guarda na memoria */
+  var GUARDA = 80;           /* quanto guarda no navegador */
+  var CHAVE = 'p146_ocorrencias';
+  var lista = [];
+  var seq = 0;
+  var dentro = false;        /* evita erro dentro do proprio registro */
+  var pronto = false;
+
+  var conOriginal = {
+    error: (window.console && console.error) ? console.error.bind(console) : function () { },
+    warn: (window.console && console.warn) ? console.warn.bind(console) : function () { }
+  };
+
+  function texto(v) {
+    if (v === null) { return 'nulo'; }
+    if (typeof v === 'undefined') { return 'vazio'; }
+    if (typeof v === 'string') { return v; }
+    if (v instanceof Error) { return v.name + ': ' + v.message; }
+    try { return JSON.stringify(v); } catch (e) { return String(v); }
+  }
+  function curto(s, n) {
+    s = String(s || '');
+    return s.length > n ? s.slice(0, n) + '...' : s;
+  }
+
+  function ler() {
+    try {
+      var cru = localStorage.getItem(CHAVE);
+      if (!cru) { return []; }
+      var v = JSON.parse(cru);
+      return Array.isArray(v) ? v : [];
+    } catch (e) { return []; }
+  }
+  function gravar() {
+    try {
+      localStorage.setItem(CHAVE, JSON.stringify(lista.slice(-GUARDA)));
+    } catch (e) { /* sem espaco: o registro na memoria continua valendo */ }
+  }
+
+  /* ---------------- anotar uma ocorrencia ---------------- */
+  function registrar(tipo, mensagem, extra) {
+    if (dentro) { return null; }
+    dentro = true;
+    var reg = null;
+    try {
+      extra = extra || {};
+      reg = {
+        n: ++seq,
+        quando: new Date().toISOString(),
+        tipo: String(tipo || 'erro'),
+        grupo: extra.grupo || (String(tipo).indexOf('aviso') >= 0 ? 'aviso' :
+                (String(tipo).indexOf('rede') >= 0 ? 'rede' : 'erro')),
+        mensagem: curto(texto(mensagem), 600),
+        de: curto(texto(extra.de || ''), 300),
+        detalhe: curto(texto(extra.detalhe || ''), 2000)
+      };
+      var ultimo = lista[lista.length - 1];
+      if (ultimo && ultimo.mensagem === reg.mensagem && ultimo.tipo === reg.tipo &&
+          (new Date(reg.quando) - new Date(ultimo.quando)) < 1500) {
+        ultimo.repetiu = (ultimo.repetiu || 1) + 1;
+        reg = ultimo;
+      } else {
+        lista.push(reg);
+        if (lista.length > LIMITE) { lista = lista.slice(-LIMITE); }
+      }
+      gravar();
+      if (pronto) { atualizarBotao(reg.grupo === 'erro'); redesenhar(); }
+    } catch (e) { /* nunca deixar o registro derrubar a pagina */ }
+    dentro = false;
+    return reg;
+  }
+
+  function contarErros() {
+    var n = 0;
+    for (var i = 0; i < lista.length; i++) {
+      if (lista[i].grupo !== 'aviso') { n += (lista[i].repetiu || 1); }
+    }
+    return n;
+  }
+
+  /* ---------------- botao do canto ---------------- */
+  function botao() {
+    var b = document.getElementById('p146Bt');
+    if (b) { return b; }
+    b = document.createElement('button');
+    b.id = 'p146Bt';
+    b.type = 'button';
+    b.title = 'Ocorrencias do painel (Ctrl + Alt + E)';
+    b.setAttribute('aria-label', 'Abrir a lista de ocorrencias do painel');
+    b.addEventListener('click', abrir);
+    (document.body || document.documentElement).appendChild(b);
+    return b;
+  }
+  function atualizarBotao(piscar) {
+    var b = botao();
+    var n = contarErros();
+    b.textContent = n ? ('Ocorrencias: ' + n) : 'Ocorrencias';
+    b.className = n ? 'temErro' : '';
+    if (piscar && n) {
+      b.classList.remove('pisca');
+      void b.offsetWidth;
+      b.classList.add('pisca');
+    }
+  }
+
+  /* ---------------- tela com a lista ---------------- */
+  function tela() {
+    var t = document.getElementById('p146Tela');
+    if (t) { return t; }
+    t = document.createElement('div');
+    t.id = 'p146Tela';
+    t.innerHTML =
+      '<div id="p146Cx" role="dialog" aria-label="Ocorrencias do painel">' +
+      '<header><span>Ocorrencias do painel</span><button type="button" id="p146Fechar">Fechar</button></header>' +
+      '<div class="p146acoes">' +
+      '<button type="button" id="p146Copiar">Copiar tudo</button>' +
+      '<button type="button" id="p146Baixar">Baixar registro</button>' +
+      '<button type="button" id="p146Limpar">Limpar</button>' +
+      '<label style="font-size:12px;display:flex;align-items:center;gap:4px">' +
+      'Mostrar: <select id="p146Filtro"><option value="tudo">tudo</option>' +
+      '<option value="erro">so erros</option><option value="rede">so rede</option>' +
+      '<option value="aviso">so avisos</option></select></label>' +
+      '</div><div id="p146Lista"></div></div>';
+    (document.body || document.documentElement).appendChild(t);
+    t.addEventListener('click', function (ev) { if (ev.target === t) { fechar(); } });
+    t.querySelector('#p146Fechar').addEventListener('click', fechar);
+    t.querySelector('#p146Copiar').addEventListener('click', copiar);
+    t.querySelector('#p146Baixar').addEventListener('click', baixar);
+    t.querySelector('#p146Limpar').addEventListener('click', limpar);
+    t.querySelector('#p146Filtro').addEventListener('change', redesenhar);
+    return t;
+  }
+
+  function filtro() {
+    var s = document.getElementById('p146Filtro');
+    return s ? s.value : 'tudo';
+  }
+  function visiveis() {
+    var f = filtro();
+    return lista.filter(function (r) { return f === 'tudo' || r.grupo === f; }).slice().reverse();
+  }
+  function horaCurta(iso) {
+    try { return new Date(iso).toLocaleString('pt-BR'); } catch (e) { return iso; }
+  }
+
+  function redesenhar() {
+    var area = document.getElementById('p146Lista');
+    if (!area || !document.getElementById('p146Tela').classList.contains('aberto')) { return; }
+    area.innerHTML = '';
+    var itens = visiveis();
+    if (!itens.length) {
+      var v = document.createElement('div');
+      v.className = 'p146vazio';
+      v.textContent = 'Nenhuma ocorrencia registrada. Otimo sinal.';
+      area.appendChild(v);
+      return;
+    }
+    itens.forEach(function (r) {
+      var d = document.createElement('div');
+      d.className = 'p146item ' + r.grupo;
+      var top = document.createElement('div');
+      top.className = 'p146top';
+      top.textContent = horaCurta(r.quando) + '  |  ' + r.tipo +
+        (r.repetiu ? ('  |  repetiu ' + r.repetiu + ' vezes') : '');
+      var msg = document.createElement('div');
+      msg.className = 'p146msg';
+      msg.textContent = r.mensagem;
+      d.appendChild(top);
+      d.appendChild(msg);
+      if (r.de) {
+        var de = document.createElement('div');
+        de.className = 'p146de';
+        de.textContent = 'onde: ' + r.de;
+        d.appendChild(de);
+      }
+      if (r.detalhe) {
+        var det = document.createElement('details');
+        var res = document.createElement('summary');
+        res.textContent = 'detalhes tecnicos';
+        var pre = document.createElement('pre');
+        pre.textContent = r.detalhe;
+        det.appendChild(res);
+        det.appendChild(pre);
+        d.appendChild(det);
+      }
+      area.appendChild(d);
+    });
+  }
+
+  function abrir() {
+    tela().classList.add('aberto');
+    redesenhar();
+  }
+  function fechar() { tela().classList.remove('aberto'); }
+
+  /* ---------------- copiar, baixar, limpar ---------------- */
+  function emTexto() {
+    var linhas = ['Registro de ocorrencias do painel',
+      'Gerado em: ' + new Date().toLocaleString('pt-BR'),
+      'Endereco: ' + String(location.href),
+      'Navegador: ' + String(navigator.userAgent),
+      'Total anotado: ' + lista.length, ''];
+    lista.forEach(function (r) {
+      linhas.push('[' + horaCurta(r.quando) + '] (' + r.tipo + ') ' + r.mensagem +
+        (r.repetiu ? ' (repetiu ' + r.repetiu + ' vezes)' : ''));
+      if (r.de) { linhas.push('   onde: ' + r.de); }
+      if (r.detalhe) { linhas.push('   detalhe: ' + r.detalhe.replace(/\n/g, ' | ')); }
+      linhas.push('');
+    });
+    return linhas.join('\n');
+  }
+
+  function copiar() {
+    var txt = emTexto();
+    var feito = function () { window.alert('Registro copiado. Cole onde quiser (e-mail, mensagem).'); };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(feito, function () { copiarNaMao(txt, feito); });
+        return;
+      }
+    } catch (e) { }
+    copiarNaMao(txt, feito);
+  }
+  function copiarNaMao(txt, feito) {
+    try {
+      var a = document.createElement('textarea');
+      a.value = txt;
+      a.style.position = 'fixed';
+      a.style.left = '-9999px';
+      document.body.appendChild(a);
+      a.select();
+      document.execCommand('copy');
+      a.remove();
+      feito();
+    } catch (e) {
+      window.alert('Nao consegui copiar sozinho. Use o botao Baixar registro.');
+    }
+  }
+
+  function baixar() {
+    try {
+      var nome = 'Ocorrencias_do_painel_' +
+        new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.txt';
+      var blob = new Blob([emTexto()], { type: 'text/plain;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = nome;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) { } }, 4000);
+      return nome;
+    } catch (e) { return ''; }
+  }
+
+  function limpar() {
+    if (!window.confirm('Apagar o registro de ocorrencias deste navegador?')) { return false; }
+    lista = [];
+    try { localStorage.removeItem(CHAVE); } catch (e) { }
+    atualizarBotao(false);
+    redesenhar();
+    return true;
+  }
+
+  /* ---------------- ouvir tudo que da errado ---------------- */
+  function ouvirErros() {
+    window.addEventListener('error', function (ev) {
+      try {
+        var alvo = ev && ev.target;
+        if (alvo && alvo !== window && alvo.tagName) {
+          var end = alvo.src || alvo.href || '';
+          registrar('arquivo nao carregou', 'Nao carregou: ' + alvo.tagName.toLowerCase(),
+            { de: end, grupo: 'rede' });
+          return;
+        }
+        registrar('erro de programa', (ev && ev.message) || 'erro sem mensagem', {
+          de: ((ev && ev.filename) || '') + (ev && ev.lineno ? (' linha ' + ev.lineno) : ''),
+          detalhe: (ev && ev.error && ev.error.stack) || ''
+        });
+      } catch (e) { }
+    }, true);
+
+    window.addEventListener('unhandledrejection', function (ev) {
+      try {
+        var m = ev && ev.reason;
+        registrar('falha nao tratada', (m && (m.message || m.details || m.hint)) || texto(m), {
+          detalhe: (m && m.stack) || ''
+        });
+      } catch (e) { }
+    });
+  }
+
+  function ouvirConsole() {
+    if (!window.console) { return; }
+    console.error = function () {
+      var args = Array.prototype.slice.call(arguments);
+      try {
+        registrar('erro avisado no console', args.map(texto).join(' '), {
+          detalhe: (args[0] && args[0].stack) || ''
+        });
+      } catch (e) { }
+      conOriginal.error.apply(null, args);
+    };
+    console.warn = function () {
+      var args = Array.prototype.slice.call(arguments);
+      try { registrar('aviso do console', args.map(texto).join(' '), { grupo: 'aviso' }); } catch (e) { }
+      conOriginal.warn.apply(null, args);
+    };
+  }
+
+  function ouvirRede() {
+    var fOriginal = window.fetch;
+    if (typeof fOriginal === 'function') {
+      window.fetch = function (entrada, opcoes) {
+        var endereco = '';
+        try { endereco = (typeof entrada === 'string') ? entrada : (entrada && entrada.url) || ''; } catch (e) { }
+        var metodo = (opcoes && opcoes.method) || (entrada && entrada.method) || 'GET';
+        return fOriginal.apply(window, arguments).then(function (r) {
+          try {
+            if (r && !r.ok) {
+              registrar('pedido recusado', 'A nuvem respondeu ' + r.status + ' ' + (r.statusText || ''),
+                { de: metodo + ' ' + endereco, grupo: 'rede' });
+            }
+          } catch (e) { }
+          return r;
+        }, function (e) {
+          try {
+            registrar('pedido nao chegou', (e && e.message) || 'falha de rede',
+              { de: metodo + ' ' + endereco, grupo: 'rede' });
+          } catch (x) { }
+          throw e;
+        });
+      };
+    }
+    try {
+      var abrirXHR = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (metodo, endereco) {
+        this.__p146 = (metodo || '') + ' ' + (endereco || '');
+        this.addEventListener('error', function () {
+          registrar('pedido nao chegou', 'falha de rede', { de: this.__p146, grupo: 'rede' });
+        });
+        this.addEventListener('load', function () {
+          if (this.status >= 400) {
+            registrar('pedido recusado', 'Resposta ' + this.status, { de: this.__p146, grupo: 'rede' });
+          }
+        });
+        return abrirXHR.apply(this, arguments);
+      };
+    } catch (e) { }
+  }
+
+  /* ---------------- ligar tudo ---------------- */
+  ouvirErros();
+  ouvirConsole();
+  ouvirRede();
+  lista = ler();
+  seq = lista.length ? (lista[lista.length - 1].n || lista.length) : 0;
+
+  function ligar() {
+    pronto = true;
+    botao();
+    tela();
+    atualizarBotao(false);
+    document.addEventListener('keydown', function (ev) {
+      if (ev.ctrlKey && ev.altKey && (ev.key === 'e' || ev.key === 'E')) {
+        ev.preventDefault();
+        if (tela().classList.contains('aberto')) { fechar(); } else { abrir(); }
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ligar);
+  } else {
+    ligar();
+  }
+
+  window.P146 = {
+    registrar: registrar,
+    abrir: abrir,
+    fechar: fechar,
+    lista: function () { return lista.slice(); },
+    texto: emTexto,
+    baixar: baixar,
+    limpar: limpar,
+    contar: contarErros
+  };
+})();
+</script>
+<!-- FIM PATCH146_PAINEL_DE_ERROS -->
+
 <!-- INI PATCH147_ECONOMIA_DE_DADOS -->
 <script>
 /* =====================================================================
@@ -72253,6 +72633,10 @@ window.P146 = { registrar: function () {}, abrir: function () {}, fechar: functi
 
 })();
 </script>
+<script src="/admin-painel.js"></script>
+<script src="/patch-ui-2026-completo.js"></script>
+<script src="/patch-ui-2026-gaveta-pgto.js"></script>
+<script src="/patch-arquivos-obra.js"></script>
 <!-- FIM PATCH150_CAMADA_ABSTRACAO -->
 
 <style id="pPrintPgtoOnly">
@@ -72368,6 +72752,5 @@ window.P146 = { registrar: function () {}, abrir: function () {}, fechar: functi
 })();
 </script>
 <script src="patch_relocate_header_buttons.js"></script>
-<script src="patch_correcao.js"></script>
 </body>
 </html>

@@ -590,7 +590,6 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
         if (typeof window.popularCustoObraSelect !== 'function') window.popularCustoObraSelect = function() {};
         if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard = function() {};
     </script>
-    <script src="supabase_auth_client.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Acompanhamento de Produção e Instalação</title>
@@ -888,11 +887,23 @@ body, main, .app-container {
             color: #38bdf8;
         }
 
+        /* [v9] header compact */
         .project-selector {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
             flex-wrap: wrap;
+            max-width: 100%;
+        }
+        .project-selector select {
+            min-width: 100px;
+            max-width: 220px;
+        }
+        .project-selector .secondary,
+        .project-selector button {
+            font-size: 0.72rem;
+            padding: 4px 8px;
+            white-space: nowrap;
         }
 
         select,
@@ -5438,238 +5449,7 @@ body.p53-travado { overflow: hidden !important; }
   #p84PrintStandalone img, #p83PrintStandalone img { max-width: 100% !important; height: auto !important; }
 }
 </style>
-<style>
-/* PATCH158 - Ocultar aba Gestao de Obra e Equipe (sem funcionalidade) */
-#btn-tab-cronograma { display: none !important; }
-#tab-cronograma { display: none !important; }
-</style>
 
-
-<style>
-
-</style>
-
-<style>
-/* === GAVETA OBRAS v1 — launcher + painel lateral (prefixo obr-) === */
-
-/* launcher — botao que abre a gaveta */
-.obr-launcher {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 0 6px !important;
-  padding: 6px 13px 6px 10px !important;
-  font: 600 13px/1.2 inherit;
-  color: #e8eefc;
-  background: linear-gradient(135deg, #1b2540 0%, #111827 100%);
-  border: 1px solid rgba(255,255,255,.14) !important;
-  border-radius: 10px !important;
-  box-shadow: 0 4px 14px rgba(2,8,23,.3);
-  cursor: pointer;
-  user-select: none;
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-}
-.obr-launcher:hover {
-  transform: translateY(-1px);
-  border-color: rgba(245,158,11,.55) !important;
-  box-shadow: 0 8px 20px rgba(2,8,23,.4);
-}
-.obr-launcher:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
-.obr-launcher .obr-ico {
-  display: grid; place-items: center;
-  width: 24px; height: 24px; font-size: 15px;
-  background: rgba(245,158,11,.18); border-radius: 7px;
-}
-.obr-launcher .obr-rot {
-  font-weight: 600; color: #c3d1ea; font-size: 12.5px;
-}
-.obr-launcher .obr-atual {
-  max-width: 200px; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
-  font-weight: 500; color: #9fb3d9; font-size: 12px;
-}
-.obr-launcher .obr-atual:before { content: '•'; margin-right: 6px; color: #f59e0b; }
-
-/* gaveta lateral — overlay + painel */
-#obrGaveta:not(.obr-on) {
-  display: none !important; visibility: hidden !important;
-  pointer-events: none !important; opacity: 0 !important;
-}
-#obrGaveta.obr-on {
-  display: block !important; visibility: visible !important;
-  pointer-events: auto !important; opacity: 1 !important;
-  position: fixed !important; top: 0 !important; left: 0 !important;
-  right: 0 !important; bottom: 0 !important;
-  width: 100% !important; height: 100% !important;
-  max-width: none !important; margin: 0 !important; padding: 0 !important;
-  z-index: 100095 !important;
-}
-.obr-fundo {
-  position: absolute !important; inset: 0 !important;
-  width: 100% !important; height: 100% !important;
-  background: rgba(3,7,18,.62);
-  backdrop-filter: blur(3px);
-  animation: obrFade .18s ease;
-}
-@keyframes obrFade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes obrSlide { from { transform: translateX(-24px); opacity: .4; } to { transform: none; opacity: 1; } }
-
-.obr-painel {
-  position: absolute !important; top: 0 !important; left: 0 !important;
-  bottom: 0 !important; right: auto !important;
-  display: flex !important; flex-direction: column !important;
-  width: 340px !important; max-width: 90vw !important;
-  height: 100% !important; margin: 0 !important; padding: 0 !important;
-  background: #0d1424;
-  border-right: 1px solid rgba(255,255,255,.08);
-  box-shadow: 24px 0 60px rgba(2,6,23,.55);
-  animation: obrSlide .2s ease;
-  overflow: hidden;
-}
-
-/* topo da gaveta */
-.obr-topo {
-  display: flex !important; align-items: center; gap: 12px;
-  width: auto !important;
-  padding: 18px 16px 14px 18px !important;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-}
-.obr-logo {
-  display: grid !important; place-items: center;
-  width: 38px !important; height: 38px; flex: 0 0 38px;
-  font: 800 15px/1 inherit; color: #fff;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  border-radius: 11px;
-  box-shadow: 0 6px 16px rgba(245,158,11,.35);
-}
-.obr-nomes { flex: 1 1 auto; min-width: 0; width: auto !important; }
-.obr-nomes b { display: block; font-size: 13.5px; letter-spacing: .3px; color: #f1f5f9; }
-.obr-nomes span { display: block; font-size: 11.5px; color: #7f92b5; margin-top: 2px; }
-.obr-x {
-  width: 32px !important; height: 32px; flex: 0 0 32px;
-  padding: 0 !important; font-size: 18px; line-height: 1;
-  color: #9fb3d9; background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.1) !important;
-  border-radius: 9px !important; cursor: pointer;
-}
-.obr-x:hover { color: #fff; background: rgba(239,68,68,.22); }
-
-/* busca */
-.obr-buscabox { padding: 10px 14px 6px 14px !important; width: auto !important; }
-.obr-busca {
-  width: 100% !important; max-width: 100% !important;
-  padding: 8px 11px !important; font: 400 12.5px/1.3 inherit;
-  color: #e8eefc; background: #131c2f !important;
-  border: 1px solid rgba(255,255,255,.1) !important;
-  border-radius: 10px !important; box-sizing: border-box;
-}
-.obr-busca::placeholder { color: #6b7f9f; }
-.obr-busca:focus { outline: none; border-color: rgba(245,158,11,.6) !important; background: #16203a !important; }
-
-/* lista de obras */
-.obr-lista {
-  flex: 1 1 auto; width: auto !important;
-  padding: 8px 10px 14px 10px !important;
-  overflow-y: auto; overflow-x: hidden;
-}
-.obr-grupo {
-  padding: 12px 8px 6px 8px;
-  font: 700 10.5px/1 inherit;
-  letter-spacing: 1.2px; text-transform: uppercase;
-  color: #5d708f;
-}
-.obr-obra {
-  display: flex !important; align-items: center; gap: 11px;
-  width: 100% !important; max-width: 100% !important;
-  margin: 3px 0 !important; padding: 10px 12px !important;
-  font: 500 13.5px/1.25 inherit;
-  text-align: left !important; color: #c3d1ea;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  border-radius: 10px !important; cursor: pointer;
-  box-sizing: border-box;
-  transition: background .14s ease, color .14s ease, transform .14s ease;
-}
-.obr-obra:hover {
-  color: #fff; background: rgba(245,158,11,.1) !important;
-  transform: translateX(2px);
-}
-.obr-obra:focus-visible { outline: 2px solid #f59e0b; outline-offset: 1px; }
-.obr-obra .obr-ico2 {
-  display: grid; place-items: center;
-  width: 28px; height: 28px; flex: 0 0 28px; font-size: 14px;
-  background: rgba(255,255,255,.05); border-radius: 8px;
-}
-.obr-obra .obr-txt {
-  flex: 1 1 auto; min-width: 0;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.obr-obra.obr-ativo {
-  color: #fff;
-  background: linear-gradient(90deg, rgba(245,158,11,.22), rgba(245,158,11,.06)) !important;
-  border-color: rgba(245,158,11,.3) !important;
-  font-weight: 700;
-}
-.obr-obra.obr-ativo .obr-ico2 { background: rgba(245,158,11,.22); }
-.obr-obra.obr-ativo:after {
-  content: ''; width: 6px; height: 6px; flex: 0 0 6px;
-  border-radius: 50%; background: #f59e0b; box-shadow: 0 0 8px #f59e0b;
-}
-.obr-vazio { padding: 18px 12px; font-size: 12.5px; color: #6b7f9f; text-align: center; }
-.obr-esconde { display: none !important; }
-
-/* rodape com botoes de acao */
-.obr-rodape {
-  width: auto !important; padding: 12px 14px 16px 14px !important;
-  border-top: 1px solid rgba(255,255,255,.07);
-  display: flex; flex-direction: column; gap: 8px;
-}
-.obr-rodape button {
-  width: 100%; padding: 9px 12px !important;
-  font: 500 13px/1.2 inherit; border-radius: 8px !important;
-  cursor: pointer; border: 1px solid rgba(255,255,255,.1) !important;
-  transition: background .14s ease;
-}
-.obr-btn-gerenciar {
-  color: #000 !important; background: #f59e0b !important;
-  border-color: rgba(245,158,11,.4) !important;
-}
-.obr-btn-gerenciar:hover { background: #d97706 !important; }
-.obr-btn-nova {
-  color: #fff !important; background: #16a34a !important;
-  border-color: rgba(22,163,74,.4) !important;
-}
-.obr-btn-nova:hover { background: #15803d !important; }
-.obr-btn-excluir {
-  color: #fff !important; background: #dc2626 !important;
-  border-color: rgba(220,38,38,.4) !important;
-}
-.obr-btn-excluir:hover { background: #b91c1c !important; }
-
-/* info de contrato no rodape */
-.obr-info {
-  width: auto !important; padding: 8px 16px 10px 16px !important;
-  font-size: 11px; color: #5d708f;
-  border-top: 1px solid rgba(255,255,255,.05);
-}
-
-/* esconder elementos antigos do project-selector */
-.obr-substitui {
-  position: absolute !important; left: -9999px !important;
-  width: 1px !important; height: 1px !important;
-  opacity: 0 !important; pointer-events: none !important;
-}
-
-body.obr-aberto { overflow: hidden !important; }
-
-@media (max-width: 520px) {
-  .obr-launcher .obr-atual { display: none; }
-  .obr-painel { width: 290px !important; }
-}
-@media print {
-  #obrGaveta, .obr-launcher { display: none !important; visibility: hidden !important; }
-}
-</style>
 </head>
 
 <body class="dark-mode">
@@ -5782,7 +5562,7 @@ body.obr-aberto { overflow: hidden !important; }
                         <div class="card-title">Controle de Produção e Instalação</div>
                         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                             <div class="search-box">
-                                <input type="text" id="searchItens" placeholder="Filtrar por ref, tipo, loc..." oninput="debounceRender()">
+                                <input type="text" id="searchItens" placeholder="Filtrar por ref, tipo, loc..." oninput="window.debounceRender()">
                             </div>
                             <button class="btn-primary" onclick="abrirModalListaCorte()" style="background: #4a5568; color: #fff;">Inserir Listas de Corte</button>
                             <button class="warning" style="color:#000" onclick="abrirModalConfig()">Ocultar/Mostrar Colunas</button>
@@ -5815,7 +5595,7 @@ body.obr-aberto { overflow: hidden !important; }
                             <div class="card-title">Acompanhamento Detalhado de Liberação Técnica (FEM)</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchLiberacao" placeholder="Filtrar liberação..." oninput="debounceRender()">
+                                    <input type="text" id="searchLiberacao" placeholder="Filtrar liberação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -5876,7 +5656,7 @@ body.obr-aberto { overflow: hidden !important; }
                             <div class="card-title">Acompanhamento Detalhado de Fabricação</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchFabricacao" placeholder="Filtrar fabricação..." oninput="debounceRender()">
+                                    <input type="text" id="searchFabricacao" placeholder="Filtrar fabricação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -5937,7 +5717,7 @@ body.obr-aberto { overflow: hidden !important; }
                             <div class="card-title">Acompanhamento Detalhado de Instalação</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchInstalacao" placeholder="Filtrar instalação..." oninput="debounceRender()">
+                                    <input type="text" id="searchInstalacao" placeholder="Filtrar instalação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -6273,7 +6053,7 @@ body.obr-aberto { overflow: hidden !important; }
                         <div class="card-title">Boletim de Medição Detalhado por Tipologia (Serviço de Instalação)</div>
                         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                             <div class="search-box">
-                                <input type="text" id="searchMedicao" placeholder="Filtrar medição..." oninput="debounceRender()">
+                                <input type="text" id="searchMedicao" placeholder="Filtrar medição..." oninput="window.debounceRender()">
                             </div>
                             <button class="warning" style="color:#000" onclick="sincronizarComInstalacao()">🔄 Sincronizar com Instalação
                             </button>
@@ -6399,7 +6179,7 @@ body.obr-aberto { overflow: hidden !important; }
                         <div class="card-title">Controle de Recebimento de Materiais</div>
                         <div class="recebimento-actions">
                             <div class="search-box">
-                                <input type="text" id="searchRecebimento" placeholder="Filtrar NF, fornecedor, material, ref..." oninput="debounceRender()">
+                                <input type="text" id="searchRecebimento" placeholder="Filtrar NF, fornecedor, material, ref..." oninput="window.debounceRender()">
                             </div>
                             <button class="secondary" onclick="abrirModalImportarRecebimento()">Inserir Recebimentos</button>
                             <button class="secondary" onclick="imprimirPagina()">Imprimir / Gerar PDF</button>
@@ -6436,6 +6216,12 @@ body.obr-aberto { overflow: hidden !important; }
                                     </th>
                                     <th class="head-base">
                                         <div class="th-content">Qtd. Recebida</div>
+                                    </th>
+                                    <th class="head-base">
+                                        <div class="th-content">Qtd. Saída</div>
+                                    </th>
+                                    <th class="head-base">
+                                        <div class="th-content">Saldo</div>
                                     </th>
                                     <th class="head-base">
                                         <div class="th-content">Unid.</div>
@@ -6494,6 +6280,12 @@ body.obr-aberto { overflow: hidden !important; }
                                         </th>
                                         <th class="head-base">
                                             <div class="th-content">Qtd. Recebida</div>
+                                        </th>
+                                        <th class="head-base">
+                                            <div class="th-content">Qtd. Saída</div>
+                                        </th>
+                                        <th class="head-base">
+                                            <div class="th-content">Saldo</div>
                                         </th>
                                         <th class="head-base">
                                             <div class="th-content">Unid.</div>
@@ -7104,6 +6896,10 @@ body.obr-aberto { overflow: hidden !important; }
                             <input type="number" step="0.01" min="0" id="recQtdRecebida" value="0">
                         </div>
                         <div class="form-group">
+                            <label>Quantidade Saída</label>
+                            <input type="number" step="0.01" min="0" id="recQtdSaida" value="0">
+                        </div>
+                        <div class="form-group">
                             <label>Status</label>
                             <select id="recStatus">
                                 <option value="Recebido">Recebido</option>
@@ -7525,7 +7321,18 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                         if (!error && data && data.dados) {
                             bancoEncontrado = data.dados.db ? data.dados.db : data.dados;
                             if (bancoEncontrado && bancoEncontrado.obras && bancoEncontrado.obras.length > 0) {
-                                fonte = '⚡ Supabase Online';
+                                /* [v8] contar itens totais na nuvem */
+                                var _totalItensNuvem = 0;
+                                try { bancoEncontrado.obras.forEach(function(o){ _totalItensNuvem += (o.itens||[]).length; }); } catch(e){}
+                                var _dbLocal = (typeof db !== 'undefined' && db) ? db : null;
+                                var _totalItensLocal = 0;
+                                if (_dbLocal && _dbLocal.obras) { try { _dbLocal.obras.forEach(function(o){ _totalItensLocal += (o.itens||[]).length; }); } catch(e){} }
+                                if (_totalItensNuvem === 0 && _totalItensLocal > 0) {
+                                    console.warn('[v8] Nuvem tem obras mas itens=0 — preservando dados locais ('+_totalItensLocal+' itens)');
+                                    bancoEncontrado = null;
+                                } else {
+                                    fonte = '⚡ Supabase Online';
+                                }
                             } else {
                                 bancoEncontrado = null;
                             }
@@ -7543,7 +7350,17 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                             const parsed = JSON.parse(localData);
                             bancoEncontrado = parsed.db ? parsed.db : parsed;
                             if (bancoEncontrado && bancoEncontrado.obras && bancoEncontrado.obras.length > 0) {
-                                fonte = '💾 Armazenamento Local';
+                                var _ttl2 = 0;
+                                try { bancoEncontrado.obras.forEach(function(o){ _ttl2 += (o.itens||[]).length; }); } catch(e){}
+                                var _dbL2 = (typeof db !== 'undefined' && db) ? db : null;
+                                var _localIt2 = 0;
+                                if (_dbL2 && _dbL2.obras) { try { _dbL2.obras.forEach(function(o){ _localIt2 += (o.itens||[]).length; }); } catch(e){} }
+                                if (_ttl2 === 0 && _localIt2 > 0) {
+                                    console.warn('[v8] LocalStorage tem obras mas itens=0 — preservando memoria ('+_localIt2+' itens)');
+                                    bancoEncontrado = null;
+                                } else {
+                                    fonte = '💾 Armazenamento Local';
+                                }
                             } else {
                                 bancoEncontrado = null;
                             }
@@ -7969,6 +7786,8 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                     clearTimeout(renderTimer);
                     renderTimer = setTimeout(() => render(), 250);
                 }
+                window.debounceRender = debounceRender;
+                window.debounceRender = debounceRender;
             
                 function getObraAtual() {
                     let o = db.obras.find(o => o.id === db.obraAtualId);
@@ -8941,6 +8760,9 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                         if (r.descricao === undefined) r.descricao = r.material || '';
                         if (r.material === undefined) r.material = r.descricao || '';
                         if (r.ref === undefined) r.ref = r.codigoCor || '';
+                        if (r.qtdSaida === undefined) r.qtdSaida = 0;
+                        if (r.saldo === undefined) r.saldo = Number(r.qtdRecebida||0) - Number(r.qtdSaida||0);
+                        if (r.qtdSaida === undefined) r.qtdSaida = 0;
                     });
                 }
             
@@ -8978,7 +8800,10 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                                 descricao: r.descricao || r.material || '',
                                 unidade: r.unidade || 'UN',
                                 qtdRecebida: 0,
+                                qtdSaida: 0,
+                                saldo: 0,
                                 qtdPrevista: 0,
+                                qtdSaida: 0,
                                 ocorrencias: 0,
                                 listasCorte: new Set(),
                                 ultimoRecebimento: r.data || ''
@@ -8987,7 +8812,12 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
             
                         const item = mapa.get(chave);
                         item.qtdRecebida += Number(r.qtdRecebida || 0);
+                        item.qtdSaida += Number(r.qtdSaida || 0);
                         item.qtdPrevista += Number(r.qtdPrevista || 0);
+                        item.qtdSaida += Number(r.qtdSaida || 0);
+                        item.qtdSaida += Number(r.qtdSaida || 0);
+                        item.qtdSaida += Number(r.qtdSaida || 0);
+                        item.saldo = Number(item.qtdRecebida||0) - Number(item.qtdSaida||0);
                         item.ocorrencias += 1;
                         if (r.listaCorte) item.listasCorte.add(String(r.listaCorte));
             
@@ -9001,7 +8831,10 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     });
             
                     const resultado = Array.from(mapa.values());
-                    resultado.forEach(item => item.listasCorte = Array.from(item.listasCorte).sort());
+                    resultado.forEach(item => {
+                        item.listasCorte = Array.from(item.listasCorte).sort();
+                        item.saldo = Number(item.qtdRecebida || 0) - Number(item.qtdSaida || 0);
+                    });
                     return resultado.sort((a, b) =>
                         `${a.classe} ${a.marca} ${a.codigoCor}`.localeCompare(
                             `${b.classe} ${b.marca} ${b.codigoCor}`, 'pt-BR'
@@ -9015,17 +8848,26 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
             
                     const materiais = obterMateriaisConsolidados(obra);
             
-                    tbody.innerHTML = materiais.map(m => `<tr>
+                    tbody.innerHTML = materiais.map(m => {
+                        const saldo = Number(m.saldo || 0);
+                        return `<tr>
                             <td>${escaparHTML((m.listasCorte || []).join(', ') || '-')}</td>
                             <td><span class="material-badge">${escaparHTML(m.classe || '-')}</span></td>
                             <td class="text-left">${escaparHTML(m.marca || '-')}</td>
                             <td class="text-left">${escaparHTML(m.codigoCor || '-')}</td>
                             <td class="text-left">${escaparHTML(m.descricao || '-')}</td>
+                            <td>${Number(m.qtdPrevista || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
                             <td>${Number(m.qtdRecebida || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
+                            <td>${Number(m.qtdSaida || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
+                            <td style="font-weight:700;color:${Number(m.saldo||0)<0?'var(--danger,#e74c3c)':'var(--success,#16a34a)'}"
+${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
+                            <td>${Number(m.qtdSaida || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
+                            <td style="font-weight:700;color:${saldo < 0 ? 'var(--danger,#e74c3c)' : 'var(--success,#16a34a)'}">${saldo.toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                             <td>${escaparHTML(m.unidade || 'UN')}</td>
                             <td>${m.ocorrencias}</td>
                             <td>${escaparHTML(m.ultimoRecebimento || '-')}</td>
-                        </tr>`).join('');
+                        </tr>`;
+                    }).join('');
                 }
             
                 function exportarMateriaisConsolidados() {
@@ -9037,10 +8879,10 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     }
             
                     const linhas = [
-                        ['Lista(s) de Corte', 'Classe', 'Marca', 'Código - Cor', 'Descrição', 'Quantidade Recebida', 'Unidade', 'Ocorrências', 'Último Recebimento'],
+                        ['Lista(s) de Corte', 'Classe', 'Marca', 'Código - Cor', 'Descrição', 'Quantidade Prevista', 'Quantidade Recebida', 'Quantidade Saída', 'Saldo', 'Unidade', 'Ocorrências', 'Último Recebimento'],
                         ...materiais.map(m => [
                             (m.listasCorte || []).join(', '), m.classe, m.marca, m.codigoCor, m.descricao,
-                            m.qtdRecebida, m.unidade, m.ocorrencias, m.ultimoRecebimento
+                            m.qtdPrevista, m.qtdRecebida, m.qtdSaida, m.saldo, m.unidade, m.ocorrencias, m.ultimoRecebimento
                         ])
                     ];
             
@@ -9079,6 +8921,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                                 <td><input class="text-left" type="text" value="${escaparHTML(r.descricao || r.material)}" onchange="editarRecebimento(${r.id},'descricao',this.value)"></td>
                                 <td><input type="number" step="0.01" min="0" value="${Number(r.qtdPrevista || 0)}" onchange="editarRecebimento(${r.id},'qtdPrevista',this.value)"></td>
                                 <td><input type="number" step="0.01" min="0" value="${Number(r.qtdRecebida || 0)}" onchange="editarRecebimento(${r.id},'qtdRecebida',this.value)"></td>
+                                <td><input type="number" step="0.01" min="0" value="${Number(r.qtdSaida || 0)}" onchange="editarRecebimento(${r.id},'qtdSaida',this.value)"></td>
+                                <td style="font-weight:700;color:${(Number(r.qtdRecebida||0) - Number(r.qtdSaida||0)) < 0 ? 'var(--danger,#e74c3c)' : 'var(--success,#16a34a)'}">${(Number(r.qtdRecebida||0) - Number(r.qtdSaida||0)).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                                 <td><select onchange="editarRecebimento(${r.id},'unidade',this.value)">${['UN', 'M', 'M²', 'KG', 'L', 'CX', 'OUTRO'].map(u => `<option value="${u}" ${r.unidade === u ? 'selected' : ''}>${u}</option>`).join('')}</select></td>
                                 <td><select onchange="editarRecebimento(${r.id},'status',this.value)">${['Recebido', 'Parcial', 'Pendente', 'Rejeitado'].map(s => `<option value="${s}" ${status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
                                 <td><input class="text-left" type="text" value="${escaparHTML(r.responsavel)}" onchange="editarRecebimento(${r.id},'responsavel',this.value)"></td>
@@ -9096,6 +8940,9 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     ['recListaCorte', 'recNF', 'recFornecedor', 'recClasse', 'recMarca', 'recCodigoCor', 'recDescricao', 'recMaterial', 'recRef', 'recResponsavel', 'recLocal', 'recObs'].forEach(id => document.getElementById(id).value = '');
                     document.getElementById('recQtdPrevista').value = 0;
                     document.getElementById('recQtdRecebida').value = 0;
+                    document.getElementById('recQtdSaida').value = 0;
+                    document.getElementById('recQtdSaida').value = 0;
+                    document.getElementById('recQtdSaida').value = 0;
                     document.getElementById('recUnidade').value = 'UN';
                     document.getElementById('recStatus').value = 'Recebido';
                     document.getElementById('modalRecebimento').style.display = 'flex';
@@ -9106,6 +8953,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     if (!obra.recebimentos) obra.recebimentos = [];
                     const qtdPrevista = Number(document.getElementById('recQtdPrevista').value) || 0;
                     const qtdRecebida = Number(document.getElementById('recQtdRecebida').value) || 0;
+                    const qtdSaida = Number(document.getElementById('recQtdSaida').value) || 0;
                     let status = document.getElementById('recStatus').value;
                     if (status === 'Recebido' && qtdPrevista > 0 && qtdRecebida < qtdPrevista) status = 'Parcial';
                     obra.recebimentos.push({
@@ -9120,7 +8968,7 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                         descricao: document.getElementById('recDescricao').value.trim(),
                         material: document.getElementById('recMaterial').value.trim(),
                         ref: document.getElementById('recRef').value.trim(),
-                        qtdPrevista, qtdRecebida,
+                        qtdPrevista, qtdRecebida, qtdSaida, qtdSaida,
                         unidade: document.getElementById('recUnidade').value,
                         status,
                         responsavel: document.getElementById('recResponsavel').value.trim(),
@@ -9134,8 +8982,8 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                     const obra = getObraAtual();
                     const item = (obra.recebimentos || []).find(r => r.id === id);
                     if (!item) return;
-                    item[campo] = ['qtdPrevista', 'qtdRecebida'].includes(campo) ? (Number(valor) || 0) : valor;
-                    if ((campo === 'qtdPrevista' || campo === 'qtdRecebida') && item.status !== 'Rejeitado') {
+                    item[campo] = ['qtdPrevista', 'qtdRecebida', 'qtdSaida'].includes(campo) ? (Number(valor) || 0) : valor;
+                    if (['qtdPrevista', 'qtdRecebida', 'qtdSaida'].includes(campo) && item.status !== 'Rejeitado') {
                         if (item.qtdRecebida <= 0) item.status = 'Pendente';
                         else if (item.qtdPrevista > 0 && item.qtdRecebida < item.qtdPrevista) item.status = 'Parcial';
                         else item.status = 'Recebido';
@@ -9326,6 +9174,9 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
                             ref: codigoCor,
                             qtdPrevista: quantidade,
                             qtdRecebida: 0,
+                            qtdSaida: 0,
+                            saldo: 0,
+                            qtdSaida: 0,
                             unidade: 'UN',
                             status: 'Pendente',
                             responsavel: '',
@@ -15777,8 +15628,9 @@ function trocarSubTabPgtoNovo(tab) {
                    ================================================================== */
                 function p38ListaColaboradores(obraId){
                   var nomes = [];
+                  var _p38db = (typeof db !== "undefined") ? db : {obras: window.dbObras || []};
                   try {
-                    (db.obras || []).forEach(function(o){
+                    (_p38db.obras || []).forEach(function(o){
                       if(obraId && o.id !== obraId) return;
                       (o.colaboradores || []).forEach(function(c){
                         var n = (c && c.nome) ? String(c.nome).trim() : "";
@@ -35632,6 +35484,18 @@ body.print-active #containerResumoPgto .p70-eco-papel,
   var P72 = window.P72 = window.P72 || {};
   P72.__v72 = true;
 
+  /* PATCH159: a tabela de Recebimento tinha colunas duplicadas no corpo,
+     o que travava o reordenamento e deixava o cabecalho (Observacoes/Acoes
+     arrastadas para o inicio, em alguma sessao antiga) fora de sincronia
+     com os dados. Corrigido o corpo; aqui zeramos so essa ordem salva,
+     uma unica vez por navegador, para a tabela voltar ao layout padrao. */
+  try {
+    if (!localStorage.getItem('p159ResetColunasRecebimento')) {
+      localStorage.removeItem('painelColunas_tbodyRecebimento');
+      localStorage.setItem('p159ResetColunasRecebimento', '1');
+    }
+  } catch (e) { /* ignora */ }
+
   /* ------------------------------------------------------------------ */
   /* AJUDANTES                                                          */
   /* ------------------------------------------------------------------ */
@@ -42100,7 +41964,126 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       '.pr-ass{margin-top:20px;text-align:center;font-size:9pt}' +
       '</style>';
     janelaImpressao.document.open();
-    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diario de Obra</title>' + cssImpressao + '</head><body>' + h + '</body></html>');
+    janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Diario de Obra</title>' + cssImpressao + '</head><body>' + h + '<!-- [v8] DIAGNOSTICO + RECUPERACAO -->
+<script>
+(function(){
+  "use strict";
+  if (window.__v8Diag) return;
+  window.__v8Diag = true;
+
+  function criarBanner(){
+    if (document.getElementById('v8DiagBanner')) return;
+    var bar = document.createElement('div');
+    bar.id = 'v8DiagBanner';
+    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483600;'
+      +'background:#1e293b;color:#e2e8f0;padding:6px 12px;font:12px monospace;'
+      +'display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .3s;';
+    bar.innerHTML = '<span id="v8DiagText">…</span>'
+      +'<button id="v8BtnRecuperar" style="background:#ef4444;color:#fff;border:0;'
+      +'padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;">'
+      +'🔄 Recuperar Dados</button>'
+      +'<button id="v8BtnFechar" style="background:#475569;color:#fff;border:0;'
+      +'padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;">✕</button>';
+    document.body.prepend(bar);
+    document.getElementById('v8BtnFechar').onclick = function(){
+      bar.style.display = 'none';
+    };
+    document.getElementById('v8BtnRecuperar').onclick = function(){
+      window.recuperarDados();
+    };
+  }
+
+  function atualizarBanner(){
+    var el = document.getElementById('v8DiagText');
+    if (!el) return;
+    try {
+      var db_ = (typeof db !== 'undefined') ? db : (window.db || null);
+      var nObras = (db_ && db_.obras) ? db_.obras.length : 0;
+      var nItens = 0;
+      if (db_ && db_.obras) {
+        db_.obras.forEach(function(o){ nItens += (o.itens||[]).length; });
+      }
+      var obraAtual = (typeof getObraAtual === 'function') ? getObraAtual() : null;
+      var nomeObra = obraAtual ? obraAtual.nome : '—';
+      var itensObra = obraAtual ? (obraAtual.itens||[]).length : 0;
+      var cor = (nItens === 0) ? '#f87171' : (nItens < 10) ? '#fbbf24' : '#4ade80';
+      el.style.color = cor;
+      el.textContent = '[v8] Obras:' + nObras + ' | Itens total:' + nItens
+        + ' | Obra: ' + nomeObra + ' (' + itensObra + ' itens)';
+    } catch(e) {
+      el.textContent = '[v8] Erro ao ler db: ' + e.message;
+      el.style.color = '#f87171';
+    }
+  }
+
+  window.recuperarDados = function(){
+    try {
+      var chaves = ['obrasDB_v8', 'obrasDB_v8_pre_nuvem_backup'];
+      var melhor = null;
+      var maisItens = 0;
+      chaves.forEach(function(c){
+        try {
+          var raw = localStorage.getItem(c);
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          var banco = parsed.db ? parsed.db : parsed;
+          if (!banco || !banco.obras || banco.obras.length === 0) return;
+          var total = 0;
+          banco.obras.forEach(function(o){ total += (o.itens||[]).length; });
+          if (total > maisItens) {
+            maisItens = total;
+            melhor = banco;
+          }
+          console.log('[v8] Chave ' + c + ': ' + banco.obras.length + ' obras, ' + total + ' itens');
+        } catch(e){}
+      });
+
+      if (melhor && maisItens > 0) {
+        db = melhor;
+        window.db = db;
+        window.dbObras = db.obras;
+        try { if (typeof salvarDB === 'function') salvarDB(false); } catch(e){}
+        try { if (typeof popularSelectObras === 'function') popularSelectObras(); } catch(e){}
+        try { if (typeof render === 'function') render(); } catch(e){}
+        alert('✅ Dados recuperados! ' + maisItens + ' itens restaurados de localStorage.');
+        atualizarBanner();
+      } else {
+        alert('❌ Nenhum backup com itens encontrado no localStorage.');
+      }
+    } catch(e){
+      alert('Erro na recuperacao: ' + e.message);
+    }
+  };
+
+  function iniciar(){
+    criarBanner();
+    atualizarBanner();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(iniciar, 500); });
+  } else {
+    setTimeout(iniciar, 500);
+  }
+
+  setInterval(atualizarBanner, 3000);
+  setTimeout(atualizarBanner, 1500);
+  setTimeout(atualizarBanner, 5000);
+  setTimeout(atualizarBanner, 10000);
+
+  window.addEventListener('error', function(evt){
+    console.error('[v8-ERR]', evt.message, evt.filename + ':' + evt.lineno);
+    var el = document.getElementById('v8DiagText');
+    if (el) { el.textContent = '[v8-ERR] ' + evt.message; el.style.color = '#ef4444'; }
+  });
+
+  try {
+    console.log('%c[v8] Diagnostico ativo. Use window.recuperarDados() para recuperar dados de localStorage.',
+      'color:#2563eb;font-weight:bold');
+  } catch(e){}
+})();
+</script>
+</body></html>');
     janelaImpressao.document.close();
     var imprimirJanela = function () {
       try { janelaImpressao.focus(); janelaImpressao.print(); } catch (erro) {}
@@ -44815,12 +44798,10 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       '#p87Botao{background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;margin:4px;font-size:13px}',
       '#p87Botao:hover{filter:brightness(1.1)}',
       '#meu-menu-abas #p87Botao{display:block;width:100%;box-sizing:border-box;margin:3px 0 !important;text-align:left}',
-      '#p87Fundo{position:fixed;inset:0;z-index:2147483200;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Segoe UI,Arial,sans-serif}'
-      /* PATCH_cadastroAdmin_v2: centralização no CSS base — sem pulo */
-      '#p87Caixa{position:fixed !important;left:50% !important;top:50% !important;right:auto !important;bottom:auto !important;transform:translate(-50%,-50%) !important;margin:0 !important;width:760px !important;max-width:94vw !important;max-height:86vh !important;height:auto !important}'
+      '#p87Fundo{position:fixed;inset:0;z-index:2147483200;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Segoe UI,Arial,sans-serif}',
       /* PATCH_cadastroAdmin: centralização já no CSS base para evitar pulo visual */
       '#p87Caixa{position:fixed !important;left:50% !important;top:50% !important;right:auto !important;bottom:auto !important;transform:translate(-50%,-50%) !important;margin:0 !important;width:760px !important;max-width:94vw !important;max-height:86vh !important;height:auto !important}',
-      '#p87Caixa{background:#fff;border-radius:14px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:p87FadeIn .2s ease-out}'
+      '#p87Caixa{background:#fff;border-radius:14px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:p87FadeIn .2s ease-out}',
       /* PATCH_cadastroAdmin: animação suave de entrada */
       '@keyframes p87FadeIn{from{opacity:0;transform:translate(-50%,-50%) scale(.97)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}',
       '#p87Caixa header{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#16304f;color:#fff;padding:12px 16px}',
@@ -45056,6 +45037,8 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   function abrirUsuarios() {
     estilo();
     fecharTela();
+    /* [v10] limpar cache para forcar recarga do Supabase */
+    window.__p87ListaSupabase = null;
 
     var f = document.createElement('div');
     f.id = 'p87Fundo';
@@ -45152,7 +45135,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     }
 
     h += '<table class="p87-tab"><thead><tr>' +
-         '<th>Nome</th><th>Usu\u00e1rio</th><th>Tipo de acesso</th><th>Criado em</th><th>A\u00e7\u00f5es</th>' +
+         '<th>Nome</th><th>Usu\u00e1rio</th><th>Tipo de acesso</th><th>Criado em</th><th>Abas [v9]</th><th>A\u00e7\u00f5es</th>' +
          '</tr></thead><tbody>';
 
     lista.forEach(function (u, i) {
@@ -45170,6 +45153,20 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
         h += '<td>' + esc(nomePerfil(u.perfil)) + '</td>';
       }
       h += '<td>' + esc(dataBr(u.criadoEm)) + '</td>';
+      /* [v9] coluna Abas */
+      var _ABAS = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.abas) ? window.PainelPermissoes.abas : [];
+      var _ehAdmL = String(u.perfil || '').toLowerCase() === 'admin';
+      var _pLib = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.liberadasDe) ? window.PainelPermissoes.liberadasDe(u.usuario, u.perfil) : _ABAS.map(function(x){return x.id;});
+      var _cfgL = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.configurado) ? window.PainelPermissoes.configurado(u.usuario) : false;
+      h += '<td style="text-align:center">';
+      if (_ehAdmL) {
+        h += '<span style="font-size:11px;color:#2563eb;font-weight:700">Todas</span>';
+      } else if (manda && _ABAS.length) {
+        h += '<button class="p87-btn mini" type="button" data-a="verAbas" data-i="' + i + '" title="Ver/editar abas liberadas" style="background:#7c3aed;color:#fff;border:0;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer">' + (_cfgL ? _pLib.length + '/' + _ABAS.length : 'Tudo') + ' ������</button>';
+      } else {
+        h += '<span style="font-size:11px;color:#6b7280">' + (_pLib.length || '?') + '</span>';
+      }
+      h += '</td>';
       h += '<td class="ac">';
       if (manda) {
         h += '<button class="p87-btn mini" type="button" data-a="senha" data-i="' + i + '">Trocar senha</button>';
@@ -45290,7 +45287,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     ev.preventDefault();
 
     if (a === 'fechar') { fecharTela(); return; }
-    if (a === 'atualizar') { desenhar(); aviso('Lista atualizada.'); return; }
+    if (a === 'atualizar') { window.__p87ListaSupabase = null; desenhar(); aviso('Lista atualizada.'); return; }
     if (a === 'csv') { baixarCsv(); return; }
 
     if (a === 'novo') {
@@ -45310,8 +45307,73 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     }
     if (a === 'salvarNovo') { salvarNovo(); return; }
 
+    /* [v9] verAbas - expandir permissoes inline */
+    if (a === 'verAbas') {
+      var _lstV = Array.isArray(window.__p87ListaSupabase) ? window.__p87ListaSupabase : usuarios();
+      var _iV = Number(b.getAttribute('data-i'));
+      if (!_lstV || !_lstV[_iV]) { return; }
+      var _uV = _lstV[_iV];
+      if (String(_uV.perfil || '').toLowerCase() === 'admin') {
+        aviso('Administrador ve todas as abas.', 'err'); return;
+      }
+      var _lnV = b.closest('tr');
+      var _pIdV = 'v9aba_' + _iV;
+      var _pElV = document.getElementById(_pIdV);
+      if (_pElV) { _pElV.style.display = _pElV.style.display === 'none' ? '' : 'none'; return; }
+      _pElV = document.createElement('tr'); _pElV.id = _pIdV;
+      var _cV = document.createElement('td'); _cV.colSpan = 6;
+      _cV.style.cssText = 'padding:12px;background:#f0f4ff;border:1px solid #bfdbfe;border-radius:8px;';
+      var _ABASv = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.abas) ? window.PainelPermissoes.abas : [];
+      var _libV = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.liberadasDe) ? window.PainelPermissoes.liberadasDe(_uV.usuario, _uV.perfil) : _ABASv.map(function(x){return x.id;});
+      var _hV = '<div style="margin:6px 0;font-weight:700;color:#1e3a5f;font-size:14px">\ud83d\udd11 Permiss\u00f5es de Abas — ' + esc(_uV.nome || _uV.usuario) + '</div>';
+      _hV += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin:8px 0">';
+      for (var _aV = 0; _aV < _ABASv.length; _aV++) {
+        var _abV = _ABASv[_aV];
+        var _onV = _libV.indexOf(_abV.id) >= 0;
+        _hV += '<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;background:' + (_onV ? '#eff6ff' : '#fff') + ';cursor:pointer;font-size:12.5px;color:#1e293b">';
+        _hV += '<input type="checkbox" data-a="v9chk" data-uid="' + esc(_uV.usuario) + '" data-aba="' + esc(_abV.id) + '"' + (_onV ? ' checked' : '') + '>';
+        _hV += '<span>' + esc(_abV.nome || _abV.id) + '</span></label>';
+      }
+      _hV += '</div>';
+      _hV += '<div style="display:flex;gap:8px;margin-top:8px">';
+      _hV += '<button class="p87-btn pri" type="button" data-a="salvarAbasI" data-uid="' + esc(_uV.usuario) + '" data-pid="' + _pIdV + '">Salvar permiss\u00f5es</button>';
+      _hV += '<button class="p87-btn" type="button" data-a="fecharAbasI" data-pid="' + _pIdV + '">Fechar</button>';
+      _hV += '</div>';
+      _cV.innerHTML = _hV;
+      _pElV.appendChild(_cV);
+      if (_lnV && _lnV.nextSibling) { _lnV.parentNode.insertBefore(_pElV, _lnV.nextSibling); }
+      else { _lnV.parentNode.appendChild(_pElV); }
+      return;
+    }
+    /* [v9] salvarAbasI */
+    if (a === 'salvarAbasI') {
+      var _uidS = b.getAttribute('data-uid');
+      var _pidS = b.getAttribute('data-pid');
+      var _cksS = document.querySelectorAll('input[data-a="v9chk"][data-uid="' + _uidS + '"]');
+      var _marcS = [];
+      for (var _cS = 0; _cS < _cksS.length; _cS++) { if (_cksS[_cS].checked) { _marcS.push(String(_cksS[_cS].getAttribute('data-aba'))); } }
+      var _mS = (typeof window.PainelPermissoes !== 'undefined' && window.PainelPermissoes.mapa) ? window.PainelPermissoes.mapa() : null;
+      if (!_mS || typeof _mS !== 'object') { _mS = {}; }
+      var _kPS = 'painel_seg_permissoes_v1';
+      if (!_marcS.length) { delete _mS[_uidS]; } else { _mS[_uidS] = _marcS; }
+      try { localStorage.setItem(_kPS, JSON.stringify(_mS)); } catch(e) { aviso('Nao consegui salvar.', 'err'); return; }
+      try { if (window.p88Registrar) { window.p88Registrar('Permissoes de abas', _uidS + ': ' + _marcS.join(', ')); } } catch(e){}
+      aviso(_marcS.length ? 'Permiss\u00f5es salvas: ' + _marcS.length + ' aba(s).' : 'Sem limite: volta a ver todas.');
+      try { if (window.PainelPermissoes && window.PainelPermissoes.aplicar) { window.PainelPermissoes.aplicar(true); } } catch(e2){}
+      var _pElS = document.getElementById(_pidS);
+      if (_pElS) { _pElS.style.display = 'none'; }
+      desenhar();
+      return;
+    }
+    /* [v9] fecharAbasI */
+    if (a === 'fecharAbasI') {
+      var _pidF = b.getAttribute('data-pid');
+      var _pElF = document.getElementById(_pidF);
+      if (_pElF) { _pElF.style.display = 'none'; }
+      return;
+    }
     if (!podeMexer()) { return; }
-    var lista = usuarios();
+    var lista = Array.isArray(window.__p87ListaSupabase) ? window.__p87ListaSupabase : usuarios();
     var i = Number(b.getAttribute('data-i'));
     if (!lista[i]) { return; }
 
@@ -50748,8 +50810,6 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
   }
 })();
 </script>
-<script src="fpdo_editor_visual.js"></script>
-<script src="modernizacao_painel_v1.js"></script>
 
 <!-- PATCH96_ENQ_OK inicio -->
 <script>
@@ -54175,14 +54235,16 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
       vistos[k] = true;
       saida.push({ usuario: u.usuario, nome: u.nome || u.usuario, perfil: u.perfil || 'visitante' });
     }
+    /* [v9] lista Supabase com fallback email->usuario */
     var rem = window.__p87ListaSupabase;
     if (rem && rem.length) {
       for (i = 0; i < rem.length; i++) {
         var r = rem[i] || {};
-        var kr = chave(r.usuario);
+        var rUsu = r.usuario || r.email || '';
+        var kr = chave(rUsu);
         if (!kr || vistos[kr]) { continue; }
         vistos[kr] = true;
-        saida.push({ usuario: r.usuario, nome: r.nome || r.usuario, perfil: r.perfil || 'visitante' });
+        saida.push({ usuario: rUsu, nome: r.nome || rUsu, perfil: r.perfil || 'visitante' });
       }
     }
     var s = sessao();
@@ -63514,14 +63576,10 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
 
 <!-- PATCH128_LOGIN_NO_SERVIDOR -->
 <script>
-if (true) {
 /* ===== PATCH128 - login conferido no servidor ... */
 (function () {
   'use strict';
-  if (window.__P128) 
-  { return; }
-})();
-} /* /PATCH154_DISABLED */
+  if (window.__P128) { return; }
 
   var K_SESS  = 'painel_seg_sessao_v1';
   var K_USERS = 'painel_seg_usuarios_v1';
@@ -63954,7 +64012,6 @@ window.P128._trocarPendente = function () {
     comecar();
   }
 })();
-} /* /PATCH154_DISABLED */
 </script>
 <!-- PATCH154_HIDDEN: <!-- FIM PATCH128_LOGIN_NO_SERVIDOR --> -->
 <!-- PATCH154: P128 DESABILITADO – FIM -->
@@ -71571,436 +71628,10 @@ if (false) { /* PATCH154_DISABLED */
 </script>
 <!-- FIM PATCH145_SALVAMENTO_SEGURO -->
 
-<!-- INI PATCH146_PAINEL_DE_ERROS -->
-<style>
-#p146Bt{position:fixed;right:14px;bottom:14px;z-index:2147482000;border:0;border-radius:22px;
-  padding:9px 13px;font:600 12px Inter,Arial,sans-serif;cursor:pointer;color:#fff;
-  background:#5d6d7e;box-shadow:0 3px 10px rgba(0,0,0,.28)}
-#p146Bt.temErro{background:#c0392b}
-#p146Bt.pisca{animation:p146pisca .7s ease-in-out 3}
-@keyframes p146pisca{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
-#p146Tela{position:fixed;inset:0;z-index:2147482100;display:none;background:rgba(0,0,0,.45)}
-#p146Tela.aberto{display:block}
-#p146Cx{position:absolute;right:0;top:0;bottom:0;width:min(560px,100%);background:#fff;
-  display:flex;flex-direction:column;font:13px/1.4 Inter,Arial,sans-serif;color:#222}
-#p146Cx header{padding:12px 14px;background:#2c3e50;color:#fff;font-weight:700;
-  display:flex;justify-content:space-between;align-items:center;gap:8px}
-#p146Cx .p146acoes{padding:8px 14px;border-bottom:1px solid #e3e6e8;display:flex;flex-wrap:wrap;gap:6px}
-#p146Cx .p146acoes button,#p146Cx header button{font:600 12px Inter,Arial,sans-serif;
-  border:1px solid #cfd6dc;background:#f4f6f7;color:#222;border-radius:6px;padding:5px 9px;cursor:pointer}
-#p146Cx header button{background:rgba(255,255,255,.18);color:#fff;border-color:transparent}
-#p146Lista{overflow:auto;padding:8px 14px 20px}
-.p146item{border:1px solid #e3e6e8;border-left:4px solid #c0392b;border-radius:6px;
-  padding:8px 10px;margin-bottom:8px;background:#fdfdfd}
-.p146item.aviso{border-left-color:#c88a00}
-.p146item.rede{border-left-color:#8e44ad}
-.p146item .p146top{font-size:11px;color:#667}
-.p146item .p146msg{font-weight:600;margin:3px 0;word-break:break-word}
-.p146item .p146de{font-size:11px;color:#667;word-break:break-all}
-.p146item pre{white-space:pre-wrap;font-size:11px;background:#f7f9fa;border-radius:4px;
-  padding:6px;margin:6px 0 0;max-height:170px;overflow:auto}
-.p146vazio{color:#667;padding:14px 0}
-</style>
-<script>
-/* =====================================================================
- * PATCH 146 - painel de erros e registro de ocorrencias
- * ===================================================================== */
-(function () {
-  'use strict';
-  if (window.P146) { return; }
-
-  var LIMITE = 300;          /* quanto guarda na memoria */
-  var GUARDA = 80;           /* quanto guarda no navegador */
-  var CHAVE = 'p146_ocorrencias';
-  var lista = [];
-  var seq = 0;
-  var dentro = false;        /* evita erro dentro do proprio registro */
-  var pronto = false;
-
-  var conOriginal = {
-    error: (window.console && console.error) ? console.error.bind(console) : function () { },
-    warn: (window.console && console.warn) ? console.warn.bind(console) : function () { }
-  };
-
-  function texto(v) {
-    if (v === null) { return 'nulo'; }
-    if (typeof v === 'undefined') { return 'vazio'; }
-    if (typeof v === 'string') { return v; }
-    if (v instanceof Error) { return v.name + ': ' + v.message; }
-    try { return JSON.stringify(v); } catch (e) { return String(v); }
-  }
-  function curto(s, n) {
-    s = String(s || '');
-    return s.length > n ? s.slice(0, n) + '...' : s;
-  }
-
-  function ler() {
-    try {
-      var cru = localStorage.getItem(CHAVE);
-      if (!cru) { return []; }
-      var v = JSON.parse(cru);
-      return Array.isArray(v) ? v : [];
-    } catch (e) { return []; }
-  }
-  function gravar() {
-    try {
-      localStorage.setItem(CHAVE, JSON.stringify(lista.slice(-GUARDA)));
-    } catch (e) { /* sem espaco: o registro na memoria continua valendo */ }
-  }
-
-  /* ---------------- anotar uma ocorrencia ---------------- */
-  function registrar(tipo, mensagem, extra) {
-    if (dentro) { return null; }
-    dentro = true;
-    var reg = null;
-    try {
-      extra = extra || {};
-      reg = {
-        n: ++seq,
-        quando: new Date().toISOString(),
-        tipo: String(tipo || 'erro'),
-        grupo: extra.grupo || (String(tipo).indexOf('aviso') >= 0 ? 'aviso' :
-                (String(tipo).indexOf('rede') >= 0 ? 'rede' : 'erro')),
-        mensagem: curto(texto(mensagem), 600),
-        de: curto(texto(extra.de || ''), 300),
-        detalhe: curto(texto(extra.detalhe || ''), 2000)
-      };
-      var ultimo = lista[lista.length - 1];
-      if (ultimo && ultimo.mensagem === reg.mensagem && ultimo.tipo === reg.tipo &&
-          (new Date(reg.quando) - new Date(ultimo.quando)) < 1500) {
-        ultimo.repetiu = (ultimo.repetiu || 1) + 1;
-        reg = ultimo;
-      } else {
-        lista.push(reg);
-        if (lista.length > LIMITE) { lista = lista.slice(-LIMITE); }
-      }
-      gravar();
-      if (pronto) { atualizarBotao(reg.grupo === 'erro'); redesenhar(); }
-    } catch (e) { /* nunca deixar o registro derrubar a pagina */ }
-    dentro = false;
-    return reg;
-  }
-
-  function contarErros() {
-    var n = 0;
-    for (var i = 0; i < lista.length; i++) {
-      if (lista[i].grupo !== 'aviso') { n += (lista[i].repetiu || 1); }
-    }
-    return n;
-  }
-
-  /* ---------------- botao do canto ---------------- */
-  function botao() {
-    var b = document.getElementById('p146Bt');
-    if (b) { return b; }
-    b = document.createElement('button');
-    b.id = 'p146Bt';
-    b.type = 'button';
-    b.title = 'Ocorrencias do painel (Ctrl + Alt + E)';
-    b.setAttribute('aria-label', 'Abrir a lista de ocorrencias do painel');
-    b.addEventListener('click', abrir);
-    (document.body || document.documentElement).appendChild(b);
-    return b;
-  }
-  function atualizarBotao(piscar) {
-    var b = botao();
-    var n = contarErros();
-    b.textContent = n ? ('Ocorrencias: ' + n) : 'Ocorrencias';
-    b.className = n ? 'temErro' : '';
-    if (piscar && n) {
-      b.classList.remove('pisca');
-      void b.offsetWidth;
-      b.classList.add('pisca');
-    }
-  }
-
-  /* ---------------- tela com a lista ---------------- */
-  function tela() {
-    var t = document.getElementById('p146Tela');
-    if (t) { return t; }
-    t = document.createElement('div');
-    t.id = 'p146Tela';
-    t.innerHTML =
-      '<div id="p146Cx" role="dialog" aria-label="Ocorrencias do painel">' +
-      '<header><span>Ocorrencias do painel</span><button type="button" id="p146Fechar">Fechar</button></header>' +
-      '<div class="p146acoes">' +
-      '<button type="button" id="p146Copiar">Copiar tudo</button>' +
-      '<button type="button" id="p146Baixar">Baixar registro</button>' +
-      '<button type="button" id="p146Limpar">Limpar</button>' +
-      '<label style="font-size:12px;display:flex;align-items:center;gap:4px">' +
-      'Mostrar: <select id="p146Filtro"><option value="tudo">tudo</option>' +
-      '<option value="erro">so erros</option><option value="rede">so rede</option>' +
-      '<option value="aviso">so avisos</option></select></label>' +
-      '</div><div id="p146Lista"></div></div>';
-    (document.body || document.documentElement).appendChild(t);
-    t.addEventListener('click', function (ev) { if (ev.target === t) { fechar(); } });
-    t.querySelector('#p146Fechar').addEventListener('click', fechar);
-    t.querySelector('#p146Copiar').addEventListener('click', copiar);
-    t.querySelector('#p146Baixar').addEventListener('click', baixar);
-    t.querySelector('#p146Limpar').addEventListener('click', limpar);
-    t.querySelector('#p146Filtro').addEventListener('change', redesenhar);
-    return t;
-  }
-
-  function filtro() {
-    var s = document.getElementById('p146Filtro');
-    return s ? s.value : 'tudo';
-  }
-  function visiveis() {
-    var f = filtro();
-    return lista.filter(function (r) { return f === 'tudo' || r.grupo === f; }).slice().reverse();
-  }
-  function horaCurta(iso) {
-    try { return new Date(iso).toLocaleString('pt-BR'); } catch (e) { return iso; }
-  }
-
-  function redesenhar() {
-    var area = document.getElementById('p146Lista');
-    if (!area || !document.getElementById('p146Tela').classList.contains('aberto')) { return; }
-    area.innerHTML = '';
-    var itens = visiveis();
-    if (!itens.length) {
-      var v = document.createElement('div');
-      v.className = 'p146vazio';
-      v.textContent = 'Nenhuma ocorrencia registrada. Otimo sinal.';
-      area.appendChild(v);
-      return;
-    }
-    itens.forEach(function (r) {
-      var d = document.createElement('div');
-      d.className = 'p146item ' + r.grupo;
-      var top = document.createElement('div');
-      top.className = 'p146top';
-      top.textContent = horaCurta(r.quando) + '  |  ' + r.tipo +
-        (r.repetiu ? ('  |  repetiu ' + r.repetiu + ' vezes') : '');
-      var msg = document.createElement('div');
-      msg.className = 'p146msg';
-      msg.textContent = r.mensagem;
-      d.appendChild(top);
-      d.appendChild(msg);
-      if (r.de) {
-        var de = document.createElement('div');
-        de.className = 'p146de';
-        de.textContent = 'onde: ' + r.de;
-        d.appendChild(de);
-      }
-      if (r.detalhe) {
-        var det = document.createElement('details');
-        var res = document.createElement('summary');
-        res.textContent = 'detalhes tecnicos';
-        var pre = document.createElement('pre');
-        pre.textContent = r.detalhe;
-        det.appendChild(res);
-        det.appendChild(pre);
-        d.appendChild(det);
-      }
-      area.appendChild(d);
-    });
-  }
-
-  function abrir() {
-    tela().classList.add('aberto');
-    redesenhar();
-  }
-  function fechar() { tela().classList.remove('aberto'); }
-
-  /* ---------------- copiar, baixar, limpar ---------------- */
-  function emTexto() {
-    var linhas = ['Registro de ocorrencias do painel',
-      'Gerado em: ' + new Date().toLocaleString('pt-BR'),
-      'Endereco: ' + String(location.href),
-      'Navegador: ' + String(navigator.userAgent),
-      'Total anotado: ' + lista.length, ''];
-    lista.forEach(function (r) {
-      linhas.push('[' + horaCurta(r.quando) + '] (' + r.tipo + ') ' + r.mensagem +
-        (r.repetiu ? ' (repetiu ' + r.repetiu + ' vezes)' : ''));
-      if (r.de) { linhas.push('   onde: ' + r.de); }
-      if (r.detalhe) { linhas.push('   detalhe: ' + r.detalhe.replace(/\n/g, ' | ')); }
-      linhas.push('');
-    });
-    return linhas.join('\n');
-  }
-
-  function copiar() {
-    var txt = emTexto();
-    var feito = function () { window.alert('Registro copiado. Cole onde quiser (e-mail, mensagem).'); };
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(txt).then(feito, function () { copiarNaMao(txt, feito); });
-        return;
-      }
-    } catch (e) { }
-    copiarNaMao(txt, feito);
-  }
-  function copiarNaMao(txt, feito) {
-    try {
-      var a = document.createElement('textarea');
-      a.value = txt;
-      a.style.position = 'fixed';
-      a.style.left = '-9999px';
-      document.body.appendChild(a);
-      a.select();
-      document.execCommand('copy');
-      a.remove();
-      feito();
-    } catch (e) {
-      window.alert('Nao consegui copiar sozinho. Use o botao Baixar registro.');
-    }
-  }
-
-  function baixar() {
-    try {
-      var nome = 'Ocorrencias_do_painel_' +
-        new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.txt';
-      var blob = new Blob([emTexto()], { type: 'text/plain;charset=utf-8' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = nome;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) { } }, 4000);
-      return nome;
-    } catch (e) { return ''; }
-  }
-
-  function limpar() {
-    if (!window.confirm('Apagar o registro de ocorrencias deste navegador?')) { return false; }
-    lista = [];
-    try { localStorage.removeItem(CHAVE); } catch (e) { }
-    atualizarBotao(false);
-    redesenhar();
-    return true;
-  }
-
-  /* ---------------- ouvir tudo que da errado ---------------- */
-  function ouvirErros() {
-    window.addEventListener('error', function (ev) {
-      try {
-        var alvo = ev && ev.target;
-        if (alvo && alvo !== window && alvo.tagName) {
-          var end = alvo.src || alvo.href || '';
-          registrar('arquivo nao carregou', 'Nao carregou: ' + alvo.tagName.toLowerCase(),
-            { de: end, grupo: 'rede' });
-          return;
-        }
-        registrar('erro de programa', (ev && ev.message) || 'erro sem mensagem', {
-          de: ((ev && ev.filename) || '') + (ev && ev.lineno ? (' linha ' + ev.lineno) : ''),
-          detalhe: (ev && ev.error && ev.error.stack) || ''
-        });
-      } catch (e) { }
-    }, true);
-
-    window.addEventListener('unhandledrejection', function (ev) {
-      try {
-        var m = ev && ev.reason;
-        registrar('falha nao tratada', (m && (m.message || m.details || m.hint)) || texto(m), {
-          detalhe: (m && m.stack) || ''
-        });
-      } catch (e) { }
-    });
-  }
-
-  function ouvirConsole() {
-    if (!window.console) { return; }
-    console.error = function () {
-      var args = Array.prototype.slice.call(arguments);
-      try {
-        registrar('erro avisado no console', args.map(texto).join(' '), {
-          detalhe: (args[0] && args[0].stack) || ''
-        });
-      } catch (e) { }
-      conOriginal.error.apply(null, args);
-    };
-    console.warn = function () {
-      var args = Array.prototype.slice.call(arguments);
-      try { registrar('aviso do console', args.map(texto).join(' '), { grupo: 'aviso' }); } catch (e) { }
-      conOriginal.warn.apply(null, args);
-    };
-  }
-
-  function ouvirRede() {
-    var fOriginal = window.fetch;
-    if (typeof fOriginal === 'function') {
-      window.fetch = function (entrada, opcoes) {
-        var endereco = '';
-        try { endereco = (typeof entrada === 'string') ? entrada : (entrada && entrada.url) || ''; } catch (e) { }
-        var metodo = (opcoes && opcoes.method) || (entrada && entrada.method) || 'GET';
-        return fOriginal.apply(window, arguments).then(function (r) {
-          try {
-            if (r && !r.ok) {
-              registrar('pedido recusado', 'A nuvem respondeu ' + r.status + ' ' + (r.statusText || ''),
-                { de: metodo + ' ' + endereco, grupo: 'rede' });
-            }
-          } catch (e) { }
-          return r;
-        }, function (e) {
-          try {
-            registrar('pedido nao chegou', (e && e.message) || 'falha de rede',
-              { de: metodo + ' ' + endereco, grupo: 'rede' });
-          } catch (x) { }
-          throw e;
-        });
-      };
-    }
-    try {
-      var abrirXHR = XMLHttpRequest.prototype.open;
-      XMLHttpRequest.prototype.open = function (metodo, endereco) {
-        this.__p146 = (metodo || '') + ' ' + (endereco || '');
-        this.addEventListener('error', function () {
-          registrar('pedido nao chegou', 'falha de rede', { de: this.__p146, grupo: 'rede' });
-        });
-        this.addEventListener('load', function () {
-          if (this.status >= 400) {
-            registrar('pedido recusado', 'Resposta ' + this.status, { de: this.__p146, grupo: 'rede' });
-          }
-        });
-        return abrirXHR.apply(this, arguments);
-      };
-    } catch (e) { }
-  }
-
-  /* ---------------- ligar tudo ---------------- */
-  ouvirErros();
-  ouvirConsole();
-  ouvirRede();
-  lista = ler();
-  seq = lista.length ? (lista[lista.length - 1].n || lista.length) : 0;
-
-  function ligar() {
-    pronto = true;
-    botao();
-    tela();
-    atualizarBotao(false);
-    document.addEventListener('keydown', function (ev) {
-      if (ev.ctrlKey && ev.altKey && (ev.key === 'e' || ev.key === 'E')) {
-        ev.preventDefault();
-        if (tela().classList.contains('aberto')) { fechar(); } else { abrir(); }
-      }
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ligar);
-  } else {
-    ligar();
-  }
-
-  window.P146 = {
-    registrar: registrar,
-    abrir: abrir,
-    fechar: fechar,
-    lista: function () { return lista.slice(); },
-    texto: emTexto,
-    baixar: baixar,
-    limpar: limpar,
-    contar: contarErros
-  };
-})();
-</script>
-<!-- FIM PATCH146_PAINEL_DE_ERROS -->
-
+/* [v11] stub: modulo de ocorrencias removido */
+window.P146 = { registrar: function () {}, abrir: function () {}, fechar: function () {}, lista: function () { return []; }, emTexto: function () { return ""; }, baixar: function () {}, limpar: function () {}, contar: function () { return 0; } };
+/* [v11] stub: modulo de ocorrencias removido */
+window.P146 = { registrar: function () {}, abrir: function () {}, fechar: function () {}, lista: function () { return []; }, emTexto: function () { return ""; }, baixar: function () {}, limpar: function () {}, contar: function () { return 0; } };
 <!-- INI PATCH147_ECONOMIA_DE_DADOS -->
 <script>
 /* =====================================================================
@@ -72573,577 +72204,7 @@ if (false) { /* PATCH154_DISABLED */
 
 })();
 </script>
-<script src="/admin-painel.js"></script>
-<script src="/patch-ui-2026-completo.js"></script>
-<script src="/patch-ui-2026-gaveta-pgto.js"></script>
-<script src="/patch-arquivos-obra.js"></script>
 <!-- FIM PATCH150_CAMADA_ABSTRACAO -->
-
-
-
-<script>
-/* === GAVETA OBRAS v1 — gaveta lateral para gerenciar obras === */
-(function () {
-  "use strict";
-
-  var G = window.GAVETA_OBRAS = window.GAVETA_OBRAS || {};
-  if (G.__v1) { return; }
-  G.__v1 = true;
-
-  var D = document;
-
-  /* estado */
-  var gaveta = null;
-  var launcher = null;
-  var montada = false;
-  var sigAtual = "";
-  var nos = {};
-  var noVazio = null;
-
-  function el(id) { return D.getElementById(id); }
-
-  /* ler db.obras de forma segura */
-  function obras() {
-    try {
-      if (typeof db !== "undefined" && db.obras && Array.isArray(db.obras)) { return db.obras; }
-    } catch (e) { }
-    return [];
-  }
-  function obraAtualId() {
-    try {
-      if (typeof db !== "undefined" && db.obraAtualId) { return db.obraAtualId; }
-    } catch (e) { }
-    return "";
-  }
-  function obraAtual() {
-    var id = obraAtualId();
-    var lista = obras();
-    var o = lista.find(function (x) { return x.id === id; });
-    return o || lista[0] || null;
-  }
-
-  function assinatura() {
-    var lista = obras();
-    return lista.length + ":" + lista.map(function (o) { return o.id; }).join(",");
-  }
-
-  function nomeAtual() {
-    var o = obraAtual();
-    return o ? (o.nome || "Sem nome") : "Sem obras";
-  }
-
-  function esconderAntigos() {
-    var sel = el("selectObra");
-    if (sel && !sel.classList.contains("obr-substitui")) {
-      sel.classList.add("obr-substitui");
-    }
-    var ps = D.querySelector(".project-selector");
-    if (!ps) { return; }
-    var btns = ps.querySelectorAll("button");
-    for (var i = 0; i < btns.length; i++) {
-      var txt = (btns[i].textContent || "").trim();
-      var onc = btns[i].getAttribute("onclick") || "";
-      if (txt.indexOf("Gerenciar Obra") >= 0 ||
-          txt.indexOf("Nova Obra") >= 0 ||
-          onc === "excluirObraAtual()") {
-        if (!btns[i].classList.contains("obr-substitui")) {
-          btns[i].classList.add("obr-substitui");
-        }
-      }
-    }
-  }
-
-  function garantirLauncher() {
-    var menu = el("orMenuBtn");
-    var b = el("obrGavetaBtn");
-    if (!b) {
-      b = D.createElement("button");
-      b.id = "obrGavetaBtn";
-      b.type = "button";
-      b.className = "obr-launcher";
-      b.setAttribute("aria-haspopup", "true");
-      b.setAttribute("aria-expanded", "false");
-      b.setAttribute("aria-controls", "obrGaveta");
-      b.innerHTML =
-        '<span class="obr-ico" aria-hidden="true">🏗️</span>' +
-        '<span class="obr-rot">Obras</span>' +
-        '<span class="obr-atual" id="obrAtual"></span>';
-      b.addEventListener("click", function (ev) {
-        ev.preventDefault();
-        G.abrir();
-      });
-    }
-    var row = el("pToolbarAbas");
-    if (!row && menu && menu.parentNode) {
-      row = D.createElement("div");
-      row.id = "pToolbarAbas";
-      menu.parentNode.insertBefore(row, menu);
-    }
-    if (row) {
-      if (menu && menu.parentNode !== row) { row.appendChild(menu); }
-      if (b.parentNode !== row) { row.appendChild(b); }
-    } else if (menu && b.parentNode !== menu.parentNode) {
-      if (menu.nextSibling) { menu.parentNode.insertBefore(b, menu.nextSibling); }
-      else { menu.parentNode.appendChild(b); }
-    }
-    launcher = b;
-    return b;
-  }
-
-  function criarGaveta() {
-    var g = el("obrGaveta");
-    if (g) { gaveta = g; return g; }
-    g = D.createElement("div");
-    g.id = "obrGaveta";
-    g.setAttribute("role", "dialog");
-    g.setAttribute("aria-modal", "true");
-    g.setAttribute("aria-label", "Gaveta de Obras");
-    g.setAttribute("aria-hidden", "true");
-    g.innerHTML =
-      '<div class="obr-fundo" id="obrFundo"></div>' +
-      '<div class="obr-painel">' +
-        '<div class="obr-topo">' +
-          '<span class="obr-logo" aria-hidden="true">OB</span>' +
-          '<span class="obr-nomes"><b>Gaveta de Obras</b><span>Gerenciar projetos</span></span>' +
-          '<button type="button" class="obr-x" id="obrFechar" title="Fechar" aria-label="Fechar gaveta">×</button>' +
-        '</div>' +
-        '<div class="obr-buscabox">' +
-          '<input type="text" class="obr-busca" id="obrBusca" placeholder="Buscar obra..." autocomplete="off">' +
-        '</div>' +
-        '<div class="obr-lista" id="obrLista"></div>' +
-        '<div class="obr-rodape">' +
-          '<button type="button" class="obr-btn-nova" id="obrNovaObra">+ Nova Obra</button>' +
-          '<button type="button" class="obr-btn-gerenciar" id="obrGerenciar">⚙️ Gerenciar Obra</button>' +
-          '<button type="button" class="obr-btn-excluir" id="obrExcluir">🗑️ Excluir Obra</button>' +
-        '</div>' +
-        '<div class="obr-info" id="obrInfo"></div>' +
-      '</div>';
-    D.body.appendChild(g);
-
-    g.addEventListener("click", function (ev) {
-      if (ev.target === g || ev.target.id === "obrFundo") { G.fechar(); }
-    });
-    var x = g.querySelector("#obrFechar");
-    if (x) { x.addEventListener("click", function () { G.fechar(); }); }
-
-    var busca = g.querySelector("#obrBusca");
-    if (busca) {
-      busca.addEventListener("input", function () { filtrar(busca.value); });
-      busca.addEventListener("keydown", function (ev) {
-        if (ev.key !== "Enter") { return; }
-        var alvo = g.querySelector(".obr-obra:not(.obr-esconde)");
-        if (alvo) { alvo.click(); }
-      });
-    }
-
-    var btnNova = g.querySelector("#obrNovaObra");
-    if (btnNova) {
-      btnNova.addEventListener("click", function () {
-        G.fechar();
-        if (typeof abrirModalNovaObra === "function") { abrirModalNovaObra(); }
-      });
-    }
-    var btnGerenciar = g.querySelector("#obrGerenciar");
-    if (btnGerenciar) {
-      btnGerenciar.addEventListener("click", function () {
-        G.fechar();
-        if (typeof abrirModalObra === "function") { abrirModalObra(); }
-      });
-    }
-    var btnExcluir = g.querySelector("#obrExcluir");
-    if (btnExcluir) {
-      btnExcluir.addEventListener("click", function () {
-        G.fechar();
-        if (typeof excluirObraAtual === "function") { excluirObraAtual(); }
-      });
-    }
-
-    gaveta = g;
-    return g;
-  }
-
-  function noVazioNode() {
-    if (!noVazio) {
-      noVazio = D.createElement("div");
-      noVazio.className = "obr-vazio obr-esconde";
-      noVazio.textContent = "Nenhuma obra encontrada.";
-    }
-    return noVazio;
-  }
-
-  function noItemObra(obra) {
-    var b = nos[obra.id];
-    if (b) {
-      var t = b.querySelector(".obr-txt");
-      if (t && t.textContent !== obra.nome) { t.textContent = obra.nome; }
-      return b;
-    }
-    b = D.createElement("button");
-    b.type = "button";
-    b.className = "obr-obra";
-    b.setAttribute("data-obra-id", obra.id);
-    var ico = D.createElement("span");
-    ico.className = "obr-ico2";
-    ico.setAttribute("aria-hidden", "true");
-    ico.textContent = "🏗️";
-    var txt = D.createElement("span");
-    txt.className = "obr-txt";
-    txt.textContent = obra.nome || "Sem nome";
-    b.appendChild(ico);
-    b.appendChild(txt);
-
-    var oid = obra.id;
-    b.addEventListener("click", function () {
-      G.fechar();
-      if (typeof trocarObra === "function") { trocarObra(oid); }
-    });
-    nos[obra.id] = b;
-    return b;
-  }
-
-  function montarLista() {
-    var caixa = el("obrLista");
-    if (!caixa) { return; }
-    var lista = obras();
-    var frag = D.createDocumentFragment();
-    var titulo = D.createElement("div");
-    titulo.className = "obr-grupo";
-    titulo.textContent = "PROJETOS";
-    frag.appendChild(titulo);
-    for (var i = 0; i < lista.length; i++) {
-      frag.appendChild(noItemObra(lista[i]));
-    }
-    frag.appendChild(noVazioNode());
-    caixa.textContent = "";
-    caixa.appendChild(frag);
-    montada = true;
-    marcarAtivo();
-  }
-
-  function marcarAtivo() {
-    var caixa = el("obrLista");
-    if (!caixa) { return; }
-    var idAtual = obraAtualId();
-    var itens = caixa.querySelectorAll(".obr-obra");
-    for (var i = 0; i < itens.length; i++) {
-      var on = itens[i].getAttribute("data-obra-id") === idAtual;
-      if (on === itens[i].classList.contains("obr-ativo")) { continue; }
-      if (on) {
-        itens[i].classList.add("obr-ativo");
-        itens[i].setAttribute("aria-current", "true");
-      } else {
-        itens[i].classList.remove("obr-ativo");
-        itens[i].removeAttribute("aria-current");
-      }
-    }
-    var info = el("obrInfo");
-    var o = obraAtual();
-    if (info && o) {
-      var contrato = o.numContrato || "—";
-      var valor = o.valorContrato ? "R$ " + Number(o.valorContrato).toLocaleString("pt-BR", {minimumFractionDigits:2}) : "—";
-      var pct = (o.pctServico !== undefined && o.pctServico !== null) ? o.pctServico + "%" : "—";
-      info.textContent = "Contrato: " + contrato + "  |  Valor: " + valor + "  |  Serviço: " + pct;
-    }
-  }
-
-  function mostrar(n, ok) {
-    if (!n) { return; }
-    var escondido = n.classList.contains("obr-esconde");
-    if (ok === escondido) {
-      if (ok) { n.classList.remove("obr-esconde"); } else { n.classList.add("obr-esconde"); }
-    }
-  }
-
-  function filtrar(txt) {
-    var caixa = el("obrLista");
-    if (!caixa) { return; }
-    var busca = (txt || "").toLowerCase().trim();
-    var f = caixa.children;
-    var grupo = null;
-    var vistos = 0;
-    var achou = 0;
-    for (var i = 0; i < f.length; i++) {
-      var n = f[i];
-      var cls = n.className || "";
-      if (cls.indexOf("obr-grupo") >= 0) {
-        if (grupo) { mostrar(grupo, vistos > 0); }
-        grupo = n;
-        vistos = 0;
-        continue;
-      }
-      if (cls.indexOf("obr-vazio") >= 0) { continue; }
-      var nome = (n.querySelector(".obr-txt") || {}).textContent || "";
-      var ok = !busca || nome.toLowerCase().indexOf(busca) >= 0;
-      mostrar(n, ok);
-      if (ok) { achou++; vistos++; }
-    }
-    if (grupo) { mostrar(grupo, vistos > 0); }
-    mostrar(noVazioNode(), achou === 0);
-  }
-
-  function atualizarRotulo() {
-    var r = el("obrAtual");
-    if (!r) { return; }
-    var t = nomeAtual();
-    if (r.textContent !== t) { r.textContent = t; }
-  }
-
-  function prepararGaveta() {
-    if (!D.body) { return null; }
-    var g = criarGaveta();
-    var sig = assinatura();
-    if (montada && sig !== sigAtual) { montada = false; }
-    if (!montada) { montarLista(); filtrar(""); }
-    sigAtual = sig;
-    return g;
-  }
-  G.preparar = prepararGaveta;
-
-  G.abrir = function () {
-    var g = prepararGaveta();
-    if (!g) { return; }
-    if (D.body.lastElementChild !== g) { D.body.appendChild(g); }
-    var b = el("obrBusca");
-    if (b && b.value !== "") { b.value = ""; }
-    marcarAtivo();
-    filtrar("");
-    g.classList.add("obr-on");
-    g.setAttribute("aria-hidden", "false");
-    D.body.classList.add("obr-aberto");
-    if (launcher || el("obrGavetaBtn")) {
-      (launcher || el("obrGavetaBtn")).setAttribute("aria-expanded", "true");
-    }
-    if (window.ORMENU && window.ORMENU.aberto && window.ORMENU.aberto()) {
-      window.ORMENU.fechar();
-    }
-    if (b && b.focus) { try { b.focus(); } catch (e) { } }
-  };
-
-  G.fechar = function () {
-    var g = el("obrGaveta");
-    if (g) {
-      g.classList.remove("obr-on");
-      g.setAttribute("aria-hidden", "true");
-    }
-    D.body.classList.remove("obr-aberto");
-    var lb = el("obrGavetaBtn");
-    if (lb) { lb.setAttribute("aria-expanded", "false"); }
-  };
-
-  G.aberto = function () {
-    var g = el("obrGaveta");
-    return !!(g && g.classList.contains("obr-on"));
-  };
-
-  G.alternar = function () {
-    if (G.aberto()) { G.fechar(); } else { G.abrir(); }
-  };
-
-  G.arrumar = function () {
-    if (!D.body) { return; }
-    garantirLauncher();
-    esconderAntigos();
-    var sig = assinatura();
-    if (montada && sig !== sigAtual) { montada = false; }
-    if (!montada && G.aberto()) { prepararGaveta(); }
-    atualizarRotulo();
-    marcarAtivo();
-  };
-
-  function ligarTeclado() {
-    if (G.__teclado) { return; }
-    G.__teclado = true;
-    D.addEventListener("keydown", function (ev) {
-      if (ev.key === "Escape" && G.aberto()) { G.fechar(); return; }
-      var comAtalho = (ev.ctrlKey || ev.metaKey) && ev.shiftKey;
-      if (comAtalho && (ev.key === "o" || ev.key === "O")) {
-        ev.preventDefault(); G.alternar();
-      }
-    });
-  }
-
-  function ligarVigia() {
-    if (G.__vigia || typeof MutationObserver !== "function") { return; }
-    var agendado = false;
-    function agenda() {
-      if (agendado) { return; }
-      agendado = true;
-      setTimeout(function () { agendado = false; G.arrumar(); }, 80);
-    }
-    var sel = el("selectObra");
-    if (sel) {
-      var o1 = new MutationObserver(agenda);
-      o1.observe(sel, { childList: true, attributes: true, attributeFilter: ["class"] });
-      G.__vigia = o1;
-    }
-    var ps = D.querySelector(".project-selector");
-    if (ps) {
-      var o2 = new MutationObserver(agenda);
-      o2.observe(ps, { childList: true, subtree: true });
-      G.__vigia2 = o2;
-    }
-  }
-
-  function ligarHooks() {
-    if (G.__hooks) { return; }
-    G.__hooks = true;
-    var trocarOriginal = (typeof window.trocarObra === "function") ? window.trocarObra : null;
-    if (trocarOriginal) {
-      window.trocarObra = function (id) {
-        trocarOriginal(id);
-        setTimeout(function () { G.arrumar(); }, 50);
-      };
-    }
-    var salvarOriginal = (typeof window.salvarDB === "function") ? window.salvarDB : null;
-    if (salvarOriginal) {
-      window.salvarDB = function () {
-        salvarOriginal();
-        setTimeout(function () { G.arrumar(); }, 80);
-      };
-    }
-  }
-
-  function partirAgora() {
-    if (!D.body) { return; }
-    garantirLauncher();
-    esconderAntigos();
-    atualizarRotulo();
-    ligarTeclado();
-    ligarVigia();
-    setTimeout(ligarHooks, 500);
-    G.__pronto = true;
-  }
-
-  if (D.body) { partirAgora(); }
-  else { D.addEventListener("DOMContentLoaded", partirAgora); }
-
-  D.addEventListener("DOMContentLoaded", function () {
-    garantirLauncher();
-    esconderAntigos();
-    atualizarRotulo();
-  });
-
-  if (D.readyState === "complete") {
-    setTimeout(function () {
-      G.arrumar();
-      console.log("GAVETA OBRAS v1 ativa — launcher + gaveta pronta.");
-    }, 200);
-  } else {
-    window.addEventListener("load", function () {
-      setTimeout(function () {
-        G.arrumar();
-        console.log("GAVETA OBRAS v1 ativa — launcher + gaveta pronta.");
-      }, 200);
-    });
-  }
-
-}());
-</script>
-
-<script id="patchObrasMenuV4inline">
-(function () {
-  "use strict";
-  if (window.__patchObrasMenuV5) return;
-  window.__patchObrasMenuV5 = true;
-
-  var css = document.createElement("style");
-  css.id = "pObrasMenuCss";
-  css.textContent =
-    "#pToolbarAbas{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;" +
-    "align-items:center!important;gap:10px!important;margin:10px 0 18px!important;width:100%;}" +
-    "#pToolbarAbas #orMenuBtn,#pToolbarAbas #obrGavetaBtn{" +
-    "height:44px!important;margin:0!important;box-sizing:border-box!important;" +
-    "padding:8px 16px 8px 12px!important;border-radius:12px!important;" +
-    "display:inline-flex!important;align-items:center!important;gap:10px!important;" +
-    "flex:0 0 auto!important;}" +
-    "#orMenu .or-grupo[data-p-obras='1'],#orMenu .or-item[data-p-obras='1']{display:none!important;}";
-  (document.head || document.documentElement).appendChild(css);
-
-  function marcarObrasNoMenu() {
-    var lista = document.getElementById("orLista");
-    if (!lista) return;
-    var dentro = false;
-    for (var i = 0; i < lista.children.length; i++) {
-      var n = lista.children[i];
-      var cls = String(n.className || "");
-      if (cls.indexOf("or-grupo") >= 0) {
-        var tx = String(n.textContent || "").replace(/\s+/g, " ").trim().toUpperCase();
-        dentro = (tx === "OBRAS" || tx === "PROJETOS");
-        if (dentro) n.setAttribute("data-p-obras", "1");
-        continue;
-      }
-      if (dentro) n.setAttribute("data-p-obras", "1");
-    }
-  }
-
-  function encaixar() {
-    var menu = document.getElementById("orMenuBtn");
-    var obras = document.getElementById("obrGavetaBtn");
-    if (!menu || !obras) return false;
-    var row = document.getElementById("pToolbarAbas");
-    if (!row) {
-      row = document.createElement("div");
-      row.id = "pToolbarAbas";
-    }
-    if (row.parentNode !== menu.parentNode && menu.parentNode) {
-      menu.parentNode.insertBefore(row, menu);
-    }
-    if (menu.parentNode !== row) row.appendChild(menu);
-    if (obras.parentNode !== row) row.appendChild(obras);
-    if (row.firstChild !== menu) row.insertBefore(menu, row.firstChild);
-    if (menu.nextSibling !== obras) row.insertBefore(obras, menu.nextSibling);
-    marcarObrasNoMenu();
-    return true;
-  }
-
-  function hookGaveta() {
-    var G = window.GAVETA_OBRAS;
-    if (!G || G.__ladoMenuV5) return;
-    G.__ladoMenuV5 = true;
-    if (typeof G.arrumar === "function") {
-      var orig = G.arrumar;
-      G.arrumar = function () {
-        var r = orig.apply(this, arguments);
-        encaixar();
-        return r;
-      };
-    }
-  }
-
-  var n = 0;
-  function tick() {
-    hookGaveta();
-    encaixar();
-    n += 1;
-    if (n < 25) setTimeout(tick, 400);
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
-  else tick();
-})();
-</script>
-
-<style id="pFixUiPgto">
-#orObrasBox,#orObrasTit,#orObrasLista{display:none!important;}
-#tab-pagamento .lanc-form-grid{display:flex!important;flex-direction:column!important;}
-#tab-pagamento .btn-imprimir,#tab-pagamento button[onclick="imprimirPaginaPgtoResumo()"]{background:#2563eb!important;color:#fff!important;border:0!important;font-weight:700!important;}
-#pToolbarAbas{display:flex!important;flex-direction:row!important;align-items:center!important;gap:10px!important;}
-</style>
-<script id="pFixUiPgtoJs">
-(function(){
-  function sumir(){ var b=document.getElementById("orObrasBox"); if(b) b.style.setProperty("display","none","important"); }
-  function setas(){
-    var all=document.body?document.body.getElementsByTagName("*"):[];
-    for(var i=0;i<all.length;i++){
-      var el=all[i]; if(el.childElementCount) continue;
-      var tx=String(el.textContent||"").replace(/\s+/g,"");
-      if(/^(→)+$/.test(tx) && !el.closest("#orMenu")) el.style.display="none";
-    }
-  }
-  var n=0; function tick(){ sumir(); setas(); n++; if(n<25) setTimeout(tick,400); }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",tick); else tick();
-})();
-</script>
-
 
 <style id="pPrintPgtoOnly">
 @media print {
@@ -73159,8 +72220,7 @@ if (false) { /* PATCH154_DISABLED */
   #tab-pagamento button,
   #tab-pagamento #panelPgtoResumo,
   #tab-pagamento #panelPgtoColaboradores,
-  #orMenu, #orMenuBtn, #obrGavetaBtn, #pToolbarAbas,
-  #pbxBotao, #pcalcBotao, header, .top-bar, #meu-menu-abas {
+  #orMenu, #orMenuBtn, #pbxBotao, #pcalcBotao, header, .top-bar, #meu-menu-abas {
     display: none !important;
   }
   #tab-pagamento, #panelPgtoLancamentos, #containerLancamentosPgto {
@@ -73258,7 +72318,6 @@ if (false) { /* PATCH154_DISABLED */
   else tick();
 })();
 </script>
-
+<script src="patch_relocate_header_buttons.js"></script>
 </body>
-
 </html>

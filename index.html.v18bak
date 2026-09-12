@@ -65621,7 +65621,7 @@ if (false) { /* PATCH154_DISABLED */
   } else {
     setTimeout(comecar, 500);
   }
-  })();
+})();
 } /* /PATCH154_DISABLED */
 </script>
 <!-- PATCH154_HIDDEN: /* PATCH153B_PROTECOES_LOOP */ -->
@@ -72368,6 +72368,5 @@ window.P146 = { registrar: function () {}, abrir: function () {}, fechar: functi
 })();
 </script>
 <script src="patch_relocate_header_buttons.js"></script>
-<script src="patch_correcao.js"></script>
 </body>
 </html>
