@@ -5461,6 +5461,42 @@ body.p53-travado { overflow: hidden !important; }
   .custo-sub-painel { overflow-x: auto; word-break: break-word; }
 </style>
 
+<style id="pV17Fix">
+  /* PATCH V17-F: esconder script tags visiveis (anti-codigo-vazamento) */
+  script { display: none !important; }
+  /* PATCH V17-Fb: forcar esconder overlays sem .on */
+  #p141Saida:not(.on) { display: none !important; }
+  #p139Trava:not(.on) { display: none !important; }
+  /* PATCH V17-Fc: overflow custo */
+  #tab-custo { overflow-x: hidden; word-break: break-word; }
+  .custo-dashboard-card { overflow: hidden; word-break: break-word; }
+  .custo-sub-painel { overflow-x: auto; word-break: break-word; }
+  .lanc-obra-group, .lanc-table { overflow-x: auto; }
+</style>
+<script id="pV17Diag">
+  /* PATCH V17-G: diagnostico - verifica codigo JS visivel na pagina */
+  (function(){
+    setTimeout(function(){
+      var suspeitos = [];
+      document.querySelectorAll("body > *").forEach(function(el){
+        if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") return;
+        var txt = (el.textContent || "").trim();
+        if (txt.indexOf("function ") >= 0 && txt.indexOf("{") >= 0 && txt.length > 200
+            && el.tagName !== "TEXTAREA" && !el.querySelector("script")) {
+          suspeitos.push({tag: el.tagName, id: el.id, cls: el.className, len: txt.length,
+            preview: txt.substring(0, 80)});
+          el.style.display = "none";
+        }
+      });
+      if (suspeitos.length > 0) {
+        console.warn("[V17-DIAG] Codigo JS visivel encontrado em:", suspeitos);
+      } else {
+        console.log("[V17-DIAG] Nenhum codigo JS visivel detectado.");
+      }
+    }, 3000);
+  })();
+</script>
+
 </head>
 
 <body class="dark-mode">
@@ -38508,7 +38544,7 @@ body.dark-mode #p63ResumoTabela table .p75-total-geral td {
     var nova = function () {
       var r = original.apply(this, arguments);
       try { sincronizar(); } catch (e) { /* ignora */ }
-      try { renderPorEmpresa(typeof getCustosFiltered === "function" ? getCustosFiltered() : []); } catch (e2) { /* ignora */ }
+      try { renderPorEmpresa(typeof window.getCustosFiltered === "function" ? window.getCustosFiltered() : []); } catch (e2) { /* ignora */ }
       return r;
     };
     nova.__p77 = true;
@@ -59832,7 +59868,7 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
       var r = antigo.apply(this, arguments);
       try {
         cacheEmp = null;
-        E.lista = (typeof getCustosFiltered === 'function') ? getCustosFiltered() : [];
+        E.lista = (typeof window.getCustosFiltered === 'function') ? window.getCustosFiltered() : [];
         E.destaque = -1;
         if (montar()) { pintar(); }
       } catch (e) { if (window.console) { console.error('p120:', e); } }
@@ -59845,7 +59881,7 @@ body.dark-mode .p118-legenda span{color:#cbd5e1;}
     var painel = document.getElementById('tab-custo');
     if (painel && painel.style.display !== 'none' && document.getElementById('custoBarChart')) {
       try {
-        E.lista = (typeof getCustosFiltered === 'function') ? getCustosFiltered() : [];
+        E.lista = (typeof window.getCustosFiltered === 'function') ? window.getCustosFiltered() : [];
         if (montar()) { pintar(); }
       } catch (e) {}
     }
@@ -65585,7 +65621,7 @@ if (false) { /* PATCH154_DISABLED */
   } else {
     setTimeout(comecar, 500);
   }
-})();
+  })();
 } /* /PATCH154_DISABLED */
 </script>
 <!-- PATCH154_HIDDEN: /* PATCH153B_PROTECOES_LOOP */ -->
