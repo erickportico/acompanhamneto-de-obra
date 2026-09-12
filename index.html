@@ -2,15 +2,8 @@
 <html lang="pt-BR">
 
 <head>
-<style id="v21SafetyCSS">#p84Fundo,#p84Impressao,#p83Fundo,#p83Impressao,#p86Fundo,#p86Caixa,#p92Fundo,#p92Caixa{display:none!important}</style>
+<style id="v21SafetyCSS">#p84Fundo,#p84Impressao,#p83Fundo,#p83Impressao,#p86Fundo,#p86Caixa,#p92Fundo,#p92Caixa,#p128Tela,#p128Estilo{display:none!important}</style>
     <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
-    <style id="p154Remocao">
-        /* vazio de proposito — overlays de login ativos */
-    </style>
-    <script>
-        /* PATCH154 desligado: nao remove mais a tela de login */
-        console.log('[P154] desativado — tela de login habilitada');
-    </script>
 
     <link rel="icon" href="data:image/x-icon;base64,=">
     <!-- PATCH90_ANTITRAVA_GERAL_OK -->
@@ -5498,7 +5491,7 @@ div:empty,
 </head>
 
 <body class="dark-mode">
-<script id="v21Cleanup">(function(){function clean(){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);var n,r=[];while(n=w.nextNode()){var t=n.textContent;if(/(window\.P[0-9]+[ \t\r\n\f]*=|janelaImpressao|imprimirJanela|function[ \t\r\n\f]+exportar|function[ \t\r\n\f]+importar|function[ \t\r\n\f]+imprimir|\(function[ \t]*\([ \t]*\)[ \t]*\{|try[ \t]*\{|catch[ \t]*\()/i.test(t))r.push(n);}r.forEach(function(nd){try{nd.parentNode.removeChild(nd)}catch(e){}});var els=document.querySelectorAll("#p84Fundo,#p84Impressao,#p83Fundo");for(var i=0;i<els.length;i++){if(els[i].style.display!=="flex")els[i].style.display="none";}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",clean);}else{clean();}setTimeout(clean,500);setTimeout(clean,2000);setTimeout(clean,5000);})();</script>
+<script id="v21Cleanup">/* v23: removido - removia nos de texto de scripts */</script>
 
 
     <div class="container">
@@ -63569,6 +63562,7 @@ if (document.readyState === 'loading') {
     <!-- PATCH128_LOGIN_NO_SERVIDOR -->
     <script>
         /* ===== PATCH128 - login conferido no servidor ... */
+        if(false){/*PATCH154_DISABLED*/
         (function () {
           'use strict';
           if (window.__P128) { return; }
@@ -64004,9 +63998,10 @@ if (document.readyState === 'loading') {
             comecar();
           }
         })();
+        } /* /PATCH154_DISABLED */
     </script>
     <!-- PATCH154_HIDDEN: <!-- FIM PATCH128_LOGIN_NO_SERVIDOR -->-->
-    <!-- PATCH154: P128 DESABILITADO – FIM -->
+    <!-- PATCH154+V23: P128 DESABILITADO (agora efetivamente) – FIM -->
 
 
 
