@@ -1,25 +1,43 @@
 (function () {
   'use strict';
 
-  function limparCodigoVazado() {
-    const elementos = document.querySelectorAll('div, p, span, tooltip');
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
+
+  function ocultarCaixaDeCodigo() {
+    // Procura por qualquer elemento que contenha trechos do código vazado
+    const elementos = document.querySelectorAll('div, p, span, section, footer, td');
 
     elementos.forEach((el) => {
       if (
         el.innerText &&
         (el.innerText.includes('function exportar()') ||
-         el.innerText.includes('janelaimpressao.document.close()'))
+         el.innerText.includes('janelaimpressao.document.close()') ||
+         el.innerText.includes('window.P84AbrirDiario'))
       ) {
-        el.style.display = 'none';
-        console.log('[PATCH] Elemento com código vazado foi ocultado.');
+        // Sobe na árvore de elementos para encontrar a div pai container e esconder a caixa inteira
+        let alvo = el;
+        while (alvo.parentElement && alvo.parentElement !== document.body) {
+          // Se o pai tiver classe ou estilo de caixa, pega ele, senão sobe até um nível alto
+          if (alvo.offsetHeight > 50 || alvo.tagName === 'DIV') {
+            alvo.style.display = 'none';
+          }
+          alvo = alvo.parentElement;
+        }
+        alvo.style.display = 'none';
       }
     });
   }
 
-  window.addEventListener('DOMContentLoaded', limparCodigoVazado);
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', ocultarCaixaDeCodigo);
+  } else {
+    ocultarCaixaDeCodigo();
+  }
 
   const observer = new MutationObserver(() => {
-    limparCodigoVazado();
+    ocultarCaixaDeCodigo();
   });
 
   observer.observe(document.body, {
