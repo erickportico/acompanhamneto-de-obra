@@ -59069,7 +59069,9 @@ if (document.readyState === 'loading') {
               d.id = 'p120Dica';
               document.body.appendChild(d);
             }
-            if (!texto) { d.style.display = 'none'; return; }
+            if (!texto) { d.style.display = 'none'; clearTimeout(d._p120t); return; }
+            clearTimeout(d._p120t);
+            d._p120t = setTimeout(function(){ d.style.display='none'; }, 3000);
             d.innerHTML = texto;
             d.style.display = 'block';
             var x = ev.clientX + 14;
@@ -59851,7 +59853,32 @@ if (document.readyState === 'loading') {
           window.p120Redesenhar = function () { try { pintar(); } catch (e) {} };
         })();
     </script>
-    <!-- FIM PATCH120 -->
+    
+
+          /* --- PATCH125: protecao contra tooltip preso --- */
+          (function(){
+            'use strict';
+
+            /* Esconde tooltip quando #tab-custo fica display:none */
+            var tabCusto = document.getElementById('tab-custo');
+            if (tabCusto && window.MutationObserver) {
+              var mo = new MutationObserver(function(){
+                if (tabCusto.style.display === 'none') { dica(''); }
+              });
+              mo.observe(tabCusto, { attributes: true, attributeFilter: ['style'] });
+            }
+
+            /* Esconde tooltip ao rolar a pagina */
+            window.addEventListener('scroll', function(){ dica(''); }, true);
+
+            /* Esconde tooltip em qualquer clique fora do canvas */
+            document.addEventListener('mousedown', function(ev){
+              var t = ev.target;
+              var isCanvas = t && (t.id === 'p120Rosca' || t.id === 'p120Rank' || t.id === 'p120Evol');
+              if (!isCanvas) { dica(''); }
+            }, true);
+          })();
+<!-- FIM PATCH120 -->
     <!-- INI PATCH122 -->
     <style id="p122Estilo">
         /* PATCH 122 - selecao em lote no Painel Geral de Producao */
