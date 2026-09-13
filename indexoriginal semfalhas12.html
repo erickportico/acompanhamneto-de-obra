@@ -9969,7 +9969,7 @@ ${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                     document.getElementById('inputNumContrato').value = obra.numContrato || '';
                     document.getElementById('inputValorContrato').value = obra.valorContrato || '';
                     document.getElementById('inputPctServico').value = obra.pctServico !== undefined ? obra.pctServico : 20;
-                    document.getElementById('inputRegiaoObra').value = (obra.regiao && String(obra.regiao).indexOf('@') < 0) ? obra.regiao : '';
+                    document.getElementById('inputRegiaoObra').value = obra.regiao || '';
                     document.getElementById('modalObra').style.display = 'flex';
                 }
             
@@ -15267,11 +15267,6 @@ function trocarSubTabPgtoNovo(tab) {
                   var mesKey = getChaveMesPgto();
                   var mesInput = document.getElementById("custoFilterMes");
                   if(mesInput && mesKey) mesInput.value = mesKey;
-                  // PATCH148: o Centro de Custos sempre inicia no mes civil vigente.
-                  if(mesInput) {
-                    var agoraCusto = new Date();
-                    mesInput.value = agoraCusto.getFullYear() + "-" + String(agoraCusto.getMonth() + 1).padStart(2, "0");
-                  }
                   // Sincronizar periodo com mes selecionado
                   var mesInput2 = document.getElementById("custoFilterMes");
                   var deInput = document.getElementById("custoFilterPeriodoDe");
@@ -15417,7 +15412,7 @@ function trocarSubTabPgtoNovo(tab) {
                   document.getElementById("custoEditData").value = entry.data || "";
                   document.getElementById("custoEditDescricao").value = entry.descricao || "";
                   document.getElementById("custoEditValor").value = entry.valor;
-                  document.getElementById("custoEditRegiao").value = (entry.regiao && String(entry.regiao).indexOf('@') < 0) ? entry.regiao : "";
+                  document.getElementById("custoEditRegiao").value = entry.regiao || "";
                   modal.style.display = "flex";
                 };
 
@@ -16031,12 +16026,7 @@ function trocarSubTabPgtoNovo(tab) {
                     "PV":1, "PVS":1, "PV'S":1,
                     "CTM":1, "PVC":1, "ACM":1, "MDF":1, "EPI":1,
                     "CNPJ":1, "CPF":1, "RG":1, "NF":1, "ID":1, "PIX":1,
-                    "LED":1, "ART":1, "OS":1,
-                    "AC":1, "AL":1, "AP":1, "AM":1, "BA":1, "CE":1,
-                    "DF":1, "ES":1, "GO":1, "MA":1, "MT":1, "MS":1,
-                    "MG":1, "PA":1, "PB":1, "PR":1, "PE":1, "PI":1,
-                    "RJ":1, "RN":1, "RS":1, "RO":1, "RR":1, "SC":1,
-                    "SP":1, "SE":1, "TO":1, "SA":1
+                    "LED":1, "ART":1, "OS":1
                   };
                 
                   function ehSigla(p){
@@ -16046,15 +16036,8 @@ function trocarSubTabPgtoNovo(tab) {
                   function ajustarPalavra(p, primeira){
                     if (!p) { return p; }
                     if (ehSigla(p)) { return p.toUpperCase(); }
-                    /* codigos e combinacoes alfanumericas preservam a particularidade,
-                       mas padronizam os prefixos conhecidos (MT001, CT018, etc.). */
-                    if (/[0-9]/.test(p)) {
-                      var especial = p.match(/^([A-Za-z]{2,5})([0-9]+(?:[A-Za-z0-9']*)?)$/);
-                      if (especial && (especial[1].toUpperCase() === 'MT' || especial[1].toUpperCase() === 'CT' || especial[1].toUpperCase() === 'EV' || especial[1].toUpperCase() === 'PV')) {
-                        return especial[1].toUpperCase() + especial[2];
-                      }
-                      return p;
-                    }
+                    /* palavras com numero ficam como foram digitadas (P2, 12x30, 3M) */
+                    if (/[0-9]/.test(p)) { return p; }
                     var low = p.toLowerCase();
                     if (!primeira && MINUSCULAS[low]) { return low; }
                     return low.charAt(0).toUpperCase() + low.slice(1);
@@ -42547,10 +42530,7 @@ janelaImpressao.document.write(
   cssImpressao +
   '</head><body>' +
   h +
-  '
-
-
-</body></html>'
+  '</body></html>'
 );
 janelaImpressao.document.close();
 
@@ -64998,9 +64978,8 @@ if (document.readyState === 'loading') {
             botaoTodosOsMeses(campo);
             if (!forcar && campo.value) { return false; }
             if (campo.getAttribute('data-p129') === '1' && !forcar) { return false; }
-            campo.value = mesVigente();
+            campo.value = "";
             campo.setAttribute('data-p129', '1');
-            campo.setAttribute('data-p129-mes', campo.value);
             chamarDireto('renderCustoDashboard');
             return true;
           }
@@ -72948,88 +72927,5 @@ if (document.readyState === 'loading') {
 <script src="patch_correcao.js"></script>
 <script src="patch_centro-custo-dinamico.js"></script>
 <script src="supabase_auth_client.js"></script>
-
-
-    <!-- PATCH148_CORRECOES_USUARIO -->
-    <style id="p148Estilo">
-      /* Tarjas informativas nunca devem bloquear a navegação entre abas. */
-      #p132Aviso, #p145Barra, #p138Faixa, #p117Net, #p125Aviso { pointer-events: auto; }
-    </style>
-    <script>
-      (function () {
-        'use strict';
-        if (window.__p148Correcoes) { return; }
-        window.__p148Correcoes = true;
-
-        function esconderTarjasDeNavegacao() {
-          ['p132Aviso', 'p145Barra', 'p138Faixa', 'p117Net'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (!el) { return; }
-            el.classList.remove('on', 'p117-on', 'p130-mostrar');
-            el.style.display = 'none';
-          });
-        }
-
-        function mesAtual() {
-          var d = new Date();
-          return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-        }
-
-        function atualizarMesVigente() {
-          var campo = document.getElementById('custoFilterMes');
-          if (!campo) { return; }
-          var atual = mesAtual();
-          if (campo.value !== atual) {
-            campo.value = atual;
-            campo.setAttribute('data-p129-mes', atual);
-            try {
-              if (typeof window.renderCustoDashboard === 'function') { window.renderCustoDashboard(); }
-            } catch (e) { }
-          }
-        }
-
-        function limparEmailDosCamposRegiao() {
-          ['inputRegiaoObra', 'custoInputRegiao', 'custoEditRegiao'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el && /@/.test(String(el.value || ''))) { el.value = ''; }
-          });
-        }
-
-        function ligarNavegacao(nome) {
-          var original = window[nome];
-          if (typeof original !== 'function' || original.__p148) { return; }
-          var novo = function () {
-            var r = original.apply(this, arguments);
-            setTimeout(function () {
-              esconderTarjasDeNavegacao();
-              limparEmailDosCamposRegiao();
-              atualizarMesVigente();
-            }, 0);
-            return r;
-          };
-          novo.__p148 = true;
-          novo.__original = original;
-          window[nome] = novo;
-          try { window[nome] = novo; } catch (e) { }
-        }
-
-        function iniciar() {
-          limparEmailDosCamposRegiao();
-          atualizarMesVigente();
-          ligarNavegacao('trocarAba');
-          ligarNavegacao('trocarSubAbaFEM');
-          ligarNavegacao('trocarSubTabPgtoNovo');
-          setTimeout(function () { ligarNavegacao('trocarAba'); ligarNavegacao('trocarSubAbaFEM'); ligarNavegacao('trocarSubTabPgtoNovo'); }, 1200);
-          setInterval(function () {
-            var aba = document.getElementById('tab-custo');
-            if (aba && getComputedStyle(aba).display !== 'none') { atualizarMesVigente(); }
-            limparEmailDosCamposRegiao();
-          }, 2000);
-        }
-        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', iniciar); }
-        else { iniciar(); }
-        window.P148 = { mesVigente: atualizarMesVigente, esconderTarjas: esconderTarjasDeNavegacao };
-      }());
-    </script>
 </body>
 </html>
