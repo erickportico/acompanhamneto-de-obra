@@ -2,6 +2,57 @@
 <html lang="pt-BR">
 
 <head>
+
+<!-- FIX SAFE TOOLTIP P120 -->
+<style id="fix-p120-css">
+  /* Garante que o tooltip nunca retenha o ponteiro do mouse */
+  #p120Dica, .p120-tooltip-fixed {
+    pointer-events: none !important;
+    transition: opacity 0.15s ease-in-out;
+  }
+</style>
+<script id="fix-p120-js">
+(function() {
+  'use strict';
+
+  function ocultarDicaP120() {
+    var el = document.getElementById('p120Dica');
+    if (el) {
+      el.style.display = 'none';
+      el.style.opacity = '0';
+    }
+  }
+
+  // Monitora a saida do mouse do container do grafico de rosca e evolucao
+  document.addEventListener('mousemove', function(ev) {
+    var target = ev.target;
+    var el = document.getElementById('p120Dica');
+    if (!el || el.style.display === 'none') return;
+
+    // Se o mouse nao estiver diretamente sobre um canvas do P120, oculta
+    var isCanvas = target && target.tagName === 'CANVAS' && (
+      target.id === 'p120Rosca' || 
+      target.id === 'p120Evol' || 
+      target.id === 'p120Rank' ||
+      (target.parentElement && target.parentElement.id && target.parentElement.id.indexOf('p120') !== -1)
+    );
+
+    if (!isCanvas) {
+      ocultarDicaP120();
+    }
+  }, true);
+
+  // Oculta ao rolar a tela ou trocar de aba
+  window.addEventListener('scroll', ocultarDicaP120, true);
+  document.addEventListener('click', function(ev) {
+    if (ev.target && ev.target.tagName !== 'CANVAS') {
+      ocultarDicaP120();
+    }
+  }, true);
+})();
+</script>
+<!-- FIM FIX SAFE TOOLTIP P120 -->
+
 <style id="v21SafetyCSS">#p84Fundo,#p84Impressao,#p83Fundo,#p83Impressao,#p86Fundo,#p86Caixa,#p92Fundo,#p92Caixa,#p128Tela,#p128Estilo{display:none!important}</style>
     <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
 
@@ -11262,7 +11313,58 @@ ${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
             
                     if (!file) return;
             
-                    // PDF.js: usa global do <head> ou importacao dinamica (v4.10.38)
+                    // PDF.js: usa global do <head>
+
+<!-- FIX SAFE TOOLTIP P120 -->
+<style id="fix-p120-css">
+  /* Garante que o tooltip nunca retenha o ponteiro do mouse */
+  #p120Dica, .p120-tooltip-fixed {
+    pointer-events: none !important;
+    transition: opacity 0.15s ease-in-out;
+  }
+</style>
+<script id="fix-p120-js">
+(function() {
+  'use strict';
+
+  function ocultarDicaP120() {
+    var el = document.getElementById('p120Dica');
+    if (el) {
+      el.style.display = 'none';
+      el.style.opacity = '0';
+    }
+  }
+
+  // Monitora a saida do mouse do container do grafico de rosca e evolucao
+  document.addEventListener('mousemove', function(ev) {
+    var target = ev.target;
+    var el = document.getElementById('p120Dica');
+    if (!el || el.style.display === 'none') return;
+
+    // Se o mouse nao estiver diretamente sobre um canvas do P120, oculta
+    var isCanvas = target && target.tagName === 'CANVAS' && (
+      target.id === 'p120Rosca' || 
+      target.id === 'p120Evol' || 
+      target.id === 'p120Rank' ||
+      (target.parentElement && target.parentElement.id && target.parentElement.id.indexOf('p120') !== -1)
+    );
+
+    if (!isCanvas) {
+      ocultarDicaP120();
+    }
+  }, true);
+
+  // Oculta ao rolar a tela ou trocar de aba
+  window.addEventListener('scroll', ocultarDicaP120, true);
+  document.addEventListener('click', function(ev) {
+    if (ev.target && ev.target.tagName !== 'CANVAS') {
+      ocultarDicaP120();
+    }
+  }, true);
+})();
+</script>
+<!-- FIM FIX SAFE TOOLTIP P120 -->
+ ou importacao dinamica (v4.10.38)
                     const pdfjs = window.pdfjsLib || (await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs'));
             
                     if (!pdfjs) {
@@ -42018,7 +42120,58 @@ function trocarSubTabPgtoNovo(tab) {
 
 janelaImpressao.document.write(
   '<!doctype html>' +
-  '<html lang="pt-BR"><head>' +
+  '<html lang="pt-BR"><head>
+
+<!-- FIX SAFE TOOLTIP P120 -->
+<style id="fix-p120-css">
+  /* Garante que o tooltip nunca retenha o ponteiro do mouse */
+  #p120Dica, .p120-tooltip-fixed {
+    pointer-events: none !important;
+    transition: opacity 0.15s ease-in-out;
+  }
+</style>
+<script id="fix-p120-js">
+(function() {
+  'use strict';
+
+  function ocultarDicaP120() {
+    var el = document.getElementById('p120Dica');
+    if (el) {
+      el.style.display = 'none';
+      el.style.opacity = '0';
+    }
+  }
+
+  // Monitora a saida do mouse do container do grafico de rosca e evolucao
+  document.addEventListener('mousemove', function(ev) {
+    var target = ev.target;
+    var el = document.getElementById('p120Dica');
+    if (!el || el.style.display === 'none') return;
+
+    // Se o mouse nao estiver diretamente sobre um canvas do P120, oculta
+    var isCanvas = target && target.tagName === 'CANVAS' && (
+      target.id === 'p120Rosca' || 
+      target.id === 'p120Evol' || 
+      target.id === 'p120Rank' ||
+      (target.parentElement && target.parentElement.id && target.parentElement.id.indexOf('p120') !== -1)
+    );
+
+    if (!isCanvas) {
+      ocultarDicaP120();
+    }
+  }, true);
+
+  // Oculta ao rolar a tela ou trocar de aba
+  window.addEventListener('scroll', ocultarDicaP120, true);
+  document.addEventListener('click', function(ev) {
+    if (ev.target && ev.target.tagName !== 'CANVAS') {
+      ocultarDicaP120();
+    }
+  }, true);
+})();
+</script>
+<!-- FIM FIX SAFE TOOLTIP P120 -->
+' +
   '<meta charset="UTF-8">' +
   '<meta name="viewport" content="width=device-width,initial-scale=1">' +
   '<title>Diário de Obra</title>' +
@@ -43114,7 +43267,58 @@ if (document.readyState === 'loading') {
               '.pr-ass{margin-top:22px;text-align:center;font-size:9pt}' +
               '</style>';
             janelaImpressao.document.open();
-            janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Boletim de Inspeção</title>' + cssImpressao + '</head><body>' + h + '</body></html>');
+            janelaImpressao.document.write('<!doctype html><html><head>
+
+<!-- FIX SAFE TOOLTIP P120 -->
+<style id="fix-p120-css">
+  /* Garante que o tooltip nunca retenha o ponteiro do mouse */
+  #p120Dica, .p120-tooltip-fixed {
+    pointer-events: none !important;
+    transition: opacity 0.15s ease-in-out;
+  }
+</style>
+<script id="fix-p120-js">
+(function() {
+  'use strict';
+
+  function ocultarDicaP120() {
+    var el = document.getElementById('p120Dica');
+    if (el) {
+      el.style.display = 'none';
+      el.style.opacity = '0';
+    }
+  }
+
+  // Monitora a saida do mouse do container do grafico de rosca e evolucao
+  document.addEventListener('mousemove', function(ev) {
+    var target = ev.target;
+    var el = document.getElementById('p120Dica');
+    if (!el || el.style.display === 'none') return;
+
+    // Se o mouse nao estiver diretamente sobre um canvas do P120, oculta
+    var isCanvas = target && target.tagName === 'CANVAS' && (
+      target.id === 'p120Rosca' || 
+      target.id === 'p120Evol' || 
+      target.id === 'p120Rank' ||
+      (target.parentElement && target.parentElement.id && target.parentElement.id.indexOf('p120') !== -1)
+    );
+
+    if (!isCanvas) {
+      ocultarDicaP120();
+    }
+  }, true);
+
+  // Oculta ao rolar a tela ou trocar de aba
+  window.addEventListener('scroll', ocultarDicaP120, true);
+  document.addEventListener('click', function(ev) {
+    if (ev.target && ev.target.tagName !== 'CANVAS') {
+      ocultarDicaP120();
+    }
+  }, true);
+})();
+</script>
+<!-- FIM FIX SAFE TOOLTIP P120 -->
+<meta charset="UTF-8"><title>Boletim de Inspeção</title>' + cssImpressao + '</head><body>' + h + '</body></html>');
             janelaImpressao.document.close();
             var imprimirJanela = function () {
               try { janelaImpressao.focus(); janelaImpressao.print(); } catch (erro) {}
