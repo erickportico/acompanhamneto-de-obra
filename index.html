@@ -3,10 +3,9 @@
 
 <head>
 <style id="v21SafetyCSS">#p84Fundo,#p84Impressao,#p83Fundo,#p83Impressao,#p86Fundo,#p86Caixa,#p92Fundo,#p92Caixa,#p128Tela,#p128Estilo{display:none!important}</style>
-    <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
-
+    <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer 
     <link rel="icon" href="data:image/x-icon;base64,=">
-    <!-- PATCH90_ANTITRAVA_GERAL_OK -->
+    <!-- PATCH90_ANTITRAVA_GERAL_OK 
     <script>
         /* PATCH90_ANTITRAVA_GERAL_OK */
         (function () {
@@ -252,7 +251,7 @@
         })();
     </script>
 
-    <!-- PATCH_VARREDURA_UNICA_OK -->
+    <!-- PATCH_VARREDURA_UNICA_OK 
     <script>
         /* PATCH_VARREDURA_UNICA_OK
            Antes: 9 patches diferentes (linhas ~39290-50374 do arquivo original)
@@ -300,7 +299,7 @@
         })();
     </script>
 
-    <!-- INI PATCH119 -->
+    <!-- INI PATCH119 
     <script id="p119Agenda">
         /* ------------------------------------------------------------------ *
          * PATCH 119 - UM RELOGIO SO PARA TODAS AS TAREFAS REPETIDAS           *
@@ -497,10 +496,8 @@
           }, true);
         })();
     </script>
-    <!-- FIM PATCH119 -->
-
-
-    <!-- 1. Carrega o SDK do Supabase PRIMEIRO -->
+    <!-- FIM PATCH119 
+    <!-- 1. Carrega o SDK do Supabase PRIMEIRO 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
@@ -587,11 +584,11 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Acompanhamento de Produção e Instalação</title>
-    <!-- Tipografia -->
+    <!-- Tipografia 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Bibliotecas de Gráficos (Chart.js) -->
+    <!-- Bibliotecas de Gráficos (Chart.js) 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
@@ -600,7 +597,7 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
 
 
 
-    <!-- PDF.js unificado (v4.10.38 ES module) -->
+    <!-- PDF.js unificado (v4.10.38 ES module) 
     <script type="module">
         /* Carrega pdfjs como modulo ES e expoe globalmente */ import * as _pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs"; _pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
         window.pdfjsLib = _pdfjs; window["pdfjs-dist/build/pdf"] = _pdfjs;
@@ -5533,18 +5530,18 @@ div:empty,
                 <button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button>
             </div>
         </header>
-        <!-- INÍCIO DO MENU LATERAL E CONTEÚDO -->
+        <!-- INÍCIO DO MENU LATERAL E CONTEÚDO 
         <div class="main-wrapper">
 
-            <!-- Área de Conteúdo Principal -->
+            <!-- Área de Conteúdo Principal 
             <div class="content-area">
-                <!-- 1. Cabeçalho Superior -->
+                <!-- 1. Cabeçalho Superior 
                 <details id="meu-menu-abas" style="margin: 10px 0 20px 0; position: relative; z-index: 9999;">
                     <summary style="cursor: pointer; padding: 8px 16px; background: #1e293b; color: #fff; border-radius: 6px; font-weight: bold; width: fit-content; user-select: none; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
                         ☰ Menu de Abas
                     </summary>
 
-                    <!-- O menu de botões flutua por cima do conteúdo sem empurrar nada -->
+                    <!-- O menu de botões flutua por cima do conteúdo sem empurrar nada 
                     <div class="tabs" style="display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; background: #121826; padding: 10px; border-radius: 8px; margin-top: 6px; gap: 6px; min-width: 260px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 25px rgba(0,0,0,0.7);">
                         <button class="tab-btn active" id="btn-tab-itens" onclick="trocarAba('itens')">📊 Painel Geral de Produção</button>
                         <button class="tab-btn" id="btn-tab-liberacao" onclick="trocarAba('liberacao')">📈 Avanço de Liberação</button>
@@ -5558,22 +5555,22 @@ div:empty,
                         <button class="tab-btn" id="btn-tab-fpdo" type="button" onclick="if (window.p92AbrirFpdo) { window.p92AbrirFpdo(); } else { alert('O Relatório FPDO ainda está carregando. Tente novamente.'); }">📋 Relatório FPDO</button>
                     </div>
 
-                    <!-- 3. Seu conteúdo principal ocupa a tela inteira -->
+                    <!-- 3. Seu conteúdo principal ocupa a tela inteira 
                     <main style="width: 100%;">
-                        <!-- Todo o conteúdo dos cartões (Centro de Custos, etc) aqui -->
+                        <!-- Todo o conteúdo dos cartões (Centro de Custos, etc) aqui 
                     </main>
                 </details>
-                <!-- ÁREA DO CONTEÚDO FORÇADA A 100% DE LARGURA -->
+                <!-- ÁREA DO CONTEÚDO FORÇADA A 100% DE LARGURA 
                 <div class="content-area" style="width: 100% !important; flex: 1 1 100% !important; margin-left: 0 !important; padding-top: 45px;">
-                    <!-- Seus cards (Centro de Custos, Cronograma, etc) ficam aqui dentro -->
+                    <!-- Seus cards (Centro de Custos, Cronograma, etc) ficam aqui dentro 
                 </div>
 
-                <!-- 2. A ÁREA DE CONTEÚDO VEM LOGO ABAIXO E OCUPA 100% -->
+                <!-- 2. A ÁREA DE CONTEÚDO VEM LOGO ABAIXO E OCUPA 100% 
                 <div class="content-area" style="width: 100%; flex: 1;">
-                    <!-- O Card do Centro de Custos e os Painéis entram todos aqui dentro -->
+                    <!-- O Card do Centro de Custos e os Painéis entram todos aqui dentro 
                 </div>
 
-                <!-- TAB 1: PAINEL GERAL DE ITENS -->
+                <!-- TAB 1: PAINEL GERAL DE ITENS 
                 <div id="tab-itens" class="card">
                     <div class="kpi-grid">
                         <div class="kpi-card">
@@ -5617,7 +5614,7 @@ div:empty,
                         </table>
                     </div>
                 </div>
-                <!-- TAB 2: LIBERAÇÃO (COM SUB-ABAS) -->
+                <!-- TAB 2: LIBERAÇÃO (COM SUB-ABAS) 
                 <div id="tab-liberacao" class="card" style="display:none;">
                     <div class="sub-tabs">
                         <button class="sub-tab-btn active" id="btn-sub-fem" onclick="trocarSubAbaFEM('fem')">Liberação (FEM)
@@ -5629,7 +5626,7 @@ div:empty,
 
                     </div>
 
-                    <!-- SUB-ABA 1: Liberação de FEM -->
+                    <!-- SUB-ABA 1: Liberação de FEM 
                     <div id="sub-tab-fem" class="sub-tab-content" style="display:block;">
                         <div class="card-header">
                             <div class="card-title">Acompanhamento Detalhado de Liberação Técnica (FEM)</div>
@@ -5690,7 +5687,7 @@ div:empty,
                         </div>
                     </div>
 
-                    <!-- SUB-ABA 2: Evolução de Fabricação -->
+                    <!-- SUB-ABA 2: Evolução de Fabricação 
                     <div id="sub-tab-fab" class="sub-tab-content" style="display:none;">
                         <div class="card-header">
                             <div class="card-title">Acompanhamento Detalhado de Fabricação</div>
@@ -5751,7 +5748,7 @@ div:empty,
                         </div>
                     </div>
 
-                    <!-- SUB-ABA 3: Evolução de Instalação -->
+                    <!-- SUB-ABA 3: Evolução de Instalação 
                     <div id="sub-tab-inst" class="sub-tab-content" style="display:none;">
                         <div class="card-header">
                             <div class="card-title">Acompanhamento Detalhado de Instalação</div>
@@ -5802,7 +5799,7 @@ div:empty,
                                         <th class="head-inst">
                                             <div class="th-content">Status Instalação</div>
                                         </th>
-                                        <!-- PATCH 36: coluna de lancamentos de instalacao -->
+                                        <!-- PATCH 36: coluna de lancamentos de instalacao 
                                         <th class="head-inst">
                                             <div class="th-content">Lançamentos</div>
                                         </th>
@@ -5817,7 +5814,7 @@ div:empty,
                     </div>
                 </div>
 
-                <!-- TAB 8: CONTRAMARCO (CTM) -->
+                <!-- TAB 8: CONTRAMARCO (CTM) 
                 <div id="tab-ctm" class="card" style="display:none;">
                     <div class="card-header">
                         <div class="card-title">🔲 Liberação de Contramarcos (CTM)</div>
@@ -5833,7 +5830,7 @@ div:empty,
                         </div>
                     </div>
 
-                    <!-- CTM Dashboard -->
+                    <!-- CTM Dashboard 
                     <div id="ctmDashCards" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin:16px 0;">
                         <div class="card" style="border-left:4px solid #27ae60;">
                             <div style="padding:14px;">
@@ -5858,16 +5855,16 @@ div:empty,
                         </div>
                     </div>
 
-                    <!-- Mode Toggle -->
+                    <!-- Mode Toggle 
                     <div style="display:flex; gap:8px; margin-bottom:14px;">
                         <button class="btn-orange" id="ctmModeIndividual" onclick="switchCTMMode('individual')" style="opacity:1;">Modo Individual</button>
                         <button class="btn-orange" id="ctmModeBulk" onclick="switchCTMMode('bulk')" style="opacity:0.5;">Modo em Lote</button>
                     </div>
 
-                    <!-- Individual Section -->
+                    <!-- Individual Section 
                     <div id="ctmIndividualSection">
                         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px;">
-                            <!-- Col 1: Seleção -->
+                            <!-- Col 1: Seleção 
                             <div class="card">
                                 <div class="card-header">
                                     <div class="card-title">Seleção do Item</div>
@@ -5889,7 +5886,7 @@ div:empty,
                                     <input type="text" id="inspector" placeholder="Nome" style="width:100%;padding:7px;background:#1a1a2e;color:#fff;border:1px solid #333;border-radius:4px;">
                                 </div>
                             </div>
-                            <!-- Col 2: Medições -->
+                            <!-- Col 2: Medições 
                             <div class="card">
                                 <div class="card-header">
                                     <div class="card-title">Medições (mm)</div>
@@ -5914,7 +5911,7 @@ div:empty,
                                     </select>
                                 </div>
                             </div>
-                            <!-- Col 3: Verificação -->
+                            <!-- Col 3: Verificação 
                             <div class="card">
                                 <div class="card-header">
                                     <div class="card-title">Verificação & Liberação</div>
@@ -5935,7 +5932,7 @@ div:empty,
                                 </div>
                             </div>
                         </div>
-                        <!-- CAD Canvas -->
+                        <!-- CAD Canvas 
                         <div class="card" style="margin-bottom:14px;">
                             <div class="card-header">
                                 <div class="card-title">📐 Visualização CAD 2D</div>
@@ -5947,7 +5944,7 @@ div:empty,
                         </div>
                     </div>
 
-                    <!-- Bulk Section -->
+                    <!-- Bulk Section 
                     <div id="ctmBulkSection" style="display:none;">
                         <div class="card" style="margin-bottom:14px;">
                             <div class="card-header">
@@ -5970,7 +5967,7 @@ div:empty,
                         </div>
                     </div>
 
-                    <!-- Specs Table -->
+                    <!-- Specs Table 
                     <div id="ctmSpecsTable" style="margin-bottom:16px;">
                         <div id="ctmFiltersBar" style="display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;">
                             <input type="text" id="searchInput" placeholder="Buscar ref..." oninput="applyFiltersCTM()" style="padding:5px 8px;background:#1a1a2e;color:#fff;border:1px solid #333;border-radius:4px;flex:1;min-width:120px;">
@@ -6010,7 +6007,7 @@ div:empty,
                         </table>
                     </div>
 
-                    <!-- History Table -->
+                    <!-- History Table 
                     <div id="ctmHistoryTable" style="margin-bottom:16px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                             <h3 style="color:#ff7b00;font-size:14px;margin:0;">📋 Histórico</h3>
@@ -6046,7 +6043,7 @@ div:empty,
                         </table>
                     </div>
 
-                    <!-- Hidden inputs & print containers -->
+                    <!-- Hidden inputs & print containers 
                     <input type="file" id="excelFileInputCTM" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importExcelSpecsCTM(event)">
                     <div id="ctmPrintHeader" style="display:none;text-align:center;margin-bottom:16px;">
                         <h2 id="ctmPrintTitle" style="font-size:20px;border-bottom:2px solid #ff7b00;padding-bottom:6px;margin-bottom:6px;"></h2>
@@ -6060,7 +6057,7 @@ div:empty,
                     <div id="resumoLoteContainer" style="display:none;"></div>
                 </div>
 
-                <!-- TAB 3: BOLETIM DE MEDIÇÃO DETALHADO -->
+                <!-- TAB 3: BOLETIM DE MEDIÇÃO DETALHADO 
                 <div id="tab-medicoes" class="card" style="display:none;">
                     <div class="print-style-bar">
                         <div class="print-card">
@@ -6195,7 +6192,7 @@ div:empty,
                     </div>
                 </div>
 
-                <!-- TAB 5: RECEBIMENTO DE MATERIAIS -->
+                <!-- TAB 5: RECEBIMENTO DE MATERIAIS 
                 <div id="tab-recebimento" class="card" style="display:none;">
                     <div class="recebimento-kpi-grid">
                         <div class="kpi-card">
@@ -6344,7 +6341,7 @@ div:empty,
                     </div>
                 </div>
 
-                <!-- TAB 4: GRÁFICOS -->
+                <!-- TAB 4: GRÁFICOS 
                 <div id="tab-graficos" class="card" style="display:none;">
                     <div class="card-header">
                         <div class="card-title">Acompanhamento Gráfico de Produção e Instalação</div>
@@ -6394,7 +6391,7 @@ div:empty,
                 </div>
             </div>
 
-            <!-- TAB: GESTÃO DE OBRA E EQUIPE (CRONOGRAMA GANTT) -->
+            <!-- TAB: GESTÃO DE OBRA E EQUIPE (CRONOGRAMA GANTT) 
             <div id="tab-cronograma" class="card" style="display:none;">
                 <div class="cronograma-content" style="padding:16px;">
                     <div class="card-header">
@@ -6491,7 +6488,7 @@ div:empty,
                         </div>
                     </div>
 
-                    <!-- DIAGRAMA DE GANTT (TELA + IMPRESSÃO) -->
+                    <!-- DIAGRAMA DE GANTT (TELA + IMPRESSÃO) 
                     <div class="gantt-wrapper">
                         <table id="ganttTableCrono">
                             <thead>
@@ -6513,7 +6510,7 @@ div:empty,
                         </table>
                     </div>
 
-                    <!-- PAINEL DE RELATÓRIO (APENAS TELA) -->
+                    <!-- PAINEL DE RELATÓRIO (APENAS TELA) 
                     <div class="report-section" id="reportContainerCrono" style="display: none;">
                         <div class="report-header-flex">
                             <h2>📊 Resumo Executivo por Projeto</h2>
@@ -6547,24 +6544,24 @@ div:empty,
                 <input type="file" id="importFileCrono" accept=".json" style="display:none;" onchange="handleFileSelectCrono(event)">
             </div>
 
-            <!-- TAB PAGAMENTO DE PRODUÇÃO -->
+            <!-- TAB PAGAMENTO DE PRODUÇÃO 
             <div id="tab-pagamento" class="card" style="display:none;">
                 <div class="tab-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                     <h2 style="margin:0;">💰 Pagamento de Produção</h2>
                 </div>
 
-                <!-- Sub-tabs: Lançamentos / Resumo de Pagamento -->
+                <!-- Sub-tabs: Lançamentos / Resumo de Pagamento 
                 <div class="pgto-sub-tabs">
                     <button class="pgto-sub-tab-btn active" onclick="trocarSubTabPgtoNovo('lancamentos')" id="subTabPgtoLancamentos">📋 Lançamentos</button>
                     <button class="pgto-sub-tab-btn" onclick="trocarSubTabPgtoNovo('resumo')" id="subTabPgtoResumo">📊 Resumo de Pagamento</button>
                     <button class="pgto-sub-tab-btn" onclick="trocarSubTabPgtoNovo('colaboradores')" id="subTabPgtoColaboradores">👥 Colaboradores</button>
                 </div>
 
-                <!-- ===== PAINEL: LANÇAMENTOS ===== -->
+                <!-- ===== PAINEL: LANÇAMENTOS ===== 
                 <div id="panelPgtoLancamentos">
-                    <!-- Formulário de registro (layout em seções) -->
+                    <!-- Formulário de registro (layout em seções) 
                     <div class="lanc-form-grid">
-                        <!-- Seção 1: Dados da Tarefa -->
+                        <!-- Seção 1: Dados da Tarefa 
                         <div class="lanc-section">
                             <div class="lanc-section-title">📝 Dados da Tarefa</div>
                             <div class="lanc-fields-row">
@@ -6583,7 +6580,7 @@ div:empty,
                             </div>
                         </div>
 
-                        <!-- Seção 2: Taxas -->
+                        <!-- Seção 2: Taxas 
                         <div class="lanc-section">
                             <div class="lanc-section-title">💲 Taxas (R$/m²)</div>
                             <div class="lanc-fields-row">
@@ -6598,7 +6595,7 @@ div:empty,
                             </div>
                         </div>
 
-                        <!-- Seção 3: Equipe -->
+                        <!-- Seção 3: Equipe 
                         <div class="lanc-section">
                             <div class="lanc-section-title">👥 Equipe</div>
                             <div class="lanc-fields-row">
@@ -6617,8 +6614,8 @@ div:empty,
                             </div>
                         </div>
 
-                        <!-- Botão de adicionar -->
-                        <!-- Selects ocultos para compatibilidade JS -->
+                        <!-- Botão de adicionar 
+                        <!-- Selects ocultos para compatibilidade JS 
                         <select id="inputLancProfissionais" multiple style="display:none;"></select>
                         <select id="inputLancAjudantes" multiple style="display:none;"></select>
                         <div class="lanc-submit-row">
@@ -6626,7 +6623,7 @@ div:empty,
                         </div>
                     </div>
 
-                    <!-- Action bar + Month nav (compacto) -->
+                    <!-- Action bar + Month nav (compacto) 
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
                         <div class="pgto-month-nav" style="margin-bottom:0;">
                             <button onclick="mudarMesPgto(-1)">◀</button>
@@ -6642,25 +6639,25 @@ div:empty,
                         <input type="file" id="inputBackupPgto" accept=".json" onchange="importarBackupPgto(event)" style="display:none;">
                     </div>
 
-                    <!-- Lançamentos table (grouped by obra) -->
+                    <!-- Lançamentos table (grouped by obra) 
                     <div id="containerLancamentosPgto"></div>
                 </div>
 
-                <!-- ===== PAINEL: RESUMO DE PAGAMENTO ===== -->
+                <!-- ===== PAINEL: RESUMO DE PAGAMENTO ===== 
                 <div id="panelPgtoResumo" style="display:none;">
-                    <!-- PATCH 31: acoes do Resumo (impressao) -->
+                    <!-- PATCH 31: acoes do Resumo (impressao) 
                     <div class="pgto-action-bar" id="pgtoResumoActionBar" style="margin-bottom:12px;">
                         <button class="btn-action btn-imprimir" onclick="imprimirPagina()">🖨️ Imprimir Resumo</button>
                         <button class="btn-action btn-import-backup" onclick="restaurarImportacoesPgto()" title="Traz de volta os lançamentos importados que foram excluídos neste mês">♻️ Restaurar Importações</button>
                     </div>
-                    <!-- Month navigation -->
+                    <!-- Month navigation 
                     <div class="pgto-month-nav">
                         <button onclick="mudarMesPgto(-1)">◀</button>
                         <span id="pgtoMesAnoLabelResumo">Jan/2026</span>
                         <button onclick="mudarMesPgto(1)">▶</button>
                     </div>
 
-                    <!-- Flex: table + side panel -->
+                    <!-- Flex: table + side panel 
                     <div class="resumo-flex">
                         <div class="resumo-table-wrap">
                             <h3 style="margin:0 0 12px 0;font-size:1rem;color:#1e3a5f;">Resumo de Pagamento por Colaborador</h3>
@@ -6673,7 +6670,7 @@ div:empty,
                     </div>
                 </div>
 
-                <!-- ===== PAINEL: COLABORADORES (sub-tab) ===== -->
+                <!-- ===== PAINEL: COLABORADORES (sub-tab) ===== 
                 <div id="panelPgtoColaboradores" style="display:none;">
                     <div class="tab-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                         <h3 style="margin:0;font-size:1rem;color:#1e3a5f;">Colaboradores (Todas as Obras)</h3>
@@ -6684,7 +6681,7 @@ div:empty,
 
             </div>
 
-            <!-- ===== TAB: CENTRO DE CUSTOS ===== -->
+            <!-- ===== TAB: CENTRO DE CUSTOS ===== 
             <div id="tab-custo" class="card" style="display:none;">
                 <h3 style="margin-top:0;color:var(--text,#fff);">📊 Centro de Custos</h3>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
@@ -6719,8 +6716,8 @@ div:empty,
                         <input type="date" id="custoFilterPeriodoAte" onchange="renderCustoDashboard()" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">
                     </div>
                 </div>
-                <!-- PATCH 38: filtro por colaborador -->
-                <!-- PATCH 41: obra do lancamento -->
+                <!-- PATCH 38: filtro por colaborador 
+                <!-- PATCH 41: obra do lancamento 
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
                     <div>
                         <label style="font-size:0.8rem;font-weight:600;">Obra do Lancamento</label>
@@ -6742,7 +6739,7 @@ div:empty,
                         <label style="font-size:0.8rem;font-weight:600;">Região / Local</label>
                         <input type="text" id="custoInputRegiao" placeholder="Ex: São Paulo" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">
                     </div>
-                    <!-- PATCH 38: colaborador da despesa -->
+                    <!-- PATCH 38: colaborador da despesa 
                     <div>
                         <label style="font-size:0.8rem;font-weight:600;">Colaborador</label>
                         <select id="custoInputColaborador" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;box-sizing:border-box;"></select>
@@ -6751,7 +6748,7 @@ div:empty,
                 <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">
                     <input type="date" id="custoInputData" style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;">
                     <button class="btn-add" onclick="salvarCusto()">➕ Adicionar Despesa</button>
-                    <!-- PATCH 32: botao exportar -->
+                    <!-- PATCH 32: botao exportar 
                     <button class="btn-add" style="background:#1d6f42;" onclick="exportarCustosXLSX()">📊 Exportar XLSX</button>
                     <button class="secondary" onclick="limparFiltrosCusto()">🧹 Limpar Filtros</button>
                 </div>
@@ -6767,17 +6764,16 @@ div:empty,
                         </div>
                     </div>
                 </div>
-                <!-- PATCH 32: paineis extras -->
+                <!-- PATCH 32: paineis extras 
                 <div id="containerCustoResumoObra" style="margin-bottom:14px;"></div>
                 <div id="containerCustoPorRegiao" style="margin-bottom:14px;"></div>
-                <!-- PATCH 38: totais por colaborador -->
+                <!-- PATCH 38: totais por colaborador 
                 <div id="containerCustoPorColaborador" style="margin-bottom:14px;"></div>
                 <div id="containerCustoTable"></div>
                 <div id="containerCustoTotal" style="margin-top:10px;"></div>
             </div>
 
-            <!-- MODAIS -->
-
+            <!-- MODAIS 
             <div class="modal-bg" id="modalObra">
                 <div class="modal">
                     <h3 id="modalObraTitle">Configurar Obra Atual</h3>
@@ -6804,7 +6800,7 @@ div:empty,
                 </div>
             </div>
 
-            <!-- PATCH 32: modal editar custo -->
+            <!-- PATCH 32: modal editar custo 
             <div class="modal-bg" id="modalEditarCusto">
                 <div class="modal" style="max-width:520px;">
                     <h3>✏️ Editar Despesa</h3>
@@ -6829,7 +6825,7 @@ div:empty,
                         <label>Região / Local</label>
                         <input type="text" id="custoEditRegiao">
                     </div>
-                    <!-- PATCH 38: colaborador da despesa -->
+                    <!-- PATCH 38: colaborador da despesa 
                     <div class="form-group">
                         <label>Colaborador</label>
                         <select id="custoEditColaborador"></select>
@@ -7012,7 +7008,7 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                     </div>
                 </div>
             </div>
-            <!-- PATCH118 LIMPEZA: janela sem uso retirada -->
+            <!-- PATCH118 LIMPEZA: janela sem uso retirada 
             <div class="modal-bg" id="modalItem">
                 <div class="modal">
                     <h3>Adicionar Item</h3>
@@ -13628,18 +13624,18 @@ function trocarSubTabPgtoNovo(tab) {
             }
             </script>
 
-            <!-- Modal Importar Esquadrias / Lista de Corte -->
+            <!-- Modal Importar Esquadrias / Lista de Corte 
             <div class="modal-bg" id="modalInserirListaCorte" style="display:none;">
                 <div class="modal" style="width:90%; max-width:760px;">
                     <h2 style="margin-top:0; font-size:1.4rem; color:#1e293b; font-weight:700; margin-bottom:16px;">
             Importar Esquadrias / Lista de Corte
         </h2>
-                    <!-- Banner Informativo -->
+                    <!-- Banner Informativo 
                     <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px 16px; margin-bottom:16px; font-size:0.88rem; color:#475569; line-height:1.4;">
                         <b>Importação automática do PDF:</b>
                         <br> O sistema lê o arquivo da Lista de Esquadrias, preenche automaticamente os dados do cabeçalho e extrai os itens para lançamento no Painel Geral.
                     </div>
-                    <!-- Seleção do PDF e Status -->
+                    <!-- Seleção do PDF e Status 
                     <div style="border:1px solid #cbd5e1; background:#fff; border-radius:6px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
                         <input type="file" id="inputPDFEsquadrias" accept=".pdf" onchange="processarPDFEsquadriasModal(event)" style="font-size:0.88rem;">
                         <span id="pdfStatusLabelEsq" style="font-size:0.85rem; color:#64748b;">Nenhum PDF selecionado</span>
@@ -13647,7 +13643,7 @@ function trocarSubTabPgtoNovo(tab) {
                     <p style="font-size:0.82rem; color:#64748b; margin:0 0 12px 0;">
                         Se preferir, ainda é possível colar manualmente uma lista no campo abaixo.
                     </p>
-                    <!-- Form de Cabeçalho (Linha 1) -->
+                    <!-- Form de Cabeçalho (Linha 1) 
                     <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:12px;">
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Data do Recebimento</label>
@@ -13668,17 +13664,17 @@ function trocarSubTabPgtoNovo(tab) {
                             <input type="text" id="impFornecedorEsq" style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.85rem; box-sizing:border-box;">
                         </div>
                     </div>
-                    <!-- Form de Cabeçalho (Linha 2) -->
+                    <!-- Form de Cabeçalho (Linha 2) 
                     <div style="margin-bottom:12px; width:24%;">
                         <label style="font-size:0.8rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Classe da Lista
                         </label>
                         <input type="text" id="impClasseEsq" placeholder="Ex.: ESQUADRIAS" style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.85rem; box-sizing:border-box;">
                     </div>
-                    <!-- Área do Texto Extraído -->
+                    <!-- Área do Texto Extraído 
                     <div style="margin-bottom:20px;">
                         <textarea id="txtEsquadriasManual" style="width:100%; height:150px; font-family:monospace; font-size:0.82rem; padding:10px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box; resize:vertical; line-height:1.4; color:#334155;"></textarea>
                     </div>
-                    <!-- Botões -->
+                    <!-- Botões 
                     <div style="display:flex; justify-content:flex-end; gap:10px;">
                         <button onclick="fecharModalListaCorte()" style="padding:8px 20px; background:#475569; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.88rem;">Cancelar</button>
                         <button onclick="confirmarImportacaoParaPainelGeral()" style="padding:8px 20px; background:#10b981; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.88rem;">Importar</button>
@@ -13687,8 +13683,8 @@ function trocarSubTabPgtoNovo(tab) {
                 </div>
             </div>
 
-            <!-- MODAL: Colaborador Pgto -->
-            <!-- Modal: Editar Lançamento -->
+            <!-- MODAL: Colaborador Pgto 
+            <!-- Modal: Editar Lançamento 
             <div class="modal-bg" id="modalLancamentoPgto" style="display:none;" onclick="if(event.target===this)fecharModalLancamento()">
                 <div class="modal">
                     <h3 style="margin-top:0;">✏️ Editar Lançamento</h3>
@@ -13727,7 +13723,7 @@ function trocarSubTabPgtoNovo(tab) {
                 </div>
             </div>
 
-            <!-- Modal: Confirmar Ação -->
+            <!-- Modal: Confirmar Ação 
             <div class="modal-bg" id="modalConfirmPgto" style="display:none;" onclick="if(event.target===this)fecharModalConfirmPgto()">
                 <div class="modal">
                     <h3 style="margin-top:0;">⚠️ Confirmar</h3>
@@ -13740,7 +13736,7 @@ function trocarSubTabPgtoNovo(tab) {
                 </div>
             </div>
 
-            <!-- MODAL: Colaborador -->
+            <!-- MODAL: Colaborador 
             <div class="modal-bg" id="modalColaborador" style="display:none;" onclick="if(event.target===this)fecharModalColaborador()">
                 <div class="modal">
                     <h3 id="colabModalTitle" style="margin-top:0;">Novo Colaborador</h3>
@@ -13780,7 +13776,7 @@ function trocarSubTabPgtoNovo(tab) {
                 </div>
             </div>
 
-            <!-- CTM Modals -->
+            <!-- CTM Modals 
             <div id="newModalCTM" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;">
                 <div style="background:#1a1a2e;border-radius:10px;padding:20px;width:480px;max-width:90vw;border:1px solid #333;">
                     <h3 id="modalTitleCTM" style="color:#ff7b00;margin:0 0 14px 0;">Novo Contramarco</h3>
@@ -27549,9 +27545,7 @@ function trocarSubTabPgtoNovo(tab) {
                 }
             </style>
 
-            <!-- PATCH119 LIMPEZA: bloco repetido do menu retirado -->
-
-
+            <!-- PATCH119 LIMPEZA: bloco repetido do menu retirado 
             <style>
                 /* === PATCH 61: MENU ESTILO OREATE (aparencia) === */
                 
@@ -38310,7 +38304,7 @@ function trocarSubTabPgtoNovo(tab) {
                 }
             </style>
 
-            <!-- ========== PATCH77_SUBABAS_CUSTO_OK ========== -->
+            <!-- ========== PATCH77_SUBABAS_CUSTO_OK ========== 
             <script>
                 /* PATCH 77: divide a aba Centro de Custos em 6 sub-abas.
                    Nao recria nada: apenas move os blocos existentes para dentro das sub-abas,
@@ -38581,7 +38575,7 @@ function trocarSubTabPgtoNovo(tab) {
                 })();
             </script>
 
-            <!-- INI PATCH108 NUCLEO SEGURANCA -->
+            <!-- INI PATCH108 NUCLEO SEGURANCA 
             <script>
                 /* PATCH108 - nucleo unico de seguranca do painel.
                    Reune o que antes estava copiado em varios trechos:
@@ -38679,9 +38673,8 @@ function trocarSubTabPgtoNovo(tab) {
                   };
                 })();
             </script>
-            <!-- FIM PATCH108 NUCLEO SEGURANCA -->
-
-            <!-- PATCH79_SEGURANCA_OK -->
+            <!-- FIM PATCH108 NUCLEO SEGURANCA 
+            <!-- PATCH79_SEGURANCA_OK 
             <script>
                 /* ====== PATCH79_SEGURANCA_OK - login + trava de exclusao ====== */
                 (function () {
@@ -39436,7 +39429,7 @@ function trocarSubTabPgtoNovo(tab) {
                 })();
             </script>
 
-            <!-- PATCH80_MENU_IMPRESSAO_GRAVACAO_OK -->
+            <!-- PATCH80_MENU_IMPRESSAO_GRAVACAO_OK 
             <script>
                 /* ====== PATCH80_MENU_IMPRESSAO_GRAVACAO_OK ====== */
                 (function () {
@@ -39674,7 +39667,7 @@ function trocarSubTabPgtoNovo(tab) {
                 })();
             </script>
 
-            <!-- PATCH81_UNIFICAR_DUPLICADOS_OK -->
+            <!-- PATCH81_UNIFICAR_DUPLICADOS_OK 
             <script>
                 /* ====== PATCH81_UNIFICAR_DUPLICADOS_OK ====== */
                 (function () {
@@ -40556,7 +40549,7 @@ function trocarSubTabPgtoNovo(tab) {
                 })();
             </script>
 
-            <!-- PATCH82_CTM_PRODUCAO_OK -->
+            <!-- PATCH82_CTM_PRODUCAO_OK 
             <script>
                 /* ====== PATCH82_CTM_PRODUCAO_OK - CTM inteligente + Painel Geral + telas centralizadas ====== */
                 (function () {
@@ -40942,7 +40935,7 @@ function trocarSubTabPgtoNovo(tab) {
                 })();
             </script>
 
-            <!-- PATCH84_DIARIO_OBRA_OK -->
+            <!-- PATCH84_DIARIO_OBRA_OK 
             <script>
                 /* ====== PATCH84_DIARIO_OBRA_OK - Diario de Obra com relatorio fotografico ====== */
                 (function () {
@@ -42026,7 +42019,7 @@ janelaImpressao.document.write(
   '</head><body>' +
   h +
   '
-<!-- INI PATCH125_ULTIMATE -->
+<!-- INI PATCH125_ULTIMATE 
 <style id="p125-style-fix">
   /* Desativa cliques/mouse over em QUALQUER tooltip da tela para nao travar o mouse no canvas */
   div[id*="dica"], div[id*="Dica"], div[class*="tooltip"], div[class*="dica"], #p120Dica {
@@ -42083,7 +42076,58 @@ janelaImpressao.document.write(
   document.addEventListener('mouseleave', fecharTodosTooltips, true);
 })();
 </script>
-<!-- FIM PATCH125_ULTIMATE -->
+<!-- FIM PATCH125_ULTIMATE 
+
+<!-- INI FIX_RESTAURAR_ABAS -->
+<script>
+(function() {
+  'use strict';
+
+  function registrarEvAba(seletorTexto, acao) {
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      var texto = target ? (target.innerText || target.textContent || '') : '';
+      if (texto.toLowerCase().indexOf(seletorTexto.toLowerCase()) !== -1) {
+        try {
+          acao();
+        } catch(err) {
+          console.error('Erro ao abrir aba ' + seletorTexto + ':', err);
+        }
+      }
+    }, true);
+  }
+
+  // Mapeia cliques nas abas para chamar os métodos do sistema sem dependência de HTML corrompido
+  registrarEvAba('Diário de Obra', function() {
+    if (typeof window.p84AbrirDiario === 'function') {
+      window.p84AbrirDiario();
+    } else if (typeof window.abrirDiario === 'function') {
+      window.abrirDiario();
+    } else {
+      var tab = document.getElementById('tab-diario') || document.getElementById('tab-p84');
+      if (tab) tab.style.display = 'block';
+    }
+  });
+
+  registrarEvAba('Boletim de Inspeção', function() {
+    if (typeof window.p83AbrirBoletim === 'function') {
+      window.p83AbrirBoletim();
+    } else if (typeof window.abrirBoletim === 'function') {
+      window.abrirBoletim();
+    } else {
+      var tab = document.getElementById('tab-boletim') || document.getElementById('tab-p83');
+      if (tab) tab.style.display = 'block';
+    }
+  });
+
+  registrarEvAba('Relatório FPDO', function() {
+    var tab = document.getElementById('tab-fpdo') || document.getElementById('aba-fpdo');
+    if (tab) tab.style.display = 'block';
+  });
+
+})();
+</script>
+<!-- FIM FIX_RESTAURAR_ABAS -->
 
 </body></html>'
 );
@@ -42218,7 +42262,7 @@ if (document.readyState === 'loading') {
 })();
 </script>
 
-    <!-- PATCH155: P152 reposicionado – estava dentro de document.write, causando bug -->
+    <!-- PATCH155: P152 reposicionado – estava dentro de document.write, causando bug 
     <script>
         (function () {
           'use strict';
@@ -42228,7 +42272,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH83_BOLETIM_INSPECAO_OK -->
+    <!-- PATCH83_BOLETIM_INSPECAO_OK 
     <script>
         /* ====== PATCH83_BOLETIM_INSPECAO_OK - Boletim de Inspecao editavel com fotos ====== */
         (function () {
@@ -43175,7 +43219,7 @@ if (document.readyState === 'loading') {
               '</style>';
             janelaImpressao.document.open();
             janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Boletim de Inspeção</title>' + cssImpressao + '</head><body>' + h + '
-<!-- INI PATCH125_ULTIMATE -->
+<!-- INI PATCH125_ULTIMATE 
 <style id="p125-style-fix">
   /* Desativa cliques/mouse over em QUALQUER tooltip da tela para nao travar o mouse no canvas */
   div[id*="dica"], div[id*="Dica"], div[class*="tooltip"], div[class*="dica"], #p120Dica {
@@ -43232,7 +43276,58 @@ if (document.readyState === 'loading') {
   document.addEventListener('mouseleave', fecharTodosTooltips, true);
 })();
 </script>
-<!-- FIM PATCH125_ULTIMATE -->
+<!-- FIM PATCH125_ULTIMATE 
+
+<!-- INI FIX_RESTAURAR_ABAS -->
+<script>
+(function() {
+  'use strict';
+
+  function registrarEvAba(seletorTexto, acao) {
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      var texto = target ? (target.innerText || target.textContent || '') : '';
+      if (texto.toLowerCase().indexOf(seletorTexto.toLowerCase()) !== -1) {
+        try {
+          acao();
+        } catch(err) {
+          console.error('Erro ao abrir aba ' + seletorTexto + ':', err);
+        }
+      }
+    }, true);
+  }
+
+  // Mapeia cliques nas abas para chamar os métodos do sistema sem dependência de HTML corrompido
+  registrarEvAba('Diário de Obra', function() {
+    if (typeof window.p84AbrirDiario === 'function') {
+      window.p84AbrirDiario();
+    } else if (typeof window.abrirDiario === 'function') {
+      window.abrirDiario();
+    } else {
+      var tab = document.getElementById('tab-diario') || document.getElementById('tab-p84');
+      if (tab) tab.style.display = 'block';
+    }
+  });
+
+  registrarEvAba('Boletim de Inspeção', function() {
+    if (typeof window.p83AbrirBoletim === 'function') {
+      window.p83AbrirBoletim();
+    } else if (typeof window.abrirBoletim === 'function') {
+      window.abrirBoletim();
+    } else {
+      var tab = document.getElementById('tab-boletim') || document.getElementById('tab-p83');
+      if (tab) tab.style.display = 'block';
+    }
+  });
+
+  registrarEvAba('Relatório FPDO', function() {
+    var tab = document.getElementById('tab-fpdo') || document.getElementById('aba-fpdo');
+    if (tab) tab.style.display = 'block';
+  });
+
+})();
+</script>
+<!-- FIM FIX_RESTAURAR_ABAS -->
 
 </body></html>');
             janelaImpressao.document.close();
@@ -43315,7 +43410,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH85_EXPORTAR_PDF_OK -->
+    <!-- PATCH85_EXPORTAR_PDF_OK 
     <script>
         /* PATCH 85 - exportar PDF de verdade nos relatorios 83 e 84 */
         (function () {
@@ -43775,7 +43870,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH86B_FECHAR_LOGIN_CUSTOS_OK -->
+    <!-- PATCH86B_FECHAR_LOGIN_CUSTOS_OK 
     <script>
         /* PATCH 86B - botao Fechar dos relatorios, login com cadastro de usuario
            e tabela Custos x Pagamentos no Centro de Custos.
@@ -44866,7 +44961,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH87_REABRIR_USUARIOS_OK -->
+    <!-- PATCH87_REABRIR_USUARIOS_OK 
     <script>
         /* PATCH 87 - conserta a reabertura das janelas (Diario de Obra, Boletim,
            Cabecalho) e cria a tela "Usuarios cadastrados".
@@ -45595,7 +45690,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH88_CENTRO_PRESENCA_HISTORICO_OK -->
+    <!-- PATCH88_CENTRO_PRESENCA_HISTORICO_OK 
     <script>
         /* PATCH 88 - centraliza e reduz a caixa "Usuarios cadastrados",
            mostra quem esta acessando o painel agora e grava um historico
@@ -46325,9 +46420,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- PATCH89_ANTITRAVA_OK -->
-
-    <!-- PATCH92_REINTEGRADO -->
+    <!-- PATCH89_ANTITRAVA_OK 
+    <!-- PATCH92_REINTEGRADO 
     <script>
         /* ====== PATCH92_FPDO_OK - Relatorio FPDO (Fique por dentro da obra) ====== */
         (function () {
@@ -48321,7 +48415,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH93_REINTEGRADO -->
+    <!-- PATCH93_REINTEGRADO 
     <script>
         /* ================================================================== *
          * PATCH 93 - Correcoes do Relatorio FPDO
@@ -48590,7 +48684,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH94_REINTEGRADO -->
+    <!-- PATCH94_REINTEGRADO 
     <script>
         /* ====== PATCH94_FPDO_PPTX_OK - Relatorio FPDO em slides 16:9 + Salvar PPTX ====== */
         (function () {
@@ -49647,7 +49741,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH95_REINTEGRADO -->
+    <!-- PATCH95_REINTEGRADO 
     <script>
         /* ====== PATCH95_IMG_OK - Criar e editar imagens no Relatorio FPDO ====== */
         (function () {
@@ -50926,7 +51020,7 @@ if (document.readyState === 'loading') {
         })();
     </script>
 
-    <!-- PATCH96_ENQ_OK inicio -->
+    <!-- PATCH96_ENQ_OK inicio 
     <script>
         /* ====== PATCH96_ENQ_OK - Enquadrar fotos por slide (Relatorio FPDO) ====== */
         (function () {
@@ -51521,9 +51615,8 @@ if (document.readyState === 'loading') {
         
         })();
     </script>
-    <!-- PATCH96_ENQ_OK fim -->
-
-    <!-- PATCH97_PPTX_CHEIO_OK inicio -->
+    <!-- PATCH96_ENQ_OK fim 
+    <!-- PATCH97_PPTX_CHEIO_OK inicio 
     <script>
         /* ====== PATCH97_PPTX_CHEIO_OK - PPTX respeita a foto no slide inteiro (PATCH 96) ====== */
         (function () {
@@ -51784,9 +51877,8 @@ if (document.readyState === 'loading') {
         
         })();
     </script>
-    <!-- PATCH97_PPTX_CHEIO_OK fim -->
-
-    <!-- === PATCH 98: janela de enquadrar na frente + destrava do painel === -->
+    <!-- PATCH97_PPTX_CHEIO_OK fim 
+    <!-- === PATCH 98: janela de enquadrar na frente + destrava do painel === 
     <script>
         /* ===================================================================
            PATCH 98 - duas correcoes de uso do painel
@@ -52031,8 +52123,8 @@ if (document.readyState === 'loading') {
           setTimeout(embrulharTodos, 2500);
         })();
     </script>
-    <!-- === FIM PATCH 98 === -->
-    <!-- PATCH99_EDITOR_LIVRE_FPDO INICIO -->
+    <!-- === FIM PATCH 98 === 
+    <!-- PATCH99_EDITOR_LIVRE_FPDO INICIO 
     <script>
         /* ====== PATCH99_EDITOR_LIVRE_FPDO - mover, redimensionar e editar tudo nos slides ====== */
         (function () {
@@ -53209,8 +53301,8 @@ if (document.readyState === 'loading') {
         
         })();
     </script>
-    <!-- PATCH99_EDITOR_LIVRE_FPDO FIM -->
-    <!-- PATCH100_INI -->
+    <!-- PATCH99_EDITOR_LIVRE_FPDO FIM 
+    <!-- PATCH100_INI 
     <script>
         /* ====== PATCH100_DESTRAVA_E_APAGAR_TUDO ======
            1) Destrava o painel quando voce sai da conferencia dos slides
@@ -53965,8 +54057,8 @@ if (document.readyState === 'loading') {
         
         })();
     </script>
-    <!-- PATCH100_FIM -->
-    <!-- PATCH101_INI -->
+    <!-- PATCH100_FIM 
+    <!-- PATCH101_INI 
     <script>
         /* ====== PATCH101_FERRAMENTAS_NA_FRENTE ======
            Deixa a barra de botoes da conferencia de slides SEMPRE na frente.
@@ -54057,8 +54149,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- PATCH101_FIM -->
-    <!-- PATCH102_INI -->
+    <!-- PATCH101_FIM 
+    <!-- PATCH102_INI 
     <script>
         /* ====== PATCH102_LEVEZA_E_ALCAS ======
            1) Tira a lentidao ao mexer nos slides: as vigias que ficavam olhando a tela
@@ -54244,8 +54336,8 @@ if (document.readyState === 'loading') {
           iniciar();
         })();
     </script>
-    <!-- PATCH102_FIM -->
-    <!-- PATCH103_INI -->
+    <!-- PATCH102_FIM 
+    <!-- PATCH103_INI 
     <script>
         /* PATCH 103 - Permissoes por usuario e por aba.
            O administrador escolhe quais abas cada pessoa pode ver.
@@ -54835,9 +54927,8 @@ if (document.readyState === 'loading') {
           setTimeout(function () { try { aplicar(true); } catch (e) { /* ignora */ } }, 3500);
         })();
     </script>
-    <!-- PATCH103_FIM -->
-
-    <!-- PATCH104_INI -->
+    <!-- PATCH103_FIM 
+    <!-- PATCH104_INI 
     <script>
         /* PATCH 104 - Guardar tudo na nuvem (Supabase).
            Espelha no servidor: usuarios/senhas, permissoes, agenda (calendario),
@@ -55393,11 +55484,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- PATCH104_FIM -->
-
-
-
-    <!-- PATCH106_INI -->
+    <!-- PATCH104_FIM 
+    <!-- PATCH106_INI 
     <style id="p106Css">
         /* aviso da nuvem: canto de baixo a DIREITA, com prioridade maxima */
         #p104Status{
@@ -55564,9 +55652,8 @@ if (document.readyState === 'loading') {
           } else { ligar(); }
         })();
     </script>
-    <!-- PATCH106_FIM -->
-
-    <!-- PATCH107_INI -->
+    <!-- PATCH106_FIM 
+    <!-- PATCH107_INI 
     <script>
         /* Patch 107 - deixa o tipo de acesso guardado sempre em letras minusculas,
            sem espacos sobrando. Assim o painel reconhece o administrador mesmo que
@@ -55607,17 +55694,16 @@ if (document.readyState === 'loading') {
           window.setTimeout(rodar, 1200);
         })();
     </script>
-    <!-- PATCH107_FIM -->
-    <!-- INI PATCH109 LIMPEZA VISUAL -->
+    <!-- PATCH107_FIM 
+    <!-- INI PATCH109 LIMPEZA VISUAL 
     <style>
         /* patch109: esconde as tarjas retiradas, caso algo tente recria-las */
         .or-pe { display: none !important; }
         #p104Status { display: none !important; }
         #ps81Botao { display: none !important; }
     </style>
-    <!-- FIM PATCH109 LIMPEZA VISUAL -->
-
-    <!-- INI PATCH111 -->
+    <!-- FIM PATCH109 LIMPEZA VISUAL 
+    <!-- INI PATCH111 
     <style id="p111Css">
         /* faixa de aviso (Online/Offline) fina e no topo */
         html body #modernizacaoStatusPainel,
@@ -55754,8 +55840,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- FIM PATCH111 -->
-    <!-- INI PATCH112 -->
+    <!-- FIM PATCH111 
+    <!-- INI PATCH112 
     <style id="p112Css">
         #p112Caixa{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
           background:rgba(15,23,42,.55);z-index:2147483000;font:14px Segoe UI,Arial,sans-serif}
@@ -56388,8 +56474,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- FIM PATCH112 -->
-    <!-- INI PATCH113 -->
+    <!-- FIM PATCH112 
+    <!-- INI PATCH113 
     <style id="p113Css">
         @media print {
         
@@ -56704,8 +56790,8 @@ if (document.readyState === 'loading') {
           }
         }
     </style>
-    <!-- FIM PATCH113 -->
-    <!-- INI PATCH114 -->
+    <!-- FIM PATCH113 
+    <!-- INI PATCH114 
     <style id="p114Css">
         /* ------------------------------------------------------------------ *
          * 1) alcas verdes de mover/esticar voltam a aparecer
@@ -57271,8 +57357,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- FIM PATCH114 -->
-    <!-- INI PATCH115 -->
+    <!-- FIM PATCH114 
+    <!-- INI PATCH115 
     <style id="p115Css">
         /* ------------------------------------------------------------------ *
          * garantia extra: fotos inteiras, na proporcao original
@@ -57342,8 +57428,8 @@ if (document.readyState === 'loading') {
           }
         }
     </style>
-    <!-- FIM PATCH115 -->
-    <!-- INI PATCH116 -->
+    <!-- FIM PATCH115 
+    <!-- INI PATCH116 
     <style id="p116Css">
         /* ------------------------------------------------------------------ *
          * na tela: a caixa cresce conforme voce escreve (nada fica escondido)
@@ -57542,8 +57628,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- FIM PATCH116 -->
-    <!-- INI PATCH117 -->
+    <!-- FIM PATCH116 
+    <!-- INI PATCH117 
     <style id="p117Css">
         /* ------------------------------------------------------------------ *
          * 1) nunca mais uma tarja de ponta a ponta no alto da tela
@@ -58096,8 +58182,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- FIM PATCH117 -->
-    <!-- INI PATCH118 -->
+    <!-- FIM PATCH117 
+    <!-- INI PATCH118 
     <style id="p118Css">
         .p118-wrap{padding:4px 0 18px 0;}
         .p118-topo{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px 0;}
@@ -58968,8 +59054,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- FIM PATCH118 -->
-    <!-- INI PATCH120 -->
+    <!-- FIM PATCH118 
+    <!-- INI PATCH120 
     <script id="p120Custo">
         /* PATCH 120 - Centro de Custos com cara nova:
            indicadores grandes, grafico de ROSCA no lugar da pizza (com total no meio),
@@ -59976,8 +60062,8 @@ if (document.readyState === 'loading') {
     
 
           
-<!-- FIM PATCH120 -->
-    <!-- INI PATCH122 -->
+<!-- FIM PATCH120 
+    <!-- INI PATCH122 
     <style id="p122Estilo">
         /* PATCH 122 - selecao em lote no Painel Geral de Producao */
         #tbodyItens tr.p122-marcada > td { background: rgba(59,130,246,0.16) !important; }
@@ -60446,8 +60532,8 @@ if (document.readyState === 'loading') {
           window.p122ExcluirSelecionados = excluirEmLote;
         })();
     </script>
-    <!-- FIM PATCH122 -->
-    <!-- INI PATCH123 -->
+    <!-- FIM PATCH122 
+    <!-- INI PATCH123 
     <style id="p123Estilo">
         /* PATCH 123 - protecao contra sobrescrever o trabalho de outra pessoa
            e lixeira de itens excluidos */
@@ -61247,8 +61333,8 @@ if (document.readyState === 'loading') {
           };
         })();
     </script>
-    <!-- FIM PATCH123 -->
-    <!-- INI PATCH124 -->
+    <!-- FIM PATCH123 
+    <!-- INI PATCH124 
     <style id="p124Estilo">
         /* PATCH 124 - retrato diario do banco guardado na nuvem, com data */
         .p124-fundo {
@@ -61935,9 +62021,8 @@ if (document.readyState === 'loading') {
           };
         })();
     </script>
-    <!-- FIM PATCH124 -->
-    
-    <!-- INI PATCH126 -->
+    <!-- FIM PATCH124 
+    <!-- INI PATCH126 
     <script>
         /* PATCH 126 - tabela sem pisca: redesenha so a linha alterada, junta pedidos
            de redesenho, guarda o foco e a rolagem, e traz cronometro (p126Tempos) e
@@ -62456,8 +62541,8 @@ if (document.readyState === 'loading') {
           console.log('[PATCH 126] tabela sem pisca ativa. No Console: p126Tempos() para os tempos, p126Codigos() para conferir codigos repetidos.');
         })();
     </script>
-    <!-- FIM PATCH126 -->
-    <!-- INI PATCH127 -->
+    <!-- FIM PATCH126 
+    <!-- INI PATCH127 
     <script>
         /* PATCH 127 - gerador unico de codigos. Cria codigo que nunca repete (nem
            entre pessoas), liga as telas de cadastro nele por fora, confere na hora de
@@ -62765,10 +62850,8 @@ if (document.readyState === 'loading') {
           } catch (e8) {}
         })();
     </script>
-    <!-- FIM PATCH127 -->
-
-
-    <!-- PATCH128_LOGIN_NO_SERVIDOR -->
+    <!-- FIM PATCH127 
+    <!-- PATCH128_LOGIN_NO_SERVIDOR 
     <script>
         /* ===== PATCH128 - login conferido no servidor ... */
         if(false){/*PATCH154_DISABLED*/
@@ -63209,12 +63292,9 @@ if (document.readyState === 'loading') {
         })();
         } /* /PATCH154_DISABLED */
     </script>
-    <!-- PATCH154_HIDDEN: <!-- FIM PATCH128_LOGIN_NO_SERVIDOR -->-->
-    <!-- PATCH154+V23: P128 DESABILITADO (agora efetivamente) – FIM -->
-
-
-
-    <!-- PATCH129_NAO_INTERROMPER -->
+    <!-- PATCH154_HIDDEN: <!-- FIM PATCH128_LOGIN_NO_SERVIDOR 
+    <!-- PATCH154+V23: P128 DESABILITADO (agora efetivamente) – FIM 
+    <!-- PATCH129_NAO_INTERROMPER 
     <script>
         /* ===== PATCH129 - a tela nao atualiza no meio do cadastro ===== */
         (function () {
@@ -63667,10 +63747,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- FIM PATCH129_NAO_INTERROMPER -->
-
-
-    <!-- INI PATCH130_TELA_LIMPA -->
+    <!-- FIM PATCH129_NAO_INTERROMPER 
+    <!-- INI PATCH130_TELA_LIMPA 
     <style id="p130Estilo">
         /* tarjas antigas de internet saem de cena de vez */
         html body #p114Net, html body #p111Net { display: none !important; }
@@ -64116,9 +64194,8 @@ if (document.readyState === 'loading') {
           }
         })();
     </script>
-    <!-- FIM PATCH130_TELA_LIMPA -->
-
-    <!-- PATCH154: stubs P131 para nao quebrar refs externas -->
+    <!-- FIM PATCH130_TELA_LIMPA 
+    <!-- PATCH154: stubs P131 para nao quebrar refs externas 
     <script>
         /* PATCH154: P131 desabilitado – stubs */
         window.P131 = {
@@ -64131,8 +64208,8 @@ if (document.readyState === 'loading') {
         window.__p131 = true;
         try { console.log("[PATCH154] P131 stub carregado – bloqueio desabilitado"); } catch(e){}
     </script>
-    <!-- PATCH154: P131 DESABILITADO – INI -->
-    <!-- PATCH154_HIDDEN: <!-- INI PATCH131_CADASTRO_BLOQUEIO -->-->
+    <!-- PATCH154: P131 DESABILITADO – INI 
+    <!-- PATCH154_HIDDEN: <!-- INI PATCH131_CADASTRO_BLOQUEIO 
     <style id="p131Estilo">
         /* PATCH154_DISABLED_START */
         #p131Faixa {
@@ -64771,11 +64848,10 @@ if (document.readyState === 'loading') {
           })();
         } /* /PATCH154_DISABLED */
     </script>
-    <!-- PATCH154_HIDDEN: /* PATCH153B_PROTECOES_LOOP */ -->
-    <!-- PATCH154_HIDDEN: <!-- FIM PATCH131_CADASTRO_BLOQUEIO -->-->
-    <!-- PATCH154: P131 DESABILITADO – FIM -->
-
-    <!-- INI PATCH132_CAIXAS_E_DATAS -->
+    <!-- PATCH154_HIDDEN: /* PATCH153B_PROTECOES_LOOP */ 
+    <!-- PATCH154_HIDDEN: <!-- FIM PATCH131_CADASTRO_BLOQUEIO 
+    <!-- PATCH154: P131 DESABILITADO – FIM 
+    <!-- INI PATCH132_CAIXAS_E_DATAS 
     <style id="p132Estilo">
         /* a tarja antiga sai de cena: era ela que o patch 130 tentava liberar */
         html body #p125Aviso { display: none !important; }
@@ -65399,9 +65475,8 @@ if (document.readyState === 'loading') {
           }
         }());
     </script>
-    <!-- FIM PATCH132_CAIXAS_E_DATAS -->
-
-    <!-- INI PATCH133_PLANO_COM_A_PRODUCAO -->
+    <!-- FIM PATCH132_CAIXAS_E_DATAS 
+    <!-- INI PATCH133_PLANO_COM_A_PRODUCAO 
     <style id="p133Estilo">
         #p133Quadro {
           margin: 10px 0 14px; padding: 12px 14px; border-radius: 12px;
@@ -65965,9 +66040,8 @@ if (document.readyState === 'loading') {
           }
         }());
     </script>
-    <!-- FIM PATCH133_PLANO_COM_A_PRODUCAO -->
-
-    <!-- INI PATCH134_PONTE_DO_PLANO -->
+    <!-- FIM PATCH133_PLANO_COM_A_PRODUCAO 
+    <!-- INI PATCH134_PONTE_DO_PLANO 
     <style id="p134Estilo">
         .p134-kpi { cursor: pointer; }
         .p134-kpi .p134rot {
@@ -66441,9 +66515,8 @@ if (document.readyState === 'loading') {
           }
         }());
     </script>
-    <!-- FIM PATCH134_PONTE_DO_PLANO -->
-
-    <!-- INI PATCH135_CURVA_E_CUSTO_PREVISTO -->
+    <!-- FIM PATCH134_PONTE_DO_PLANO 
+    <!-- INI PATCH135_CURVA_E_CUSTO_PREVISTO 
     <style id="p135Estilo">
         .p135-card {
           position: relative; background: #fff; border-radius: 14px; padding: 14px 15px;
@@ -67253,9 +67326,8 @@ if (document.readyState === 'loading') {
           }
         }());
     </script>
-    <!-- FIM PATCH135_CURVA_E_CUSTO_PREVISTO -->
-
-    <!-- INI PATCH135B_DIAGNOSTICO -->
+    <!-- FIM PATCH135_CURVA_E_CUSTO_PREVISTO 
+    <!-- INI PATCH135B_DIAGNOSTICO 
     <script>
         /* =====================================================================
          * PATCH 135B - raio x do plano e dos lancamentos (somente leitura)
@@ -67538,9 +67610,8 @@ if (document.readyState === 'loading') {
           } catch (e) { }
         }());
     </script>
-    <!-- FIM PATCH135B_DIAGNOSTICO -->
-
-    <!-- INI PATCH136_ACESSOS_E_ABAS -->
+    <!-- FIM PATCH135B_DIAGNOSTICO 
+    <!-- INI PATCH136_ACESSOS_E_ABAS 
     <style id="p136Estilo">
         #p136Barra { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 8px 0; }
         .p136-sel { padding: 5px 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px;
@@ -67917,9 +67988,8 @@ if (document.readyState === 'loading') {
           }
         }());
     </script>
-    <!-- FIM PATCH136_ACESSOS_E_ABAS -->
-
-    <!-- INI PATCH137_CUSTOS_E_PLANO -->
+    <!-- FIM PATCH136_ACESSOS_E_ABAS 
+    <!-- INI PATCH137_CUSTOS_E_PLANO 
     <style id="p137Estilo">
         #p137Faixa { margin: 8px 0 12px; padding: 10px 12px; border-radius: 10px;
           background: #fef9c3; border: 1px solid #fde68a; color: #78350f;
@@ -68389,10 +68459,9 @@ if (document.readyState === 'loading') {
           }
         }());
     </script>
-    <!-- FIM PATCH137_CUSTOS_E_PLANO -->
-
-    <!-- PATCH154: P138 DESABILITADO – INI -->
-    <!-- PATCH154_HIDDEN: <!-- INI PATCH138_CRACHA_DO_SERVIDOR -->-->
+    <!-- FIM PATCH137_CUSTOS_E_PLANO 
+    <!-- PATCH154: P138 DESABILITADO – INI 
+    <!-- PATCH154_HIDDEN: <!-- INI PATCH138_CRACHA_DO_SERVIDOR 
     <style id="p138Estilo">
         /* PATCH154_DISABLED_START */
         #p138Faixa { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 2147483400;
@@ -68721,11 +68790,10 @@ if (document.readyState === 'loading') {
         }());
         } /* /PATCH154_DISABLED */
     </script>
-    <!-- PATCH154_HIDDEN: <!-- FIM PATCH138_CRACHA_DO_SERVIDOR -->-->
-    <!-- PATCH154: P138 DESABILITADO – FIM -->
-
-    <!-- PATCH154: P139 DESABILITADO – INI -->
-    <!-- PATCH154_HIDDEN: <!-- INI PATCH139_BLOQUEIO_CENTRADO -->-->
+    <!-- PATCH154_HIDDEN: <!-- FIM PATCH138_CRACHA_DO_SERVIDOR 
+    <!-- PATCH154: P138 DESABILITADO – FIM 
+    <!-- PATCH154: P139 DESABILITADO – INI 
+    <!-- PATCH154_HIDDEN: <!-- INI PATCH139_BLOQUEIO_CENTRADO 
     <style id="p139Estilo">
         /* PATCH154_DISABLED_START */
         /* a caixa antiga sai de cena para nao brigar com a nova */
@@ -68776,7 +68844,7 @@ if (document.readyState === 'loading') {
         @media print { #p139Trava { display: none !important; } }
         /* PATCH154_DISABLED_END */
     </style>
-    <!-- PATCH154_HIDDEN:  -->
+    <!-- PATCH154_HIDDEN:  
     <script>
         if (false) { /* PATCH154_DISABLED */
         /* =====================================================================
@@ -69190,11 +69258,10 @@ if (document.readyState === 'loading') {
         }());
         } /* /PATCH154_DISABLED */
     </script>
-    <!-- PATCH154_HIDDEN: <!-- FIM PATCH139_BLOQUEIO_CENTRADO -->-->
-    <!-- PATCH154: P139 DESABILITADO – FIM -->
-
-    <!-- PATCH154: P140 DESABILITADO – INI -->
-    <!-- PATCH154_HIDDEN: <!-- INI PATCH140_SIMULADOR_BLOQUEIO -->-->
+    <!-- PATCH154_HIDDEN: <!-- FIM PATCH139_BLOQUEIO_CENTRADO 
+    <!-- PATCH154: P139 DESABILITADO – FIM 
+    <!-- PATCH154: P140 DESABILITADO – INI 
+    <!-- PATCH154_HIDDEN: <!-- INI PATCH140_SIMULADOR_BLOQUEIO 
     <script>
         if (false) { /* PATCH154_DISABLED */
         /* =====================================================================
@@ -69441,10 +69508,9 @@ if (document.readyState === 'loading') {
         }());
         } /* /PATCH154_DISABLED */
     </script>
-    <!-- PATCH154_HIDDEN: <!-- FIM PATCH140_SIMULADOR_BLOQUEIO -->-->
-    <!-- PATCH154: P140 DESABILITADO – FIM -->
-
-    <!-- INI PATCH141_CAIXAS_EM_ORDEM -->
+    <!-- PATCH154_HIDDEN: <!-- FIM PATCH140_SIMULADOR_BLOQUEIO 
+    <!-- PATCH154: P140 DESABILITADO – FIM 
+    <!-- INI PATCH141_CAIXAS_EM_ORDEM 
     <style id="p141Estilo">
         #p141Saida {
           position: fixed !important; top: 10px; right: 12px;
@@ -69843,9 +69909,8 @@ if (document.readyState === 'loading') {
           }
         }());
     </script>
-    <!-- FIM PATCH141_CAIXAS_EM_ORDEM -->
-
-    <!-- INI PATCH142_ESC_LIBERADO -->
+    <!-- FIM PATCH141_CAIXAS_EM_ORDEM 
+    <!-- INI PATCH142_ESC_LIBERADO 
     <script>
         /* =====================================================================
          * PATCH 142 - o Esc volta a funcionar pelo caminho do "soltar a tecla"
@@ -69973,9 +70038,8 @@ if (document.readyState === 'loading') {
           }
         }());
     </script>
-    <!-- FIM PATCH142_ESC_LIBERADO -->
-
-    <!-- INI PATCH143_IMPORTAR_CTM -->
+    <!-- FIM PATCH142_ESC_LIBERADO 
+    <!-- INI PATCH143_IMPORTAR_CTM 
     <script>
         /* =====================================================================
          * PATCH 143 - importacao da lista CTM que cria, atualiza e explica
@@ -70249,9 +70313,8 @@ if (document.readyState === 'loading') {
           try { console.log('[PATCH143] importacao da lista CTM agora cria, atualiza e explica. Use P143.ultimo().'); } catch (e4) { }
         }());
     </script>
-    <!-- FIM PATCH143_IMPORTAR_CTM -->
-
-    <!-- INI PATCH144_IMPORTAR_JSON_SEGURO -->
+    <!-- FIM PATCH143_IMPORTAR_CTM 
+    <!-- INI PATCH144_IMPORTAR_JSON_SEGURO 
     <script>
         /* =====================================================================
          * PATCH 144 - importacao de banco (JSON) com conferencia e desfazer
@@ -70515,9 +70578,8 @@ if (document.readyState === 'loading') {
           } catch (e5) { }
         }());
     </script>
-    <!-- FIM PATCH144_IMPORTAR_JSON_SEGURO -->
-
-    <!-- INI PATCH145_SALVAMENTO_SEGURO -->
+    <!-- FIM PATCH144_IMPORTAR_JSON_SEGURO 
+    <!-- INI PATCH145_SALVAMENTO_SEGURO 
     <style>
         #p145Barra{position:fixed;left:0;right:0;top:0;z-index:2147483000;display:none;
           font:600 13px/1.35 Inter,Arial,sans-serif;padding:10px 14px;color:#fff;
@@ -70822,10 +70884,8 @@ if (document.readyState === 'loading') {
           };
         })();
     </script>
-    <!-- FIM PATCH145_SALVAMENTO_SEGURO -->
-
-
-    <!-- INI PATCH147_ECONOMIA_DE_DADOS -->
+    <!-- FIM PATCH145_SALVAMENTO_SEGURO 
+    <!-- INI PATCH147_ECONOMIA_DE_DADOS 
     <script>
         /* =====================================================================
          * PATCH 147 - porteiro de leituras: nao baixar o mesmo banco toda hora
@@ -71102,9 +71162,8 @@ if (document.readyState === 'loading') {
           };
         })();
     </script>
-    <!-- FIM PATCH147_ECONOMIA_DE_DADOS -->
-
-    <!-- INI PATCH150_CAMADA_ABSTRACAO -->
+    <!-- FIM PATCH147_ECONOMIA_DE_DADOS 
+    <!-- INI PATCH150_CAMADA_ABSTRACAO 
     <script>
         /* =====================================================================
          * PATCH 150 - camada de abstracao: namespace Painel
@@ -71397,8 +71456,7 @@ if (document.readyState === 'loading') {
         
         })();
     </script>
-    <!-- FIM PATCH150_CAMADA_ABSTRACAO -->
-
+    <!-- FIM PATCH150_CAMADA_ABSTRACAO 
     <style id="pPrintPgtoOnly">
         @media print {
           @page { size: A4 landscape; margin: 8mm; }
@@ -71515,7 +71573,7 @@ if (document.readyState === 'loading') {
 <script src="patch_correcao.js"></script>
 <script src="patch_centro-custo-dinamico.js"></script>
 
-<!-- INI PATCH125_ULTIMATE -->
+<!-- INI PATCH125_ULTIMATE 
 <style id="p125-style-fix">
   /* Desativa cliques/mouse over em QUALQUER tooltip da tela para nao travar o mouse no canvas */
   div[id*="dica"], div[id*="Dica"], div[class*="tooltip"], div[class*="dica"], #p120Dica {
@@ -71572,7 +71630,58 @@ if (document.readyState === 'loading') {
   document.addEventListener('mouseleave', fecharTodosTooltips, true);
 })();
 </script>
-<!-- FIM PATCH125_ULTIMATE -->
+<!-- FIM PATCH125_ULTIMATE 
+
+<!-- INI FIX_RESTAURAR_ABAS -->
+<script>
+(function() {
+  'use strict';
+
+  function registrarEvAba(seletorTexto, acao) {
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      var texto = target ? (target.innerText || target.textContent || '') : '';
+      if (texto.toLowerCase().indexOf(seletorTexto.toLowerCase()) !== -1) {
+        try {
+          acao();
+        } catch(err) {
+          console.error('Erro ao abrir aba ' + seletorTexto + ':', err);
+        }
+      }
+    }, true);
+  }
+
+  // Mapeia cliques nas abas para chamar os métodos do sistema sem dependência de HTML corrompido
+  registrarEvAba('Diário de Obra', function() {
+    if (typeof window.p84AbrirDiario === 'function') {
+      window.p84AbrirDiario();
+    } else if (typeof window.abrirDiario === 'function') {
+      window.abrirDiario();
+    } else {
+      var tab = document.getElementById('tab-diario') || document.getElementById('tab-p84');
+      if (tab) tab.style.display = 'block';
+    }
+  });
+
+  registrarEvAba('Boletim de Inspeção', function() {
+    if (typeof window.p83AbrirBoletim === 'function') {
+      window.p83AbrirBoletim();
+    } else if (typeof window.abrirBoletim === 'function') {
+      window.abrirBoletim();
+    } else {
+      var tab = document.getElementById('tab-boletim') || document.getElementById('tab-p83');
+      if (tab) tab.style.display = 'block';
+    }
+  });
+
+  registrarEvAba('Relatório FPDO', function() {
+    var tab = document.getElementById('tab-fpdo') || document.getElementById('aba-fpdo');
+    if (tab) tab.style.display = 'block';
+  });
+
+})();
+</script>
+<!-- FIM FIX_RESTAURAR_ABAS -->
 
 </body>
 </html>
