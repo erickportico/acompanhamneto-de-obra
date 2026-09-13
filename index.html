@@ -59583,6 +59583,31 @@ if (document.readyState === 'loading') {
             d.style.left = Math.max(4, x) + 'px';
             d.style.top = Math.max(4, y) + 'px';
           }
+
+          /* PATCH V29: rede de seguranca contra o tooltip ficar preso na tela.
+             Isso acontece quando o mouse sai da barra/legenda no exato momento em
+             que o painel e reconstruido ou a aba e trocada, e o evento mouseleave
+             nao chega a disparar. Nao muda nada do desenho do painel: so garante
+             que o tooltip suma quando o mouse nao esta mais sobre o grafico. */
+          document.addEventListener('mousemove', function (ev) {
+            var d = document.getElementById('p120Dica');
+            if (!d || d.style.display === 'none') { return; }
+            var area = document.getElementById('p120Area');
+            if (!area || !area.contains(ev.target)) { d.style.display = 'none'; }
+          }, true);
+          (function () {
+            var ant = window.trocarAba;
+            if (typeof ant === 'function' && !ant.__v29Dica) {
+              var nova = function () {
+                var r = ant.apply(this, arguments);
+                var d = document.getElementById('p120Dica');
+                if (d) { d.style.display = 'none'; }
+                return r;
+              };
+              nova.__v29Dica = true;
+              window.trocarAba = nova;
+            }
+          })();
         
           /* deixa o restante da aba com a mesma cara: campos, botoes, sub-abas e
              tabelas. So aparencia, nenhum comportamento muda. */
@@ -60353,6 +60378,7 @@ if (document.readyState === 'loading') {
           }, true);
         
           window.p120Redesenhar = function () { try { pintar(); } catch (e) {} };
+          window.p120EsconderDica = function () { try { dica(''); } catch (e) {} };
           window.p120IrPara = function (g) {
             try {
               var valido = GRUPOS.some(function (x) { return x.k === g; });
