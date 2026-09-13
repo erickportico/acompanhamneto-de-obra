@@ -42045,7 +42045,50 @@ janelaImpressao.document.write(
   cssImpressao +
   '</head><body>' +
   h +
-  '</body></html>'
+  '
+<!-- INI FIX_ABA_FPDO -->
+<script>
+(function() {
+  'use strict';
+
+  function forcarAberturaFPDO() {
+    // Intercepta cliques no item de menu "Relatório FPDO"
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      var texto = target ? (target.innerText || target.textContent || '') : '';
+      
+      if (texto.indexOf('Relatório FPDO') !== -1 || texto.indexOf('FPDO') !== -1) {
+        // Esconde todas as outras abas ativas
+        var abas = document.querySelectorAll('[id^="tab-"], [class*="tab-content"], .aba-conteudo');
+        abas.forEach(function(aba) {
+          aba.style.display = 'none';
+        });
+
+        // Procura o container do FPDO e exibe
+        var tabFPDO = document.getElementById('tab-fpdo') || 
+                      document.getElementById('aba-fpdo') || 
+                      document.querySelector('[data-tab="fpdo"]');
+
+        if (tabFPDO) {
+          tabFPDO.style.display = 'block';
+          tabFPDO.classList.remove('hidden');
+        } else {
+          console.warn('Container da aba FPDO não encontrado no DOM.');
+        }
+      }
+    }, true);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', forcarAberturaFPDO);
+  } else {
+    forcarAberturaFPDO();
+  }
+})();
+</script>
+<!-- FIM FIX_ABA_FPDO -->
+
+</body></html>'
 );
 janelaImpressao.document.close();
 
@@ -43134,7 +43177,50 @@ if (document.readyState === 'loading') {
               '.pr-ass{margin-top:22px;text-align:center;font-size:9pt}' +
               '</style>';
             janelaImpressao.document.open();
-            janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Boletim de Inspeção</title>' + cssImpressao + '</head><body>' + h + '</body></html>');
+            janelaImpressao.document.write('<!doctype html><html><head><meta charset="UTF-8"><title>Boletim de Inspeção</title>' + cssImpressao + '</head><body>' + h + '
+<!-- INI FIX_ABA_FPDO -->
+<script>
+(function() {
+  'use strict';
+
+  function forcarAberturaFPDO() {
+    // Intercepta cliques no item de menu "Relatório FPDO"
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      var texto = target ? (target.innerText || target.textContent || '') : '';
+      
+      if (texto.indexOf('Relatório FPDO') !== -1 || texto.indexOf('FPDO') !== -1) {
+        // Esconde todas as outras abas ativas
+        var abas = document.querySelectorAll('[id^="tab-"], [class*="tab-content"], .aba-conteudo');
+        abas.forEach(function(aba) {
+          aba.style.display = 'none';
+        });
+
+        // Procura o container do FPDO e exibe
+        var tabFPDO = document.getElementById('tab-fpdo') || 
+                      document.getElementById('aba-fpdo') || 
+                      document.querySelector('[data-tab="fpdo"]');
+
+        if (tabFPDO) {
+          tabFPDO.style.display = 'block';
+          tabFPDO.classList.remove('hidden');
+        } else {
+          console.warn('Container da aba FPDO não encontrado no DOM.');
+        }
+      }
+    }, true);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', forcarAberturaFPDO);
+  } else {
+    forcarAberturaFPDO();
+  }
+})();
+</script>
+<!-- FIM FIX_ABA_FPDO -->
+
+</body></html>');
             janelaImpressao.document.close();
             var imprimirJanela = function () {
               try { janelaImpressao.focus(); janelaImpressao.print(); } catch (erro) {}
@@ -72325,5 +72411,48 @@ if (document.readyState === 'loading') {
     <script src="patch_relocate_header_buttons.js"></script>
 <script src="patch_correcao.js"></script>
 <script src="patch_centro-custo-dinamico.js"></script>
+
+<!-- INI FIX_ABA_FPDO -->
+<script>
+(function() {
+  'use strict';
+
+  function forcarAberturaFPDO() {
+    // Intercepta cliques no item de menu "Relatório FPDO"
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      var texto = target ? (target.innerText || target.textContent || '') : '';
+      
+      if (texto.indexOf('Relatório FPDO') !== -1 || texto.indexOf('FPDO') !== -1) {
+        // Esconde todas as outras abas ativas
+        var abas = document.querySelectorAll('[id^="tab-"], [class*="tab-content"], .aba-conteudo');
+        abas.forEach(function(aba) {
+          aba.style.display = 'none';
+        });
+
+        // Procura o container do FPDO e exibe
+        var tabFPDO = document.getElementById('tab-fpdo') || 
+                      document.getElementById('aba-fpdo') || 
+                      document.querySelector('[data-tab="fpdo"]');
+
+        if (tabFPDO) {
+          tabFPDO.style.display = 'block';
+          tabFPDO.classList.remove('hidden');
+        } else {
+          console.warn('Container da aba FPDO não encontrado no DOM.');
+        }
+      }
+    }, true);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', forcarAberturaFPDO);
+  } else {
+    forcarAberturaFPDO();
+  }
+})();
+</script>
+<!-- FIM FIX_ABA_FPDO -->
+
 </body>
 </html>
