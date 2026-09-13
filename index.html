@@ -6781,21 +6781,21 @@ div:empty,
             
             <!-- PATCH V26: Aba Administração -->
             <div id="tab-admin" class="card" style="display:none;">
-                <h3 style="margin-top:0;color:var(--text,#fff);">\U0001f527 Administra\u00e7\u00e3o</h3>
+                <h3 style="margin-top:0;color:var(--text,#fff);">🔧 Administração</h3>
 
                 <!-- Sub-abas -->
                 <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
-                    <button class="v26-sbtn v26-sbtn-on" onclick="v26Sub('usuarios')" id="v26-s-usuarios">\U0001f465 Usu\u00e1rios</button>
-                    <button class="v26-sbtn" onclick="v26Sub('permissoes')" id="v26-s-permissoes">\U0001f512 Permiss\u00f5es</button>
-                    <button class="v26-sbtn" onclick="v26Sub('novo')" id="v26-s-novo">\u2795 Novo Usu\u00e1rio</button>
-                    <button class="v26-sbtn" onclick="v26Sub('config')" id="v26-s-config">\u2699\ufe0f Config</button>
+                    <button class="v26-sbtn v26-sbtn-on" onclick="v26Sub('usuarios')" id="v26-s-usuarios">👥 Usuários</button>
+                    <button class="v26-sbtn" onclick="v26Sub('permissoes')" id="v26-s-permissoes">🔒 Permissões</button>
+                    <button class="v26-sbtn" onclick="v26Sub('novo')" id="v26-s-novo">➕ Novo Usuário</button>
+                    <button class="v26-sbtn" onclick="v26Sub('config')" id="v26-s-config">⚙️ Config</button>
                 </div>
 
                 <!-- Sub: Usuarios -->
                 <div id="v26-p-usuarios">
                     <div style="margin-bottom:10px;">
-                        <button class="v26-btn v26-bp" onclick="v26Atualizar()">\U0001f504 Atualizar</button>
-                        <button class="v26-btn" onclick="v26CSV()">\U0001f4e5 CSV</button>
+                        <button class="v26-btn v26-bp" onclick="v26Atualizar()">🔄 Atualizar</button>
+                        <button class="v26-btn" onclick="v26CSV()">📥 CSV</button>
                     </div>
                     <div id="v26-tbl" style="overflow-x:auto;"></div>
                     <div id="v26-info" style="margin-top:10px;font-size:12px;color:#64748b;"></div>
@@ -6811,10 +6811,10 @@ div:empty,
                     <div id="v26-pgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;"></div>
                     <div id="v26-pinfo" style="margin-top:12px;"></div>
                     <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-                        <button class="v26-btn v26-bp" onclick="v26PermSave()">\U0001f4be Salvar</button>
-                        <button class="v26-btn" onclick="v26PermAll()">\u2705 Todas</button>
-                        <button class="v26-btn" onclick="v26PermNone()">\u274c Nenhuma</button>
-                        <button class="v26-btn" onclick="v26PermReset()">\U0001f513 Liberar tudo</button>
+                        <button class="v26-btn v26-bp" onclick="v26PermSave()">💾 Salvar</button>
+                        <button class="v26-btn" onclick="v26PermAll()">✅ Todas</button>
+                        <button class="v26-btn" onclick="v26PermNone()">❌ Nenhuma</button>
+                        <button class="v26-btn" onclick="v26PermReset()">🔓 Liberar tudo</button>
                     </div>
                 </div>
 
@@ -6822,7 +6822,7 @@ div:empty,
                 <div id="v26-p-novo" style="display:none;">
                     <div style="max-width:480px;">
                         <div style="margin-bottom:12px;">
-                            <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;display:block;margin-bottom:3px;">E-mail / Usu\u00e1rio</label>
+                            <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;display:block;margin-bottom:3px;">E-mail / Usuário</label>
                             <input type="text" id="v26-ne" placeholder="email@exemplo.com" style="width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;box-sizing:border-box;">
                         </div>
                         <div style="margin-bottom:12px;">
@@ -6833,18 +6833,18 @@ div:empty,
                             <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;display:block;margin-bottom:3px;">Tipo de acesso</label>
                             <select id="v26-np" style="width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;box-sizing:border-box;">
                                 <option value="visitante">Somente consulta</option>
-                                <option value="editor">Editor (lan\u00e7a e edita)</option>
+                                <option value="editor">Editor (lança e edita)</option>
                                 <option value="admin">Administrador</option>
                             </select>
                         </div>
                         <div style="margin-bottom:12px;">
-                            <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;display:block;margin-bottom:3px;">Senha (m\u00ednimo 6 caracteres para nuvem)</label>
+                            <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;display:block;margin-bottom:3px;">Senha (mínimo 6 caracteres para nuvem)</label>
                             <input type="password" id="v26-ns" placeholder="Senha" style="width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;box-sizing:border-box;">
                         </div>
                         <div id="v26-nerro" style="min-height:18px;font-size:12px;color:#b91c1c;"></div>
                         <div style="margin-top:10px;display:flex;gap:8px;">
-                            <button class="v26-btn v26-bp" onclick="v26CadLocal()">\u2795 Cadastrar local</button>
-                            <button class="v26-btn" onclick="v26CadNuvem()">\u2601\ufe0f Cadastrar na nuvem</button>
+                            <button class="v26-btn v26-bp" onclick="v26CadLocal()">➕ Cadastrar local</button>
+                            <button class="v26-btn" onclick="v26CadNuvem()">☁️ Cadastrar na nuvem</button>
                         </div>
                     </div>
                 </div>
@@ -6852,28 +6852,28 @@ div:empty,
                 <!-- Sub: Config -->
                 <div id="v26-p-config" style="display:none;">
                     <div style="max-width:560px;">
-                        <h4 style="margin:0 0 6px;font-size:13px;color:#0f172a;">Regra de exclus\u00e3o</h4>
+                        <h4 style="margin:0 0 6px;font-size:13px;color:#0f172a;">Regra de exclusão</h4>
                         <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Quando permitir apagar registros</p>
                         <select id="v26-cmodo" style="width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:12px;">
                             <option value="fora">No servidor o admin apaga direto; de outro computador exige senha</option>
                             <option value="sempre">Sempre pedir a senha do administrador</option>
-                            <option value="bloqueado">Somente no servidor (de fora, n\u00e3o apaga nem com senha)</option>
+                            <option value="bloqueado">Somente no servidor (de fora, não apaga nem com senha)</option>
                         </select>
                         <div id="v26-csrv" style="font-size:12px;color:#64748b;margin-bottom:14px;"></div>
-                        <button class="v26-btn v26-bp" onclick="v26CfgSave()">\U0001f4be Salvar</button>
+                        <button class="v26-btn v26-bp" onclick="v26CfgSave()">💾 Salvar</button>
 
                         <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0 14px;">
-                        <h4 style="margin:0 0 6px;font-size:13px;color:#0f172a;">Sincroniza\u00e7\u00e3o Supabase</h4>
+                        <h4 style="margin:0 0 6px;font-size:13px;color:#0f172a;">Sincronização Supabase</h4>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-                            <button class="v26-btn" onclick="v26Sync()">\U0001f504 Sincronizar</button>
-                            <button class="v26-btn" onclick="v26SyncForce()">\U0001f4e5 For\u00e7ar recarga</button>
+                            <button class="v26-btn" onclick="v26Sync()">🔄 Sincronizar</button>
+                            <button class="v26-btn" onclick="v26SyncForce()">📥 Forçar recarga</button>
                         </div>
                         <div id="v26-sync" style="font-size:12px;color:#64748b;"></div>
 
                         <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0 14px;">
                         <h4 style="margin:0 0 6px;font-size:13px;color:#dc2626;">Zona de perigo</h4>
-                        <button class="v26-btn v26-bd" onclick="v26Reset()">\U0001f4a3 Resetar todos os usu\u00e1rios</button>
-                        <p style="margin:6px 0 0;font-size:11px;color:#94a3b8;">Remove todos os cadastros locais. Emerg\u00eancia somente.</p>
+                        <button class="v26-btn v26-bd" onclick="v26Reset()">💣 Resetar todos os usuários</button>
+                        <p style="margin:6px 0 0;font-size:11px;color:#94a3b8;">Remove todos os cadastros locais. Emergência somente.</p>
                     </div>
                 </div>
             </div>
@@ -54611,7 +54611,8 @@ if (document.readyState === 'loading') {
             { id: 'pagamento',  nome: 'Pagamento de Producao' },
             { id: 'ctm',        nome: 'Contramarco (CTM)' },
             { id: 'custo',      nome: 'Centro de Custos' },
-            { id: 'fpdo',       nome: 'Relatorio FPDO' }
+            { id: 'fpdo',       nome: 'Relatorio FPDO' },
+            { id: 'admin',      nome: 'Administracao' }
           ];
         
           /* ================================================================ *
