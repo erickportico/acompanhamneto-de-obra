@@ -13302,7 +13302,12 @@ function trocarSubTabPgtoNovo(tab) {
               const ajudIds = getCheckedIds('checklistLancAjudantes');            
             
               if (!obraId) { alert('Selecione uma obra.'); return; }
-              if (m2 <= 0) { alert('Informe a metragem (M²).'); return; }
+              if (m2
+
+<script>
+/* RECONSTRUCAO DE JS EMBUTIDO */
+try {
+<= 0) { alert('Informe a metragem (M²).'); return; }
             
               const obra = db.obras.find(o => o.id === obraId);
               if (!obra) return;
@@ -72876,5 +72881,11 @@ if (document.readyState === 'loading') {
     <script src="patch_relocate_header_buttons.js"></script>
 <script src="patch_correcao.js"></script>
 <script src="patch_centro-custo-dinamico.js"></script>
+</body>
+</html>
+} catch(e) {
+  console.error('Erro no script reconstruido:', e);
+}
+</script>
 </body>
 </html>
