@@ -3,6 +3,9 @@
 
 <head>
 <style id="v21SafetyCSS">#p128Tela,#p128Estilo{display:none!important}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+    <title>Painel de Acompanhamento</title>
     <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
 
     <link rel="icon" href="data:image/x-icon;base64,=">
@@ -28424,6 +28427,10 @@ function trocarSubTabPgtoNovo(tab) {
                   M.fechar = function () {
                     var g = el('orMenu');
                     if (g) {
+                      if (g.contains(D.activeElement)) {
+                        var lbFoco = el('orMenuBtn');
+                        try { (lbFoco || D.body).focus(); } catch (e) { try { D.activeElement.blur(); } catch (e2) { } }
+                      }
                       g.classList.remove('or-on');
                       g.setAttribute('aria-hidden', 'true');
                     }
@@ -28456,7 +28463,13 @@ function trocarSubTabPgtoNovo(tab) {
                       atualizarRotulo();
                       var g = el('orMenu');
                       if (g && !g.classList.contains('or-on')) {
-                        if (g.getAttribute('aria-hidden') !== 'true') { g.setAttribute('aria-hidden', 'true'); }
+                        if (g.getAttribute('aria-hidden') !== 'true') {
+                          if (g.contains(D.activeElement)) {
+                            var lbFoco2 = el('orMenuBtn');
+                            try { (lbFoco2 || D.body).focus(); } catch (e3) { try { D.activeElement.blur(); } catch (e4) { } }
+                          }
+                          g.setAttribute('aria-hidden', 'true');
+                        }
                         D.body.classList.remove('or-aberto');
                       }
                     } finally {
@@ -72853,6 +72866,7 @@ if (document.readyState === 'loading') {
           else tick();
         })();
     </script>
+    <script src="supabase_auth_client.js"></script>
     <script src="patch_relocate_header_buttons.js"></script>
 <script src="patch_correcao.js"></script>
 <script src="patch_centro-custo-dinamico.js"></script>
