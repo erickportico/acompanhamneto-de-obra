@@ -28013,7 +28013,7 @@ function trocarSubTabPgtoNovo(tab) {
                     { titulo: 'PRODU' + ACENTO_C + ACENTO_A + 'O',
                       abas: ['itens', 'liberacao', 'ctm', 'recebimento'] },
                     { titulo: 'PLANEJAMENTO',
-                      abas: ['cronograma', 'obraflow'] },
+                      abas: ['obraflow'] },
                     { titulo: 'FINANCEIRO',
                       abas: ['medicoes', 'pagamento', 'custo'] },
                     { titulo: 'RELAT' + ACENTO_O + 'RIOS',
@@ -72886,8 +72886,13 @@ if (document.readyState === 'loading') {
             var out = [];
             for (var i = 0; i < lista.length; i++) {
               var c = lista[i] || {};
-              var id = String(c.id || "");
-              if (id.indexOf("pgto-") === 0) continue;
+              /* PATCH V30: antes, todo lancamento com id comecando em "pgto-"
+                 (espelho do Pagamento de Producao) era descartado sempre, mesmo
+                 quando era o unico registro daquele custo - por isso a Visao Geral
+                 e as sub-abas (Obra/Regiao/Colaborador/Empresa) nao contavam o
+                 valor da producao. Agora ele so e descartado se for mesmo uma
+                 duplicata (mesma obra+data+colaborador+valor+categoria de outro
+                 lancamento ja contado). */
               var k = chave(c);
               if (seen[k]) continue;
               seen[k] = 1;
