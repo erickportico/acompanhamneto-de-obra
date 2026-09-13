@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 
 <head>
-<style id="v21SafetyCSS">#p84Fundo,#p84Impressao,#p83Fundo,#p83Impressao,#p86Fundo,#p86Caixa,#p92Fundo,#p92Caixa,#p128Tela,#p128Estilo{display:none!important}</style>
+<style id="v21SafetyCSS">#p128Tela,#p128Estilo{display:none!important}</style>
     <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
 
     <link rel="icon" href="data:image/x-icon;base64,=">
@@ -6900,6 +6900,10 @@ div:empty,
                         <label>Porcentagem (%) Destinada ao Serviço de Instalação</label>
                         <input type="number" id="inputPctServico" value="20" placeholder="Ex: 20 para 20%">
                     </div>
+                    <div class="form-group">
+                        <label>Região / Cidade da Obra</label>
+                        <input type="text" id="inputRegiaoObra" placeholder="Ex: João Pessoa - PB">
+                    </div>
                     <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
                         <button class="secondary" onclick="fecharModais()">Cancelar</button>
                         <button class="success" onclick="salvarConfigObra()">Salvar</button>
@@ -9950,6 +9954,7 @@ ${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                     document.getElementById('inputNumContrato').value = obra.numContrato || '';
                     document.getElementById('inputValorContrato').value = obra.valorContrato || '';
                     document.getElementById('inputPctServico').value = obra.pctServico !== undefined ? obra.pctServico : 20;
+                    document.getElementById('inputRegiaoObra').value = obra.regiao || '';
                     document.getElementById('modalObra').style.display = 'flex';
                 }
             
@@ -9960,6 +9965,7 @@ ${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                     document.getElementById('inputNumContrato').value = '';
                     document.getElementById('inputValorContrato').value = '';
                     document.getElementById('inputPctServico').value = 20;
+                    document.getElementById('inputRegiaoObra').value = '';
                     document.getElementById('modalObra').style.display = 'flex';
                 }
             
@@ -9969,6 +9975,7 @@ ${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                     const numContrato = document.getElementById('inputNumContrato').value.trim();
                     const valorContrato = Number(document.getElementById('inputValorContrato').value) || 0;
                     const pctServico = Number(document.getElementById('inputPctServico').value) || 20;
+                    const regiao = document.getElementById('inputRegiaoObra').value.trim();
             
                     if (modoNovaObra) {
                         const novaObra = {
@@ -9977,6 +9984,7 @@ ${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                             numContrato: numContrato,
                             valorContrato: valorContrato,
                             pctServico: pctServico,
+                            regiao: regiao,
                             numMedicaoMax: 1,
                             consideracoesPorMedicao: {},
                             itens: [],
@@ -9990,6 +9998,7 @@ ${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                         obra.numContrato = numContrato;
                         obra.valorContrato = valorContrato;
                         obra.pctServico = pctServico;
+                        obra.regiao = regiao;
                     }
                     fecharModais();
                     salvarDB();
@@ -22102,7 +22111,7 @@ function trocarSubTabPgtoNovo(tab) {
                             descricao: "Pagamento de Produ\u00e7\u00e3o \u2014 " +
                                        (nome || "colaborador") + " (" + funcao + ")",
                             valor: valor,
-                            regiao: "Geral",
+                            regiao: (obra.regiao && String(obra.regiao).trim()) || "Geral",
                             colaborador: nome,
                             p54auto: true
                           });
@@ -60308,9 +60317,85 @@ if (document.readyState === 'loading') {
           }, true);
         
           window.p120Redesenhar = function () { try { pintar(); } catch (e) {} };
+          window.p120IrPara = function (g) {
+            try {
+              var valido = GRUPOS.some(function (x) { return x.k === g; });
+              if (!valido) { return; }
+              E.grupo = g;
+              E.destaque = -1;
+              if (montar()) { pintar(); }
+            } catch (e) {}
+          };
         })();
     </script>
     <!-- FIM PATCH120 -->
+
+    <!-- INI PATCH V28_UNIFICAR_SUBABAS_CUSTO -->
+    <script id="v28UnificarSubabas">
+        /* PATCH V28: as sub-abas Por Obra / Por Regiao / Por Colaborador / Por Empresa
+           passam a mostrar a mesma tela rica (rosca + barras + resumo) que a Visao Geral,
+           apenas trocando o agrupamento. Nao duplica nada: move o mesmo painel (p120Area)
+           entre as sub-abas e esconde a tabela simples antiga de cada uma. */
+        (function () {
+          'use strict';
+
+          var MAPA_GRUPO = { geral: 'categoria', obra: 'obra', regiao: 'regiao',
+                              colab: 'colab', empresa: 'empresa' };
+
+          var CONTAINER_ANTIGO = {
+            obra: 'containerCustoResumoObra',
+            regiao: 'containerCustoPorRegiao',
+            colab: 'containerCustoPorColaborador',
+            empresa: 'containerCustoPorEmpresa'
+          };
+
+          var casaPai = null, casaProximo = null;
+
+          function mudarPara(k) {
+            var area = document.getElementById('p120Area');
+            if (!area) { return; }
+            if (!casaPai) { casaPai = area.parentNode; casaProximo = area.nextSibling; }
+
+            if (k === 'geral') {
+              if (area.parentNode !== casaPai) { casaPai.insertBefore(area, casaProximo); }
+            } else {
+              var idAntigo = CONTAINER_ANTIGO[k];
+              var antigo = idAntigo ? document.getElementById(idAntigo) : null;
+              if (!antigo) { return; }
+              if (antigo.style.display !== 'none') { antigo.style.display = 'none'; }
+              if (area.previousSibling !== antigo) { antigo.parentNode.insertBefore(area, antigo.nextSibling); }
+            }
+
+            if (typeof window.p120IrPara === 'function') { window.p120IrPara(MAPA_GRUPO[k] || 'categoria'); }
+          }
+
+          function ligarBotoes() {
+            Object.keys(MAPA_GRUPO).forEach(function (k) {
+              var b = document.getElementById('custoSubBtn-' + k);
+              if (b && !b.__v28Ligado) {
+                b.__v28Ligado = true;
+                b.addEventListener('click', function () { setTimeout(function () { mudarPara(k); }, 60); });
+              }
+            });
+          }
+
+          var tentativas = 0;
+          var relogio = setInterval(function () {
+            tentativas++;
+            ligarBotoes();
+            if (document.getElementById('p120Area') && document.getElementById('custoSubBtn-obra')) {
+              /* pagina ja pronta: garante que a aba ativa no carregamento tambem fique correta */
+              try {
+                var ativo = localStorage.getItem('custoSubAbaAtiva');
+                if (ativo && MAPA_GRUPO[ativo]) { mudarPara(ativo); }
+              } catch (e) {}
+              clearInterval(relogio);
+            }
+            if (tentativas > 200) { clearInterval(relogio); }
+          }, 300);
+        })();
+    </script>
+    <!-- FIM PATCH V28_UNIFICAR_SUBABAS_CUSTO -->
     <!-- INI PATCH122 -->
     <style id="p122Estilo">
         /* PATCH 122 - selecao em lote no Painel Geral de Producao */
@@ -69369,6 +69454,13 @@ if (document.readyState === 'loading') {
               txt += ' <b>' + c.semData.length + '</b> lancamento(s) estao sem data: ' +
                      'lancamento sem data nunca aparece em filtro por mes.';
             }
+
+            /* PATCH V27: evita reconstruir a faixa quando nada mudou, o que
+               disparava o MutationObserver em loop infinito (piscar a cada ~220ms) */
+            if (cx.getAttribute('data-p137-assinatura') === txt && cx.querySelector('#p137Lista')) {
+              return c;
+            }
+            cx.setAttribute('data-p137-assinatura', txt);
         
             cx.innerHTML = '<div>' + txt + '</div>' +
               '<div class="p137-btns">' +

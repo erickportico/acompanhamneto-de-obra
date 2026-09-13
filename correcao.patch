@@ -1,0 +1,78 @@
+*** file_original.js
+--- file_corrigido.js
+***************
+*** 135,145 ****
+!                     // FIX: Extrair vidro excluindo o contexto da dimensao
+!                     function extrairVidro(texto, dimMatchResult) {
+!                         let textoLimpo = texto;
+!                         if (dimMatchResult) {
+!                             const dimStart = texto.indexOf(dimMatchResult[0]);
+!                             const dimEnd = dimStart + dimMatchResult[0].length;
+!                             const before = Math.max(0, dimStart - 2);
+!                             const after = Math.min(texto.length, dimEnd + 4);
+!                             textoLimpo = texto.substring(0, before) + ' '.repeat(after - before) + texto.substring(after);
+!                         }
+!                         // Priorizar vidro com descricao (ex: "6MM(LAMINADO INCOLOR 6MM)", "4MM(FLOAT INCOLOR 4MM)")
+!                         const m = textoLimpo.match(/(\d{1,2}MM\s*\([^)]+\)|\d{1,2}mm\s+(?:INCOLOR|LAMINADO|TEMPERADO|INSULADO|FLOAT|FUM[E\u00ca]|VERDE|BRONZE|REFLETIVO|SERIGRAFADO)[^,\n]*|INCOLOR|LAMINADO|TEMPERADO|INSULADO|FLOAT|FUM[E\u00ca]|VERDE|BRONZE|REFLETIVO|SERIGRAFADO|3\+3|4\+4|6\+6|8\+8)[^,\n]*/i);
+!                         if (m) return m[0].trim();
+!                         // Fallback: procurar padrao "Nmm" sozinho
+!                         const m2 = textoLimpo.match(/(?:\s|^)(\d{1,2})mm(?:\s|$)/i);
+!                         if (m2) return m2[1] + 'mm';
+!                         return 'Geral';
+!                     }
+--- 135,188 ----
+!     // FIX: Extrair vidro excluindo o contexto da dimensao
+!     function extrairVidro(texto, dimMatchResult) {
+!         let textoLimpo = texto;
+!         if (dimMatchResult) {
+!             const dimStart = texto.indexOf(dimMatchResult[0]);
+!             const dimEnd = dimStart + dimMatchResult[0].length;
+!             const before = Math.max(0, dimStart - 2);
+!             const after = Math.min(texto.length, dimEnd + 4);
+!             textoLimpo = texto.substring(0, before) + ' '.repeat(after - before) + texto.substring(after);
+!         }
+!         const m = textoLimpo.match(/(\d{1,2}MM\s*\([^)]+\)|\d{1,2}mm\s+(?:INCOLOR|LAMINADO|TEMPERADO|INSULADO|FLOAT|FUM[E\u00ca]|VERDE|BRONZE|REFLETIVO|SERIGRAFADO)[^,\n]*|INCOLOR|LAMINADO|TEMPERADO|INSULADO|FLOAT|FUM[E\u00ca]|VERDE|BRONZE|REFLETIVO|SERIGRAFADO|3\+3|4\+4|6\+6|8\+8)[^,\n]*/i);
+!         if (m) return m[0].trim();
+!         const m2 = textoLimpo.match(/(?:\s|^)(\d{1,2})mm(?:\s|$)/i);
+!         if (m2) return m2[1] + 'mm';
+!         return 'Geral';
+!     }
+! 
+!     // ============================================================
+!     // PROCESSAMENTO DAS LINHAS E ESTRATÉGIA DE PARSING
+!     // ============================================================
+!     linhas.forEach(linha => {
+!         const dimMatch = linha.match(regexDimensao);
+!         if (dimMatch) {
+!             let larg = parseFloat(dimMatch[1].replace(',', '.'));
+!             let alt = parseFloat(dimMatch[2].replace(',', '.'));
+! 
+!             larg = converterParaMetros(larg, dimMatch[0], linha);
+!             alt = converterParaMetros(alt, dimMatch[0], linha);
+! 
+!             const qtdMatch = linha.match(/(?:QTD|QUANTIDADE|QTD\.|UNID)[\s:]*(\d+)/i) || linha.match(/\b(\d+)\s*(?:pçs|pcs|un|unidades?)\b/i);
+!             const qtd = qtdMatch ? parseInt(qtdMatch[1], 10) : 1;
+! 
+!             const refMatch = linha.match(/\b([A-Z]{1,3}[-\s]?\d{1,4}[-]?[A-Za-z]?)\b/);
+!             const ref = refMatch ? refMatch[1] : `ITEM-${refAuto++}`;
+
++             const tipo = detectarTipo(linha);
++             const tipologia = extrairTipologia(linha);
++             const vidro = extrairVidro(linha, dimMatch);
++ 
++             itens.push({
++                 referencia: ref,
++                 tipo: tipo,
++                 tipologia: tipologia,
++                 largura: larg,
++                 altura: alt,
++                 quantidade: qtd,
++                 vidro: vidro,
++                 areaUnitaria: Number((larg * alt).toFixed(2)),
++                 areaTotal: Number((larg * alt * qtd).toFixed(2))
++             });
++         }
++     });
++ 
++     return itens;
++ }
