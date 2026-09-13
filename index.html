@@ -3,9 +3,6 @@
 
 <head>
 <style id="v21SafetyCSS">#p128Tela,#p128Estilo{display:none!important}</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<meta charset="UTF-8">
-    <title>Painel de Acompanhamento</title>
     <!-- PATCH154 DESLIGADO: login/senha voltaram a aparecer -->
 
     <link rel="icon" href="data:image/x-icon;base64,=">
@@ -8869,10 +8866,22 @@ document.getElementById('meu-menu-abas')?.removeAttribute('open');
             
                 function titleCase(str) {
                     if (!str || typeof str !== 'string') return str || '';
-                    var exceptions = ['e','de','do','da','aos','as','dos','das'];
-                    return str.toLowerCase().replace(/\b\w+/g, function(word, offset) {
-                        if (offset > 0 && exceptions.indexOf(word) !== -1) return word;
-                        return word.charAt(0).toUpperCase() + word.slice(1);
+                    var exceptions = ['e','de','do','da','das','dos','a','à','o','é','ao','aos','as'];
+                    return str.replace(/[^\s-]+/g, function(word, offset) {
+                        /* PATCH V29: preserva siglas (PB, CE, CTM), codigos com numero
+                           (MT001, CT018) e codigos com apostrofo (EV's), em vez de
+                           forcar tudo para minusculo e recapitalizar so a 1a letra. */
+                        var base = word.replace(/['’]s$/i, '');
+                        var baseTemLetra = /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(base);
+                        var baseTudoMaiusculo = baseTemLetra && base === base.toUpperCase() && base !== base.toLowerCase();
+                        var temNumero = /\d/.test(word);
+                        var curta = base.length <= 3;
+                        if (temNumero || (baseTudoMaiusculo && curta)) {
+                            return word;
+                        }
+                        var lower = word.toLowerCase();
+                        if (offset > 0 && exceptions.indexOf(lower) !== -1) return lower;
+                        return lower.charAt(0).toUpperCase() + lower.slice(1);
                     });
                 }
             
@@ -38649,6 +38658,19 @@ function trocarSubTabPgtoNovo(tab) {
                       if (p) { p.style.display = on ? "block" : "none"; }
                       if (b) { b.className = on ? "custo-sub-btn ativo" : "custo-sub-btn"; }
                     });
+                    /* PATCH V29: o painel "Custos x Pagamentos" (PATCH86B) nao faz parte
+                       da lista ABAS, entao precisa ser escondido aqui manualmente sempre
+                       que outra sub-aba for aberta - senao ele fica preso na tela. */
+                    if (chave !== "p86bcxp") {
+                      if (typeof window.__p86bEsconderCxp === "function") {
+                        try { window.__p86bEsconderCxp(); } catch (e3) { /* ignora */ }
+                      } else {
+                        var pcxp = document.getElementById("custoSubPainel-p86bcxp");
+                        var bcxp = document.getElementById("custoSubBtn-p86bcxp");
+                        if (pcxp) { pcxp.style.display = "none"; }
+                        if (bcxp) { bcxp.className = "custo-sub-btn"; }
+                      }
+                    }
                     try { localStorage.setItem(CHAVE, chave); } catch (e) { /* ignora */ }
                 
                     /* redesenha para os graficos aparecerem certos ao voltar para a aba */
@@ -45098,6 +45120,7 @@ if (document.readyState === 'loading') {
             var b = document.getElementById(ID_BTN);
             if (b) { b.className = 'custo-sub-btn'; }
           }
+          window.__p86bEsconderCxp = esconderNossa;
         
           function envolverSub() {
             var ant = window.abrirSubAbaCusto;
@@ -72866,7 +72889,6 @@ if (document.readyState === 'loading') {
           else tick();
         })();
     </script>
-    <script src="supabase_auth_client.js"></script>
     <script src="patch_relocate_header_buttons.js"></script>
 <script src="patch_correcao.js"></script>
 <script src="patch_centro-custo-dinamico.js"></script>
