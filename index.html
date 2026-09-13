@@ -42548,7 +42548,11 @@ janelaImpressao.document.write(
   '</head><body>' +
   h +
   '' +
-  '</body></html>'
+  '
+
+
+
+</body></html>'
 );
 janelaImpressao.document.close();
 
@@ -73040,5 +73044,52 @@ if (document.readyState === 'loading') {
         window.P148 = { mesVigente: atualizarMesVigente, esconderTarjas: esconderTarjasDeNavegacao };
       }());
     </script>
+
+<!-- PATCH_MENU_LIMPEZA_1958: remove apenas atalhos obsoletos da gaveta; modulos internos preservados -->
+<script id="patchMenuLimpeza1958">
+(function () {
+  'use strict';
+  if (window.__patchMenuLimpeza1958) return;
+  window.__patchMenuLimpeza1958 = true;
+
+  function texto(el) {
+    return String(el && (el.innerText || el.textContent) || '')
+      .replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  function limparMenu() {
+    var menu = document.querySelector('#meu-menu-abas .tabs');
+    if (!menu) return;
+
+    Array.prototype.forEach.call(menu.querySelectorAll('button'), function (b) {
+      var t = texto(b);
+      /* Estes atalhos continuam disponíveis dentro de Administração, se necessário. */
+      if (/^usu[aá]rios cadastrados/.test(t) ||
+          /^permiss[oõ]es de abas/.test(t) ||
+          /^gest[aã]o de obra e equipe/.test(t)) {
+        b.setAttribute('data-menu-obsoleto', '1');
+        b.style.setProperty('display', 'none', 'important');
+      }
+    });
+
+    var plano = menu.querySelector('#btn-tab-obraflow');
+    if (plano) {
+      plano.innerHTML = '📐 <span class="pmenu-txt">Plano Mestre da Obra</span>';
+      plano.setAttribute('title', 'Plano Mestre da Obra');
+      plano.setAttribute('data-menu-renomeado', '1');
+    }
+
+    /* A aba antiga permanece somente como dependência interna do cronograma. */
+    var antigo = menu.querySelector('#btn-tab-cronograma');
+    if (antigo) antigo.style.setProperty('display', 'none', 'important');
+  }
+
+  limparMenu();
+  if (window.MutationObserver) {
+    new MutationObserver(limparMenu).observe(document.documentElement, { childList: true, subtree: true });
+  }
+  [0, 250, 1000, 2500, 5000].forEach(function (ms) { setTimeout(limparMenu, ms); });
+})();
+</script>
 </body>
 </html>
