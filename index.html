@@ -42547,10 +42547,8 @@ janelaImpressao.document.write(
   cssImpressao +
   '</head><body>' +
   h +
-  '
-
-
-</body></html>'
+  '' +
+  '</body></html>'
 );
 janelaImpressao.document.close();
 
@@ -72962,10 +72960,10 @@ if (document.readyState === 'loading') {
         window.__p148Correcoes = true;
 
         function esconderTarjasDeNavegacao() {
-          ['p132Aviso', 'p145Barra', 'p138Faixa', 'p117Net'].forEach(function (id) {
+          ['p125Aviso', 'p132Aviso', 'p145Barra', 'p138Faixa', 'p117Net'].forEach(function (id) {
             var el = document.getElementById(id);
             if (!el) { return; }
-            el.classList.remove('on', 'p117-on', 'p130-mostrar');
+            el.classList.remove('on', 'p125-on', 'p117-on', 'p130-mostrar');
             el.style.display = 'none';
           });
         }
@@ -73013,7 +73011,18 @@ if (document.readyState === 'loading') {
           try { window[nome] = novo; } catch (e) { }
         }
 
+        function ligarLimpezaDireta() {
+          document.addEventListener('click', function (ev) {
+            var alvo = ev.target && ev.target.closest ? ev.target.closest(".tab-btn, .sub-tab-btn, [onclick*=\"trocarAba\"], [onclick*=\"trocarSub\"]") : null;
+            if (!alvo) { return; }
+            esconderTarjasDeNavegacao();
+            setTimeout(esconderTarjasDeNavegacao, 0);
+            setTimeout(esconderTarjasDeNavegacao, 120);
+          }, true);
+        }
+
         function iniciar() {
+          ligarLimpezaDireta();
           limparEmailDosCamposRegiao();
           atualizarMesVigente();
           ligarNavegacao('trocarAba');
