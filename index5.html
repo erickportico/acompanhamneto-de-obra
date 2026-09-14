@@ -5492,8 +5492,27 @@ div:empty,
           })();
     </script>
 
+<style id="patch161TooltipStyle">
+#p120Area{position:relative!important;}
+#p120Dica{position:absolute!important;right:12px!important;bottom:12px!important;left:auto!important;top:auto!important;z-index:30!important;pointer-events:none!important;display:none;box-sizing:border-box;min-width:190px;max-width:300px;padding:9px 12px!important;border:1px solid rgba(148,163,184,.35);border-radius:10px!important;background:rgba(15,23,42,.96)!important;color:#fff!important;font-size:.76rem!important;line-height:1.4!important;box-shadow:0 8px 24px rgba(0,0,0,.25)!important;}
+#p120Dica b{display:block;font-size:.8rem;margin-bottom:3px;}
+</style>
+<style id="patch161DadosTarefaStyle">
+.lanc-section-tarefa{border:1px solid var(--border,#dbe2ec)!important;border-radius:14px!important;background:var(--card-bg,#fff);padding:14px 16px!important;box-shadow:0 2px 8px rgba(15,23,42,.05);}
+.lanc-section-tarefa .lanc-section-title{display:flex;align-items:center;gap:9px;font-size:.92rem;font-weight:800;margin-bottom:11px;}
+.lanc-section-hint{margin-left:auto;font-size:.7rem;font-weight:600;color:var(--text-light,#64748b);}
+.lanc-task-fields{display:grid!important;grid-template-columns:minmax(190px,1.1fr) minmax(145px,.65fr) minmax(230px,1.35fr) minmax(125px,.55fr)!important;gap:12px!important;align-items:end;}
+.lanc-task-fields .lanc-field{min-width:0;}
+.lanc-task-fields label{display:block;margin-bottom:5px;font-size:.72rem;font-weight:800;letter-spacing:.35px;text-transform:uppercase;color:var(--text-light,#64748b);}
+.lanc-task-fields input,.lanc-task-fields select{width:100%;min-height:38px;box-sizing:border-box;border-radius:9px;border:1px solid var(--border,#dbe2ec);padding:8px 10px;background:var(--input-bg,#fff);color:var(--text,#0f172a);outline:none;}
+.lanc-task-fields input:focus,.lanc-task-fields select:focus{border-color:#64748b;box-shadow:0 0 0 3px rgba(100,116,139,.12);}
+body.dark-mode .lanc-section-tarefa{background:#0f172a;border-color:#334155!important;}
+body.dark-mode .lanc-task-fields input,body.dark-mode .lanc-task-fields select{background:#111827;color:#f8fafc;border-color:#334155;}
+@media(max-width:900px){.lanc-task-fields{grid-template-columns:1fr 1fr!important;}.lanc-section-hint{display:none;}}
+</style>
 </head>
 
+<!-- PATCH 161: TOOLTIP FIX + DADOS DA TAREFA -->
 <body class="dark-mode">
 <script id="v21Cleanup">/* v23: removido - removia nos de texto de scripts */</script>
 
@@ -6569,17 +6588,21 @@ div:empty,
                 <div id="panelPgtoLancamentos">
                     <!-- Formulário de registro (layout em seções) -->
                     <div class="lanc-form-grid">
-                        <!-- Seção 1: Dados da Tarefa -->
-                        <div class="lanc-section">
-                            <div class="lanc-section-title">📝 Dados da Tarefa</div>
-                            <div class="lanc-fields-row">
-                                <div class="lanc-field lanc-field-wide">
+                        <!-- PATCH 161: Dados da Tarefa -->
+                        <div class="lanc-section lanc-section-tarefa">
+                            <div class="lanc-section-title">📝 Dados da Tarefa <span class="lanc-section-hint">identificação, data e metragem</span></div>
+                            <div class="lanc-fields-row lanc-task-fields">
+                                <div class="lanc-field">
                                     <label>Obra</label>
                                     <select id="inputLancObra"></select>
                                 </div>
-                                <div class="lanc-field lanc-field-wide">
+                                <div class="lanc-field">
+                                    <label>Data da Tarefa</label>
+                                    <input type="date" id="inputLancData" title="Data em que a instalação foi realizada">
+                                </div>
+                                <div class="lanc-field">
                                     <label>Material Instalado</label>
-                                    <input type="text" id="inputLancMaterial" placeholder="Ex: Porta, Janela...">
+                                    <input type="text" id="inputLancMaterial" placeholder="Ex: Porta, Janela, Fachada...">
                                 </div>
                                 <div class="lanc-field">
                                     <label>Instalação M²</label>
@@ -13301,6 +13324,9 @@ function trocarSubTabPgtoNovo(tab) {
             // --- Add lançamento manually ---
             function salvarLancamentoPgto() {
               const obraId = document.getElementById('inputLancObra').value;
+              const dataInput = document.getElementById('inputLancData');
+              const dataLancamento = dataInput && dataInput.value ? dataInput.value : new Date().toISOString().slice(0, 10);
+              const mesLancamento = dataLancamento.substring(0, 7);
               const m2 = parseFloat(document.getElementById('inputLancInstalacaoM2').value) || 0;
               const material = document.getElementById('inputLancMaterial').value.trim();
               const taxaProf = parseFloat(document.getElementById('inputLancTaxaProf').value) || 6;
@@ -13323,8 +13349,8 @@ function trocarSubTabPgtoNovo(tab) {
                 id: gerarIdPgto(),
                 obraId: obra.id,
                 obraNome: obra.nome,
-                data: new Date().toISOString().slice(0, 10),
-                mesAnoKey: getChaveMesPgto(),
+                data: dataLancamento,
+                mesAnoKey: mesLancamento,
                 instalacaoM2: m2,
                 material: material,
                 taxaProf: taxaProf,
@@ -13344,6 +13370,7 @@ function trocarSubTabPgtoNovo(tab) {
               // Clear form
               document.getElementById('inputLancInstalacaoM2').value = '';
               document.getElementById('inputLancMaterial').value = '';
+              if (dataInput) { dataInput.value = new Date().toISOString().slice(0, 10); }
               document.getElementById('inputLancObra').selectedIndex = 0;
               Array.from(document.getElementById('inputLancProfissionais').options).forEach(o => o.selected = false);
               Array.from(document.getElementById('inputLancAjudantes').options).forEach(o => o.selected = false);
@@ -13358,6 +13385,8 @@ function trocarSubTabPgtoNovo(tab) {
               document.getElementById('editLancId').value = lanc.id;
               document.getElementById('editLancObraId').value = obra.id;
               document.getElementById('editLancInstalacaoM2').value = lanc.instalacaoM2;
+              var editDataEl = document.getElementById('editLancData');
+              if (editDataEl) { editDataEl.value = lanc.data || new Date().toISOString().slice(0, 10); }
               document.getElementById('editLancMaterial').value = lanc.material;
               document.getElementById('editLancTaxaProf').value = lanc.taxaProf;
               document.getElementById('editLancTaxaAjud').value = lanc.taxaAjud;
@@ -13380,6 +13409,11 @@ function trocarSubTabPgtoNovo(tab) {
               if (!obra) return;
               const lanc = (obra.lancamentosProducao || []).find(l => l.id === lancId);
               if (!lanc) return;
+              var editDataEl = document.getElementById('editLancData');
+              if (editDataEl && editDataEl.value) {
+                lanc.data = editDataEl.value;
+                lanc.mesAnoKey = editDataEl.value.substring(0, 7);
+              }
               lanc.instalacaoM2 = parseFloat(document.getElementById('editLancInstalacaoM2').value) || 0;
               lanc.material = document.getElementById('editLancMaterial').value.trim();
               lanc.taxaProf = parseFloat(document.getElementById('editLancTaxaProf').value) || 6;
@@ -13540,6 +13574,8 @@ function trocarSubTabPgtoNovo(tab) {
             function renderPagamento() {
               autoImportarItensPgto();
               popularSelectsPgto();
+              var dataPgto = document.getElementById('inputLancData');
+              if (dataPgto && !dataPgto.value) { dataPgto.value = new Date().toISOString().slice(0, 10); }
             
               const label = formatarMesAnoPgto(pgtoMes, pgtoAno);
               const el1 = document.getElementById('pgtoMesAnoLabel');
@@ -13823,6 +13859,10 @@ function trocarSubTabPgtoNovo(tab) {
                     <input type="hidden" id="editLancId">
                     <input type="hidden" id="editLancObraId">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;">Data da Tarefa</label>
+                            <input type="date" id="editLancData" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;">
+                        </div>
                         <div>
                             <label style="font-size:0.82rem;font-weight:600;">Instalação M²</label>
                             <input type="number" id="editLancInstalacaoM2" step="0.01" min="0" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;">
@@ -42558,7 +42598,6 @@ janelaImpressao.document.write(
   cssImpressao +
   '</head><body>' +
   h +
-  '' +
   '</body></html>'
 );
 janelaImpressao.document.close();
@@ -73643,6 +73682,176 @@ if (document.readyState === 'loading') {
     iniciar(); ligarObraCusto();
   }
   setTimeout(function(){ aplicarTudo(true); ligarObraCusto(); }, 1200);
+})();
+</script>
+
+<!-- PATCH162: recupera Diario de Obra e elimina tarja fixa do Centro de Custos -->
+<style id="patch162FinalStyle">
+  /* A dica fica somente como uma pequena caixa dentro do painel do Centro de Custos. */
+  #p120Area { position:relative !important; }
+  #p120Dica {
+    position:absolute !important;
+    left:auto !important;
+    top:auto !important;
+    right:12px !important;
+    bottom:12px !important;
+    width:auto !important;
+    min-width:0 !important;
+    max-width:300px !important;
+    z-index:30 !important;
+    pointer-events:none !important;
+    box-sizing:border-box !important;
+    display:none;
+    margin:0 !important;
+    padding:9px 12px !important;
+    border:1px solid rgba(148,163,184,.35) !important;
+    border-radius:10px !important;
+    background:rgba(15,23,42,.96) !important;
+    color:#fff !important;
+    font:12px/1.4 system-ui,Segoe UI,Arial,sans-serif !important;
+    box-shadow:0 8px 24px rgba(0,0,0,.25) !important;
+  }
+  #p120Dica b { display:block !important; font-size:12px !important; margin-bottom:3px !important; }
+</style>
+<style id="patch163TooltipStyle">
+#p120Area{position:relative!important;}
+#p120Dica{position:absolute!important;z-index:30!important;pointer-events:none!important;display:none;box-sizing:border-box;min-width:190px;max-width:300px;padding:9px 12px!important;border:1px solid rgba(148,163,184,.35);border-radius:10px!important;background:rgba(15,23,42,.96)!important;color:#fff!important;font-size:.76rem!important;line-height:1.4!important;box-shadow:0 8px 24px rgba(0,0,0,.25)!important;margin:0!important;}
+#p120Dica b{display:block;font-size:.8rem;margin-bottom:3px;}
+</style>
+<script id="patch163TooltipFollowMouse">
+(function(){
+  'use strict';
+  if (window.__patch163TooltipFollowMouse) return;
+  window.__patch163TooltipFollowMouse = true;
+  var timer = null;
+  var visible = false;
+  var lastEv = null;
+
+  function esconder(){
+    if (timer) { clearTimeout(timer); timer = null; }
+    visible = false;
+    var d = document.getElementById('p120Dica');
+    if (d) {
+      d.style.setProperty('display','none','important');
+      d.setAttribute('aria-hidden','true');
+    }
+  }
+
+  function garantirCaixa(){
+    var area = document.getElementById('p120Area');
+    if (!area) { esconder(); return null; }
+    var d = document.getElementById('p120Dica');
+    if (!d) d = document.createElement('div');
+    d.id = 'p120Dica';
+    if (d.parentNode !== area) area.appendChild(d);
+    return d;
+  }
+
+  function posicionar(ev){
+    var area = document.getElementById('p120Area');
+    var d = document.getElementById('p120Dica');
+    if (!area || !d || !visible || !ev) return;
+    var ar = area.getBoundingClientRect();
+    var x = ev.clientX - ar.left + 14;
+    var y = ev.clientY - ar.top + 14;
+    var w = d.offsetWidth || 220;
+    var h = d.offsetHeight || 55;
+    var maxX = Math.max(8, ar.width - w - 8);
+    var maxY = Math.max(8, ar.height - h - 8);
+    if (x > maxX) x = ev.clientX - ar.left - w - 14;
+    if (y > maxY) y = ev.clientY - ar.top - h - 14;
+    x = Math.max(8, Math.min(x, maxX));
+    y = Math.max(8, Math.min(y, maxY));
+    d.style.setProperty('left', Math.round(x) + 'px','important');
+    d.style.setProperty('top', Math.round(y) + 'px','important');
+    d.style.setProperty('right','auto','important');
+    d.style.setProperty('bottom','auto','important');
+  }
+
+  function mostrar(texto, ev){
+    var d = garantirCaixa();
+    if (!d || !texto) { esconder(); return; }
+    if (timer) clearTimeout(timer);
+    lastEv = ev || lastEv;
+    d.innerHTML = String(texto);
+    visible = true;
+    d.style.setProperty('display','block','important');
+    d.setAttribute('aria-hidden','false');
+    posicionar(lastEv);
+    timer = setTimeout(esconder, 4000);
+  }
+
+  window.ocultarDicaP120 = esconder;
+  window.dica = function(texto, ev){ mostrar(texto, ev); };
+
+  document.addEventListener('mousemove', function(ev){
+    var area = document.getElementById('p120Area');
+    if (!area) { esconder(); return; }
+    if (!area.contains(ev.target)) { esconder(); return; }
+    lastEv = ev;
+    if (visible) posicionar(ev);
+  }, true);
+
+  document.addEventListener('mouseleave', function(){}, true);
+  document.addEventListener('click', function(ev){
+    var area = document.getElementById('p120Area');
+    if (!area || !area.contains(ev.target)) esconder();
+  }, true);
+  document.addEventListener('pointerdown', function(ev){
+    var area = document.getElementById('p120Area');
+    if (!area || !area.contains(ev.target)) esconder();
+  }, true);
+  window.addEventListener('blur', esconder);
+  document.addEventListener('visibilitychange', esconder);
+  window.addEventListener('mouseout', function(ev){
+    if (!ev.relatedTarget) esconder();
+  }, true);
+
+  try {
+    var obs = new MutationObserver(function(){
+      var area = document.getElementById('p120Area');
+      var d = document.getElementById('p120Dica');
+      if (d && (!area || !area.contains(d))) esconder();
+    });
+    obs.observe(document.body, {childList:true, subtree:true});
+  } catch(e) {}
+
+  setInterval(function(){
+    var area = document.getElementById('p120Area');
+    var d = document.getElementById('p120Dica');
+    if (!area || !d) { if (d) esconder(); return; }
+    if (!area.contains(d)) { esconder(); return; }
+    d.style.setProperty('position','absolute','important');
+    d.style.setProperty('z-index','30','important');
+    d.style.setProperty('pointer-events','none','important');
+  }, 500);
+
+  function garantirDiarioMenu(){
+    var cx = document.querySelector('#meu-menu-abas .tabs') ||
+             document.querySelector('details#meu-menu-abas .tabs');
+    var b = document.getElementById('p84Botao');
+    if (!b || !cx) return;
+    if (b.parentNode !== cx) cx.appendChild(b);
+    b.style.removeProperty('position');
+    b.style.removeProperty('right');
+    b.style.removeProperty('bottom');
+    b.style.removeProperty('z-index');
+    b.style.setProperty('display','inline-flex','important');
+  }
+  function abrirDiarioSeguro(){
+    try {
+      if (typeof window.p84AbrirDiario === 'function') return window.p84AbrirDiario();
+    } catch(e) {}
+    try {
+      var f = document.getElementById('p84Fundo');
+      if (f) { f.classList.remove('p86b-oculto','p87-oculto','p87b-oculto'); f.style.display='flex'; return true; }
+    } catch(e2) {}
+    return false;
+  }
+  window.patch163AbrirDiario = abrirDiarioSeguro;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',function(){setTimeout(garantirDiarioMenu,250);});
+  else setTimeout(garantirDiarioMenu,250);
+  setInterval(garantirDiarioMenu,1500);
 })();
 </script>
 </body>
