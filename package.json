@@ -1,0 +1,13 @@
+{
+  "name": "acompanhamento-obras-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servidor local Express para o painel Acompanhamento de Obras",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
