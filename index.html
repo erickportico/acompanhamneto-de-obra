@@ -42548,11 +42548,7 @@ janelaImpressao.document.write(
   '</head><body>' +
   h +
   '' +
-  '
-
-
-
-</body></html>'
+  '</body></html>'
 );
 janelaImpressao.document.close();
 
@@ -71997,6 +71993,11 @@ if (document.readyState === 'loading') {
           function hora(iso) {
             try { return new Date(iso).toLocaleTimeString('pt-BR'); } catch (e) { return String(iso || ''); }
           }
+          function mesmaMarca(a, b) {
+            if (!a || !b) return a === b;
+            var x = Date.parse(a), y = Date.parse(b);
+            return isFinite(x) && isFinite(y) ? Math.abs(x - y) <= 10000 : String(a) === String(b);
+          }
         
           /* ---------------- barra de aviso no alto da tela ---------------- */
           function barra() {
@@ -72151,7 +72152,7 @@ if (document.readyState === 'loading') {
         
             return horaDaNuvem()
               .then(function (remoto) {
-                if (!forcar && conhecido && remoto && remoto !== conhecido) {
+                if (!forcar && conhecido && remoto && !mesmaMarca(remoto, conhecido)) {
                   avisarConflito(remoto);
                   return false;
                 }
@@ -72197,7 +72198,7 @@ if (document.readyState === 'loading') {
               if (conhecido === null) { conhecido = remoto; return; }
               if (remoto !== conhecido) {
                 if (pendente) { avisarConflito(remoto); }
-                else { avisarMudancaDeFora(remoto); }
+                else { conhecido = remoto; }
               }
             }).catch(function () { });
           }
@@ -72991,7 +72992,7 @@ if (document.readyState === 'loading') {
         }
 
         function limparEmailDosCamposRegiao() {
-          ['inputRegiaoObra', 'custoInputRegiao', 'custoEditRegiao'].forEach(function (id) {
+          ['inputRegiaoObra', 'custoInputRegiao', 'custoEditRegiao', 'custoFilterRegiao'].forEach(function (id) {
             var el = document.getElementById(id);
             if (el && /@/.test(String(el.value || ''))) { el.value = ''; }
           });
@@ -73001,11 +73002,12 @@ if (document.readyState === 'loading') {
           var original = window[nome];
           if (typeof original !== 'function' || original.__p148) { return; }
           var novo = function () {
-            var r = original.apply(this, arguments);
+            var args = arguments;
+            var r = original.apply(this, args);
             setTimeout(function () {
               esconderTarjasDeNavegacao();
               limparEmailDosCamposRegiao();
-              atualizarMesVigente();
+              if (String(args[0] || '') === 'custo') { atualizarMesVigente(); }
             }, 0);
             return r;
           };
@@ -73035,7 +73037,6 @@ if (document.readyState === 'loading') {
           setTimeout(function () { ligarNavegacao('trocarAba'); ligarNavegacao('trocarSubAbaFEM'); ligarNavegacao('trocarSubTabPgtoNovo'); }, 1200);
           setInterval(function () {
             var aba = document.getElementById('tab-custo');
-            if (aba && getComputedStyle(aba).display !== 'none') { atualizarMesVigente(); }
             limparEmailDosCamposRegiao();
           }, 2000);
         }
@@ -73064,9 +73065,9 @@ if (document.readyState === 'loading') {
     Array.prototype.forEach.call(menu.querySelectorAll('button'), function (b) {
       var t = texto(b);
       /* Estes atalhos continuam disponíveis dentro de Administração, se necessário. */
-      if (/^usu[aá]rios cadastrados/.test(t) ||
-          /^permiss[oõ]es de abas/.test(t) ||
-          /^gest[aã]o de obra e equipe/.test(t)) {
+      if (t.indexOf('usuários cadastrados') >= 0 || t.indexOf('usuarios cadastrados') >= 0 ||
+          t.indexOf('permissões de abas') >= 0 || t.indexOf('permissoes de abas') >= 0 ||
+          t.indexOf('gestão de obra e equipe') >= 0 || t.indexOf('gestao de obra e equipe') >= 0) {
         b.setAttribute('data-menu-obsoleto', '1');
         b.style.setProperty('display', 'none', 'important');
       }
