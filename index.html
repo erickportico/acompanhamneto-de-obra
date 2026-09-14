@@ -28129,6 +28129,16 @@ function trocarSubTabPgtoNovo(tab) {
                       for (var i = 0; i < brutos.length; i++) {
                         var b = brutos[i];
                         if (b.id === 'orMenuBtn' || ehItemDaGaveta(b)) { continue; }
+                        var nomeBruto = String(b.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+                        var abaBruta = abaDoBotao(b);
+                        /* Dependência interna preservada; apenas não entra na gaveta. */
+                        if (abaBruta === 'cronograma' ||
+                            nomeBruto.indexOf('usuários cadastrados') >= 0 ||
+                            nomeBruto.indexOf('usuarios cadastrados') >= 0 ||
+                            nomeBruto.indexOf('permissões de abas') >= 0 ||
+                            nomeBruto.indexOf('permissoes de abas') >= 0 ||
+                            nomeBruto.indexOf('gestão de obra e equipe') >= 0 ||
+                            nomeBruto.indexOf('gestao de obra e equipe') >= 0) { continue; }
                         var p = limparTexto(b);
                         if (!p.texto) { continue; }
                         var aba = abaDoBotao(b);
@@ -73072,6 +73082,22 @@ if (document.readyState === 'loading') {
         b.style.setProperty('display', 'none', 'important');
       }
     });
+
+    var gaveta = document.getElementById('orLista');
+    if (gaveta) {
+      Array.prototype.forEach.call(gaveta.querySelectorAll('.or-item'), function (item) {
+        var chave = texto(item);
+        if (item.getAttribute('data-aba') === 'cronograma' ||
+            chave.indexOf('usuários cadastrados') >= 0 || chave.indexOf('usuarios cadastrados') >= 0 ||
+            chave.indexOf('permissões de abas') >= 0 || chave.indexOf('permissoes de abas') >= 0 ||
+            chave.indexOf('gestão de obra e equipe') >= 0 || chave.indexOf('gestao de obra e equipe') >= 0) {
+          var grupo = item.previousElementSibling;
+          item.remove();
+          if (grupo && grupo.classList.contains('or-grupo') &&
+              !grupo.nextElementSibling?.classList.contains('or-item')) { grupo.remove(); }
+        }
+      });
+    }
 
     var plano = menu.querySelector('#btn-tab-obraflow');
     if (plano) {
