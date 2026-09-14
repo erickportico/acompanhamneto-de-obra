@@ -1,42 +1,40 @@
 /**
- * Modelo FPDO no padrão do PPT (capa, fachadas antes/depois, fotos no toque).
- * Usa o relatório já salvo pelo P92. Não apaga o editor antigo.
+ * FPDO no roteiro do PPT Portico.
  */
 (function () {
   'use strict';
-  if (window.__patchFpdoModelo20260914) return;
+  if (window.__patchFpdoRoteiroPpt) return;
+  window.__patchFpdoRoteiroPpt = true;
   window.__patchFpdoModelo20260914 = true;
+  window.__patchFpdoModelo20260914b = true;
 
+  var KEY = 'p92_fpdo_roteiro_ppt_v1';
   var FACHADAS = ['Leste', 'Norte', 'Sul', 'Cobertura'];
-  var KEY = 'p92_fpdo_modelo_v1';
 
   function obraNome() {
     try {
-      var o = (typeof getObraAtual === 'function') ? getObraAtual() : null;
+      var o = typeof getObraAtual === 'function' ? getObraAtual() : null;
       return (o && o.nome) || '';
     } catch (e) { return ''; }
   }
 
   function estado() {
-    var s;
-    try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { s = null; }
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
     if (!s) s = {};
-    if (!s.capa) {
-      s.capa = {
-        obra: obraNome(),
-        mes: 'Agosto 2026',
-        mesAnt: 'Julho',
-        cliente: '',
-        local: '',
-        responsavel: '',
-        gestor: 'Erick dos Santos'
-      };
-    }
-    if (!s.fotos) s.fotos = {};
-    if (!s.portico) s.portico = '';
-    if (!s.clienteTxt) s.clienteTxt = '';
-    if (!s.proxPortico) s.proxPortico = '';
-    if (!s.proxCliente) s.proxCliente = '';
+    s.capa = s.capa || {};
+    s.capa.obra = s.capa.obra || obraNome();
+    s.capa.mes = s.capa.mes || 'Agosto 2026';
+    s.capa.mesAnt = s.capa.mesAnt || 'Julho';
+    s.capa.cliente = s.capa.cliente || '';
+    s.capa.local = s.capa.local || '';
+    s.capa.responsavel = s.capa.responsavel || '';
+    s.capa.gestor = s.capa.gestor || 'Erick dos Santos';
+    s.fotos = s.fotos || {};
+    s.portico = s.portico || '';
+    s.clienteTxt = s.clienteTxt || '';
+    s.proxPortico = s.proxPortico || '';
+    s.proxCliente = s.proxCliente || '';
     return s;
   }
 
@@ -45,98 +43,111 @@
   }
 
   function css() {
-    if (document.getElementById('fpdoModCss')) return;
-    var s = document.createElement('style');
-    s.id = 'fpdoModCss';
-    s.textContent =
-      '#fpdoModFundo{position:fixed;inset:0;z-index:2147482500;background:#0b1220;display:flex;flex-direction:column}' +
-      '#fpdoModBar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:#111827;color:#fff}' +
-      '#fpdoModBar button{border:0;border-radius:8px;padding:8px 12px;background:#2563eb;color:#fff;font-weight:700}' +
-      '#fpdoModBar .off{background:#334155}' +
-      '#fpdoModView{flex:1;overflow:auto;padding:12px}' +
-      '.fpdo-slide{width:min(960px,100%);margin:0 auto 16px;background:#000;color:#fff;border-radius:12px;padding:16px;aspect-ratio:16/9;box-sizing:border-box}' +
-      '.fpdo-slide h2{margin:0 0 8px;color:#facc15;font-size:clamp(16px,3vw,28px);text-align:center}' +
-      '.fpdo-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;height:calc(100% - 40px)}' +
-      '.fpdo-slot{border:1px dashed #64748b;border-radius:10px;min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center;background:#111;position:relative;overflow:hidden}' +
-      '.fpdo-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}' +
-      '.fpdo-slot span{position:relative;z-index:1;color:#facc15;font-weight:700;padding:6px}' +
-      '.fpdo-capa input,.fpdo-capa textarea{width:100%;margin:4px 0;padding:8px;border-radius:8px;border:0}' +
-      '.fpdo-capa textarea{min-height:70px}' +
-      '@media(max-width:700px){.fpdo-grid2{grid-template-columns:1fr}.fpdo-slide{aspect-ratio:auto;min-height:280px}}';
-    document.head.appendChild(s);
+    if (document.getElementById('fpdoRoteiroCss')) return;
+    var el = document.createElement('style');
+    el.id = 'fpdoRoteiroCss';
+    el.textContent =
+      '#fpdoRot{position:fixed;inset:0;z-index:2147482600;background:#1e293b;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif}' +
+      '#fpdoRotBar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 10px;background:#0f172a;color:#fff}' +
+      '#fpdoRotBar button{border:0;border-radius:8px;padding:8px 12px;background:#ea580c;color:#fff;font-weight:700}' +
+      '#fpdoRotBar .off{background:#334155}' +
+      '#fpdoRotView{flex:1;overflow:auto;padding:10px}' +
+      '.fr-slide{width:min(1100px,100%);margin:0 auto 14px;background:#fff;color:#111;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.25);overflow:hidden}' +
+      '.fr-head{display:flex;justify-content:space-between;align-items:center;border:2px solid #111;margin:10px 12px 8px;padding:6px 10px;font-weight:800;letter-spacing:.08em}' +
+      '.fr-marca{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#fb923c,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}' +
+      '.fr-title{text-align:center;font-size:22px;font-weight:800;margin:4px 0 8px}' +
+      '.fr-meses{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 14px 8px}' +
+      '.fr-meses h4{margin:0 0 6px;text-align:center}' +
+      '.fr-slot{position:relative;background:#e5e7eb;border:1px solid #cbd5e1;min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden}' +
+      '.fr-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}' +
+      '.fr-slot span{position:relative;z-index:1;background:rgba(255,255,255,.82);padding:6px 10px;font-weight:700;font-size:13px}' +
+      '.fr-slot input[type=file]{position:absolute;inset:0;opacity:0;z-index:2}' +
+      '.fr-capa{display:grid;grid-template-columns:1fr 1.2fr;min-height:360px}' +
+      '.fr-capa-logo{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:#ececec}' +
+      '.fr-capa-logo h1{margin:0;font-size:clamp(22px,4vw,42px);line-height:0.95;text-align:center}' +
+      '.fr-contra{display:grid;grid-template-columns:1.1fr 1fr;min-height:360px}' +
+      '.fr-contra-txt{padding:28px 22px}' +
+      '.fr-contra-txt input,.fr-txt textarea{width:100%;margin:5px 0;padding:8px;border:1px solid #d1d5db;border-radius:6px;box-sizing:border-box}' +
+      '.fr-txt{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:12px 16px 18px}' +
+      '.fr-txt h3{margin:0 0 6px;color:#b91c1c}' +
+      '.fr-txt textarea{min-height:140px}' +
+      '.fr-foot{display:flex;justify-content:flex-end;padding:0 14px 10px;font-weight:800;font-size:12px}' +
+      '@media(max-width:720px){.fr-capa,.fr-contra,.fr-meses,.fr-txt{grid-template-columns:1fr}}';
+    document.head.appendChild(el);
+  }
+
+  function slot(s, chave, rotulo, alto) {
+    var img = s.fotos[chave];
+    return '<label class="fr-slot" style="' + (alto ? ('min-height:' + alto + 'px') : '') + '">' +
+      (img ? '<img src="' + img + '" alt="">' : '') +
+      '<span>' + rotulo + '</span>' +
+      '<input type="file" accept="image/*" capture="environment" data-chave="' + chave + '">' +
+      '</label>';
   }
 
   function abrir() {
     css();
     var s = estado();
-    var f = document.getElementById('fpdoModFundo');
+    var f = document.getElementById('fpdoRot');
     if (!f) {
       f = document.createElement('div');
-      f.id = 'fpdoModFundo';
+      f.id = 'fpdoRot';
       document.body.appendChild(f);
     }
     f.style.display = 'flex';
-    pintar(s);
-  }
+    var html = '<div id="fpdoRotBar"><strong>FPDO modelo PPT</strong>' +
+      '<button type="button" id="fpdoRotSalvar">Salvar</button>' +
+      '<button type="button" class="off" id="fpdoRotFechar">Fechar</button></div><div id="fpdoRotView">';
 
-  function fechar() {
-    var f = document.getElementById('fpdoModFundo');
-    if (f) f.style.display = 'none';
-  }
+    html += '<div class="fr-slide"><div class="fr-capa"><div class="fr-capa-logo"><h1>FIQUE<br>POR<br>DENTRO<br>DA OBRA</h1><div style="margin-top:16px;font-weight:800;color:#ea580c">PORTICO</div></div>' +
+      slot(s, 'capa', 'Toque: foto da capa', 360) + '</div></div>';
 
-  function slot(s, chave, rotulo) {
-    var img = s.fotos[chave];
-    return '<label class="fpdo-slot">' +
-      (img ? '<img src="' + img + '" alt="">' : '') +
-      '<span>' + rotulo + '<br><small>Toque para foto</small></span>' +
-      '<input type="file" accept="image/*" capture="environment" data-chave="' + chave + '" style="position:absolute;inset:0;opacity:0">' +
-      '</label>';
-  }
-
-  function pintar(s) {
-    var f = document.getElementById('fpdoModFundo');
-    var html = '<div id="fpdoModBar">' +
-      '<strong>FPDO modelo apresentação</strong>' +
-      '<button type="button" id="fpdoModSalvar">Salvar</button>' +
-      '<button type="button" class="off" id="fpdoModFechar">Fechar</button>' +
-      '</div><div id="fpdoModView">';
-
-    html += '<div class="fpdo-slide fpdo-capa"><h2>CAPA</h2>' +
-      '<input id="fpdoObra" placeholder="Obra" value="">' +
-      '<input id="fpdoMes" placeholder="Mês atual" value="">' +
-      '<input id="fpdoMesAnt" placeholder="Mês anterior" value="">' +
-      '<input id="fpdoCli" placeholder="Cliente" value="">' +
-      '<input id="fpdoLoc" placeholder="Local" value="">' +
-      '<input id="fpdoResp" placeholder="Responsável da obra" value="">' +
-      '<input id="fpdoGes" placeholder="Gestor Pórtico" value="">' +
-      '</div>';
+    html += '<div class="fr-slide"><div class="fr-contra">' + slot(s, 'contra', 'Toque: fachada da contra-capa', 360) +
+      '<div class="fr-contra-txt"><input id="fpdoObra" placeholder="Obra"><input id="fpdoMes" placeholder="Mes atual"><input id="fpdoMesAnt" placeholder="Mes anterior"><input id="fpdoCli" placeholder="Cliente"><input id="fpdoLoc" placeholder="Local"><input id="fpdoResp" placeholder="Responsavel"><input id="fpdoGes" placeholder="Gestor Portico"></div></div></div>';
 
     FACHADAS.forEach(function (fa) {
       var k = fa.toLowerCase();
-      html += '<div class="fpdo-slide"><h2>' + fa.toUpperCase() + '</h2><div class="fpdo-grid2">' +
-        slot(s, k + '_ant', 'MÊS ' + (s.capa.mesAnt || 'ANTERIOR').toUpperCase()) +
-        slot(s, k + '_atu', 'MÊS ' + (s.capa.mes || 'ATUAL').toUpperCase()) +
-        '</div></div>';
+      html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div>' +
+        '<div class="fr-title">ELEVACAO ' + fa.toUpperCase() + '</div><div class="fr-meses"><div><h4>MES ' + (s.capa.mesAnt || 'ANTERIOR').toUpperCase() + '</h4>' +
+        slot(s, k + '_ant', 'Toque para foto') + '</div><div><h4>MES ATUAL</h4>' +
+        slot(s, k + '_atu', 'Toque para foto') + '</div></div><div class="fr-foot">' + (s.capa.obra || 'OBRA') + '</div></div>';
     });
 
-    html += '<div class="fpdo-slide fpdo-capa"><h2>ATIVIDADES REALIZADAS</h2>' +
-      '<textarea id="fpdoPortico" placeholder="PÓRTICO"></textarea>' +
-      '<textarea id="fpdoClienteTxt" placeholder="CLIENTE / OBRA"></textarea></div>';
-    html += '<div class="fpdo-slide fpdo-capa"><h2>PRÓXIMAS ETAPAS</h2>' +
-      '<textarea id="fpdoProxP" placeholder="PÓRTICO + prazos"></textarea>' +
-      '<textarea id="fpdoProxC" placeholder="CLIENTE + prazos"></textarea></div>';
-    html += '</div>';
-    f.innerHTML = html;
+    html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div><div class="fr-title">DESENHO — o que foi montado</div>' +
+      slot(s, 'desenho', 'Toque: planta/elevacao grifada', 300) + '<div class="fr-foot">' + (s.capa.obra || 'OBRA') + '</div></div>';
 
-    var set = function (id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; };
+    html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div><div class="fr-title">GRAFICOS E INDICADORES</div>' +
+      slot(s, 'grafico', 'Toque: print dos graficos', 300) + '<div class="fr-foot">' + (s.capa.obra || 'OBRA') + '</div></div>';
+
+    html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div><div class="fr-txt"><div><h3>Atividades — PORTICO</h3><textarea id="fpdoPortico"></textarea></div><div><h3>Atividades — CONTRATANTE</h3><textarea id="fpdoClienteTxt"></textarea></div></div></div>';
+    html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div><div class="fr-txt"><div><h3>Proximas — PORTICO</h3><textarea id="fpdoProxP"></textarea></div><div><h3>Proximas — CONTRATANTE</h3><textarea id="fpdoProxC"></textarea></div></div></div>';
+    html += '<div class="fr-slide"><div style="padding:10px 16px;font-weight:800">porticoesquadrias</div>' +
+      slot(s, 'final', 'Toque: foto final / fabrica', 280) +
+      '<div style="text-align:right;padding:12px 16px;font-weight:800">PORTICO</div></div></div>';
+
+    f.innerHTML = html;
+    function set(id, v) { var n = document.getElementById(id); if (n) n.value = v || ''; }
     set('fpdoObra', s.capa.obra); set('fpdoMes', s.capa.mes); set('fpdoMesAnt', s.capa.mesAnt);
     set('fpdoCli', s.capa.cliente); set('fpdoLoc', s.capa.local);
     set('fpdoResp', s.capa.responsavel); set('fpdoGes', s.capa.gestor);
     set('fpdoPortico', s.portico); set('fpdoClienteTxt', s.clienteTxt);
     set('fpdoProxP', s.proxPortico); set('fpdoProxC', s.proxCliente);
-
-    document.getElementById('fpdoModFechar').onclick = fechar;
-    document.getElementById('fpdoModSalvar').onclick = function () { ler(s); gravar(s); alert('FPDO modelo salvo neste aparelho.'); };
+    document.getElementById('fpdoRotFechar').onclick = function () { f.style.display = 'none'; };
+    document.getElementById('fpdoRotSalvar').onclick = function () {
+      s.capa.obra = (document.getElementById('fpdoObra') || {}).value || '';
+      s.capa.mes = (document.getElementById('fpdoMes') || {}).value || '';
+      s.capa.mesAnt = (document.getElementById('fpdoMesAnt') || {}).value || '';
+      s.capa.cliente = (document.getElementById('fpdoCli') || {}).value || '';
+      s.capa.local = (document.getElementById('fpdoLoc') || {}).value || '';
+      s.capa.responsavel = (document.getElementById('fpdoResp') || {}).value || '';
+      s.capa.gestor = (document.getElementById('fpdoGes') || {}).value || '';
+      s.portico = (document.getElementById('fpdoPortico') || {}).value || '';
+      s.clienteTxt = (document.getElementById('fpdoClienteTxt') || {}).value || '';
+      s.proxPortico = (document.getElementById('fpdoProxP') || {}).value || '';
+      s.proxCliente = (document.getElementById('fpdoProxC') || {}).value || '';
+      gravar(s);
+      alert('Modelo PPT salvo neste aparelho.');
+    };
     f.querySelectorAll('input[type=file]').forEach(function (inp) {
       inp.addEventListener('change', function () {
         var file = inp.files && inp.files[0];
@@ -155,38 +166,29 @@
     });
   }
 
-  function ler(s) {
-    function g(id) { var el = document.getElementById(id); return el ? el.value : ''; }
-    s.capa.obra = g('fpdoObra'); s.capa.mes = g('fpdoMes'); s.capa.mesAnt = g('fpdoMesAnt');
-    s.capa.cliente = g('fpdoCli'); s.capa.local = g('fpdoLoc');
-    s.capa.responsavel = g('fpdoResp'); s.capa.gestor = g('fpdoGes');
-    s.portico = g('fpdoPortico'); s.clienteTxt = g('fpdoClienteTxt');
-    s.proxPortico = g('fpdoProxP'); s.proxCliente = g('fpdoProxC');
-  }
-
   function botao() {
     var pe = document.getElementById('p92Pe');
-    if (pe && !document.getElementById('fpdoModBtn')) {
+    if (pe && !document.getElementById('fpdoRotBtn')) {
       var b = document.createElement('button');
-      b.id = 'fpdoModBtn';
+      b.id = 'fpdoRotBtn';
       b.className = 'p92-btn p92-btn-ok';
       b.type = 'button';
-      b.textContent = 'Modelo apresentação (fotos)';
+      b.textContent = 'Modelo PPT (capa a final)';
       b.onclick = abrir;
       pe.appendChild(b);
     }
   }
 
-  if (typeof window.p92AbrirFpdo === 'function' && !window.p92AbrirFpdo.__modelo) {
+  if (typeof window.p92AbrirFpdo === 'function' && !window.p92AbrirFpdo.__roteiro) {
     var old = window.p92AbrirFpdo;
     window.p92AbrirFpdo = function () {
       var r = old.apply(this, arguments);
       setTimeout(botao, 400);
       return r;
     };
-    window.p92AbrirFpdo.__modelo = true;
+    window.p92AbrirFpdo.__roteiro = true;
   }
   window.abrirFpdoModelo = abrir;
-  setTimeout(botao, 1500);
-  console.log('[fpdo-modelo] abrirFpdoModelo() ou botão no FPDO');
+  setTimeout(botao, 1200);
+  console.log('[fpdo-roteiro] abrirFpdoModelo()');
 })();
