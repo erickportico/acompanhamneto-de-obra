@@ -13090,6 +13090,7 @@ function trocarSubTabPgtoNovo(tab) {
               var editId = document.getElementById('colabEditId').value;
               var editObraId = document.getElementById('colabEditObraId').value;
               var nome = document.getElementById('colabInputNome').value.trim();
+              if (typeof titleCase === 'function') { nome = titleCase(nome); }
               var funcao = _normalizarFuncaoColab(document.getElementById('colabInputFuncao').value); // PATCH 78
               var empresa = document.getElementById('colabInputEmpresa').value;
               if(!nome){ alert('Informe o nome do colaborador.'); return; }
@@ -73111,7 +73112,7 @@ if (document.readyState === 'loading') {
 
     var plano = menu.querySelector('#btn-tab-obraflow');
     if (plano) {
-      plano.innerHTML = '📐 <span class="pmenu-txt">Gestão de Obras e Equipes</span>';
+      plano.innerHTML = '📐 <span class="pmenu-txt">Plano Mestre da Obra</span>';
       plano.setAttribute('title', 'Plano Mestre da Obra');
       plano.setAttribute('data-menu-renomeado', '1');
     }
