@@ -14,7 +14,7 @@
   function soSeta(el) {
     if (!el || el.closest && (el.closest('input') || el.closest('textarea') || el.closest('select'))) return false;
     if (el.children && el.children.length) return false;
-    var t = String(el.textContent || '').trim();
+    var t = String(el.textContent || '').replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
     return t.length > 0 && /^[→▸▾>\s]+$/.test(t);
   }
 
