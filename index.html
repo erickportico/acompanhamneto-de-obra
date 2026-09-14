@@ -73129,5 +73129,259 @@ if (document.readyState === 'loading') {
   [0, 250, 1000, 2500, 5000].forEach(function (ms) { setTimeout(limparMenu, ms); });
 })();
 </script>
+<!-- PATCH V32_HISTORICO_ALTERACOES -->
+<script id="v32Historico">
+(function () {
+  'use strict';
+  if (window.__v32Historico) { return; }
+  window.__v32Historico = true;
+
+  var LIMITE = 500;
+
+  function usuarioAtual() {
+    try {
+      var s = window.PainelNucleo && window.PainelNucleo.sessao();
+      if (s && s.usuario) { return s.usuario; }
+    } catch (e) { }
+    return 'desconhecido';
+  }
+
+  function moeda(v) {
+    var n = Number(v) || 0;
+    try { return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    catch (e) { return 'R$ ' + n.toFixed(2); }
+  }
+
+  function registrar(acao, detalhes) {
+    try {
+      if (!window.db) { return; }
+      if (!Array.isArray(window.db.historicoAlteracoes)) { window.db.historicoAlteracoes = []; }
+      window.db.historicoAlteracoes.push({
+        ts: new Date().toISOString(),
+        usuario: usuarioAtual(),
+        acao: acao,
+        detalhes: detalhes || ''
+      });
+      if (window.db.historicoAlteracoes.length > LIMITE) {
+        window.db.historicoAlteracoes = window.db.historicoAlteracoes.slice(-LIMITE);
+      }
+    } catch (e) { /* o log nunca pode quebrar a acao original */ }
+  }
+  window.registrarHistorico = registrar;
+
+  /* ---------------- obra: criada ou editada ---------------- */
+  (function () {
+    var original = window.salvarConfigObra;
+    if (typeof original !== 'function' || original.__v32) { return; }
+    var novo = function () {
+      var criando = !!window.modoNovaObra;
+      var antes = null;
+      try {
+        if (!criando && typeof getObraAtual === 'function') {
+          var o = getObraAtual();
+          if (o) { antes = { nome: o.nome, valorContrato: o.valorContrato, pctServico: o.pctServico, regiao: o.regiao }; }
+        }
+      } catch (e) { }
+      var r = original.apply(this, arguments);
+      try {
+        var elNome = document.getElementById('inputNomeObra');
+        var nomeNovo = elNome ? elNome.value.trim() : '';
+        if (criando) {
+          registrar('Obra criada', nomeNovo);
+        } else if (antes) {
+          var partes = [];
+          var elValor = document.getElementById('inputValorContrato');
+          var elPct = document.getElementById('inputPctServico');
+          var elRegiao = document.getElementById('inputRegiaoObra');
+          var valorNovo = elValor ? (Number(elValor.value) || 0) : antes.valorContrato;
+          var pctNovo = elPct ? (Number(elPct.value) || 0) : antes.pctServico;
+          var regiaoNovo = elRegiao ? elRegiao.value : (antes.regiao || '');
+          if ((antes.nome || '') !== nomeNovo) { partes.push('nome: "' + (antes.nome || '') + '" -> "' + nomeNovo + '"'); }
+          if (Number(antes.valorContrato) !== valorNovo) { partes.push('contrato: ' + moeda(antes.valorContrato) + ' -> ' + moeda(valorNovo)); }
+          if (Number(antes.pctServico) !== pctNovo) { partes.push('% servico: ' + antes.pctServico + '% -> ' + pctNovo + '%'); }
+          if ((antes.regiao || '') !== regiaoNovo) { partes.push('regiao: "' + (antes.regiao || '') + '" -> "' + regiaoNovo + '"'); }
+          if (partes.length) { registrar('Obra editada (' + nomeNovo + ')', partes.join('; ')); }
+        }
+      } catch (e) { }
+      return r;
+    };
+    novo.__v32 = true;
+    window.salvarConfigObra = novo;
+  })();
+
+  /* ---------------- despesa: lancada ---------------- */
+  (function () {
+    var original = window.salvarCusto;
+    if (typeof original !== 'function' || original.__v32) { return; }
+    var novo = function () {
+      var obraId = (document.getElementById('custoFilterObra') || {}).value;
+      var obra = (obraId && window.db) ? window.db.obras.find(function (o) { return o.id === obraId; }) : null;
+      if (!obra && typeof getObraAtual === 'function') { obra = getObraAtual(); }
+      var idsAntes = {};
+      if (obra && Array.isArray(obra.centrosCusto)) {
+        obra.centrosCusto.forEach(function (c) { idsAntes[c.id] = 1; });
+      }
+      var r = original.apply(this, arguments);
+      try {
+        if (obra && Array.isArray(obra.centrosCusto)) {
+          var novoItem = null;
+          for (var i = obra.centrosCusto.length - 1; i >= 0; i--) {
+            if (!idsAntes[obra.centrosCusto[i].id]) { novoItem = obra.centrosCusto[i]; break; }
+          }
+          if (novoItem) {
+            registrar('Despesa lancada', '"' + novoItem.descricao + '" - ' + moeda(novoItem.valor) +
+              ' (' + (novoItem.categoria || '') + ') em ' + (obra.nome || ''));
+          }
+        }
+      } catch (e) { }
+      return r;
+    };
+    novo.__v32 = true;
+    window.salvarCusto = novo;
+  })();
+
+  /* ---------------- despesa: editada ---------------- */
+  (function () {
+    var original = window.salvarEdicaoCusto;
+    if (typeof original !== 'function' || original.__v32) { return; }
+    var novo = function () {
+      var id = (document.getElementById('custoEditId') || {}).value;
+      var entry = (typeof _buscarCusto === 'function') ? _buscarCusto(id) : null;
+      var antes = entry ? { descricao: entry.descricao, valor: entry.valor, categoria: entry.categoria, regiao: entry.regiao, data: entry.data } : null;
+      var r = original.apply(this, arguments);
+      try {
+        var depois = (typeof _buscarCusto === 'function') ? _buscarCusto(id) : null;
+        if (antes && depois) {
+          var partes = [];
+          if (antes.descricao !== depois.descricao) { partes.push('descricao: "' + antes.descricao + '" -> "' + depois.descricao + '"'); }
+          if (Number(antes.valor) !== Number(depois.valor)) { partes.push('valor: ' + moeda(antes.valor) + ' -> ' + moeda(depois.valor)); }
+          if (antes.categoria !== depois.categoria) { partes.push('categoria: "' + (antes.categoria || '') + '" -> "' + (depois.categoria || '') + '"'); }
+          if (antes.regiao !== depois.regiao) { partes.push('regiao: "' + (antes.regiao || '') + '" -> "' + (depois.regiao || '') + '"'); }
+          if (antes.data !== depois.data) { partes.push('data: ' + antes.data + ' -> ' + depois.data); }
+          if (partes.length) { registrar('Despesa editada', partes.join('; ')); }
+        }
+      } catch (e) { }
+      return r;
+    };
+    novo.__v32 = true;
+    window.salvarEdicaoCusto = novo;
+  })();
+
+  /* ---------------- despesa: excluida ---------------- */
+  (function () {
+    var original = window.excluirCusto;
+    if (typeof original !== 'function' || original.__v32) { return; }
+    var novo = function (id) {
+      var entry = (typeof _buscarCusto === 'function') ? _buscarCusto(id) : null;
+      var copia = entry ? { descricao: entry.descricao, valor: entry.valor } : null;
+      var r = original.apply(this, arguments);
+      try {
+        if (copia) {
+          registrar('Despesa excluida', '"' + copia.descricao + '" - ' + moeda(copia.valor));
+        }
+      } catch (e) { }
+      return r;
+    };
+    novo.__v32 = true;
+    window.excluirCusto = novo;
+  })();
+
+  /* ---------------- colaborador: criado ou editado ---------------- */
+  (function () {
+    var original = window.salvarColaborador;
+    if (typeof original !== 'function' || original.__v32) { return; }
+    var novo = function () {
+      var editId = (document.getElementById('colabEditId') || {}).value;
+      var editando = !!editId;
+      var r = original.apply(this, arguments);
+      try {
+        var elNome = document.getElementById('colabInputNome');
+        var nome = elNome ? elNome.value.trim() : '';
+        registrar(editando ? 'Colaborador editado' : 'Colaborador cadastrado', nome);
+      } catch (e) { }
+      return r;
+    };
+    novo.__v32 = true;
+    window.salvarColaborador = novo;
+  })();
+
+  /* ---------------- painel de visualizacao ---------------- */
+  window.v32AbrirHistorico = function () {
+    var m = document.getElementById('v32Modal');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'v32Modal';
+      m.className = 'modal-bg';
+      m.innerHTML =
+        '<div class="modal" style="max-width:720px;">' +
+        '  <h3>\uD83D\uDCDC Hist\u00F3rico de Altera\u00E7\u00F5es</h3>' +
+        '  <div style="margin-bottom:10px;">' +
+        '    <input type="text" id="v32Filtro" placeholder="Filtrar por usu\u00E1rio, a\u00E7\u00E3o ou texto..." ' +
+        '      style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;">' +
+        '  </div>' +
+        '  <div id="v32Lista" style="max-height:60vh;overflow:auto;"></div>' +
+        '  <div style="display:flex;justify-content:flex-end;margin-top:14px;">' +
+        '    <button class="secondary" onclick="document.getElementById(\'v32Modal\').style.display=\'none\';">Fechar</button>' +
+        '  </div>' +
+        '</div>';
+      document.body.appendChild(m);
+      m.addEventListener('click', function (ev) { if (ev.target === m) { m.style.display = 'none'; } });
+      document.getElementById('v32Filtro').addEventListener('input', v32Render);
+    }
+    m.style.display = 'flex';
+    v32Render();
+  };
+
+  function v32Render() {
+    var lista = document.getElementById('v32Lista');
+    if (!lista) { return; }
+    var termo = (document.getElementById('v32Filtro').value || '').trim().toLowerCase();
+    var itens = (window.db && Array.isArray(window.db.historicoAlteracoes)) ? window.db.historicoAlteracoes.slice().reverse() : [];
+    if (termo) {
+      itens = itens.filter(function (h) {
+        return (h.usuario || '').toLowerCase().indexOf(termo) >= 0 ||
+               (h.acao || '').toLowerCase().indexOf(termo) >= 0 ||
+               (h.detalhes || '').toLowerCase().indexOf(termo) >= 0;
+      });
+    }
+    if (!itens.length) {
+      lista.innerHTML = '<p style="color:#64748b;">Nenhuma altera\u00E7\u00E3o registrada ainda.</p>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
+      '<thead><tr style="text-align:left;border-bottom:2px solid #e2e8f0;">' +
+      '<th style="padding:6px;">Quando</th><th style="padding:6px;">Usu\u00E1rio</th>' +
+      '<th style="padding:6px;">A\u00E7\u00E3o</th><th style="padding:6px;">Detalhes</th></tr></thead><tbody>';
+    itens.slice(0, 300).forEach(function (h) {
+      var quando = '';
+      try { quando = new Date(h.ts).toLocaleString('pt-BR'); } catch (e) { quando = h.ts || ''; }
+      html += '<tr style="border-bottom:1px solid #f1f5f9;">' +
+        '<td style="padding:6px;white-space:nowrap;">' + quando + '</td>' +
+        '<td style="padding:6px;">' + (h.usuario || '') + '</td>' +
+        '<td style="padding:6px;">' + (h.acao || '') + '</td>' +
+        '<td style="padding:6px;">' + (h.detalhes || '') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    lista.innerHTML = html;
+  }
+
+  /* ---------------- botao dentro da aba Administracao ---------------- */
+  function colocarBotao() {
+    var alvo = document.querySelector('#tab-admin .card-buttons, #tab-admin');
+    if (!alvo || document.getElementById('v32BtnHistorico')) { return; }
+    var b = document.createElement('button');
+    b.id = 'v32BtnHistorico';
+    b.className = 'secondary';
+    b.innerHTML = '\uD83D\uDCDC Hist\u00F3rico';
+    b.onclick = window.v32AbrirHistorico;
+    var refBtn = document.querySelector('#tab-admin button');
+    if (refBtn && refBtn.parentNode) { refBtn.parentNode.insertBefore(b, refBtn.nextSibling); }
+    else { alvo.appendChild(b); }
+  }
+  [0, 500, 1500, 3000].forEach(function (ms) { setTimeout(colocarBotao, ms); });
+})();
+</script>
+<!-- FIM PATCH V32_HISTORICO_ALTERACOES -->
+
 </body>
 </html>
