@@ -116,8 +116,14 @@
     html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div><div class="fr-title">DESENHO — o que foi montado</div>' +
       slot(s, 'desenho', 'Toque: planta/elevacao grifada', 300) + '<div class="fr-foot">' + (s.capa.obra || 'OBRA') + '</div></div>';
 
-    html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div><div class="fr-title">GRAFICOS E INDICADORES</div>' +
-      slot(s, 'grafico', 'Toque: print dos graficos', 300) + '<div class="fr-foot">' + (s.capa.obra || 'OBRA') + '</div></div>';
+    html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div>' +
+      '<div class="fr-title">GRAFICOS E INDICADORES</div>' +
+      '<div style="padding:0 14px 8px;display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button type="button" id="fpdoPuxarGraf" style="border:0;border-radius:8px;padding:8px 12px;background:#ea580c;color:#fff;font-weight:700">Puxar da aba Graficos</button>' +
+      '</div>' +
+      '<div id="fpdoGrafPainel" style="padding:0 14px 10px"></div>' +
+      slot(s, 'grafico', 'Ou toque: foto / imagem dos graficos', 180) +
+      '<div class="fr-foot">' + (s.capa.obra || 'OBRA') + '</div></div>';
 
     html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div><div class="fr-txt"><div><h3>Atividades — PORTICO</h3><textarea id="fpdoPortico"></textarea></div><div><h3>Atividades — CONTRATANTE</h3><textarea id="fpdoClienteTxt"></textarea></div></div></div>';
     html += '<div class="fr-slide"><div class="fr-head"><b>ANDAMENTO DA OBRA</b><span class="fr-marca">P</span></div><div class="fr-txt"><div><h3>Proximas — PORTICO</h3><textarea id="fpdoProxP"></textarea></div><div><h3>Proximas — CONTRATANTE</h3><textarea id="fpdoProxC"></textarea></div></div></div>';
@@ -132,6 +138,60 @@
     set('fpdoResp', s.capa.responsavel); set('fpdoGes', s.capa.gestor);
     set('fpdoPortico', s.portico); set('fpdoClienteTxt', s.clienteTxt);
     set('fpdoProxP', s.proxPortico); set('fpdoProxC', s.proxCliente);
+    function puxarIndicadores() {
+      var box = document.getElementById('fpdoGrafPainel');
+      if (!box) return;
+      var ids = ['chartLiberacao', 'chartFabricacao', 'chartInstalacao', 'chartResumo'];
+      var html = '';
+      ids.forEach(function (id) {
+        var c = document.getElementById(id);
+        if (c && c.toDataURL) {
+          try { html += '<img src="' + c.toDataURL('image/png') + '" style="width:100%;background:#fff;margin:0 0 8px;border:1px solid #fed7aa">'; } catch (e) {}
+        }
+      });
+      if (html) {
+        box.innerHTML = '<p style="font-size:12px;color:#334155">Copiado da aba Graficos e Relatorios</p>' + html;
+        s.indicadores = true;
+        gravar(s);
+        return;
+      }
+      var o = null;
+      try { o = typeof getObraAtual === 'function' ? getObraAtual() : null; } catch (e) {}
+      if (!o || !o.itens || !o.itens.length) {
+        box.innerHTML = '<p style="color:#b91c1c">Abra Menu - Graficos e Relatorios nesta obra (deixe os graficos aparecerem) e clique de novo em Puxar.</p>';
+        return;
+      }
+      function pct(i, campo) {
+        var q = Number(i.qtd) || 0;
+        if (!q) return 0;
+        if (campo === 'inst') {
+          var at = q * (Number(i.larg) || 0) * (Number(i.alt) || 0);
+          var ai = (Number(i.instalado) || 0) * (Number(i.larg) || 0) * (Number(i.alt) || 0);
+          return at > 0 ? Math.round(ai / at * 100) : 0;
+        }
+        return Math.round(((Number(i[campo]) || 0) / q) * 100);
+      }
+      var blocos = [
+        { t: 'LIBERACAO ESQUADRIAS', c: '#f59e0b', k: 'fem' },
+        { t: 'FABRICACAO ESQUADRIAS', c: '#3b82f6', k: 'fabricado' },
+        { t: 'INSTALACAO ESQUADRIAS', c: '#10b981', k: 'inst' }
+      ];
+      box.innerHTML = blocos.map(function (b) {
+        var barras = o.itens.slice(0, 24).map(function (it) {
+          var p = Math.max(0, Math.min(100, pct(it, b.k)));
+          return '<div style="display:flex;align-items:center;gap:6px;margin:2px 0;font-size:11px">' +
+            '<span style="width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (it.ref || '') + '</span>' +
+            '<div style="flex:1;background:#fee2e2;height:10px;border-radius:4px;overflow:hidden"><div style="width:' + p + '%;height:100%;background:' + b.c + '"></div></div>' +
+            '<span style="width:36px;text-align:right">' + p + '%</span></div>';
+        }).join('');
+        return '<div style="margin:0 0 10px;border:1px solid #fed7aa;padding:8px"><b style="color:#c2410c">' + b.t + '</b>' + barras + '</div>';
+      }).join('');
+      s.indicadores = true;
+      gravar(s);
+    }
+    var btG = document.getElementById('fpdoPuxarGraf');
+    if (btG) btG.onclick = puxarIndicadores;
+    if (s.indicadores) puxarIndicadores();
     document.getElementById('fpdoRotFechar').onclick = function () { f.style.display = 'none'; };
     document.getElementById('fpdoRotSalvar').onclick = function () {
       s.capa.obra = (document.getElementById('fpdoObra') || {}).value || '';
