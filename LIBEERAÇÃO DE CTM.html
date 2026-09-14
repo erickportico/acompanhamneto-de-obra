@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Meta tags essenciais para prévia e indexação -->
+    <title>CTM - Liberação de Contramarcos & CAD DXF</title>
+    <meta name="description" content="Sistema completo para gestão e liberação de contramarcos, conferência técnica de esquadrias e exportação de desenhos CAD em DXF.">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Prevenção de Cache -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- BIBLIOTECA SHEETJS PARA LER/EXPORTAR EXCEL -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --primary-orange: #ff7b00;
+            --primary-dark: #121212;
+            --card-bg: #ffffff;
+            --bg-color: #f4f6f9;
+            --text-color: #333333;
+            --success-green: #27ae60;
+            --danger-red: #e74c3c;
+            --warning-yellow: #f39c12;
+            --info-blue: #2980b9;
+            --border-color: #e0e0e0;
+            --print-scale: 1; /* Escala dinâmica de impressão */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; font-size: 14px; }
+        .container { max-width: 1250px; margin: 0 auto; }
+
+        /* Headers */
+        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .header h1 { font-size: 20px; color: var(--primary-dark); }
+        .sub-header-title { font-weight: bold; color: var(--primary-orange); margin-top: 4px; }
+
+        /* Cards & Layout */
+        .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+
+        /* Dashboard Cards */
+        .dash-card { background: #fff; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-orange); box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center; }
+        .dash-card h4 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+        .dash-card .value { font-size: 20px; font-weight: bold; color: var(--primary-dark); }
+        .progress-container { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--success-green); width: 0%; transition: width 0.3s ease; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); }
+        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: var(--primary-orange); border-bottom-color: var(--primary-orange); }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 12px; color: #444; }
+        .form-control { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; }
+        .form-control:focus { outline: none; border-color: var(--primary-orange); }
+        
+        /* Buttons */
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; justify-content: center; transition: background 0.2s; }
+        .btn-primary { background: var(--primary-orange); color: #fff; }
+        .btn-primary:hover { background: #e06c00; }
+        .btn-success { background: var(--success-green); color: #fff; }
+        .btn-success:hover { background: #219150; }
+        .btn-secondary { background: #7f8c8d; color: #fff; }
+        .btn-danger { background: var(--danger-red); color: #fff; }
+        .btn-purple { background: #8e44ad; color: #fff; }
+        .btn-purple:hover { background: #712d91; }
+        .btn-sm { padding: 4px 8px; font-size: 11px; }
+
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background: #f8f9fa; font-weight: 600; color: #444; }
+        tr:hover { background: #f1f4f8; }
+
+        /* Badges */
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; color: #fff; text-transform: uppercase; }
+        .badge-success { background: var(--success-green); }
+        .badge-warning { background: var(--warning-yellow); }
+        .badge-danger { background: var(--danger-red); }
+        .badge-info { background: var(--info-blue); }
+        .badge-dark { background: #34495e; }
+
+        /* Result Box */
+        .result-box { padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 15px; text-align: center; display: none; }
+        .result-box.pass { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-box.fail { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Bulk List */
+        .bulk-list-container { max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; background: #fafafa; }
+        .bulk-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 650px; max-height: 90vh; overflow-y: auto; }
+
+        /* Action Buttons in Table */
+        .btn-edit, .btn-delete { border: none; background: none; cursor: pointer; font-size: 14px; margin: 0 2px; }
+        .btn-delete { color: var(--danger-red); }
+
+        /* CAD Print Layout Styles */
+        .cad-sheet-print {
+            background: #fff;
+            border: 2px solid #000;
+            padding: 20px;
+            margin-bottom: 0px;
+            color: #000;
+            box-sizing: border-box;
+        }
+
+        .cad-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Elements Hidden on Screen, Visible on Print */
+        .print-only { display: none; }
+
+        /* ==========================================================================
+           REGRAS E PADRONIZAÇÃO DE IMPRESSÃO (SISTEMA DE ZOOM E CABEÇALHO)
+           ========================================================================== */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+
+            body { 
+                background: #fff !important; 
+                color: #000 !important; 
+                font-size: 10pt !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                zoom: var(--print-scale, 1) !important; /* Aplica o zoom configurado */
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Ocultar elementos da interface web interativa */
+            .no-print, .btn, .tabs, .header-controls, .dash-card, .result-box, .header, .modal { 
+                display: none !important; 
+            }
+
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Cabeçalho Unificado de Impressão */
+            .print-header-unified {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 2px solid #000;
+                padding-bottom: 8px;
+                margin-bottom: 15px;
+                width: 100%;
+            }
+
+            .card { 
+                box-shadow: none !important; 
+                border: 1px solid #000 !important; 
+                margin-bottom: 15px !important; 
+                padding: 12px !important;
+                page-break-inside: avoid; 
+                break-inside: avoid; 
+            }
+
+            .print-only { display: block !important; }
+            
+            /* Modos de Impressão Filtrados */
+            body.print-specs-mode .card:not(#cardSpecs) { display: none !important; }
+            body.print-history-mode .card:not(#cardHistory) { display: none !important; }
+            body.print-cad-mode .container > * { display: none !important; }
+            body.print-cad-mode #cadBatchPrintContainer { display: block !important; }
+
+            /* Evita quebra de página da primeira folha */
+            .cad-sheet-print:not(:last-child) {
+                page-break-after: always;
+                break-after: page;
+            }
+
+            .signatures-container { 
+                display: flex !important; 
+                justify-content: space-between; 
+                margin-top: 35px; 
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .signature-box { 
+                width: 45%; 
+                text-align: center; 
+                border-top: 1px solid #000; 
+                padding-top: 5px; 
+                font-size: 10pt;
+            }
+
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border-bottom: 1px solid #000 !important; padding: 6px 8px !important; }
+            th { background-color: #f2f2f2 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Input oculto para carregar arquivo Excel de especificações -->
+<input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importExcelSpecs(event)">
+
+<div class="container">
+    
+    <!-- CABEÇALHO UNIFICADO PARA IMPRESSÃO -->
+    <div class="print-header-unified print-only">
+        <div>
+            <h2 style="margin:0; font-size:18px; text-transform:uppercase;" id="printReportTitle">RELATÓRIO TÉCNICO DE CONTRAMARCOS</h2>
+            <div style="font-size:12px; margin-top:2px;">OBRA: <strong class="work-name-span"></strong></div>
+        </div>
+        <div style="text-align:right; font-size:11px;">
+            <div><strong>SISTEMA CTM LIBERAÇÃO</strong></div>
+            <div id="printReportDate"></div>
+        </div>
+    </div>
+
+    <!-- Cabeçalho Principal (Tela) -->
+    <div class="header no-print">
+        <div>
+            <h1>🏗️ SISTEMA DE LIBERAÇÃO DE CONTRAMARCOS</h1>
+            <div id="subHeaderTitle" class="sub-header-title">CTM LIBERAÇÃO</div>
+        </div>
+        <div class="header-controls" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="printZoomSelect" style="margin-bottom: 2px;">🔍 ZOOM IMPRESSÃO:</label>
+                <select id="printZoomSelect" class="form-control" onchange="updatePrintZoom()" style="padding: 6px 8px; font-weight: bold; background: #fdfefe;">
+                    <option value="0.7">50% (Compacto)</option>
+                    <option value="0.8">80%</option>
+                    <option value="0.9">90%</option>
+                    <option value="1.0" selected>100% (Padrão)</option>
+                    <option value="1.1">110%</option>
+                    <option value="1.2">120% (Expandido)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="workSelect" style="margin-bottom: 2px;">SELECIONAR OBRA:</label>
+                <select id="workSelect" class="form-control" onchange="changeWork()"></select>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="createNewWork()">➕ Nova Obra</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCurrentWork()">🗑️ Apagar Obra</button>
+        </div>
+    </div>
+
+    <!-- Dashboard de Métricas -->
+    <div class="grid-4 no-print" style="margin-bottom: 20px;">
+        <div class="dash-card">
+            <h4>Total Projetado</h4>
+            <div id="totalProjected" class="value">0 pçs</div>
+            <small style="color: #777;"><span id="totalTypes">0</span> Tipologias</small>
+        </div>
+        <div class="dash-card" style="border-left-color: var(--success-green);">
+            <h4>Liberado em Obra</h4>
+            <div id="totalReleasedQty" class="value" style="color: var(--success-green);">0 pçs</div>
+        </div>
+        <div class="dash-card" style="border-left-color: var(--danger-red);">
+            <h4>Saldo Pendente</h4>
+            <div id="totalPendingQty" class="value" style="color: var(--danger-red);">0 pçs</div>
+        </div>
+        <div class="dash-card" style="border-left-color: var(--info-blue);">
+            <h4>Progresso do Projeto</h4>
+            <div id="approvalRate" class="value" style="color: var(--info-blue);">0%</div>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botões de Ações Gerais -->
+    <div class="no-print" style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="copyWhatsAppSummary()">📲 Copiar Resumo (WhatsApp)</button>
+        <button class="btn btn-secondary" onclick="generatePDFReport()">🖨️ Imprimir Relatório Geral</button>
+    </div>
+
+    <!-- PAINEL DE LIBERAÇÃO -->
+    <div class="card no-print">
+        <div class="tabs">
+            <button id="tabIndividual" class="tab-btn active" onclick="switchMode('individual')">Conferência Individual</button>
+            <button id="tabBulk" class="tab-btn" onclick="switchMode('bulk')">Liberação em Massa (Lote)</button>
+        </div>
+
+        <!-- Conteúdo: Modo Individual -->
+        <div id="modeIndividualContent">
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="refSelect">Referência / Código do Projeto:</label>
+                    <select id="refSelect" class="form-control" onchange="updateProjectedSpecs()"></select>
+                </div>
+                <div class="form-group">
+                    <label for="measureType">Tipo de Medida Tomativa:</label>
+                    <select id="measureType" class="form-control" onchange="updateProjectedSpecs()">
+                        <option value="base">Base do Projeto (Sem Ajuste)</option>
+                        <option value="fora">Fora a Fora (+28mm)</option>
+                        <option value="dentro">Dentro a Dentro (-4mm)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Escopo da Liberação:</label>
+                    <div style="display: flex; gap: 15px; margin-top: 5px;">
+                        <label><input type="radio" name="releaseScope" value="TOTAL" checked onclick="toggleScopeInputs()"> Total</label>
+                        <label><input type="radio" name="releaseScope" value="PARCIAL" onclick="toggleScopeInputs()"> Parcial</label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="partialQtyContainer" class="form-group" style="display: none;">
+                <label for="partialQty">Quantidade Parcial a Liberar:</label>
+                <input type="number" id="partialQty" class="form-control" min="1" placeholder="Ex: 5">
+            </div>
+
+            <div class="grid-4" style="margin-top: 10px;">
+                <div class="form-group">
+                    <label for="realL">Largura Medida L (mm):</label>
+                    <input type="number" id="realL" class="form-control" placeholder="Ex: 1500" oninput="drawCADCanvas()">
+                </div>
+                <div class="form-group">
+                    <label for="realH">Altura Medida H (mm):</label>
+                    <input type="number" id="realH" class="form-control" placeholder="Ex: 1200" oninput="drawCADCanvas()">
+                </div>
+                <div class="form-group">
+                    <label for="realDiag1">Diagonal 1 (mm) [Opcional]:</label>
+                    <input type="number" id="realDiag1" class="form-control" placeholder="Ex: 1920">
+                </div>
+                <div class="form-group">
+                    <label for="realDiag2">Diagonal 2 (mm) [Opcional]:</label>
+                    <input type="number" id="realDiag2" class="form-control" placeholder="Ex: 1920">
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="location">Local / Bloco / Apto:</label>
+                    <input type="text" id="location" class="form-control" placeholder="Ex: Bloco A - Apto 102">
+                </div>
+                <div class="form-group">
+                    <label for="inspector">Conferente / Responsável:</label>
+                    <input type="text" id="inspector" class="form-control" placeholder="Ex: Eng. Carlos">
+                </div>
+                <div class="form-group">
+                    <label for="tolerance">Tolerância Permitida (mm):</label>
+                    <input type="number" id="tolerance" class="form-control" value="3">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="obsNotes">Observações / Notas:</label>
+                <input type="text" id="obsNotes" class="form-control" placeholder="Ex: Vão limpo e pronto para instalação">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-primary" onclick="checkRelease()">🔍 Verificar Medidas</button>
+                <button class="btn btn-success" onclick="saveVerification()">💾 Gravar e Liberar</button>
+            </div>
+
+            <!-- Resumo do Projeto Alvo -->
+            <div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 6px; font-size: 12px; display: flex; gap: 20px; flex-wrap: wrap;">
+                <div><strong>L Projeto:</strong> <span id="projL">-</span> mm</div>
+                <div><strong>H Projeto:</strong> <span id="projH">-</span> mm</div>
+                <div><strong>Tipologia:</strong> <span id="projType">-</span></div>
+                <div><strong>Estrutura:</strong> <span id="projSides">-</span></div>
+                <div><strong>Modelo CTM:</strong> <span id="projModel">-</span></div>
+                <div><strong>Total Projetado:</strong> <span id="projQty">-</span></div>
+                <div><strong>Já Liberado:</strong> <span id="projReleased" style="color:var(--success-green); font-weight:bold;">-</span></div>
+                <div><strong>Saldo Pendente:</strong> <span id="projPending" style="color:var(--danger-red); font-weight:bold;">-</span></div>
+            </div>
+
+            <div id="resultBox" class="result-box"></div>
+        </div>
+
+        <!-- Conteúdo: Modo Em Massa -->
+        <div id="modeBulkContent" style="display: none;">
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="bulkLocation">Local Geral:</label>
+                    <input type="text" id="bulkLocation" class="form-control" value="Liberação Geral do Cliente">
+                </div>
+                <div class="form-group">
+                    <label for="bulkInspector">Conferente:</label>
+                    <input type="text" id="bulkInspector" class="form-control" value="Aprovado via Cliente/Projeto">
+                </div>
+                <div class="form-group">
+                    <label for="bulkMeasureType">Tipo de Medida Tomativa:</label>
+                    <select id="bulkMeasureType" class="form-control">
+                        <option value="base">Base do Projeto (Sem Ajuste)</option>
+                        <option value="fora">Fora a Fora (+28mm)</option>
+                        <option value="dentro">Dentro a Dentro (-4mm)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Escopo da Liberação em Lote:</label>
+                    <div style="display: flex; gap: 15px; margin-top: 5px;">
+                        <label><input type="radio" name="bulkScope" value="TOTAL" checked onclick="toggleBulkScopeInputs()"> Total por Item</label>
+                        <label><input type="radio" name="bulkScope" value="PARCIAL" onclick="toggleBulkScopeInputs()"> Parcial Fixo</label>
+                    </div>
+                </div>
+                <div id="bulkPartialQtyContainer" class="form-group" style="display: none;">
+                    <label for="bulkPartialQty">Qtd Parcial por Item:</label>
+                    <input type="number" id="bulkPartialQty" class="form-control" placeholder="Ex: 5">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <label style="font-weight: bold;">Selecione os Contramarcos para Liberar:</label>
+                <button class="btn btn-secondary btn-sm" onclick="toggleSelectAllBulk()">Marcar / Desmarcar Todos</button>
+            </div>
+            
+            <div id="bulkListContainer" class="bulk-list-container"></div>
+
+            <button class="btn btn-success" style="margin-top: 15px;" onclick="executeBulkRelease()">🚀 Executar Liberação em Massa</button>
+        </div>
+
+        <!-- PAINEL DE VISUALIZAÇÃO CAD 2D E EXPORTAÇÃO DXF -->
+        <div class="card" style="margin-top: 20px; background: #1a1a1a; color: #fff; border: 1px solid #333;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin: 0; color: var(--primary-orange); display: flex; align-items: center; gap: 8px;">
+                    📐 Visualização CAD 2D (Escala Automática)
+                </h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-purple" style="font-size: 12px;" onclick="openBatchCadModal()">
+                        🖨️ Pranchas CAD em Lote (Multi-Marcos)
+                    </button>
+                    <button class="btn btn-primary" style="background: #27ae60; border: none; font-size: 12px;" onclick="downloadDXF()">
+                        📥 Baixar DXF 1:1 (AutoCAD)
+                    </button>
+                </div>
+            </div>
+            
+            <div style="text-align: center; background: #0d0d0d; padding: 10px; border-radius: 6px; border: 1px solid #222;">
+                <canvas id="cadCanvas" width="550" height="320" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"></canvas>
+            </div>
+            
+            <div style="margin-top: 8px; font-size: 11px; color: #aaa; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px;">
+                <span>🔸 Layer `CONTRAMARCO_EXT`: Perfil Exterior</span>
+                <span>🔹 Layer `DIAGONAIS`: Linhas de Checagem</span>
+                <span>🟢 Layer `COTAS`: Cotas de Projeto (mm)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABELA DE ESPECIFICAÇÕES DO PROJETO -->
+    <div class="card" id="cardSpecs">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+            <h2>📋 Especificações dos Contramarcos da Obra (<span class="work-name-span"></span>)</h2>
+            <div class="no-print" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-success btn-sm" onclick="exportSpecsToExcel()">📥 Exportar Excel</button>
+                <button class="btn btn-purple btn-sm" onclick="triggerExcelImport()">📤 Importar Excel</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteSelectedSpecs()">🗑️ Excluir Selecionados</button>
+                <button class="btn btn-secondary btn-sm" onclick="printSpecsOnly()">🖨️ Imprimir Especificações</button>
+                <button class="btn btn-secondary btn-sm" onclick="openCustomTypeModal()">🏷️ Cadastrar Tipologia</button>
+                <button class="btn btn-primary btn-sm" onclick="openNewModal()">➕ Novo Contramarco</button>
+            </div>
+        </div>
+
+        <!-- Filtros da Tabela -->
+        <div class="grid-3 no-print" style="margin-bottom: 10px;">
+            <input type="text" id="searchInput" class="form-control" placeholder="🔎 Buscar por Referência..." onkeyup="applyFilters()">
+            <select id="typeFilter" class="form-control" onchange="applyFilters()">
+                <option value="">Todas Tipologias</option>
+            </select>
+            <select id="statusFilter" class="form-control" onchange="applyFilters()">
+                <option value="">Todos Status</option>
+                <option value="PENDENTE">PENDENTE</option>
+                <option value="EM ANDAMENTO">EM ANDAMENTO</option>
+                <option value="CONCLUÍDO">CONCLUÍDO</option>
+            </select>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table id="specTable">
+                <thead>
+                    <tr>
+                        <th class="no-print" style="width: 30px; text-align: center;">
+                            <input type="checkbox" id="selectAllSpecs" onclick="toggleSelectAllSpecs()">
+                        </th>
+                        <th>Ref.</th>
+                        <th>Medida Projeto (L x H) mm</th>
+                        <th>Qtd Total</th>
+                        <th>Liberado</th>
+                        <th>Saldo</th>
+                        <th>Status</th>
+                        <th>Lados</th>
+                        <th>Modelo CTM</th>
+                        <th>Tipologia</th>
+                        <th class="no-print">Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- HISTÓRICO DE LIBERAÇÕES REGISTRADAS -->
+    <div class="card" id="cardHistory">
+        <!-- Input de arquivo oculto para carregar planilhas de histórico -->
+        <input type="file" id="inputImportarHistorico" accept=".xlsx, .xls, .csv" style="display: none;" onchange="processarArquivoHistorico(event)">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+            <h2>📜 Histórico de Liberações Registradas (<span class="work-name-span"></span>)</h2>
+            <div class="no-print" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <button type="button" class="btn btn-success btn-sm" onclick="exportHistoryToExcel()">
+                    📊 Exportar Histórico (Excel)
+                </button>
+                <button type="button" class="btn btn-purple btn-sm" onclick="document.getElementById('inputImportarHistorico').click()">
+                    📥 Importar Histórico
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedHistory()">
+                    🗑️ Excluir Selecionados
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="printHistoryOnly()">
+                    🖨️ Imprimir Histórico
+                </button>
+            </div>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th class="no-print" style="width: 30px; text-align: center;">
+                            <input type="checkbox" id="selectAllHistory" onclick="toggleSelectAllHistory()">
+                        </th>
+                        <th>Data/Hora</th>
+                        <th>Local</th>
+                        <th>Ref.</th>
+                        <th>Liberado</th>
+                        <th>Tipo Medida</th>
+                        <th>Medido (L x H)</th>
+                        <th>Projeto Alvo</th>
+                        <th>Dif. (L / H)</th>
+                        <th>Status</th>
+                        <th>Conferente / Obs</th>
+                        <th class="no-print">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr>
+                        <td colspan="12" style="text-align: center; color: #888;">Nenhuma liberação registrada até o momento nesta obra.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- AREA DE IMPRESSÃO CAD EM LOTE -->
+    <div id="cadBatchPrintContainer" style="display: none;"></div>
+
+    <!-- Seção de Assinaturas Técnicas Padronizadas -->
+    <div class="print-only">
+        <div class="signatures-container">
+            <div class="signature-box">
+                <strong>Engenharia / Responsável da Obra</strong><br>
+                <small>Assinatura & Carimbo</small>
+            </div>
+            <div class="signature-box">
+                <strong>Conferente Técnico / Esquadrias</strong><br>
+                <small>Assinatura & Carimbo</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cadastrar / Editar Contramarco -->
+<div id="newModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" style="margin-bottom: 15px; border-bottom: 2px solid var(--primary-orange); padding-bottom: 5px;">Cadastrar Novo Contramarco</h2>
+        <input type="hidden" id="editIndex" value="-1">
+        
+        <div class="form-group">
+            <label for="newRef">Código / Referência (Ex: J22, P30)</label>
+            <input type="text" id="newRef" class="form-control" placeholder="Ex: J22">
+        </div>
+
+        <div class="form-group">
+            <label for="newType">TIPOLOGIA DA ESQUADRIA</label>
+            <select id="newType" class="form-control"></select>
+        </div>
+
+        <div class="form-group">
+            <label for="newHasBottom">CONFIGURAÇÃO DOS LADOS (PERFIL INFERIOR)</label>
+            <select id="newHasBottom" class="form-control">
+                <option value="true">4 Lados (Completo - Janelas e Portas C/ Soleira)</option>
+                <option value="false">3 Lados (Sem Soleira - Ex: Porta de Giro / Passagem)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="newCtmProfile">MODELO DO PERFIL (CTM)</label>
+            <select id="newCtmProfile" class="form-control">
+                <option value="largo">CTM Largo</option>
+                <option value="estreito">CTM Estreito</option>
+            </select>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="newL">Largura Projeto L (mm)</label>
+                <input type="number" id="newL" class="form-control" placeholder="Ex: 1500">
+            </div>
+            <div class="form-group">
+                <label for="newH">Altura Projeto H (mm)</label>
+                <input type="number" id="newH" class="form-control" placeholder="Ex: 1200">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="newQty">Quantidade Total Projetada</label>
+            <input type="number" id="newQty" class="form-control" placeholder="Ex: 10">
+        </div>
+
+        <div class="grid-2" style="margin-top: 15px;">
+            <button class="btn btn-success" onclick="saveItemModal()">Salvar</button>
+            <button class="btn btn-secondary" onclick="closeNewModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cadastrar Nova Tipologia Customizada -->
+<div id="customTypeModal" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 15px; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">🏷️ Cadastrar Nova Tipologia</h2>
+        
+        <div class="form-group">
+            <label for="customTypeCategory">Categoria / Grupo</label>
+            <select id="customTypeCategory" class="form-control">
+                <option value="JANELAS">🪟 JANELAS</option>
+                <option value="PORTAS">🚪 PORTAS</option>
+                <option value="FACHADAS & OUTROS">🏗️ FACHADAS & OUTROS</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="customTypeName">Nome da Nova Tipologia</label>
+            <input type="text" id="customTypeName" class="form-control" placeholder="Ex: JANELA OSCILO-BATENTE / PORTA PIVOTANTE">
+        </div>
+
+        <div class="grid-2" style="margin-top: 15px;">
+            <button class="btn btn-success" style="background:#8e44ad;" onclick="saveCustomType()">Cadastrar Tipologia</button>
+            <button class="btn btn-secondary" onclick="closeCustomTypeModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gerar Pranchas CAD em Lote -->
+<div id="batchCadModal" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 10px; border-bottom: 2px solid var(--primary-orange); padding-bottom: 5px;">🖨️ Pranchas CAD & Exportação em Lote</h2>
+        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Selecione os contramarcos e o tipo de medida tomativa para incluir nas pranchas ou para exportar direto para o AutoCAD (DWG/DXF):</p>
+        
+        <div class="form-group" style="margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+            <label for="batchCadMeasureType" style="font-weight: bold; color: var(--primary-orange);">Regra de Modificação / Tipo de Medida Tomativa:</label>
+            <select id="batchCadMeasureType" class="form-control" style="margin-top: 5px;">
+                <option value="base">Base do Projeto (Sem Ajuste)</option>
+                <option value="fora">Fora a Fora (+28mm)</option>
+                <option value="dentro">Dentro a Dentro (-4mm)</option>
+            </select>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: bold; font-size: 12px;">Marcos Disponíveis no Projeto:</span>
+            <button class="btn btn-secondary btn-sm" onclick="toggleSelectAllCadBatch()">Marcar / Desmarcar Todos</button>
+        </div>
+
+        <div id="batchCadListContainer" class="bulk-list-container" style="max-height: 250px;"></div>
+
+        <div class="grid-2" style="margin-top: 15px;">
+            <button class="btn btn-purple" onclick="executeBatchCadPrint()">🖨️ Imprimir Pranchas + Folha Resumo</button>
+            <button class="btn btn-success" onclick="downloadBatchDXF()">📥 Exportar Selecionados (DWG/DXF)</button>
+        </div>
+        <div style="text-align: right; margin-top: 10px;">
+            <button class="btn btn-secondary btn-sm" onclick="closeBatchCadModal()">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let defaultTypesStruct = [
+        { category: "JANELAS", name: "JANELA MAXIM-AR" },
+        { category: "JANELAS", name: "JANELA DE CORRER C/ 02 FOLHAS" },
+        { category: "JANELAS", name: "JANELA DE CORRER C/ 03 FOLHAS" },
+        { category: "JANELAS", name: "JANELA DE CORRER C/ 04 FOLHAS" },
+        { category: "JANELAS", name: "JANELA FIXA / QUADRO FIXO" },
+        { category: "JANELAS", name: "INTEGRADA C/ PERSIANA" },
+        { category: "PORTAS", name: "PORTA DE CORRER C/ 02 FOLHAS" },
+        { category: "PORTAS", name: "PORTA DE CORRER C/ 03 FOLHAS" },
+        { category: "PORTAS", name: "PORTA DE CORRER C/ 04 FOLHAS" },
+        { category: "PORTAS", name: "PORTA DE GIRO VIDRO" },
+        { category: "FACHADAS & OUTROS", name: "FACHADA PELE DE VIDRO" }
+    ];
+
+    function getStorageItem(key, fallback) {
+        try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : fallback;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function setStorageItem(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+            console.warn("Storage inacessível:", e);
+        }
+    }
+
+    let customTypes = getStorageItem('ctm_custom_types_v2', defaultTypesStruct);
+
+    let defaultWorks = {
+        "BRISAS DE CAMBOINHA": {
+            specs: [
+                { ref: "J01", L: 528,  H: 528,  qty: 100, type: "JANELA DE CORRER C/ 02 FOLHAS", hasBottom: true, ctmProfile: "largo" },
+                { ref: "J02", L: 2328, H: 528,  qty: 14,  type: "JANELA DE CORRER C/ 02 FOLHAS", hasBottom: true, ctmProfile: "largo" },
+                { ref: "J03", L: 1828, H: 1528, qty: 13,  type: "JANELA MAXIM-AR", hasBottom: true, ctmProfile: "estreito" },
+                { ref: "P08", L: 1828, H: 2228, qty: 63,  type: "PORTA DE CORRER C/ 02 FOLHAS", hasBottom: true, ctmProfile: "largo" }
+            ],
+            logs: []
+        },
+        "Obra Artus Vivence": {
+            specs: [
+                { ref: "J01", L: 528,  H: 528,  qty: 50, type: "JANELA DE CORRER C/ 02 FOLHAS", hasBottom: true, ctmProfile: "largo" },
+                { ref: "P01", L: 1500, H: 2100, qty: 20, type: "PORTA DE GIRO VIDRO", hasBottom: false, ctmProfile: "estreito" }
+            ],
+            logs: []
+        }
+    };
+
+    let allWorks = getStorageItem('ctm_all_works', defaultWorks);
+    let currentWorkKey = getStorageItem('ctm_current_work', "BRISAS DE CAMBOINHA");
+    if (typeof currentWorkKey !== 'string') currentWorkKey = "BRISAS DE CAMBOINHA";
+
+    let currentCheck = null;
+
+    window.onload = function() {
+        renderTypeDropdowns();
+        renderWorkSelect();
+        loadCurrentWorkData();
+    };
+
+    /**
+     * Atualiza a escala de zoom de impressão no CSS dinamicamente
+     */
+    function updatePrintZoom() {
+        const zoomVal = document.getElementById("printZoomSelect").value;
+        document.documentElement.style.setProperty('--print-scale', zoomVal);
+    }
+
+    /**
+     * Atualiza o cabeçalho padronizado do relatório antes de imprimir
+     */
+    function preparePrintHeader(title) {
+        document.getElementById("printReportTitle").textContent = title;
+        document.getElementById("printReportDate").textContent = `EMISSÃO: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`;
+    }
+
+    function processarArquivoHistorico(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (typeof XLSX === 'undefined') {
+            alert("Erro: A biblioteca SheetJS (xlsx) não está carregada.");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                if (!jsonRows || jsonRows.length === 0) {
+                    alert("O arquivo selecionado está vazio ou não contém dados válidos.");
+                    return;
+                }
+
+                const novosRegistros = jsonRows.map((row) => {
+                    let medidoStr = String(row["Medido (L x H)"] || row["medido"] || row["Medido"] || "0 x 0");
+                    let partesMedido = medidoStr.toLowerCase().split('x').map(v => parseFloat(v.trim()) || 0);
+                    let realL = partesMedido[0] || parseFloat(row["Medido L (mm)"]) || 0;
+                    let realH = partesMedido[1] || parseFloat(row["Medido H (mm)"]) || 0;
+
+                    let projStr = String(row["Projeto Alvo"] || row["projetoAlvo"] || "0 x 0");
+                    let partesProj = projStr.toLowerCase().split('x').map(v => parseFloat(v.trim()) || 0);
+                    let projL = partesProj[0] || parseFloat(row["Projeto L (mm)"]) || 0;
+                    let projH = partesProj[1] || parseFloat(row["Projeto H (mm)"]) || 0;
+
+                    let difStr = String(row["Dif. (L / H)"] || row["dif"] || "0 / 0");
+                    let partesDif = difStr.replace('mm','').toLowerCase().split('/').map(v => parseFloat(v.trim()) || 0);
+                    let diffL = partesDif[0] || parseFloat(row["Diferença L (mm)"]) || (realL - projL);
+                    let diffH = partesDif[1] || parseFloat(row["Diferença H (mm)"]) || (realH - projH);
+
+                    let liberadoStr = String(row["Liberado"] || row["liberado"] || row["Escopo Liberado"] || "TOTAL (1 pçs)");
+                    let matchQtd = liberadoStr.match(/\d+/);
+                    let releasedQty = matchQtd ? parseInt(matchQtd[0]) : 1;
+
+                    return {
+                        timestamp: row["Data/Hora"] || row["dataHora"] || row["Data"] || new Date().toLocaleString('pt-BR'),
+                        location: row["Local / Bloco"] || row["Local"] || row["local"] || "Não especificado",
+                        ref: String(row["Referência"] || row["Ref."] || row["ref"] || row["Referencia"] || "N/A").toUpperCase(),
+                        scopeLabel: liberadoStr,
+                        releasedQty: releasedQty,
+                        measureType: row["Tipo Medida"] || row["tipoMedida"] || "Base do Projeto",
+                        realL: realL,
+                        realH: realH,
+                        projL: projL,
+                        projH: projH,
+                        diffL: diffL,
+                        diffH: diffH,
+                        diagDiff: row["Diferença Diagonais (mm)"] || null,
+                        status: String(row["Status Liberação"] || row["Status"] || row["status"] || "APROVADO").toUpperCase(),
+                        inspector: row["Conferente"] || row["conferente"] || row["Responsável"] || "Importado",
+                        notes: row["Observações"] || row["Observação"] || row["conferenteObs"] || "Importado via planilha"
+                    };
+                });
+
+                if (!allWorks[currentWorkKey]) {
+                    allWorks[currentWorkKey] = { specs: [], logs: [] };
+                }
+                if (!allWorks[currentWorkKey].logs) {
+                    allWorks[currentWorkKey].logs = [];
+                }
+
+                allWorks[currentWorkKey].logs = [...novosRegistros, ...allWorks[currentWorkKey].logs];
+
+                saveAllData();
+                populateTableAndSelect();
+                renderBulkItems();
+                renderHistory();
+                updateDashboard();
+
+                alert(`✅ Sucesso! ${novosRegistros.length} registro(s) de histórico foram importados para a obra "${currentWorkKey}".`);
+
+            } catch (error) {
+                console.error("Erro na importação:", error);
+                alert("Ocorreu um erro ao processar a planilha. Verifique a estrutura dos dados.");
+            } finally {
+                event.target.value = '';
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    function toggleScopeInputs() {
+        const scope = document.querySelector('input[name="releaseScope"]:checked').value;
+        document.getElementById("partialQtyContainer").style.display = (scope === "PARCIAL") ? "block" : "none";
+    }
+
+    function toggleBulkScopeInputs() {
+        const scope = document.querySelector('input[name="bulkScope"]:checked').value;
+        document.getElementById("bulkPartialQtyContainer").style.display = (scope === "PARCIAL") ? "block" : "none";
+    }
+
+    function renderTypeDropdowns() {
+        const modalSelect = document.getElementById("newType");
+        const filterSelect = document.getElementById("typeFilter");
+
+        modalSelect.innerHTML = "";
+        filterSelect.innerHTML = '<option value="">Todas Tipologias</option>';
+
+        const categories = {};
+        customTypes.forEach(t => {
+            const cat = t.category || "FACHADAS & OUTROS";
+            if (!categories[cat]) categories[cat] = [];
+            if (!categories[cat].includes(t.name)) categories[cat].push(t.name);
+        });
+
+        const catIcons = {
+            "JANELAS": "🪟 JANELAS",
+            "PORTAS": "🚪 PORTAS",
+            "FACHADAS & OUTROS": "🏗️ FACHADAS & OUTROS"
+        };
+
+        Object.keys(categories).forEach(catKey => {
+            const optGroupModal = document.createElement("optgroup");
+            optGroupModal.label = catIcons[catKey] || catKey;
+
+            const optGroupFilter = document.createElement("optgroup");
+            optGroupFilter.label = catIcons[catKey] || catKey;
+
+            categories[catKey].forEach(typeName => {
+                let opt1 = document.createElement("option");
+                opt1.value = typeName;
+                opt1.textContent = typeName;
+                optGroupModal.appendChild(opt1);
+
+                let opt2 = document.createElement("option");
+                opt2.value = typeName;
+                opt2.textContent = typeName;
+                optGroupFilter.appendChild(opt2);
+            });
+
+            modalSelect.appendChild(optGroupModal);
+            filterSelect.appendChild(optGroupFilter);
+        });
+    }
+
+    function openCustomTypeModal() { document.getElementById("customTypeModal").style.display = "flex"; }
+    function closeCustomTypeModal() { document.getElementById("customTypeModal").style.display = "none"; }
+
+    function saveCustomType() {
+        const category = document.getElementById("customTypeCategory").value;
+        const name = document.getElementById("customTypeName").value.trim().toUpperCase();
+
+        if (!name) { alert("Digite o nome da tipologia."); return; }
+
+        if (!customTypes.some(t => t.name === name)) {
+            customTypes.push({ category, name });
+            setStorageItem('ctm_custom_types_v2', customTypes);
+            renderTypeDropdowns();
+            alert(`✔ Tipologia "${name}" cadastrada na categoria [${category}]!`);
+        } else {
+            alert(`A tipologia "${name}" já está cadastrada.`);
+        }
+
+        document.getElementById("customTypeName").value = "";
+        closeCustomTypeModal();
+    }
+
+    function switchMode(mode) {
+        const btnInd = document.getElementById("tabIndividual");
+        const btnBulk = document.getElementById("tabBulk");
+        const contentInd = document.getElementById("modeIndividualContent");
+        const contentBulk = document.getElementById("modeBulkContent");
+
+        if (mode === 'individual') {
+            btnInd.classList.add("active");
+            btnBulk.classList.remove("active");
+            contentInd.style.display = "block";
+            contentBulk.style.display = "none";
+        } else {
+            btnBulk.classList.add("active");
+            btnInd.classList.remove("active");
+            contentBulk.style.display = "block";
+            contentInd.style.display = "none";
+            renderBulkItems();
+        }
+    }
+
+    function renderWorkSelect() {
+        const select = document.getElementById("workSelect");
+        select.innerHTML = "";
+        
+        Object.keys(allWorks).forEach(workName => {
+            let option = document.createElement("option");
+            option.value = workName;
+            option.textContent = workName;
+            if (workName === currentWorkKey) option.selected = true;
+            select.appendChild(option);
+        });
+    }
+
+    function createNewWork() {
+        let name = prompt("Digite o nome da Nova Obra:");
+        if (!name || !name.trim()) return;
+
+        name = name.trim();
+        if (allWorks[name]) {
+            alert("Já existe uma obra cadastrada com esse nome.");
+            return;
+        }
+
+        allWorks[name] = { specs: [], logs: [] };
+        currentWorkKey = name;
+        saveAllData();
+
+        renderWorkSelect();
+        loadCurrentWorkData();
+    }
+
+    function deleteCurrentWork() {
+        if (Object.keys(allWorks).length <= 1) {
+            alert("Não é possível excluir a única obra cadastrada.");
+            return;
+        }
+
+        if (confirm(`Tem certeza que deseja apagar a obra "${currentWorkKey}" e todos os seus dados?`)) {
+            delete allWorks[currentWorkKey];
+            currentWorkKey = Object.keys(allWorks)[0];
+            saveAllData();
+
+            renderWorkSelect();
+            loadCurrentWorkData();
+        }
+    }
+
+    function changeWork() {
+        currentWorkKey = document.getElementById("workSelect").value;
+        setStorageItem('ctm_current_work', currentWorkKey);
+        loadCurrentWorkData();
+    }
+
+    function getReleasedQtyForRef(ref) {
+        const logs = allWorks[currentWorkKey].logs || [];
+        let total = 0;
+        logs.forEach(l => {
+            if (l.ref === ref && l.status === "APROVADO") {
+                total += parseInt(l.releasedQty || 0);
+            }
+        });
+        return total;
+    }
+
+    function loadCurrentWorkData() {
+        if (!allWorks[currentWorkKey]) {
+            currentWorkKey = Object.keys(allWorks)[0];
+        }
+
+        document.querySelectorAll(".work-name-span").forEach(el => {
+            el.textContent = currentWorkKey;
+        });
+
+        document.getElementById("subHeaderTitle").textContent = `CTM LIBERAÇÃO - ${currentWorkKey.toUpperCase()}`;
+
+        populateTableAndSelect();
+        updateDashboard();
+        renderHistory();
+        resetForm();
+        renderBulkItems();
+    }
+
+    function saveAllData() {
+        setStorageItem('ctm_all_works', allWorks);
+        setStorageItem('ctm_current_work', currentWorkKey);
+    }
+
+    function populateTableAndSelect() {
+        const select = document.getElementById("refSelect");
+        const tbody = document.querySelector("#specTable tbody");
+        const specs = allWorks[currentWorkKey].specs;
+
+        select.innerHTML = '<option value="">-- Selecione a Referência --</option>';
+        tbody.innerHTML = "";
+
+        let totalQty = 0;
+
+        specs.forEach((item, index) => {
+            totalQty += parseInt(item.qty);
+            let released = getReleasedQtyForRef(item.ref);
+            let pending = Math.max(0, item.qty - released);
+
+            let statusLabel = "PENDENTE";
+            let statusBadge = '<span class="badge badge-danger">PENDENTE</span>';
+            if (released >= item.qty) {
+                statusLabel = "CONCLUÍDO";
+                statusBadge = '<span class="badge badge-success">CONCLUÍDO</span>';
+            } else if (released > 0) {
+                statusLabel = "EM ANDAMENTO";
+                statusBadge = '<span class="badge badge-warning">EM ANDAMENTO</span>';
+            }
+
+            let sidesBadge = item.hasBottom === false 
+                ? '<span class="badge badge-warning" style="font-size:9px;">3 LADOS (SEM SOLEIRA)</span>' 
+                : '<span class="badge badge-info" style="font-size:9px;">4 LADOS</span>';
+
+            let profileBadge = item.ctmProfile === "estreito"
+                ? '<span class="badge badge-dark" style="font-size:9px; background:#e67e22;">CTM ESTREITO</span>'
+                : '<span class="badge badge-dark" style="font-size:9px;">CTM LARGO</span>';
+
+            let option = document.createElement("option");
+            option.value = item.ref;
+            option.textContent = `${item.ref} - ${item.L}x${item.H}mm ${item.hasBottom === false ? '[3 Lados]' : ''} [${item.ctmProfile === 'estreito' ? 'Estreito' : 'Largo'}] (Saldo: ${pending} / Total: ${item.qty})`;
+            select.appendChild(option);
+
+            let tr = document.createElement("tr");
+            tr.setAttribute("data-type", item.type);
+            tr.setAttribute("data-status", statusLabel);
+            tr.innerHTML = `
+                <td class="no-print" style="text-align:center;">
+                    <input type="checkbox" class="spec-chk" value="${index}">
+                </td>
+                <td><strong>${item.ref}</strong></td>
+                <td>${item.L} x ${item.H}</td>
+                <td>${item.qty}</td>
+                <td style="color:var(--success-green); font-weight:bold;">${released}</td>
+                <td style="color:${pending > 0 ? 'var(--danger-red)' : '#888'}; font-weight:bold;">${pending}</td>
+                <td>${statusBadge}</td>
+                <td>${sidesBadge}</td>
+                <td>${profileBadge}</td>
+                <td><small style="color:#555;">${item.type}</small></td>
+                <td class="no-print">
+                    <button class="btn-edit" title="Editar Item" onclick="openEditModal(${index})">✏️</button>
+                    <button class="btn-delete" title="Excluir Item" onclick="deleteSpecItem(${index})">🗑</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        const selectAllSpecElem = document.getElementById("selectAllSpecs");
+        if (selectAllSpecElem) selectAllSpecElem.checked = false;
+
+        document.getElementById("totalProjected").textContent = `${totalQty} pçs`;
+        document.getElementById("totalTypes").textContent = specs.length;
+    }
+
+    function toggleSelectAllSpecs() {
+        const selectAll = document.getElementById("selectAllSpecs").checked;
+        document.querySelectorAll(".spec-chk").forEach(c => c.checked = selectAll);
+    }
+
+    function deleteSelectedSpecs() {
+        const selectedChks = document.querySelectorAll(".spec-chk:checked");
+        if (selectedChks.length === 0) {
+            alert("Selecione ao menos um contramarco das especificações para excluir em massa.");
+            return;
+        }
+
+        if (confirm(`Deseja realmente excluir os ${selectedChks.length} contramarco(s) selecionado(s)?`)) {
+            const indicesToDelete = Array.from(selectedChks)
+                .map(c => parseInt(c.value))
+                .sort((a, b) => b - a);
+            
+            indicesToDelete.forEach(idx => {
+                allWorks[currentWorkKey].specs.splice(idx, 1);
+            });
+
+            saveAllData();
+            populateTableAndSelect();
+            renderBulkItems();
+            updateDashboard();
+            alert("✔ Contramarcos selecionados foram excluídos com sucesso!");
+        }
+    }
+
+    function renderBulkItems() {
+        const container = document.getElementById("bulkListContainer");
+        const specs = allWorks[currentWorkKey].specs;
+
+        if (specs.length === 0) {
+            container.innerHTML = '<div style="color:#888; text-align:center; padding:10px;">Nenhuma referência cadastrada nesta obra.</div>';
+            return;
+        }
+
+        container.innerHTML = "";
+        specs.forEach(item => {
+            let released = getReleasedQtyForRef(item.ref);
+            let pending = Math.max(0, item.qty - released);
+
+            let sidesTxt = item.hasBottom === false ? '<small style="color:#d35400;">(3 Lados)</small>' : '';
+            let profileTxt = item.ctmProfile === 'estreito' ? '<small style="color:#e67e22;">[CTM Estreito]</small>' : '<small style="color:#34495e;">[CTM Largo]</small>';
+
+            let div = document.createElement("div");
+            div.className = "bulk-item";
+            div.innerHTML = `
+                <input type="checkbox" class="bulk-chk" value="${item.ref}" id="chk_${item.ref}" ${pending > 0 ? 'checked' : ''}>
+                <label for="chk_${item.ref}" style="cursor:pointer; flex:1;">
+                    <strong>${item.ref}</strong> - ${item.L} x ${item.H} mm ${sidesTxt} ${profileTxt}
+                    <small style="color:#666;">(Total: ${item.qty} | Liberado: ${released} | <strong style="color:var(--danger-red);">Saldo: ${pending}</strong>)</small>
+                </label>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function toggleSelectAllBulk() {
+        const chks = document.querySelectorAll(".bulk-chk");
+        if (chks.length === 0) return;
+        const allChecked = Array.from(chks).every(c => c.checked);
+        chks.forEach(c => c.checked = !allChecked);
+    }
+
+    function executeBulkRelease() {
+        const chks = document.querySelectorAll(".bulk-chk:checked");
+        if (chks.length === 0) {
+            alert("Por favor, selecione ao menos um item para liberar em massa.");
+            return;
+            // 👈 COLE AQUI NO FINAL DA FUNÇÃO
+    sincronizarComControle("CX-01");
+        }
+
+        const scope = document.querySelector('input[name="bulkScope"]:checked').value;
+        const bulkPartialQty = parseInt(document.getElementById("bulkPartialQty").value) || 0;
+
+        if (scope === "PARCIAL" && (isNaN(bulkPartialQty) || bulkPartialQty <= 0)) {
+            alert("Informe uma quantidade parcial válida maior que zero.");
+            return;
+        }
+
+        const location = document.getElementById("bulkLocation").value.trim() || "Liberação Geral do Cliente";
+        const inspector = document.getElementById("bulkInspector").value.trim() || "Aprovado via Cliente/Projeto";
+        const measureType = document.getElementById("bulkMeasureType").value;
+
+        let labelMeasure = measureType === "fora" ? "Fora a Fora (+28mm)" : (measureType === "dentro" ? "Dentro a Dentro (-4mm)" : "Base do Projeto");
+        const specs = allWorks[currentWorkKey].specs;
+
+        let count = 0;
+        chks.forEach(chk => {
+            const ref = chk.value;
+            const spec = specs.find(s => s.ref === ref);
+            if (!spec) return;
+
+            let releasedAlready = getReleasedQtyForRef(ref);
+            let pending = Math.max(0, spec.qty - releasedAlready);
+            if (pending <= 0) return; 
+
+            let actualQtyToRelease = (scope === "TOTAL") ? pending : Math.min(bulkPartialQty, pending);
+            let scopeLabel = (scope === "TOTAL" || actualQtyToRelease === pending) 
+                ? `TOTAL (${actualQtyToRelease} pçs)` 
+                : `PARCIAL (${actualQtyToRelease} pçs)`;
+
+            let targetL = spec.L;
+            let targetH = spec.H;
+
+            if (measureType === "fora") {
+                targetL += 28;
+                targetH += 28;
+            } else if (measureType === "dentro") {
+                targetL -= 4;
+                targetH -= 4;
+            }
+
+            const bulkCheck = {
+                timestamp: new Date().toLocaleString('pt-BR'),
+                location: location,
+                inspector: inspector,
+                notes: "Liberação em massa via sistema",
+                ref: ref,
+                scopeLabel: scopeLabel,
+                releasedQty: actualQtyToRelease,
+                measureType: `${labelMeasure} (Lote)`,
+                realL: targetL,
+                realH: targetH,
+                projL: targetL,
+                projH: targetH,
+                diffL: 0,
+                diffH: 0,
+                diagDiff: 0,
+                status: "APROVADO",
+                tol: 0
+            };
+
+            allWorks[currentWorkKey].logs.unshift(bulkCheck);
+            count++;
+        });
+
+        saveAllData();
+        populateTableAndSelect();
+        renderBulkItems();
+        renderHistory();
+        updateDashboard();
+
+        alert(`✔ Sucesso! ${count} item(ns) liberado(s) na obra "${currentWorkKey}".`);
+    }
+
+    function updateProjectedSpecs() {
+        const ref = document.getElementById("refSelect").value;
+        const measureType = document.getElementById("measureType").value;
+        const specs = allWorks[currentWorkKey].specs;
+        const spec = specs.find(item => item.ref === ref);
+
+        if (spec) {
+            let released = getReleasedQtyForRef(ref);
+            let pending = Math.max(0, spec.qty - released);
+
+            let targetL = spec.L;
+            let targetH = spec.H;
+
+            if (measureType === "fora") {
+                targetL += 28;
+                targetH += 28;
+            } else if (measureType === "dentro") {
+                targetL -= 4;
+                targetH -= 4;
+            }
+
+            document.getElementById("projL").textContent = targetL;
+            document.getElementById("projH").textContent = targetH;
+            document.getElementById("projType").textContent = spec.type;
+            document.getElementById("projSides").textContent = spec.hasBottom === false ? "3 Lados (Sem Soleira)" : "4 Lados (Completo)";
+            document.getElementById("projModel").textContent = spec.ctmProfile === "estreito" ? "CTM Estreito" : "CTM Largo";
+            document.getElementById("projQty").textContent = `${spec.qty} un`;
+            document.getElementById("projReleased").textContent = `${released} un`;
+            document.getElementById("projPending").textContent = `${pending} un`;
+
+            document.getElementById("realL").value = targetL;
+            document.getElementById("realH").value = targetH;
+            document.getElementById("partialQty").value = pending > 0 ? pending : 1;
+        } else {
+            document.getElementById("projL").textContent = "-";
+            document.getElementById("projH").textContent = "-";
+            document.getElementById("projType").textContent = "-";
+            document.getElementById("projSides").textContent = "-";
+            document.getElementById("projModel").textContent = "-";
+            document.getElementById("projQty").textContent = "-";
+            document.getElementById("projReleased").textContent = "-";
+            document.getElementById("projPending").textContent = "-";
+            document.getElementById("realL").value = "";
+            document.getElementById("realH").value = "";
+        }
+        document.getElementById("resultBox").style.display = "none";
+        drawCADCanvas();
+    }
+
+    function checkRelease() {
+        const ref = document.getElementById("refSelect").value;
+        const measureType = document.getElementById("measureType").value;
+        const scope = document.querySelector('input[name="releaseScope"]:checked').value;
+        const partialQty = parseInt(document.getElementById("partialQty").value) || 0;
+        const obsNotes = document.getElementById("obsNotes").value.trim();
+
+        const realL = parseFloat(document.getElementById("realL").value);
+        const realH = parseFloat(document.getElementById("realH").value);
+        const tol = parseFloat(document.getElementById("tolerance").value);
+        const d1 = parseFloat(document.getElementById("realDiag1").value);
+        const d2 = parseFloat(document.getElementById("realDiag2").value);
+        const resultBox = document.getElementById("resultBox");
+
+        if (!ref) {
+            alert("Por favor, selecione uma referência.");
+            return false;
+        }
+
+        const specs = allWorks[currentWorkKey].specs;
+        const spec = specs.find(item => item.ref === ref);
+        let releasedAlready = getReleasedQtyForRef(ref);
+        let pending = Math.max(0, spec.qty - releasedAlready);
+
+        if (scope === "PARCIAL" && (isNaN(partialQty) || partialQty <= 0)) {
+            alert("Por favor, digite uma quantidade parcial válida maior que zero.");
+            return false;
+        }
+
+        let qtyToRelease = (scope === "TOTAL") ? pending : Math.min(partialQty, pending);
+        if (qtyToRelease <= 0) {
+            alert("Este item já teve sua quantidade total liberada.");
+            return false;
+        }
+
+        if (isNaN(realL) || isNaN(realH)) {
+            alert("Por favor, preencha as medidas reais L e H.");
+            return false;
+        }
+
+        let targetL = spec.L;
+        let targetH = spec.H;
+
+        if (measureType === "fora") {
+            targetL += 28;
+            targetH += 28;
+        } else if (measureType === "dentro") {
+            targetL -= 4;
+            targetH -= 4;
+        }
+
+        const diffL = realL - targetL;
+        const diffH = realH - targetH;
+
+        let passL = Math.abs(diffL) <= tol;
+        let passH = Math.abs(diffH) <= tol;
+
+        let diagDiff = 0;
+        let passDiag = true;
+        if (!isNaN(d1) && !isNaN(d2)) {
+            diagDiff = Math.abs(d1 - d2);
+            if (diagDiff > 3) passDiag = false;
+        }
+
+        let isApproved = passL && passH && passDiag;
+        let labelMeasure = measureType === "fora" ? "Fora a Fora (+28mm)" : (measureType === "dentro" ? "Dentro a Dentro (-4mm)" : "Base do Projeto");
+        let scopeText = (scope === "TOTAL" || qtyToRelease === pending) ? `TOTAL (${qtyToRelease} pçs)` : `PARCIAL (${qtyToRelease} pçs)`;
+
+        currentCheck = {
+            timestamp: new Date().toLocaleString('pt-BR'),
+            location: document.getElementById("location").value || "Não especificado",
+            inspector: document.getElementById("inspector").value || "Não especificado",
+            notes: obsNotes,
+            ref: ref,
+            scopeLabel: scopeText,
+            releasedQty: qtyToRelease,
+            measureType: labelMeasure,
+            realL: realL,
+            realH: realH,
+            projL: targetL,
+            projH: targetH,
+            diffL: diffL,
+            diffH: diffH,
+            diagDiff: (!isNaN(d1) && !isNaN(d2)) ? diagDiff : null,
+            status: isApproved ? "APROVADO" : "REPROVADO",
+            tol: tol
+        };
+
+        resultBox.style.display = "block";
+        resultBox.className = "result-box " + (isApproved ? "pass" : "fail");
+        
+        let message = "";
+        if (isApproved) {
+            message = `✔ APROVADO - Liberação ${scopeText}! (${labelMeasure})<br>`;
+            message += `<small>Diferença L: ${diffL > 0 ? '+' : ''}${diffL}mm | Diferença H: ${diffH > 0 ? '+' : ''}${diffH}mm (Tol: ±${tol}mm)</small>`;
+        } else {
+            message = `✖ FORA DAS ESPECIFICAÇÕES!<br>`;
+            if (!passL) message += `<small>• Largura com desvio de ${diffL > 0 ? '+' : ''}${diffL}mm (Permitido ±${tol}mm)</small><br>`;
+            if (!passH) message += `<small>• Altura com desvio de ${diffH > 0 ? '+' : ''}${diffH}mm (Permitido ±${tol}mm)</small><br>`;
+        }
+
+        resultBox.innerHTML = message;
+        return true;
+    }
+
+    function saveVerification() {
+        if (!currentCheck) {
+            let ok = checkRelease();
+            if (!ok) return;
+        }
+
+        allWorks[currentWorkKey].logs.unshift(currentCheck);
+        saveAllData();
+        
+        populateTableAndSelect();
+        renderBulkItems();
+        renderHistory();
+        updateDashboard();
+
+        alert(`✔ Liberação (${currentCheck.scopeLabel}) registrada com sucesso em "${currentWorkKey}"!`);
+        currentCheck = null;
+        resetForm();
+    }
+
+    function resetForm() {
+        document.getElementById("refSelect").value = "";
+        document.getElementById("realL").value = "";
+        document.getElementById("realH").value = "";
+        document.getElementById("realDiag1").value = "";
+        document.getElementById("realDiag2").value = "";
+        document.getElementById("obsNotes").value = "";
+        document.getElementById("resultBox").style.display = "none";
+        updateProjectedSpecs();
+    }
+
+    function renderHistory() {
+        const tbody = document.getElementById("historyBody");
+        const logs = allWorks[currentWorkKey].logs;
+
+        if (logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; color: #888;">Nenhuma liberação registrada nesta obra.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = "";
+        logs.forEach((log, index) => {
+            let tr = document.createElement("tr");
+            let statusBadge = log.status === "APROVADO" 
+                ? '<span class="badge badge-success">APROVADO</span>' 
+                : '<span class="badge badge-danger">REPROVADO</span>';
+
+            let inspectorText = log.inspector || '-';
+            if (log.notes) {
+                inspectorText += `<br><small style="color:#777;">📝 ${log.notes}</small>`;
+            }
+
+            tr.innerHTML = `
+                <td class="no-print" style="text-align:center;">
+                    <input type="checkbox" class="hist-chk" value="${index}">
+                </td>
+                <td>${log.timestamp}</td>
+                <td>${log.location}</td>
+                <td><strong>${log.ref}</strong></td>
+                <td><span class="badge badge-info">${log.scopeLabel || 'TOTAL'}</span></td>
+                <td><small>${log.measureType || 'Padrão'}</small></td>
+                <td>${log.realL} x ${log.realH}</td>
+                <td>${log.projL} x ${log.projH}</td>
+                <td>${log.diffL > 0 ? '+' : ''}${log.diffL} / ${log.diffH > 0 ? '+' : ''}${log.diffH} mm</td>
+                <td>${statusBadge}</td>
+                <td>${inspectorText}</td>
+                <td class="no-print"><button class="btn-delete" title="Excluir" onclick="deleteHistoryItem(${index})">🗑</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        document.getElementById("selectAllHistory").checked = false;
+    }
+
+    function toggleSelectAllHistory() {
+        const selectAll = document.getElementById("selectAllHistory").checked;
+        document.querySelectorAll(".hist-chk").forEach(c => c.checked = selectAll);
+    }
+
+    function deleteSelectedHistory() {
+        const selectedChks = document.querySelectorAll(".hist-chk:checked");
+        if (selectedChks.length === 0) {
+            alert("Selecione ao menos um item do histórico para excluir.");
+            return;
+        }
+
+        if (confirm(`Deseja realmente excluir os ${selectedChks.length} registros selecionados do histórico?`)) {
+            const indicesToDelete = Array.from(selectedChks).map(c => parseInt(c.value)).sort((a, b) => b - a);
+            
+            indicesToDelete.forEach(idx => {
+                allWorks[currentWorkKey].logs.splice(idx, 1);
+            });
+
+            saveAllData();
+            populateTableAndSelect();
+            renderBulkItems();
+            renderHistory();
+            updateDashboard();
+            alert("✔ Registros excluídos com sucesso!");
+        }
+    }
+
+    function deleteHistoryItem(index) {
+        if (confirm("Deseja excluir este registro do histórico?")) {
+            allWorks[currentWorkKey].logs.splice(index, 1);
+            saveAllData();
+            populateTableAndSelect();
+            renderBulkItems();
+            renderHistory();
+            updateDashboard();
+        }
+    }
+
+    function printHistoryOnly() {
+        preparePrintHeader("RELATÓRIO DE HISTÓRICO DE LIBERAÇÕES");
+        document.body.classList.add("print-history-mode");
+        window.print();
+        document.body.classList.remove("print-history-mode");
+    }
+
+    function printSpecsOnly() {
+        preparePrintHeader("RELATÓRIO DE ESPECIFICAÇÕES TÉCNICAS DOS CONTRAMARCOS");
+        document.body.classList.add("print-specs-mode");
+        window.print();
+        document.body.classList.remove("print-specs-mode");
+    }
+
+    function generatePDFReport() {
+        preparePrintHeader("RELATÓRIO GERAL COMPLETO DE PROJETO E LIBERAÇÕES");
+        window.print();
+    }
+
+    function updateDashboard() {
+        const specs = allWorks[currentWorkKey].specs;
+        let totalProj = 0;
+        let totalRel = 0;
+
+        specs.forEach(s => {
+            totalProj += parseInt(s.qty);
+            totalRel += getReleasedQtyForRef(s.ref);
+        });
+
+        const totalPending = Math.max(0, totalProj - totalRel);
+        const rate = totalProj > 0 ? Math.round((totalRel / totalProj) * 100) : 0;
+
+        document.getElementById("totalReleasedQty").textContent = `${totalRel} pçs`;
+        document.getElementById("totalPendingQty").textContent = `${totalPending} pçs`;
+        document.getElementById("approvalRate").textContent = `${rate}%`;
+        document.getElementById("progressBar").style.width = `${rate}%`;
+    }
+
+    function copyWhatsAppSummary() {
+        const specs = allWorks[currentWorkKey].specs;
+        let totalProj = 0;
+        let totalRel = 0;
+
+        specs.forEach(s => {
+            totalProj += parseInt(s.qty);
+            totalRel += getReleasedQtyForRef(s.ref);
+        });
+
+        const rate = totalProj > 0 ? Math.round((totalRel / totalProj) * 100) : 0;
+
+        let text = `*📊 RESUMO DE LIBERAÇÃO DE CONTRAMARCOS*\n`;
+        text += `🏢 *Obra:* ${currentWorkKey}\n`;
+        text += `📅 *Data:* ${new Date().toLocaleDateString('pt-BR')}\n`;
+        text += `-----------------------------------\n`;
+        text += `✅ *Progresso Geral:* ${rate}%\n`;
+        text += `📦 *Projetado:* ${totalProj} pçs\n`;
+        text += `🟢 *Liberado:* ${totalRel} pçs\n`;
+        text += `🔴 *Pendente:* ${totalProj - totalRel} pçs\n`;
+        text += `-----------------------------------\n`;
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✔ Resumo copiado para a área de transferência! Cole diretamente no WhatsApp.");
+            }).catch(() => fallbackCopyTextToClipboard(text));
+        } else {
+            fallbackCopyTextToClipboard(text);
+        }
+    }
+
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert("✔ Resumo copiado para a área de transferência! Cole diretamente no WhatsApp.");
+        } catch (err) {
+            alert("Erro ao copiar o resumo.");
+        }
+        document.body.removeChild(textArea);
+    }
+
+    function openNewModal() {
+        document.getElementById("modalTitle").textContent = "Novo Contramarco";
+        document.getElementById("editIndex").value = "-1";
+        document.getElementById("newRef").value = "";
+        document.getElementById("newL").value = "";
+        document.getElementById("newH").value = "";
+        document.getElementById("newQty").value = "";
+        document.getElementById("newHasBottom").value = "true";
+        document.getElementById("newCtmProfile").value = "largo";
+        document.getElementById("newModal").style.display = "flex";
+    }
+
+    function closeNewModal() {
+        document.getElementById("newModal").style.display = "none";
+    }
+
+    function openEditModal(index) {
+        const spec = allWorks[currentWorkKey].specs[index];
+        if (!spec) return;
+
+        document.getElementById("modalTitle").textContent = `Editar Contramarco (${spec.ref})`;
+        document.getElementById("editIndex").value = index;
+        document.getElementById("newRef").value = spec.ref;
+        document.getElementById("newL").value = spec.L;
+        document.getElementById("newH").value = spec.H;
+        document.getElementById("newQty").value = spec.qty;
+        document.getElementById("newType").value = spec.type;
+        document.getElementById("newHasBottom").value = (spec.hasBottom !== false) ? "true" : "false";
+        document.getElementById("newCtmProfile").value = spec.ctmProfile || "largo";
+
+        document.getElementById("newModal").style.display = "flex";
+    }
+
+    function saveItemModal() {
+        const index = parseInt(document.getElementById("editIndex").value);
+        const ref = document.getElementById("newRef").value.trim().toUpperCase();
+        const L = parseFloat(document.getElementById("newL").value);
+        const H = parseFloat(document.getElementById("newH").value);
+        const qty = parseInt(document.getElementById("newQty").value);
+        const type = document.getElementById("newType").value;
+        const hasBottom = document.getElementById("newHasBottom").value === "true";
+        const ctmProfile = document.getElementById("newCtmProfile").value;
+
+        if (!ref || isNaN(L) || isNaN(H) || isNaN(qty) || L <= 0 || H <= 0 || qty <= 0) {
+            alert("Preencha todos os campos corretamente com valores válidos maiores que zero.");
+            return;
+        }
+
+        const specs = allWorks[currentWorkKey].specs;
+
+        if (index === -1) {
+            if (specs.some(s => s.ref === ref)) {
+                alert(`A referência "${ref}" já existe nesta obra!`);
+                return;
+            }
+            specs.push({ ref, L, H, qty, type, hasBottom, ctmProfile });
+        } else {
+            specs[index] = { ref, L, H, qty, type, hasBottom, ctmProfile };
+        }
+
+        saveAllData();
+        populateTableAndSelect();
+        renderBulkItems();
+        updateDashboard();
+        closeNewModal();
+    }
+
+    function deleteSpecItem(index) {
+        const spec = allWorks[currentWorkKey].specs[index];
+        if (confirm(`Deseja realmente remover o contramarco "${spec.ref}" do projeto?`)) {
+            allWorks[currentWorkKey].specs.splice(index, 1);
+            saveAllData();
+            populateTableAndSelect();
+            renderBulkItems();
+            updateDashboard();
+        }
+    }
+
+    function applyFilters() {
+        const text = document.getElementById("searchInput").value.toUpperCase();
+        const type = document.getElementById("typeFilter").value;
+        const status = document.getElementById("statusFilter").value;
+
+        const rows = document.querySelectorAll("#specTable tbody tr");
+
+        rows.forEach(row => {
+            const rowRef = row.children[1] ? row.children[1].textContent.toUpperCase() : "";
+            const rowType = row.getAttribute("data-type") || "";
+            const rowStatus = row.getAttribute("data-status") || "";
+
+            const matchText = rowRef.includes(text);
+            const matchType = !type || rowType === type;
+            const matchStatus = !status || rowStatus === status;
+
+            row.style.display = (matchText && matchType && matchStatus) ? "" : "none";
+        });
+    }
+
+    function drawCADCanvas() {
+        const canvas = document.getElementById("cadCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+
+        const ref = document.getElementById("refSelect") ? document.getElementById("refSelect").value : "";
+        const measureType = document.getElementById("measureType") ? document.getElementById("measureType").value : "base";
+        const specs = allWorks[currentWorkKey].specs;
+        const spec = specs.find(s => s.ref === ref);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Fundo estilo CAD Dark
+        ctx.fillStyle = "#0d0d0d";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Grade CAD
+        ctx.strokeStyle = "#1a2332";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 20) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 20) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        if (!spec) {
+            ctx.fillStyle = "#666";
+            ctx.font = "14px Segoe UI, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("📐 Selecione uma Referência para visualizar o CAD 2D", canvas.width / 2, canvas.height / 2);
+            return;
+        }
+
+        let measureLabel = "Base do Projeto";
+        if (measureType === "fora") measureLabel = "Fora a Fora (+28mm)";
+        else if (measureType === "dentro") measureLabel = "Dentro a Dentro (-4mm)";
+
+        const realL = parseFloat(document.getElementById("realL").value) || spec.L;
+        const realH = parseFloat(document.getElementById("realH").value) || spec.H;
+        const hasBottom = spec.hasBottom !== false;
+        const ctmProfileLabel = spec.ctmProfile === "estreito" ? "Estreito" : "Largo";
+
+        const padding = 65;
+        const availW = canvas.width - (padding * 2);
+        const availH = canvas.height - (padding * 2);
+
+        const scale = Math.min(availW / realL, availH / realH);
+
+        const drawW = realL * scale;
+        const drawH = realH * scale;
+
+        const startX = (canvas.width - drawW) / 2;
+        const startY = (canvas.height - drawH) / 2;
+
+        // Quadro Externo
+        ctx.strokeStyle = "#ff7b00";
+        ctx.lineWidth = 3;
+        if (hasBottom) {
+            ctx.strokeRect(startX, startY, drawW, drawH);
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY + drawH);
+            ctx.lineTo(startX, startY);
+            ctx.lineTo(startX + drawW, startY);
+            ctx.lineTo(startX + drawW, startY + drawH);
+            ctx.stroke();
+        }
+
+        // Perfil Interno
+        const baseThickness = spec.ctmProfile === "estreito" ? 12 : 24;
+        const profileOffset = Math.max(2, baseThickness * scale);
+        ctx.strokeStyle = "#d35400";
+        ctx.lineWidth = 1.5;
+        if (hasBottom) {
+            ctx.strokeRect(startX + profileOffset, startY + profileOffset, drawW - (profileOffset * 2), drawH - (profileOffset * 2));
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(startX + profileOffset, startY + drawH);
+            ctx.lineTo(startX + profileOffset, startY + profileOffset);
+            ctx.lineTo(startX + drawW - profileOffset, startY + profileOffset);
+            ctx.lineTo(startX + drawW - profileOffset, startY + drawH);
+            ctx.stroke();
+        }
+
+        // Linhas Diagonais
+        ctx.strokeStyle = "#00a8ff";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(startX, startY); ctx.lineTo(startX + drawW, startY + drawH);
+        ctx.moveTo(startX + drawW, startY); ctx.lineTo(startX, startY + drawH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Cotas
+        ctx.fillStyle = "#2ecc71";
+        ctx.font = "bold 12px monospace";
+        ctx.textAlign = "center";
+
+        ctx.fillText(`L = ${realL} mm`, startX + (drawW / 2), startY - 12);
+        ctx.strokeStyle = "#2ecc71";
+        ctx.beginPath();
+        ctx.moveTo(startX, startY - 6); ctx.lineTo(startX + drawW, startY - 6);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(startX + drawW + 18, startY + (drawH / 2));
+        ctx.rotate(Math.PI / 2);
+        ctx.fillText(`H = ${realH} mm`, 0, 0);
+        ctx.restore();
+
+        // Identificação Central
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillText(`${spec.ref}`, startX + (drawW / 2), startY + (drawH / 2) - 10);
+        
+        ctx.fillStyle = "#ff7b00";
+        ctx.font = "10px sans-serif";
+        ctx.fillText(`[${measureLabel}] ${hasBottom ? '' : '(3 Lados)'} [CTM ${ctmProfileLabel}]`, startX + (drawW / 2), startY + (drawH / 2) + 5);
+        
+        ctx.fillStyle = "#aaa";
+        ctx.font = "10px sans-serif";
+        ctx.fillText(`${spec.type}`, startX + (drawW / 2), startY + (drawH / 2) + 18);
+    }
+
+    /* --- RECURSOS DE IMPRESSÃO EM LOTE CAD & EXPORTAÇÃO DWG/DXF --- */
+    function openBatchCadModal() {
+        const container = document.getElementById("batchCadListContainer");
+        const specs = allWorks[currentWorkKey].specs;
+
+        if (specs.length === 0) {
+            alert("Não há contramarcos cadastrados nesta obra.");
+            return;
+        }
+
+        const currentMainType = document.getElementById("measureType") ? document.getElementById("measureType").value : "base";
+        document.getElementById("batchCadMeasureType").value = currentMainType;
+
+        container.innerHTML = "";
+        specs.forEach(item => {
+            let div = document.createElement("div");
+            div.className = "bulk-item";
+            let sidesTxt = item.hasBottom === false ? '<small style="color:#d35400;">[3 Lados]</small>' : '';
+            let profileTxt = `<small style="color:#888;">[CTM ${item.ctmProfile === 'estreito' ? 'Estreito' : 'Largo'}]</small>`;
+            div.innerHTML = `
+                <input type="checkbox" class="batch-cad-chk" value="${item.ref}" id="cad_chk_${item.ref}" checked>
+                <label for="cad_chk_${item.ref}" style="cursor:pointer; flex:1;">
+                    <strong>${item.ref}</strong> - ${item.L} x ${item.H} mm ${sidesTxt} ${profileTxt} <small style="color:#666;">(${item.type})</small>
+                </label>
+            `;
+            container.appendChild(div);
+        });
+
+        document.getElementById("batchCadModal").style.display = "flex";
+    }
+
+    function closeBatchCadModal() {
+        document.getElementById("batchCadModal").style.display = "none";
+    }
+
+    function toggleSelectAllCadBatch() {
+        const chks = document.querySelectorAll(".batch-cad-chk");
+        if (chks.length === 0) return;
+        const allChecked = Array.from(chks).every(c => c.checked);
+        chks.forEach(c => c.checked = !allChecked);
+    }
+
+    function executeBatchCadPrint() {
+        const chks = document.querySelectorAll(".batch-cad-chk:checked");
+        if (chks.length === 0) {
+            alert("Selecione ao menos um contramarco para gerar as pranchas.");
+            return;
+        }
+
+        const measureType = document.getElementById("batchCadMeasureType").value;
+        let offset = 0;
+        let measureLabel = "Base do Projeto (Sem Ajuste)";
+        if (measureType === "fora") { offset = 28; measureLabel = "Fora a Fora (+28mm)"; }
+        else if (measureType === "dentro") { offset = -4; measureLabel = "Dentro a Dentro (-4mm)"; }
+
+        const specs = allWorks[currentWorkKey].specs;
+        const selectedRefs = Array.from(chks).map(c => c.value);
+        const selectedSpecs = specs.filter(s => selectedRefs.includes(s.ref));
+
+        const printContainer = document.getElementById("cadBatchPrintContainer");
+        printContainer.innerHTML = "";
+
+        // FOLHA 1: RESUMO DO LOTE
+        let totalPiecesInBatch = 0;
+        let summaryRowsHtml = "";
+
+        selectedSpecs.forEach(spec => {
+            totalPiecesInBatch += parseInt(spec.qty);
+            const adjL = spec.L + offset;
+            const adjH = spec.H + offset;
+            let sidesTxt = spec.hasBottom === false ? "3 Lados (Sem Soleira)" : "4 Lados";
+            let ctmTxt = spec.ctmProfile === "estreito" ? "CTM Estreito" : "CTM Largo";
+            summaryRowsHtml += `
+                <tr>
+                    <td style="font-weight:bold; text-align:center;">${spec.ref}</td>
+                    <td>${spec.type}</td>
+                    <td style="text-align:center;">${sidesTxt}</td>
+                    <td style="text-align:center;">${ctmTxt}</td>
+                    <td style="text-align:center;">${adjL} mm ${offset !== 0 ? `<small style="color:#666;">(${spec.L})</small>` : ''}</td>
+                    <td style="text-align:center;">${adjH} mm ${offset !== 0 ? `<small style="color:#666;">(${spec.H})</small>` : ''}</td>
+                    <td style="text-align:center; font-weight:bold;">${spec.qty} un</td>
+                </tr>
+            `;
+        });
+
+        const summarySheet = document.createElement("div");
+        summarySheet.className = "cad-sheet-print";
+        summarySheet.innerHTML = `
+            <div class="cad-sheet-header">
+                <div>
+                    <h2 style="margin:0; font-size:20px;">CTM ESQUADRIAS - RESUMO DO LOTE CAD</h2>
+                    <span style="font-size:13px;">OBRA: <strong>${currentWorkKey.toUpperCase()}</strong></span>
+                </div>
+                <div style="text-align:right;">
+                    <h3 style="margin:0; color:#ff7b00; font-size:18px;">FOLHA 01 / RESUMO</h3>
+                    <span style="font-size:11px;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}</span>
+                </div>
+            </div>
+
+            <div style="margin: 15px 0; background: #f8f9fa; padding: 10px; border: 1px solid #000;">
+                <strong>REGRA APLICADA / TIPO DE MEDIDA TOMATIVA:</strong> <span style="color: #ff7b00; font-weight: bold;">${measureLabel.toUpperCase()}</span>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3 style="margin-bottom:10px; font-size:14px; border-bottom:1px solid #000; padding-bottom:4px;">RELAÇÃO DE MARCOS INCLUÍDOS NESTE LOTE:</h3>
+                <table style="width:100%; border:1px solid #000; border-collapse:collapse; font-size:12px;">
+                    <thead>
+                        <tr style="background:#eee; border-bottom:1px solid #000;">
+                            <th style="padding:8px; border-right:1px solid #000;">REFERÊNCIA</th>
+                            <th style="padding:8px; border-right:1px solid #000;">TIPOLOGIA DA ESQUADRIA</th>
+                            <th style="padding:8px; border-right:1px solid #000; text-align:center;">ESTRUTURA</th>
+                            <th style="padding:8px; border-right:1px solid #000; text-align:center;">MODELO CTM</th>
+                            <th style="padding:8px; border-right:1px solid #000; text-align:center;">LARGURA FINAL (L)</th>
+                            <th style="padding:8px; border-right:1px solid #000; text-align:center;">ALTURA FINAL (H)</th>
+                            <th style="padding:8px; text-align:center;">QUANTIDADE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${summaryRowsHtml}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background:#f9f9f9; font-weight:bold; border-top:2px solid #000;">
+                            <td colspan="6" style="padding:8px; text-align:right; border-right:1px solid #000;">TOTAL DE PEÇAS NO LOTE:</td>
+                            <td style="padding:8px; text-align:center; color:#27ae60;">${totalPiecesInBatch} un</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div style="margin-top: 60px; display:flex; justify-content:space-between; text-align:center;">
+                <div style="width:45%; border-top:1px solid #000; padding-top:5px; font-size:11px;">
+                    <strong>Departamento Técnico / Engenharia CAD</strong><br>Aprovação de Medidas e Projeto
+                </div>
+                <div style="width:45%; border-top:1px solid #000; padding-top:5px; font-size:11px;">
+                    <strong>Responsável da Fábrica / Produção</strong><br>Recebimento para Fabricação
+                </div>
+            </div>
+        `;
+        printContainer.appendChild(summarySheet);
+
+        // FOLHAS INDIVIDUAIS
+        selectedSpecs.forEach((spec, idx) => {
+            const sheet = document.createElement("div");
+            sheet.className = "cad-sheet-print";
+
+            const canvasId = `print_canvas_${spec.ref}`;
+            const adjL = spec.L + offset;
+            const adjH = spec.H + offset;
+            let sidesLabel = spec.hasBottom === false ? "3 Lados (Sem Soleira)" : "4 Lados (Completo)";
+            let ctmLabel = spec.ctmProfile === "estreito" ? "CTM Estreito" : "CTM Largo";
+            
+            sheet.innerHTML = `
+                <div class="cad-sheet-header">
+                    <div>
+                        <h2 style="margin:0; font-size:18px;">CTM ESQUADRIAS - PRANCHA DE FABRICAÇÃO</h2>
+                        <span style="font-size:12px;">OBRA: <strong>${currentWorkKey.toUpperCase()}</strong></span>
+                    </div>
+                    <div style="text-align:right;">
+                        <h3 style="margin:0; color:#ff7b00; font-size:20px;">REF: ${spec.ref}</h3>
+                        <span style="font-size:11px;">FOLHA ${String(idx + 2).padStart(2, '0')} | DATA: ${new Date().toLocaleDateString('pt-BR')}</span>
+                    </div>
+                </div>
+
+                <div style="text-align:center; margin: 15px 0;">
+                    <canvas id="${canvasId}" width="650" height="360" style="border:1px dashed #ccc; background:#fff;"></canvas>
+                </div>
+
+                <div style="border-top:2px solid #000; padding-top:10px; display:grid; grid-template-columns: 1.2fr 1fr 0.8fr 1.2fr 1fr 0.8fr; font-size:11px;">
+                    <div><strong>Tipologia:</strong> ${spec.type}</div>
+                    <div><strong>Estrutura:</strong> ${sidesLabel}</div>
+                    <div><strong>Modelo:</strong> ${ctmLabel}</div>
+                    <div><strong>Medidas Finais:</strong> ${adjL} x ${adjH} mm</div>
+                    <div><strong>Tipo Medida:</strong> ${measureLabel}</div>
+                    <div><strong>Qtd Total:</strong> ${spec.qty} un</div>
+                </div>
+            `;
+
+            printContainer.appendChild(sheet);
+
+            setTimeout(() => {
+                renderPrintCanvas(canvasId, spec, offset, measureLabel);
+            }, 50);
+        });
+
+        closeBatchCadModal();
+
+        setTimeout(() => {
+            document.body.classList.add("print-cad-mode");
+            window.print();
+            document.body.classList.remove("print-cad-mode");
+        }, 300);
+    }
+
+    function renderPrintCanvas(canvasId, spec, offset = 0, measureLabel = "") {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+
+        const realL = spec.L + offset;
+        const realH = spec.H + offset;
+        const hasBottom = spec.hasBottom !== false;
+        const ctmLabel = spec.ctmProfile === "estreito" ? "Estreito" : "Largo";
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Fundo Branco para Impressão
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const padding = 70;
+        const availW = canvas.width - (padding * 2);
+        const availH = canvas.height - (padding * 2);
+        const scale = Math.min(availW / realL, availH / realH);
+
+        const drawW = realL * scale;
+        const drawH = realH * scale;
+
+        const startX = (canvas.width - drawW) / 2;
+        const startY = (canvas.height - drawH) / 2;
+
+        // Quadro Externo
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
+        if (hasBottom) {
+            ctx.strokeRect(startX, startY, drawW, drawH);
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY + drawH);
+            ctx.lineTo(startX, startY);
+            ctx.lineTo(startX + drawW, startY);
+            ctx.lineTo(startX + drawW, startY + drawH);
+            ctx.stroke();
+        }
+
+        // Perfil Interno
+        const baseThickness = spec.ctmProfile === "estreito" ? 12 : 24;
+        const profileOffset = Math.max(2, baseThickness * scale);
+        ctx.strokeStyle = "#444444";
+        ctx.lineWidth = 1;
+        if (hasBottom) {
+            ctx.strokeRect(startX + profileOffset, startY + profileOffset, drawW - (profileOffset * 2), drawH - (profileOffset * 2));
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(startX + profileOffset, startY + drawH);
+            ctx.lineTo(startX + profileOffset, startY + profileOffset);
+            ctx.lineTo(startX + drawW - profileOffset, startY + profileOffset);
+            ctx.lineTo(startX + drawW - profileOffset, startY + drawH);
+            ctx.stroke();
+        }
+
+        // Linhas Diagonais
+        ctx.strokeStyle = "#888888";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(startX, startY); ctx.lineTo(startX + drawW, startY + drawH);
+        ctx.moveTo(startX + drawW, startY); ctx.lineTo(startX, startY + drawH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Cotas
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 13px Arial";
+        ctx.textAlign = "center";
+
+        ctx.fillText(`L = ${realL} mm`, startX + (drawW / 2), startY - 15);
+        ctx.strokeStyle = "#000";
+        ctx.beginPath();
+        ctx.moveTo(startX, startY - 8); ctx.lineTo(startX + drawW, startY - 8);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(startX + drawW + 22, startY + (drawH / 2));
+        ctx.rotate(Math.PI / 2);
+        ctx.fillText(`H = ${realH} mm`, 0, 0);
+        ctx.restore();
+
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText(`${spec.ref}`, startX + (drawW / 2), startY + (drawH / 2) - 10);
+        
+        ctx.fillStyle = "#d35400";
+        ctx.font = "11px Arial";
+        ctx.fillText(`[${measureLabel}] ${hasBottom ? '' : '(3 Lados)'} [CTM ${ctmLabel}]`, startX + (drawW / 2), startY + (drawH / 2) + 8);
+    }
+
+    /* --- EXPORTAR SELECIONADOS EM LOTE PARA DWG/DXF --- */
+    function downloadBatchDXF() {
+        const chks = document.querySelectorAll(".batch-cad-chk:checked");
+        if (chks.length === 0) {
+            alert("Selecione ao menos um contramarco para exportar o DWG/DXF.");
+            return;
+        }
+
+        const measureType = document.getElementById("batchCadMeasureType").value;
+        let offset = 0;
+        let measureLabel = "Base do Projeto";
+        if (measureType === "fora") { offset = 28; measureLabel = "Fora a Fora (+28mm)"; }
+        else if (measureType === "dentro") { offset = -4; measureLabel = "Dentro a Dentro (-4mm)"; }
+
+        const specs = allWorks[currentWorkKey].specs;
+        const selectedRefs = Array.from(chks).map(c => c.value);
+        const selectedSpecs = specs.filter(s => selectedRefs.includes(s.ref));
+
+        let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nTABLES\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nENTITIES\n`;
+
+        function addDXFLine(x1, y1, x2, y2, layer = "CONTRAMARCO_EXT") {
+            return `0\nLINE\n8\n${layer}\n10\n${x1}\n20\n${y1}\n30\n0.0\n11\n${x2}\n21\n${y2}\n31\n0.0\n`;
+        }
+
+        function addDXFText(x, y, textHeight, textVal, layer = "SELO_TEXTOS") {
+            return `0\nTEXT\n8\n${layer}\n10\n${x}\n20\n${y}\n30\n0.0\n40\n${textHeight}\n1\n${textVal}\n`;
+        }
+
+        let currentOffsetX = 0;
+
+        selectedSpecs.forEach((spec) => {
+            const L = spec.L + offset;
+            const H = spec.H + offset;
+            const hasBottom = spec.hasBottom !== false;
+            const ctmLabel = spec.ctmProfile === "estreito" ? "ESTREITO" : "LARGO";
+
+            if (hasBottom) {
+                dxf += addDXFLine(currentOffsetX, 0, currentOffsetX + L, 0, "CONTRAMARCO_EXT");
+            }
+            dxf += addDXFLine(currentOffsetX + L, 0, currentOffsetX + L, H, "CONTRAMARCO_EXT");
+            dxf += addDXFLine(currentOffsetX + L, H, currentOffsetX, H, "CONTRAMARCO_EXT");
+            dxf += addDXFLine(currentOffsetX, H, currentOffsetX, 0, "CONTRAMARCO_EXT");
+
+            const off = spec.ctmProfile === "estreito" ? 15 : 25;
+            if (L > off * 2 && H > off * 2) {
+                if (hasBottom) {
+                    dxf += addDXFLine(currentOffsetX + off, off, currentOffsetX + L - off, off, "CONTRAMARCO_INT");
+                }
+                dxf += addDXFLine(currentOffsetX + L - off, off, currentOffsetX + L - off, H - off, "CONTRAMARCO_INT");
+                dxf += addDXFLine(currentOffsetX + L - off, H - off, currentOffsetX + off, H - off, "CONTRAMARCO_INT");
+                dxf += addDXFLine(currentOffsetX + off, H - off, currentOffsetX + off, off, "CONTRAMARCO_INT");
+            }
+
+            dxf += addDXFLine(currentOffsetX, 0, currentOffsetX + L, H, "DIAGONAIS");
+            dxf += addDXFLine(currentOffsetX, H, currentOffsetX + L, 0, "DIAGONAIS");
+
+            dxf += addDXFText(currentOffsetX + (L / 2) - 80, (H / 2) + 30, 25, `REF: ${spec.ref}`, "SELO_TEXTOS");
+            dxf += addDXFText(currentOffsetX + (L / 2) - 100, (H / 2), 16, `REGRA: ${measureLabel} ${hasBottom ? '' : '(3 LADOS)'} [CTM ${ctmLabel}]`, "SELO_TEXTOS");
+            dxf += addDXFText(currentOffsetX + (L / 2) - 120, (H / 2) - 30, 18, `TIPO: ${spec.type}`, "SELO_TEXTOS");
+            dxf += addDXFText(currentOffsetX + (L / 2) - 60, -40, 20, `L = ${L} mm`, "COTAS");
+            dxf += addDXFText(currentOffsetX - 100, H / 2, 20, `H = ${H} mm`, "COTAS");
+            dxf += addDXFText(currentOffsetX + (L / 2) - 40, H + 30, 20, `Qtd: ${spec.qty} un`, "SELO_TEXTOS");
+
+            currentOffsetX += L + 1000;
+        });
+
+        dxf += `0\nENDSEC\n0\nEOF\n`;
+
+        const blob = new Blob([dxf], { type: "application/dxf" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Lote_Contramarcos_${currentWorkKey.replace(/\s+/g, '_')}.dxf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        alert(`✔ Arquivo CAD (DWG/DXF) contendo ${selectedSpecs.length} contramarco(s) exportado com sucesso!`);
+    }
+
+    function downloadDXF() {
+        const ref = document.getElementById("refSelect") ? document.getElementById("refSelect").value : "";
+        const measureType = document.getElementById("measureType") ? document.getElementById("measureType").value : "base";
+        const specs = allWorks[currentWorkKey].specs;
+        const spec = specs.find(s => s.ref === ref);
+
+        if (!spec) {
+            alert("Selecione uma referência válida para exportar o arquivo DXF CAD.");
+            return;
+        }
+
+        let measureLabel = "Base do Projeto";
+        if (measureType === "fora") measureLabel = "Fora a Fora (+28mm)";
+        else if (measureType === "dentro") measureLabel = "Dentro a Dentro (-4mm)";
+
+        const L = parseFloat(document.getElementById("realL").value) || spec.L;
+        const H = parseFloat(document.getElementById("realH").value) || spec.H;
+        const hasBottom = spec.hasBottom !== false;
+        const ctmLabel = spec.ctmProfile === "estreito" ? "ESTREITO" : "LARGO";
+
+        let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nTABLES\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nENTITIES\n`;
+
+        function addDXFLine(x1, y1, x2, y2, layer = "CONTRAMARCO_EXT") {
+            return `0\nLINE\n8\n${layer}\n10\n${x1}\n20\n${y1}\n30\n0.0\n11\n${x2}\n21\n${y2}\n31\n0.0\n`;
+        }
+
+        function addDXFText(x, y, textHeight, textVal, layer = "SELO_TEXTOS") {
+            return `0\nTEXT\n8\n${layer}\n10\n${x}\n20\n${y}\n30\n0.0\n40\n${textHeight}\n1\n${textVal}\n`;
+        }
+
+        if (hasBottom) {
+            dxf += addDXFLine(0, 0, L, 0, "CONTRAMARCO_EXT");
+        }
+        dxf += addDXFLine(L, 0, L, H, "CONTRAMARCO_EXT");
+        dxf += addDXFLine(L, H, 0, H, "CONTRAMARCO_EXT");
+        dxf += addDXFLine(0, H, 0, 0, "CONTRAMARCO_EXT");
+
+        const off = spec.ctmProfile === "estreito" ? 15 : 25;
+        if (L > off * 2 && H > off * 2) {
+            if (hasBottom) {
+                dxf += addDXFLine(off, off, L - off, off, "CONTRAMARCO_INT");
+            }
+            dxf += addDXFLine(L - off, off, L - off, H - off, "CONTRAMARCO_INT");
+            dxf += addDXFLine(L - off, H - off, off, H - off, "CONTRAMARCO_INT");
+            dxf += addDXFLine(off, H - off, off, off, "CONTRAMARCO_INT");
+        }
+
+        dxf += addDXFLine(0, 0, L, H, "DIAGONAIS");
+        dxf += addDXFLine(0, H, L, 0, "DIAGONAIS");
+
+        dxf += addDXFText(L / 2 - 80, H / 2 + 30, 25, `REF: ${spec.ref}`, "SELO_TEXTOS");
+        dxf += addDXFText(L / 2 - 100, H / 2, 16, `REGRA: ${measureLabel} ${hasBottom ? '' : '(3 LADOS)'} [CTM ${ctmLabel}]`, "SELO_TEXTOS");
+        dxf += addDXFText(L / 2 - 120, H / 2 - 30, 18, `TIPO: ${spec.type}`, "SELO_TEXTOS");
+        dxf += addDXFText(L / 2 - 60, -40, 20, `L = ${L} mm`, "COTAS");
+        dxf += addDXFText(-100, H / 2, 20, `H = ${H} mm`, "COTAS");
+
+        dxf += `0\nENDSEC\n0\nEOF\n`;
+
+        const blob = new Blob([dxf], { type: "application/dxf" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Contramarco_${spec.ref}_${L}x${H}mm.dxf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    /* --- IMPORTAÇÃO E EXPORTAÇÃO EXCEL DE ESPECIFICAÇÕES --- */
+    function exportSpecsToExcel() {
+        const specs = allWorks[currentWorkKey].specs;
+        if (specs.length === 0) {
+            alert("Não há especificações cadastradas para exportar.");
+            return;
+        }
+
+        const dataToExport = specs.map(item => {
+            let released = getReleasedQtyForRef(item.ref);
+            let pending = Math.max(0, item.qty - released);
+            let status = released >= item.qty ? "CONCLUÍDO" : (released > 0 ? "EM ANDAMENTO" : "PENDENTE");
+
+            return {
+                "Referência": item.ref,
+                "Largura (L) mm": item.L,
+                "Altura (H) mm": item.H,
+                "Lados": item.hasBottom === false ? "3 Lados" : "4 Lados",
+                "Modelo CTM": item.ctmProfile === "estreito" ? "Estreito" : "Largo",
+                "Quantidade Total": item.qty,
+                "Liberado": released,
+                "Saldo Pendente": pending,
+                "Status": status,
+                "Tipologia": item.type
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Especificações");
+
+        const fileName = `Especificacoes_${currentWorkKey.replace(/\s+/g, '_')}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+    }
+
+    function exportHistoryToExcel() {
+        const logs = allWorks[currentWorkKey].logs;
+        if (logs.length === 0) {
+            alert("Não há registros no histórico para exportar.");
+            return;
+        }
+
+        const dataToExport = logs.map(log => ({
+            "Data/Hora": log.timestamp,
+            "Local / Bloco": log.location,
+            "Referência": log.ref,
+            "Escopo Liberado": log.scopeLabel,
+            "Qtd Liberada": log.releasedQty,
+            "Tipo Medida": log.measureType,
+            "Medido L (mm)": log.realL,
+            "Medido H (mm)": log.realH,
+            "Projeto L (mm)": log.projL,
+            "Projeto H (mm)": log.projH,
+            "Diferença L (mm)": log.diffL,
+            "Diferença H (mm)": log.diffH,
+            "Diferença Diagonais (mm)": log.diagDiff !== null ? log.diagDiff : "-",
+            "Status Liberação": log.status,
+            "Conferente": log.inspector,
+            "Observações": log.notes
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Histórico Liberações");
+
+        const fileName = `Historico_Liberacoes_${currentWorkKey.replace(/\s+/g, '_')}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+    }
+
+    function triggerExcelImport() {
+        document.getElementById("excelFileInput").click();
+    }
+
+    function importExcelSpecs(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                if (jsonData.length === 0) {
+                    alert("O arquivo selecionado está vazio.");
+                    return;
+                }
+
+                let importedCount = 0;
+                let updatedCount = 0;
+                const currentSpecs = allWorks[currentWorkKey].specs;
+
+                jsonData.forEach(row => {
+                    let ref = row["Referência"] || row["Referencia"] || row["REF"] || row["Ref"] || row["CODIGO"] || row["Código"] || "";
+                    let L = parseFloat(row["Largura (L) mm"] || row["Largura"] || row["L"] || row["LARGURA"] || 0);
+                    let H = parseFloat(row["Altura (H) mm"] || row["Altura"] || row["H"] || row["ALTURA"] || 0);
+                    let qty = parseInt(row["Quantidade Total"] || row["Quantidade"] || row["Qtd"] || row["QTY"] || row["QTD"] || 0);
+                    let type = row["Tipologia"] || row["Tipo"] || row["TIPOLOGIA"] || "JANELA DE CORRER C/ 02 FOLHAS";
+                    
+                    let sidesVal = String(row["Lados"] || row["LADOS"] || row["Estrutura"] || "").toLowerCase();
+                    let hasBottom = !sidesVal.includes("3");
+
+                    let modelVal = String(row["Modelo CTM"] || row["Modelo"] || row["MODELO"] || row["Perfil"] || "").toLowerCase();
+                    let ctmProfile = modelVal.includes("estreito") ? "estreito" : "largo";
+
+                    ref = String(ref).trim().toUpperCase();
+
+                    if (ref && !isNaN(L) && !isNaN(H) && !isNaN(qty) && L > 0 && H > 0 && qty > 0) {
+                        const existingIndex = currentSpecs.findIndex(s => s.ref === ref);
+                        if (existingIndex !== -1) {
+                            currentSpecs[existingIndex] = { ref, L, H, qty, type, hasBottom, ctmProfile };
+                            updatedCount++;
+                        } else {
+                            currentSpecs.push({ ref, L, H, qty, type, hasBottom, ctmProfile });
+                            importedCount++;
+                        }
+                    }
+                });
+
+                saveAllData();
+                populateTableAndSelect();
+                renderBulkItems();
+                updateDashboard();
+
+                alert(`✔ Processamento concluído com sucesso!\n• ${importedCount} novo(s) contramarco(s) adicionado(s).\n• ${updatedCount} contramarco(s) atualizado(s).`);
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao ler a planilha. Verifique se o arquivo possui colunas válidas.");
+            } finally {
+                event.target.value = "";
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+</script>
+<script>
+// PONTE DE INTEGRAÇÃO CTM -> CONTROLE DE OBRA
+function sincronizarComControle(tipologiaItem, quantidade = 1) {
+  const CHAVE_OBRA = 'controleObra_DB';
+  const rawData = localStorage.getItem(CHAVE_OBRA);
+  
+  if (!rawData) {
+    console.warn("Banco do Controle de Obra não encontrado no navegador.");
+    return;
+  }
+
+  let db = JSON.parse(rawData);
+
+  // Percorre as obras e encontra a tipologia certa para somar
+  if (db.obras) {
+    db.obras.forEach(obra => {
+      if (obra.itens) {
+        obra.itens.forEach(item => {
+          if (item.tipologia === tipologiaItem) {
+            item.fem = (parseFloat(item.fem) || 0) + quantidade;
+            console.log(`✅ Tipologia ${tipologiaItem} atualizada! Novo FEM: ${item.fem}`);
+          }
+        });
+      }
+    });
+    // Salva o resultado
+    localStorage.setItem(CHAVE_OBRA, JSON.stringify(db));
+  }
+}
+</script>
+<body>
+</html>

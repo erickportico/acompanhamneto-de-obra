@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Produção Mensal</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h2 { text-align: center; color: #1a252f; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        
+        /* Navegação por Abas */
+        .nav-tabs { display: flex; gap: 5px; border-bottom: 2px solid #ccc; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; background: #e0e0e0; border: none; border-top-left-radius: 6px; border-top-right-radius: 6px; cursor: pointer; font-weight: bold; color: #555; transition: background 0.2s; }
+        .tab-btn:hover { background: #d5d5d5; }
+        .tab-btn.active { background: #3498db; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Filtro de Período */
+        .month-selector { background: #e8f4f8; padding: 12px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; border: 1px solid #bce0fd; }
+        .month-selector label { font-weight: bold; color: #2c3e50; }
+        .month-selector select, .month-selector input { padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
+
+        /* Cards e Sessões */
+        .team-card { background: #fcf8e3; border: 1px solid #faebcc; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+        .team-card h4 { margin: 0 0 15px 0; color: #8a6d3b; font-size: 16px; }
+        .team-inputs { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 20px; }
+        .obra-inputs { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 1fr; gap: 10px; align-items: end; margin-bottom: 20px; }
+        .team-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .team-box { background: white; border: 1px solid #e0d0b0; border-radius: 6px; padding: 15px; max-height: 300px; overflow-y: auto; }
+        .team-box h5 { margin: 0 0 10px 0; font-size: 13px; color: #777; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed #eee; }
+        .btn-del-colab { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 13px; font-weight: bold; }
+
+        /* Calculadora */
+        .calc-card { background: #eef2f5; border: 1px solid #d9e2ec; padding: 20px; border-radius: 6px; }
+        .calc-card h4 { margin: 0 0 15px 0; color: #2c3e50; }
+        .calc-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; align-items: end; }
+        .calc-list { margin-top: 15px; background: white; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; padding: 10px; }
+        .calc-item { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px solid #eee; }
+        .calc-item:last-child { border-bottom: none; }
+        .calc-total-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; font-weight: bold; font-size: 16px; color: #16a085; }
+        .btn-calc-add { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-calc-add:hover { background: #2980b9; }
+        .btn-calc-use { background: #27ae60; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-calc-use:hover { background: #219150; }
+        .btn-calc-reset { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+        /* Formulário de Cadastro */
+        .form-card { background: #f8f9fa; border: 1px solid #deae0e; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        .form-group input, .form-group select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .input-destaque { border-color: #3498db !important; background-color: #f4fafe; }
+        
+        .form-buttons { grid-column: 1 / -1; display: flex; gap: 10px; }
+        .btn-add { flex: 1; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-add:hover { background: #219150; }
+        .btn-update { flex: 1; background: #f39c12; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-update:hover { background: #d68910; }
+        .btn-cancel { background: #7f8c8d; color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-cancel:hover { background: #616a6b; }
+
+        /* Ações do Sistema */
+        .actions-bar { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .actions-bar div { display: flex; gap: 8px; }
+        .btn-action { color: white; border: none; padding: 8px 14px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-print { background: #2980b9; }
+        .btn-print:hover { background: #1f618d; }
+        .btn-clear { background: #e74c3c; }
+        .btn-clear:hover { background: #c0392b; }
+        .btn-backup { background: #8e44ad; }
+        .btn-backup:hover { background: #71368a; }
+
+        /* Tabelas */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+        th, td { border: 1px solid #dcdcdc; padding: 8px 12px; font-size: 13px; text-align: left; vertical-align: middle; }
+        th { background: #2c3e50; color: white; text-align: center; }
+        tfoot tr { background-color: #eaedd0; font-weight: bold; }
+        tfoot td { border-top: 2px solid #2c3e50; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .taxa-info { font-size: 11px; color: #7f8c8d; display: block; margin-top: 2px; }
+        
+        /* Input Pagamento Manual na Tabela */
+        .input-pagamento-manual {
+            width: 110px;
+            padding: 5px;
+            border: 1px solid #27ae60;
+            border-radius: 4px;
+            text-align: right;
+            font-weight: bold;
+            color: #27ae60;
+            background-color: #f2fcf5;
+        }
+        .input-pagamento-manual:focus {
+            outline: none;
+            box-shadow: 0 0 4px #27ae60;
+        }
+        .print-only-val { display: none; }
+
+        /* Botões da Tabela */
+        .col-acao { white-space: nowrap; width: 120px; }
+        .action-buttons-wrapper { display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .btn-edit, .btn-del, .btn-move { 
+            border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 13px; line-height: 1;
+            display: inline-flex; align-items: center; justify-content: center; transition: transform 0.1s ease, background 0.2s ease;
+        }
+        .btn-move { background: #3498db; color: white; }
+        .btn-move:hover { background: #2980b9; transform: scale(1.08); }
+        .btn-edit { background: #f39c12; color: white; }
+        .btn-edit:hover { background: #d68910; transform: scale(1.08); }
+        .btn-del { background: #e74c3c; color: white; font-weight: bold; }
+        .btn-del:hover { background: #c0392b; transform: scale(1.08); }
+
+        /* Dashboard */
+        .dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px; }
+        .card-totais { background: #eef6fb; border: 1px solid #bce0fd; padding: 15px; border-radius: 6px; }
+        .resumo-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #cbd5e1; font-weight: bold; }
+        .total-destaque { background: #fef08a; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 15px; }
+        .total-pago-destaque { background: #d1fae5; padding: 10px; border-radius: 4px; margin-top: 6px; font-size: 15px; color: #065f46; }
+
+        /* Estilo de Impressão (Configurado para Escala de 60%) */
+        @media print {
+            @page {
+                size: A4;
+                margin: 8mm;
+            }
+
+            body { 
+                background: white !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                
+                /* Aplicação da Escala de 60% */
+                zoom: 60%;
+                transform: scale(0.6);
+                transform-origin: top left;
+                width: 166.66%; 
+            }
+
+            .container { 
+                box-shadow: none !important; 
+                padding: 0 !important; 
+                max-width: 100% !important; 
+            }
+
+            .nav-tabs, .form-card, .actions-bar, .btn-del, .btn-edit, .btn-move, .col-acao, .month-selector { 
+                display: none !important; 
+            }
+
+            .dashboard { display: block !important; }
+            .card-totais { margin-top: 20px; page-break-inside: avoid; }
+            
+            th { 
+                background-color: #2c3e50 !important; 
+                color: white !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+
+            .total-destaque, .total-pago-destaque { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+
+            .input-pagamento-manual { display: none !important; }
+            .print-only-val { display: inline !important; font-weight: bold; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>SISTEMA DE PAGAMENTO DE PRODUÇÃO - JOÃO PESSOA</h2>
+
+    <!-- SELETOR DE PERÍODO -->
+    <div class="month-selector">
+        <label for="mes-referencia">Período de Referência:</label>
+        <select id="mes-referencia" onchange="trocarPeriodo()">
+            <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+            <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+            <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
+        <input type="number" id="ano-referencia" value="2026" min="2020" max="2035" onchange="trocarPeriodo()">
+    </div>
+
+    <!-- ABAS -->
+    <div class="nav-tabs">
+        <button class="tab-btn" id="btn-tab-lancamentos" onclick="abrirAba(event, 'tab-lancamentos')">📌 Lançamentos & Resumo</button>
+        <button class="tab-btn" id="btn-tab-equipe" onclick="abrirAba(event, 'tab-equipe')">👥 Cadastrar Colaboradores e Obras</button>
+        <button class="tab-btn" id="btn-tab-calculadora" onclick="abrirAba(event, 'tab-calculadora')">🧮 Calculadora de Metragem</button>
+    </div>
+
+    <!-- ABA 1: LANÇAMENTOS -->
+    <div id="tab-lancamentos" class="tab-content">
+        <div class="form-card">
+            <div class="form-group">
+                <label>Instalação (M²)</label>
+                <input type="number" id="m2" step="0.01" placeholder="Ex: 31.92">
+            </div>
+            <div class="form-group">
+                <label>Material Instalado</label>
+                <input type="text" id="material" placeholder="Ex: Guarda Corpo de Vidro">
+            </div>
+            <div class="form-group">
+                <label>Taxa Profissional (R$/m²)</label>
+                <input type="number" id="taxa-prof" step="0.01" value="6.00" class="input-destaque">
+            </div>
+            <div class="form-group">
+                <label>Taxa Ajudante (R$/m²)</label>
+                <input type="number" id="taxa-ajud" step="0.01" value="4.00" class="input-destaque">
+            </div>
+            <div class="form-group">
+                <label>Obra</label>
+                <select id="obra"><option value="">-- Selecione uma Obra --</option></select>
+            </div>
+            <div class="form-group">
+                <label>Profissional(is)</label>
+                <select id="profissionais" multiple size="3"></select>
+            </div>
+            <div class="form-group">
+                <label>Ajudante(s)</label>
+                <select id="ajudantes" multiple size="3"></select>
+            </div>
+
+            <div class="form-buttons">
+                <button id="btn-submit" class="btn-add" onclick="salvarLancamento()">+ Adicionar Lançamento no Mês Selecionado</button>
+                <button id="btn-cancel-edit" class="btn-cancel" onclick="cancelarEdicao()" style="display: none;">Cancelar</button>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <div>
+                <button class="btn-action btn-backup" onclick="exportarBackup()">💾 Exportar Backup</button>
+                <button class="btn-action btn-backup" onclick="document.getElementById('input-import').click()">📂 Importar Backup</button>
+                <input type="file" id="input-import" style="display:none" onchange="importarBackup(event)" accept=".json">
+            </div>
+            <div>
+                <button class="btn-action btn-clear" onclick="limparMesAtual()">🗑️ Limpar Mês Selecionado</button>
+                <button class="btn-action btn-print" onclick="window.print()">🖨️ Imprimir Relatório</button>
+            </div>
+        </div>
+
+        <h3 id="titulo-lancamentos-mes" style="color:#2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 8px;">Lançamentos do Mês</h3>
+        <div id="area-tabelas-obras"></div>
+
+        <div class="dashboard">
+            <div>
+                <h3>Resumo de Pagamento por Colaborador</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Colaborador</th>
+                            <th>Total Profissional</th>
+                            <th>Total Ajudante</th>
+                            <th>Total a Receber</th>
+                            <th>Valor Pago (Manual)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-resumo"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>TOTAL GERAL:</td>
+                            <td class="text-right" id="soma-resumo-prof">R$ 0,00</td>
+                            <td class="text-right" id="soma-resumo-ajud" style="color:#c0392b;">R$ 0,00</td>
+                            <td class="text-right" id="soma-resumo-receber">R$ 0,00</td>
+                            <td class="text-right" id="soma-resumo-pago" style="color:#27ae60;">R$ 0,00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="card-totais">
+                <h3>Totais Gerais do Mês</h3>
+                <div class="resumo-item"><span>Metragem Total:</span><span id="total-m2">0.00 m²</span></div>
+                <div class="resumo-item"><span>Total Profissionais:</span><span id="total-prof">R$ 0,00</span></div>
+                <div class="resumo-item"><span>Total Ajudantes:</span><span id="total-ajud" style="color: #c0392b;">R$ 0,00</span></div>
+                <div class="resumo-item total-destaque"><span>Custo Total Produção:</span><span id="total-geral">R$ 0,00</span></div>
+                <div class="resumo-item total-pago-destaque"><span>Valor Pago:</span><span id="total-pago-geral">R$ 0,00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 2: CADASTRO -->
+    <div id="tab-equipe" class="tab-content">
+        <div class="team-card">
+            <h4>👥 Gerenciamento de Colaboradores Cadastrados</h4>
+            <div class="team-inputs">
+                <div class="form-group"><label>Nome</label><input type="text" id="novo-nome-colab"></div>
+                <div class="form-group"><label>Empresa</label><input type="text" id="nova-empresa-colab"></div>
+                <div class="form-group">
+                    <label>Função</label>
+                    <select id="nova-funcao-colab">
+                        <option value="Profissional">Profissional</option>
+                        <option value="Ajudante">Ajudante</option>
+                    </select>
+                </div>
+                <button class="btn-calc-add" style="background:#8a6d3b" onclick="cadastrarColaborador()">+ Cadastrar</button>
+            </div>
+            <div class="team-lists">
+                <div class="team-box"><h5>Profissionais:</h5><div id="lista-profissionais-cadastrados"></div></div>
+                <div class="team-box"><h5>Ajudantes:</h5><div id="lista-ajudantes-cadastrados"></div></div>
+            </div>
+        </div>
+
+        <div class="team-card" style="background: #eaf2f8; border-color: #bce0fd;">
+            <h4 style="color: #2980b9;">🏗️ Gerenciamento de Obras Cadastradas</h4>
+            <div class="obra-inputs">
+                <div class="form-group"><label>Nome da Obra</label><input type="text" id="novo-nome-obra" oninput="this.value = this.value.toUpperCase()"></div>
+                <div class="form-group"><label>Bairro</label><input type="text" id="novo-bairro-obra" list="lista-bairros" oninput="buscarBairros(this.value)">
+                    <datalist id="lista-bairros"></datalist>
+                </div>
+                <div class="form-group"><label>Cidade</label><input type="text" id="nova-cidade-obra" list="lista-cidades" oninput="buscarCidadesDebounced(this.value)">
+                    <datalist id="lista-cidades"></datalist>
+                </div>
+                <button class="btn-calc-add" style="background:#2980b9" onclick="cadastrarObra()">+ Cadastrar Obra</button>
+            </div>
+            <div class="team-box" style="max-height: 250px;">
+                <h5>Obras Disponíveis:</h5>
+                <div id="lista-obras-cadastradas"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 3: CALCULADORA -->
+    <div id="tab-calculadora" class="tab-content">
+        <div class="calc-card">
+            <h4>🧮 Calculadora de Metragem (Somador de Peças)</h4>
+            <div class="calc-inputs">
+                <div class="form-group"><label>Largura (m)</label><input type="number" id="calc-largura" step="0.01"></div>
+                <div class="form-group"><label>Altura (m)</label><input type="number" id="calc-altura" step="0.01"></div>
+                <div class="form-group"><label>Qtd. Peças</label><input type="number" id="calc-qtd" value="1" min="1"></div>
+                <button class="btn-calc-add" onclick="adicionarPecaCalc()">+ Somar Peça</button>
+            </div>
+            <div class="calc-list" id="calc-itens-lista"></div>
+            <div class="calc-total-bar">
+                <span>Metragem Calculada: <span id="calc-total-m2">0.00</span> m²</span>
+                <div>
+                    <button class="btn-calc-reset" onclick="resetarCalculadora()">Limpar</button>
+                    <button class="btn-calc-use" onclick="usarMetragemCalculada()">📥 Enviar para Formulário</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* === ESTADO GLOBAL === */
+    let bancoCidadesIBGE = [];
+    let bancoBairrosLocais = ["MANAÍRA", "CABEDELO", "MIRAMAR", "TAMBAÚ", "BESSA", "CABO BRANCO", "ALTI PLANO", "TORRE", "CENTRO", "MANGABEIRA", "INTERMARES"];
+    let timerBuscaCidade = null;
+
+    let listaProfissionais = JSON.parse(localStorage.getItem('producao_profs_db_v2')) || [
+        { nome: "Valdemir", empresa: "Própria" }, { nome: "Edilson", empresa: "Própria" }, { nome: "Lennon", empresa: "Própria" }
+    ];
+    let listaAjudantes = JSON.parse(localStorage.getItem('producao_ajuds_db_v2')) || [
+        { nome: "Antonio", empresa: "Própria" }, { nome: "Garcia", empresa: "Própria" }, { nome: "Leandro", empresa: "Própria" }
+    ];
+    let listaObras = JSON.parse(localStorage.getItem('producao_obras_db_v3')) || [
+        { nome: "GET FOR YOU", bairro: "MANAÍRA", cidade: "JOÃO PESSOA" },
+        { nome: "RESIDENCIAL MIRAMAR", bairro: "MIRAMAR", cidade: "JOÃO PESSOA" }
+    ];
+
+    let bancoDadosGlobal = JSON.parse(localStorage.getItem('producao_mensal_db')) || {};
+    let pagamentosManuaisGlobal = JSON.parse(localStorage.getItem('producao_pagamentos_manuais')) || {};
+    
+    let chaveAtual = "";
+    let editandoId = null;
+    let listaPecasCalculadas = [];
+
+    // Helper de Formatação BRL
+    const formatarBRL = val => (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    // Capitalização de Nomes
+    function formatarTextoCap(str) {
+        if (!str) return '';
+        const excecoes = ['e', 'a', 'o', 'as', 'os', 'da', 'de', 'do', 'das', 'dos', 'em', 'na', 'no', 'nas', 'nos', 'por', 'para', 'com'];
+        return str.trim().toLowerCase().split(/\s+/).map((word, index) => 
+            (index > 0 && excecoes.includes(word)) ? word : word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    }
+
+    /* === BUSCA DE CIDADES === */
+    function buscarCidadesDebounced(termo) {
+        clearTimeout(timerBuscaCidade);
+        timerBuscaCidade = setTimeout(() => buscarCidades(termo), 300);
+    }
+
+    async function buscarCidades(termo) {
+        termo = termo.toUpperCase();
+        document.getElementById('nova-cidade-obra').value = termo;
+        if (termo.length < 3) return;
+
+        if (bancoCidadesIBGE.length === 0) {
+            try {
+                const resp = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios');
+                const dados = await resp.json();
+                bancoCidadesIBGE = dados.map(m => m.nome.toUpperCase());
+            } catch (err) {
+                console.warn("Não foi possível carregar cidades do IBGE offline.");
+                return;
+            }
+        }
+
+        const datalist = document.getElementById('lista-cidades');
+        datalist.innerHTML = bancoCidadesIBGE
+            .filter(c => c.includes(termo))
+            .slice(0, 10)
+            .map(c => `<option value="${c}">`)
+            .join('');
+    }
+
+    function buscarBairros(termo) {
+        termo = termo.toUpperCase();
+        document.getElementById('novo-bairro-obra').value = termo;
+        if (termo.length < 3) return;
+
+        const datalist = document.getElementById('lista-bairros');
+        datalist.innerHTML = bancoBairrosLocais
+            .filter(b => b.includes(termo))
+            .slice(0, 10)
+            .map(b => `<option value="${b}">`)
+            .join('');
+    }
+
+    /* === CONTROLE DE ABAS (PERSISTENTE) === */
+    function abrirAba(evt, abaId) {
+        document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach(tb => tb.classList.remove("active"));
+        
+        document.getElementById(abaId).classList.add("active");
+        
+        if (evt && evt.currentTarget) {
+            evt.currentTarget.classList.add("active");
+        } else {
+            const btnMap = {
+                'tab-lancamentos': 'btn-tab-lancamentos',
+                'tab-equipe': 'btn-tab-equipe',
+                'tab-calculadora': 'btn-tab-calculadora'
+            };
+            if (btnMap[abaId]) document.getElementById(btnMap[abaId]).classList.add("active");
+        }
+
+        // Salva a aba atual no navegador
+        localStorage.setItem('producao_aba_ativa', abaId);
+    }
+
+    function restaurarAbaAtiva() {
+        const abaSalva = localStorage.getItem('producao_aba_ativa') || 'tab-lancamentos';
+        abrirAba(null, abaSalva);
+    }
+
+    /* === INICIALIZAÇÃO === */
+    function inicializarData() {
+        const hoje = new Date();
+        document.getElementById('mes-referencia').value = String(hoje.getMonth() + 1).padStart(2, '0');
+        document.getElementById('ano-referencia').value = hoje.getFullYear();
+        definirChaveAtual();
+    }
+
+    function definirChaveAtual() {
+        const mesSelect = document.getElementById('mes-referencia');
+        const mes = mesSelect.value;
+        const ano = document.getElementById('ano-referencia').value;
+        const nomeMes = mesSelect.options[mesSelect.selectedIndex].text;
+
+        chaveAtual = `${ano}-${mes}`;
+        if (!bancoDadosGlobal[chaveAtual]) bancoDadosGlobal[chaveAtual] = [];
+        if (!pagamentosManuaisGlobal[chaveAtual]) pagamentosManuaisGlobal[chaveAtual] = {};
+
+        // Atualiza o título dinâmico
+        document.getElementById('titulo-lancamentos-mes').innerText = `Lançamentos de ${nomeMes}/${ano}`;
+    }
+
+    /* === GESTÃO DE COLABORADORES === */
+    function cadastrarColaborador() {
+        const nomeInput = document.getElementById('novo-nome-colab');
+        const empresaInput = document.getElementById('nova-empresa-colab');
+        const nome = formatarTextoCap(nomeInput.value);
+        const empresa = formatarTextoCap(empresaInput.value) || 'Própria';
+        const funcao = document.getElementById('nova-funcao-colab').value;
+
+        if (!nome) return alert('Digite o nome do colaborador!');
+
+        const listaTarget = funcao === 'Profissional' ? listaProfissionais : listaAjudantes;
+        if (!listaTarget.some(item => item.nome === nome)) {
+            listaTarget.push({ nome, empresa });
+            salvarColaboradores();
+            renderizarColaboradores();
+        }
+
+        nomeInput.value = '';
+        empresaInput.value = '';
+    }
+
+    function removerColaborador(nome, funcao) {
+        if (funcao === 'Profissional') {
+            listaProfissionais = listaProfissionais.filter(p => p.nome !== nome);
+        } else {
+            listaAjudantes = listaAjudantes.filter(a => a.nome !== nome);
+        }
+        salvarColaboradores();
+        renderizarColaboradores();
+    }
+
+    function salvarColaboradores() {
+        localStorage.setItem('producao_profs_db_v2', JSON.stringify(listaProfissionais));
+        localStorage.setItem('producao_ajuds_db_v2', JSON.stringify(listaAjudantes));
+    }
+
+    function renderizarColaboradores() {
+        const renderOptions = list => list.map(i => `<option value="${i.nome} (${i.empresa || 'Própria'})">${i.nome} (${i.empresa || 'Própria'})</option>`).join('');
+        document.getElementById('profissionais').innerHTML = renderOptions(listaProfissionais);
+        document.getElementById('ajudantes').innerHTML = renderOptions(listaAjudantes);
+
+        const renderBox = (list, funcao) => list.map(i => `
+            <div class="team-item">
+                <span><strong>${i.nome}</strong> <small style="color:#777;">(${i.empresa || 'Própria'})</small></span>
+                <button class="btn-del-colab" onclick="removerColaborador('${i.nome}', '${funcao}')">🗑️ Excluir</button>
+            </div>
+        `).join('');
+
+        document.getElementById('lista-profissionais-cadastrados').innerHTML = renderBox(listaProfissionais, 'Profissional');
+        document.getElementById('lista-ajudantes-cadastrados').innerHTML = renderBox(listaAjudantes, 'Ajudante');
+    }
+
+    /* === GESTÃO DE OBRAS === */
+    function cadastrarObra() {
+        const nomeObra = document.getElementById('novo-nome-obra').value.trim().toUpperCase();
+        const bairroObra = document.getElementById('novo-bairro-obra').value.trim().toUpperCase();
+        const cidadeObra = document.getElementById('nova-cidade-obra').value.trim().toUpperCase();
+
+        if (!nomeObra) return alert('Digite o nome da obra!');
+
+        if (!listaObras.some(o => o.nome === nomeObra)) {
+            listaObras.push({ nome: nomeObra, bairro: bairroObra, cidade: cidadeObra });
+            if (bairroObra && !bancoBairrosLocais.includes(bairroObra)) bancoBairrosLocais.push(bairroObra);
+            salvarObras();
+            renderizarObras();
+        } else {
+            alert('Esta obra já está cadastrada!');
+        }
+
+        document.getElementById('novo-nome-obra').value = '';
+        document.getElementById('novo-bairro-obra').value = '';
+        document.getElementById('nova-cidade-obra').value = '';
+    }
+
+    function removerObra(nomeObra) {
+        listaObras = listaObras.filter(o => o.nome !== nomeObra);
+        salvarObras();
+        renderizarObras();
+    }
+
+    function salvarObras() {
+        localStorage.setItem('producao_obras_db_v3', JSON.stringify(listaObras));
+    }
+
+    function renderizarObras() {
+        const selectObra = document.getElementById('obra');
+        const divObras = document.getElementById('lista-obras-cadastradas');
+        
+        let htmlSelect = '<option value="">-- Selecione uma Obra --</option>';
+        let htmlBox = '';
+
+        listaObras.forEach(o => {
+            let localStr = [o.bairro, o.cidade].filter(Boolean).join(' - ');
+            let textoCompleto = localStr ? `${o.nome} (${localStr})` : o.nome;
+
+            htmlSelect += `<option value="${textoCompleto}">${textoCompleto}</option>`;
+            htmlBox += `
+                <div class="team-item">
+                    <span><strong>${o.nome}</strong> ${localStr ? `<small style="color:#555;">- ${localStr}</small>` : ''}</span>
+                    <button class="btn-del-colab" onclick="removerObra('${o.nome}')">🗑️ Excluir</button>
+                </div>`;
+        });
+
+        selectObra.innerHTML = htmlSelect;
+        divObras.innerHTML = htmlBox;
+    }
+
+    /* === CALCULADORA === */
+    function adicionarPecaCalc() {
+        const larg = parseFloat(document.getElementById('calc-largura').value);
+        const alt = parseFloat(document.getElementById('calc-altura').value);
+        const qtd = parseInt(document.getElementById('calc-qtd').value) || 1;
+
+        if (!larg || !alt) return alert('Informe a Largura e a Altura!');
+
+        listaPecasCalculadas.push({ larg, alt, qtd, areaTotalPeca: (larg * alt) * qtd });
+        document.getElementById('calc-largura').value = '';
+        document.getElementById('calc-altura').value = '';
+        document.getElementById('calc-qtd').value = '1';
+
+        atualizarCalculadora();
+    }
+
+    function atualizarCalculadora() {
+        let total = 0;
+        document.getElementById('calc-itens-lista').innerHTML = listaPecasCalculadas.map(peca => {
+            total += peca.areaTotalPeca;
+            return `<div class="calc-item"><span>${peca.qtd}x (${peca.larg.toFixed(2)}m × ${peca.alt.toFixed(2)}m)</span><span><strong>${peca.areaTotalPeca.toFixed(2)} m²</strong></span></div>`;
+        }).join('');
+        document.getElementById('calc-total-m2').innerText = total.toFixed(2);
+    }
+
+    function resetarCalculadora() {
+        listaPecasCalculadas = [];
+        atualizarCalculadora();
+    }
+
+    function usarMetragemCalculada() {
+        const total = parseFloat(document.getElementById('calc-total-m2').innerText);
+        if (total === 0) return alert('Nenhuma peça calculada!');
+        document.getElementById('m2').value = total.toFixed(2);
+        abrirAba(null, 'tab-lancamentos');
+    }
+
+    /* === MANIPULAÇÃO DE LANÇAMENTOS E PAGAMENTOS MANUAIS === */
+    function salvarDados() {
+        localStorage.setItem('producao_mensal_db', JSON.stringify(bancoDadosGlobal));
+        localStorage.setItem('producao_pagamentos_manuais', JSON.stringify(pagamentosManuaisGlobal));
+    }
+
+    function salvarValorPagoManual(colaborador, valor) {
+        if (!pagamentosManuaisGlobal[chaveAtual]) pagamentosManuaisGlobal[chaveAtual] = {};
+        pagamentosManuaisGlobal[chaveAtual][colaborador] = parseFloat(valor) || 0;
+        salvarDados();
+        atualizarInterface();
+    }
+
+    function trocarPeriodo() {
+        cancelarEdicao();
+        definirChaveAtual();
+        atualizarInterface();
+    }
+
+    function salvarLancamento() {
+        const m2 = parseFloat(document.getElementById('m2').value);
+        let material = document.getElementById('material').value;
+        const obra = document.getElementById('obra').value;
+        const taxaProf = parseFloat(document.getElementById('taxa-prof').value) || 0;
+        const taxaAjud = parseFloat(document.getElementById('taxa-ajud').value) || 0;
+        
+        const profs = Array.from(document.getElementById('profissionais').selectedOptions).map(o => o.value);
+        const ajuds = Array.from(document.getElementById('ajudantes').selectedOptions).map(o => o.value);
+
+        if (!m2 || !material) return alert('Informe a metragem M² e o Material!');
+        if (!obra) return alert('Selecione uma Obra!');
+
+        material = formatarTextoCap(material);
+        const valProf = m2 * taxaProf;
+        const valAjud = m2 * taxaAjud;
+
+        if (editandoId !== null) {
+            const index = bancoDadosGlobal[chaveAtual].findIndex(i => i.id === editandoId);
+            if (index !== -1) {
+                bancoDadosGlobal[chaveAtual][index] = { id: editandoId, m2, material, taxaProf, taxaAjud, obra, valProf, valAjud, profs, ajuds };
+            }
+            cancelarEdicao();
+        } else {
+            bancoDadosGlobal[chaveAtual].push({ id: Date.now(), m2, material, taxaProf, taxaAjud, obra, valProf, valAjud, profs, ajuds });
+        }
+
+        salvarDados();
+        limparFormulario();
+        atualizarInterface();
+    }
+
+    function editarItem(id) {
+        const item = bancoDadosGlobal[chaveAtual].find(i => i.id === id);
+        if (!item) return;
+
+        document.getElementById('m2').value = item.m2;
+        document.getElementById('material').value = item.material;
+        document.getElementById('obra').value = item.obra;
+        document.getElementById('taxa-prof').value = item.taxaProf || 6.00;
+        document.getElementById('taxa-ajud').value = item.taxaAjud || 4.00;
+
+        Array.from(document.getElementById('profissionais').options).forEach(opt => opt.selected = item.profs.includes(opt.value));
+        Array.from(document.getElementById('ajudantes').options).forEach(opt => opt.selected = item.ajuds.includes(opt.value));
+
+        editandoId = id;
+        const btnSubmit = document.getElementById('btn-submit');
+        btnSubmit.innerText = '💾 Salvar Alterações';
+        btnSubmit.className = 'btn-update';
+        document.getElementById('btn-cancel-edit').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarEdicao() {
+        editandoId = null;
+        limparFormulario();
+        const btnSubmit = document.getElementById('btn-submit');
+        btnSubmit.innerText = '+ Adicionar Lançamento no Mês Selecionado';
+        btnSubmit.className = 'btn-add';
+        document.getElementById('btn-cancel-edit').style.display = 'none';
+    }
+
+    function deletarItem(id) {
+        if (editandoId === id) cancelarEdicao();
+        if (confirm("Deseja realmente excluir este lançamento?")) {
+            bancoDadosGlobal[chaveAtual] = bancoDadosGlobal[chaveAtual].filter(item => item.id !== id);
+            salvarDados();
+            atualizarInterface();
+        }
+    }
+
+    function transferirItem(id) {
+        const itemIndex = bancoDadosGlobal[chaveAtual].findIndex(i => i.id === id);
+        if (itemIndex === -1) return;
+
+        const destino = prompt("Para qual mês/ano mover? (Formato: MM/AAAA - ex: 09/2026):");
+        if (!destino) return;
+
+        const partes = destino.trim().split('/');
+        if (partes.length !== 2 || partes[0].length !== 2 || partes[1].length !== 4) return alert("Formato inválido! Use MM/AAAA.");
+
+        const novaChave = `${partes[1]}-${partes[0]}`;
+        if (novaChave === chaveAtual) return alert("O lançamento já está neste mês!");
+
+        if (!bancoDadosGlobal[novaChave]) bancoDadosGlobal[novaChave] = [];
+        bancoDadosGlobal[novaChave].push(bancoDadosGlobal[chaveAtual].splice(itemIndex, 1)[0]);
+
+        salvarDados();
+        atualizarInterface();
+        alert("Lançamento transferido com sucesso!");
+    }
+
+    function limparMesAtual() {
+        if (confirm(`Tem certeza que deseja apagar os lançamentos e pagamentos manuais do mês ${chaveAtual}?`)) {
+            cancelarEdicao();
+            bancoDadosGlobal[chaveAtual] = [];
+            pagamentosManuaisGlobal[chaveAtual] = {};
+            salvarDados();
+            atualizarInterface();
+        }
+    }
+
+    function limparFormulario() {
+        document.getElementById('m2').value = '';
+        document.getElementById('material').value = '';
+        document.getElementById('obra').value = '';
+        document.getElementById('taxa-prof').value = '6.00';
+        document.getElementById('taxa-ajud').value = '4.00';
+        document.getElementById('profissionais').selectedIndex = -1;
+        document.getElementById('ajudantes').selectedIndex = -1;
+    }
+
+    /* === RENDERIZAÇÃO DA INTERFACE === */
+    function atualizarInterface() {
+        const lancamentos = bancoDadosGlobal[chaveAtual] || [];
+        const pagamentosManuais = pagamentosManuaisGlobal[chaveAtual] || {};
+        const lancamentosPorObra = {};
+        
+        let totalM2Geral = 0, totalProfGeral = 0, totalAjudGeral = 0;
+        let pagamentoColaboradores = {};
+
+        // Processa Lançamentos
+        lancamentos.forEach(item => {
+            const nomeObra = item.obra || "OBRA NÃO INFORMADA";
+            if (!lancamentosPorObra[nomeObra]) {
+                lancamentosPorObra[nomeObra] = { itens: [], totalM2: 0, totalValor: 0 };
+            }
+
+            lancamentosPorObra[nomeObra].itens.push(item);
+            lancamentosPorObra[nomeObra].totalM2 += item.m2;
+            lancamentosPorObra[nomeObra].totalValor += (item.valProf + item.valAjud);
+
+            totalM2Geral += item.m2;
+            totalProfGeral += item.valProf;
+            totalAjudGeral += item.valAjud;
+
+            if (item.profs && item.profs.length) {
+                let parte = item.valProf / item.profs.length;
+                item.profs.forEach(p => {
+                    pagamentoColaboradores[p] = pagamentoColaboradores[p] || { prof: 0, ajud: 0 };
+                    pagamentoColaboradores[p].prof += parte;
+                });
+            }
+
+            if (item.ajuds && item.ajuds.length) {
+                let parte = item.valAjud / item.ajuds.length;
+                item.ajuds.forEach(a => {
+                    pagamentoColaboradores[a] = pagamentoColaboradores[a] || { prof: 0, ajud: 0 };
+                    pagamentoColaboradores[a].ajud += parte;
+                });
+            }
+        });
+
+        // Renderiza Tabelas por Obra
+        const areaTabelas = document.getElementById('area-tabelas-obras');
+        const obras = Object.keys(lancamentosPorObra);
+
+        if (obras.length === 0) {
+            areaTabelas.innerHTML = '<p style="text-align:center; color:#777; padding:20px;">Nenhum lançamento cadastrado neste mês.</p>';
+        } else {
+            areaTabelas.innerHTML = obras.map(nomeObra => {
+                const dadosObra = lancamentosPorObra[nomeObra];
+                const linhasHtml = dadosObra.itens.map(item => `
+                    <tr>
+                        <td class="text-center"><strong>${item.m2.toFixed(2)}</strong></td>
+                        <td>${item.material}</td>
+                        <td class="text-right">${formatarBRL(item.valProf)} <span class="taxa-info">(${formatarBRL(item.taxaProf || 6)}/m²)</span></td>
+                        <td class="text-right">${formatarBRL(item.valAjud)} <span class="taxa-info">(${formatarBRL(item.taxaAjud || 4)}/m²)</span></td>
+                        <td>${[...(item.profs || []), ...(item.ajuds || [])].join(', ')}</td>
+                        <td class="text-center col-acao">
+                            <div class="action-buttons-wrapper">
+                                <button class="btn-move" title="Transferir" onclick="transferirItem(${item.id})">➡️</button>
+                                <button class="btn-edit" title="Editar" onclick="editarItem(${item.id})">✏️</button>
+                                <button class="btn-del" title="Excluir" onclick="deletarItem(${item.id})">✕</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+
+                return `
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <div style="background: #2c3e50; color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <h4 style="margin: 0; font-size: 16px; color: #3498db;">🏗️ ${nomeObra}</h4>
+                            <div style="font-size: 13px; background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 4px;">
+                                <span>Metragem: <strong style="color: #2ecc71;">${dadosObra.totalM2.toFixed(2)} m²</strong></span> &nbsp;|&nbsp; 
+                                <span>Custo: <strong style="color: #f1c40f;">${formatarBRL(dadosObra.totalValor)}</strong></span>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="background: #e2e8f0; color: #2c3e50;">Instalação M²</th>
+                                    <th style="background: #e2e8f0; color: #2c3e50;">Material</th>
+                                    <th style="background: #e2e8f0; color: #2c3e50;">Valor Profissional</th>
+                                    <th style="background: #e2e8f0; color: #2c3e50;">Valor Ajudante</th>
+                                    <th style="background: #e2e8f0; color: #2c3e50;">Equipe</th>
+                                    <th style="background: #e2e8f0; color: #2c3e50;" class="col-acao">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>${linhasHtml}</tbody>
+                        </table>
+                    </div>`;
+            }).join('');
+        }
+
+        // Renderiza Resumo Colaboradores
+        let totalPagoGeral = 0;
+        let somaTotalProf = 0;
+        let somaTotalAjud = 0;
+        let somaTotalReceber = 0;
+
+        document.getElementById('corpo-resumo').innerHTML = Object.keys(pagamentoColaboradores).map(colab => {
+            const pVal = pagamentoColaboradores[colab].prof;
+            const aVal = pagamentoColaboradores[colab].ajud;
+            const totalAReceber = pVal + aVal;
+            const valorPagoManual = pagamentosManuais[colab] !== undefined ? pagamentosManuais[colab] : '';
+            
+            somaTotalProf += pVal;
+            somaTotalAjud += aVal;
+            somaTotalReceber += totalAReceber;
+
+            if (pagamentosManuais[colab]) {
+                totalPagoGeral += parseFloat(pagamentosManuais[colab]);
+            }
+
+            return `
+                <tr>
+                    <td><strong>${colab}</strong></td>
+                    <td class="text-right">${formatarBRL(pVal)}</td>
+                    <td class="text-right" style="color:#c0392b;">${formatarBRL(aVal)}</td>
+                    <td class="text-right"><strong>${formatarBRL(totalAReceber)}</strong></td>
+                    <td class="text-right">
+                        <input type="number" step="0.01" class="input-pagamento-manual" 
+                               value="${valorPagoManual}" placeholder="0.00" 
+                               onchange="salvarValorPagoManual('${colab}', this.value)">
+                        <span class="print-only-val">${formatarBRL(parseFloat(valorPagoManual) || 0)}</span>
+                    </td>
+                </tr>`;
+        }).join('');
+
+        // Atualiza a linha do rodapé
+        document.getElementById('soma-resumo-prof').innerText = formatarBRL(somaTotalProf);
+        document.getElementById('soma-resumo-ajud').innerText = formatarBRL(somaTotalAjud);
+        document.getElementById('soma-resumo-receber').innerText = formatarBRL(somaTotalReceber);
+        document.getElementById('soma-resumo-pago').innerText = formatarBRL(totalPagoGeral);
+
+        // Totais Gerais do Mês
+        const custoTotalProducao = totalProfGeral + totalAjudGeral;
+
+        document.getElementById('total-m2').innerText = totalM2Geral.toFixed(2) + ' m²';
+        document.getElementById('total-prof').innerText = formatarBRL(totalProfGeral);
+        document.getElementById('total-ajud').innerText = formatarBRL(totalAjudGeral);
+        document.getElementById('total-geral').innerText = formatarBRL(custoTotalProducao);
+        document.getElementById('total-pago-geral').innerText = formatarBRL(totalPagoGeral);
+    }
+
+    /* === BACKUP === */
+    function exportarBackup() {
+        const pacote = { 
+            bancoDados: bancoDadosGlobal, 
+            pagamentosManuais: pagamentosManuaisGlobal,
+            profissionais: listaProfissionais, 
+            ajudantes: listaAjudantes, 
+            obras: listaObras 
+        };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(pacote));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `backup_producao_${Date.now()}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    }
+
+    function importarBackup(event) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const dados = JSON.parse(e.target.result);
+                if (confirm("Substituir todos os dados atuais pelo arquivo importado?")) {
+                    bancoDadosGlobal = dados.bancoDados || {};
+                    pagamentosManuaisGlobal = dados.pagamentosManuais || {};
+                    listaProfissionais = dados.profissionais || listaProfissionais;
+                    listaAjudantes = dados.ajudantes || listaAjudantes;
+                    listaObras = dados.obras || listaObras;
+
+                    salvarDados();
+                    salvarColaboradores();
+                    salvarObras();
+                    renderizarColaboradores();
+                    renderizarObras();
+                    atualizarInterface();
+                    alert("Dados importados com sucesso!");
+                }
+            } catch (err) {
+                alert("Erro ao ler o arquivo de backup.");
+            }
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    // Inicialização da Página Garantida Após o HTML Carregar
+    window.addEventListener('DOMContentLoaded', () => {
+        inicializarData();
+        renderizarColaboradores();
+        renderizarObras();
+        atualizarInterface();
+        restaurarAbaAtiva();
+    });
+</script>
+
+</body>
+</html>

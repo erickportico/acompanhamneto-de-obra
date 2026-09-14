@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Vistoria e Ocorrências de Obra</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #3b82f6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--surface); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        header { border-bottom: 3px solid var(--primary); padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .header-title-box { display: flex; align-items: center; gap: 20px; }
+        .logo-container { display: flex; flex-direction: column; align-items: center; }
+        .logo-img { max-height: 70px; max-width: 200px; object-fit: contain; display: none; margin-bottom: 5px; }
+        .logo-btn { font-size: 11px; padding: 4px 8px; background: #e2e8f0; border: 1px dashed #64748b; border-radius: 4px; cursor: pointer; color: var(--text); }
+        .logo-btn:hover { background: #cbd5e1; }
+        
+        h1 { color: var(--primary); font-size: 24px; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+        textarea { resize: vertical; height: 80px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .card-form { background: #f1f5f9; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #e2e8f0; transition: background-color 0.3s; }
+        .card-form.editing { background: #eff6ff; border-color: var(--secondary); }
+        .card-form h3 { margin-bottom: 15px; color: var(--primary); display: flex; justify-content: space-between; align-items: center; }
+
+        .actions-bar { display: flex; gap: 10px; }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-print { background: #10b981; color: white; }
+        .btn-clear { background: #64748b; color: white; }
+        .btn-cancel { background: #94a3b8; color: white; margin-left: 10px; display: none; }
+        
+        /* Botões dos Cards */
+        .btn-action { padding: 5px 10px; font-size: 12px; border-radius: 4px; border: none; font-weight: 600; cursor: pointer; margin-left: 5px; }
+        .btn-edit { background: var(--secondary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        .problem-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: white; page-break-inside: avoid; }
+        .problem-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; }
+        .badge-Baixa { background: #10b981; }
+        .badge-Média { background: var(--warning); }
+        .badge-Alta { background: var(--danger); }
+
+        .img-preview { max-width: 100%; max-height: 280px; border-radius: 6px; margin-top: 10px; object-fit: cover; display: block; }
+        .edit-photo-info { font-size: 12px; color: #64748b; margin-top: 4px; display: block; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            .no-print { display: none !important; }
+            .problem-card { border: 1px solid #000; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-title-box">
+            <div class="logo-container">
+                <img id="logoEmpresa" class="logo-img" alt="Logo da Empresa">
+                <label for="inputLogo" class="logo-btn no-print">📷 Alterar Logo</label>
+                <input type="file" id="inputLogo" accept="image/*" style="display: none;" onchange="salvarLogo(this)">
+            </div>
+            <div>
+                <h1>Relatório de Vistoria de Obra</h1>
+                <p style="color: #64748b; font-size: 14px;">Salvo automaticamente no seu navegador</p>
+            </div>
+        </div>
+        <div class="actions-bar no-print">
+            <button class="btn btn-clear" onclick="limparTudo()">🗑️ Novo Relatório</button>
+            <button class="btn btn-print" onclick="window.print()">🖨️ Exportar PDF</button>
+        </div>
+    </header>
+
+    <!-- Cabeçalho da Obra -->
+    <section class="form-group grid-2">
+        <div>
+            <label>Nome da Obra / Cliente:</label>
+            <input type="text" id="obraNome" oninput="salvarCabecalho()" placeholder="Ex: Residencial Alvorada - Ap 402">
+        </div>
+        <div>
+            <label>Data da Vistoria:</label>
+            <input type="date" id="obraData" oninput="salvarCabecalho()">
+        </div>
+        <div>
+            <label>Responsável Técnico:</label>
+            <input type="text" id="obraEngenheiro" oninput="salvarCabecalho()" placeholder="Ex: Eng. Carlos Silva">
+        </div>
+        <div>
+            <label>Local / Pavimento:</label>
+            <input type="text" id="obraLocal" oninput="salvarCabecalho()" placeholder="Ex: Cozinha / Bloco B">
+        </div>
+    </section>
+
+    <!-- Formulário Dinâmico (Adicionar / Editar) -->
+    <section class="card-form no-print" id="formArea">
+        <h3 id="formTitle">
+            <span>+ Adicionar Nova Ocorrência / Problema</span>
+        </h3>
+        <input type="hidden" id="editId" value="">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Título do Problema:</label>
+                <input type="text" id="probTitulo" placeholder="Ex: Infiltração na parede norte">
+            </div>
+            <div class="form-group">
+                <label>Gravidade:</label>
+                <select id="probGravidade">
+                    <option value="Baixa">Baixa</option>
+                    <option value="Média">Média</option>
+                    <option value="Alta">Alta</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Descrição Detalhada do Problema:</label>
+            <textarea id="probDescricao" placeholder="Descreva o que foi observado e a ação corretiva necessária..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Foto da Ocorrência:</label>
+            <input type="file" id="probFoto" accept="image/*" capture="environment">
+            <span class="edit-photo-info" id="photoInfo">Se desejar manter a foto atual durante a edição, deixe este campo em branco.</span>
+        </div>
+        <div>
+            <button class="btn btn-primary" id="btnSalvar" onclick="salvarOcorrencia()">Adicionar ao Relatório</button>
+            <button class="btn btn-cancel" id="btnCancelar" onclick="cancelarEdicao()">Cancelar Edição</button>
+        </div>
+    </section>
+
+    <!-- Lista de Ocorrências -->
+    <section>
+        <h2 style="margin-bottom: 15px; color: var(--primary);">Ocorrências Registradas</h2>
+        <div id="listaOcorrencias"></div>
+    </section>
+</div>
+
+<script>
+    let fotoBase64Temporaria = '';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarDados();
+    });
+
+    // 1. LOGO
+    function salvarLogo(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const logoBase64 = e.target.result;
+                try {
+                    localStorage.setItem('obra_logo', logoBase64);
+                    exibirLogo(logoBase64);
+                } catch (err) {
+                    alert('A imagem da logo é muito pesada.');
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function exibirLogo(src) {
+        const img = document.getElementById('logoEmpresa');
+        if (src) {
+            img.src = src;
+            img.style.display = 'block';
+        } else {
+            img.style.display = 'none';
+        }
+    }
+
+    // 2. CABEÇALHO
+    function salvarCabecalho() {
+        const cabecalho = {
+            nome: document.getElementById('obraNome').value,
+            data: document.getElementById('obraData').value,
+            engenheiro: document.getElementById('obraEngenheiro').value,
+            local: document.getElementById('obraLocal').value
+        };
+        localStorage.setItem('obra_cabecalho', JSON.stringify(cabecalho));
+    }
+
+    // 3. SALVAR (CRIAR OU EDITAR)
+    function salvarOcorrencia() {
+        const editId = document.getElementById('editId').value;
+        const titulo = document.getElementById('probTitulo').value;
+        const gravidade = document.getElementById('probGravidade').value;
+        const descricao = document.getElementById('probDescricao').value;
+        const fotoInput = document.getElementById('probFoto');
+
+        if (!titulo || !descricao) {
+            alert('Por favor, preencha o título e a descrição do problema.');
+            return;
+        }
+
+        // Se uma nova foto foi enviada
+        if (fotoInput.files && fotoInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                finalizarSalvamento(editId, titulo, gravidade, descricao, e.target.result);
+            };
+            reader.readAsDataURL(fotoInput.files[0]);
+        } else {
+            // Se estiver editando e não enviou foto nova, mantém a antiga (fotoBase64Temporaria)
+            finalizarSalvamento(editId, titulo, gravidade, descricao, fotoBase64Temporaria);
+        }
+    }
+
+    function finalizarSalvamento(id, titulo, gravidade, descricao, foto) {
+        let lista = JSON.parse(localStorage.getItem('obra_ocorrencias')) || [];
+
+        if (id) {
+            // MODO EDIÇÃO: Atualiza o item existente
+            lista = lista.map(item => {
+                if (item.id == id) {
+                    return { id: Number(id), titulo, gravidade, descricao, fotoBase64: foto };
+                }
+                return item;
+            });
+        } else {
+            // MODO CRIAÇÃO: Adiciona novo item
+            const novaOcorrencia = {
+                id: Date.now(),
+                titulo,
+                gravidade,
+                descricao,
+                fotoBase64: foto
+            };
+            lista.push(novaOcorrencia);
+        }
+
+        try {
+            localStorage.setItem('obra_ocorrencias', JSON.stringify(lista));
+            renderizarOcorrencias();
+            cancelarEdicao(); // Limpa o formulário e restaura o estado inicial
+        } catch (e) {
+            alert('A foto é muito grande para o LocalStorage. Tente fotos menores.');
+        }
+    }
+
+    // 4. MODO DE EDIÇÃO
+    function prepararEdicao(id) {
+        const lista = JSON.parse(localStorage.getItem('obra_ocorrencias')) || [];
+        const item = lista.find(o => o.id === id);
+
+        if (!item) return;
+
+        // Preenche o formulário com os dados da ocorrência
+        document.getElementById('editId').value = item.id;
+        document.getElementById('probTitulo').value = item.titulo;
+        document.getElementById('probGravidade').value = item.gravidade;
+        document.getElementById('probDescricao').value = item.descricao;
+        
+        // Guarda a foto antiga temporariamente
+        fotoBase64Temporaria = item.fotoBase64 || '';
+
+        // Ajusta a interface do formulário
+        document.getElementById('formTitle').innerHTML = '✏️ Editando Ocorrência';
+        document.getElementById('btnSalvar').innerText = 'Salvar Alterações';
+        document.getElementById('btnCancelar').style.display = 'inline-block';
+        
+        const formArea = document.getElementById('formArea');
+        formArea.classList.add('editing');
+
+        // Rola a tela até o formulário
+        formArea.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cancelarEdicao() {
+        document.getElementById('editId').value = '';
+        document.getElementById('probTitulo').value = '';
+        document.getElementById('probDescricao').value = '';
+        document.getElementById('probFoto').value = '';
+        fotoBase64Temporaria = '';
+
+        document.getElementById('formTitle').innerHTML = '+ Adicionar Nova Ocorrência / Problema';
+        document.getElementById('btnSalvar').innerText = 'Adicionar ao Relatório';
+        document.getElementById('btnCancelar').style.display = 'none';
+
+        document.getElementById('formArea').classList.remove('editing');
+    }
+
+    // 5. RENDERIZAR E DELETAR
+    function renderizarOcorrencias() {
+        const container = document.getElementById('listaOcorrencias');
+        container.innerHTML = '';
+
+        const lista = JSON.parse(localStorage.getItem('obra_ocorrencias')) || [];
+
+        lista.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'problem-card';
+            
+            const fotoHtml = item.fotoBase64 
+                ? `<img class="img-preview" src="${item.fotoBase64}" alt="Foto da ocorrência">` 
+                : '';
+
+            card.innerHTML = `
+                <div class="problem-header">
+                    <h3>${item.titulo}</h3>
+                    <div>
+                        <span class="badge badge-${item.gravidade}">${item.gravidade}</span>
+                        <button class="btn-action btn-edit no-print" onclick="prepararEdicao(${item.id})">✏️ Editar</button>
+                        <button class="btn-action btn-danger no-print" onclick="deletarOcorrencia(${item.id})">🗑️ Excluir</button>
+                    </div>
+                </div>
+                <p><strong>Descrição:</strong> ${item.descricao}</p>
+                ${fotoHtml}
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function deletarOcorrencia(id) {
+        if (confirm('Tem certeza que deseja excluir esta ocorrência?')) {
+            let lista = JSON.parse(localStorage.getItem('obra_ocorrencias')) || [];
+            lista = lista.filter(item => item.id !== id);
+            localStorage.setItem('obra_ocorrencias', JSON.stringify(lista));
+            
+            // Se estava editando o item que foi excluído, limpa o formulário
+            if (document.getElementById('editId').value == id) {
+                cancelarEdicao();
+            }
+            
+            renderizarOcorrencias();
+        }
+    }
+
+    function limparTudo() {
+        if (confirm('Deseja apagar todos os dados para iniciar um NOVO relatório? (A logo será mantida)')) {
+            localStorage.removeItem('obra_cabecalho');
+            localStorage.removeItem('obra_ocorrencias');
+            location.reload();
+        }
+    }
+
+    function carregarDados() {
+        const logo = localStorage.getItem('obra_logo');
+        if (logo) exibirLogo(logo);
+
+        const cabecalho = JSON.parse(localStorage.getItem('obra_cabecalho'));
+        if (cabecalho) {
+            document.getElementById('obraNome').value = cabecalho.nome || '';
+            document.getElementById('obraData').value = cabecalho.data || '';
+            document.getElementById('obraEngenheiro').value = cabecalho.engenheiro || '';
+            document.getElementById('obraLocal').value = cabecalho.local || '';
+        } else {
+            document.getElementById('obraData').valueAsDate = new Date();
+        }
+
+        renderizarOcorrencias();
+    }
+</script>
+
+</body>
+</html>

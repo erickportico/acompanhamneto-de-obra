@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Acompanhamento de Produção e Instalação</title>
+    <!-- Bibliotecas de Gráficos (Chart.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* VARIÁVEIS - TEMA CLARO */
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #cbd5e1;
+            --primary: #0f172a;
+            --primary-accent: #2563eb;
+            --secondary: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --med-header-dark: #65a30d;
+            --input-bg: #ffffff;
+            --table-header-base: #e2e8f0;
+            --table-row-completed: #f0fdf4;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* VARIÁVEIS - TEMA ESCURO (SLATE DARK / PREMIUM) */
+        body.dark-mode {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --primary: #020617;
+            --primary-accent: #3b82f6;
+            --secondary: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #f43f5e;
+            --med-header-dark: #84cc16;
+            --input-bg: #0f172a;
+            --table-header-base: #334155;
+            --table-row-completed: #064e3b22;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
+        body { background-color: var(--bg); color: var(--text); padding: 15px; line-height: 1.4; }
+        .container { max-width: 1700px; margin: 0 auto; }
+
+        header {
+            background: var(--primary); color: white; padding: 16px 20px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            box-shadow: var(--card-shadow); flex-wrap: wrap; gap: 15px; border: 1px solid var(--border);
+        }
+
+        .header-title-container { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .header-title-info h1 { font-size: 1.5rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.5px; }
+        .header-title-info p { font-size: 0.85rem; opacity: 0.8; }
+
+        .contract-badge {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 14px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center;
+        }
+        .contract-badge .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; font-weight: 700; }
+        .contract-badge .val { font-size: 1.25rem; font-weight: 800; color: #38bdf8; }
+
+        .project-selector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        select, input, button, textarea { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem; background: var(--input-bg); color: var(--text); }
+        button { background: var(--primary-accent); color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button.danger { background: var(--danger); }
+        button.secondary { background: var(--secondary); color: #fff; }
+        button.success { background: var(--success); }
+        button.warning { background: var(--warning); color: #000; }
+
+        /* CONTROLE DE RECEBIMENTO DE MATERIAIS */
+        .recebimento-import-help { background:var(--input-bg); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:.8rem; color:var(--text-light); }
+        .recebimento-import-help strong { color:var(--text); }
+        .material-badge { display:inline-block; padding:3px 6px; border-radius:5px; background:var(--table-header-base); font-size:.72rem; font-weight:700; }
+
+        .recebimento-kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:15px; }
+        .recebimento-status { display:inline-block; padding:4px 8px; border-radius:999px; font-size:.72rem; font-weight:800; }
+        .recebimento-status.recebido { background:#dcfce7; color:#166534; }
+        .recebimento-status.parcial { background:#fef3c7; color:#92400e; }
+        .recebimento-status.rejeitado { background:#ffe4e6; color:#9f1239; }
+        .recebimento-status.pendente { background:#e2e8f0; color:#334155; }
+        body.dark-mode .recebimento-status.recebido { background:#14532d; color:#dcfce7; }
+        body.dark-mode .recebimento-status.parcial { background:#78350f; color:#fef3c7; }
+        body.dark-mode .recebimento-status.rejeitado { background:#881337; color:#ffe4e6; }
+        body.dark-mode .recebimento-status.pendente { background:#334155; color:#e2e8f0; }
+        .recebimento-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .recebimento-table input, .recebimento-table select { min-width:90px; }
+
+        /* KPIS - PRIMEIRA ABA */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .kpi-card { background: var(--card-bg); padding: 16px; border-radius: 10px; border: 1px solid var(--border); box-shadow: var(--card-shadow); }
+        .kpi-card .label { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .kpi-card .value { font-size: 1.5rem; font-weight: 800; margin: 4px 0; color: var(--text); }
+
+        .tabs { display: flex; gap: 8px; border-bottom: 2px solid var(--border); margin-bottom: 16px; flex-wrap: wrap; }
+        .tab-btn { background: none; border: none; color: var(--text-light); padding: 10px 18px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; border-radius: 0; }
+        .tab-btn.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); }
+
+        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 18px; margin-bottom: 20px; box-shadow: var(--card-shadow); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+        .card-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+
+        .search-box { position: relative; min-width: 250px; }
+        .search-box input { width: 100%; padding-left: 28px; }
+        .search-box::before { content: "🔍"; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; opacity: 0.6; }
+
+        .table-responsive { 
+            overflow-x: auto; overflow-y: auto; max-height: 65vh; max-width: 100%; 
+            border: 1px solid var(--border); border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); cursor: grab; user-select: none; 
+        }
+        .table-responsive.active { cursor: grabbing; }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.8rem; text-align: center; }
+        th, td { padding: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+        th:first-child, td:first-child { border-left: 1px solid var(--border); }
+        
+        tr.row-completed { background-color: var(--table-row-completed) !important; }
+        tr.row-completed td input { background-color: transparent; }
+
+        .th-content { padding: 8px 10px; display: inline-block; width: 100%; height: 100%; min-width: 40px; resize: horizontal; overflow: auto; scrollbar-width: none; font-weight: 700; }
+        .th-content::-webkit-scrollbar { display: none; }
+        td .td-content { padding: 6px 8px; color: var(--text); }
+
+        thead th { position: sticky; top: 0; z-index: 10; background-clip: padding-box; }
+        thead tr:nth-child(1) th { top: 0; z-index: 11; }
+        thead tr:nth-child(2) th { top: 31px; z-index: 10; }
+
+        th.head-base { background: var(--table-header-base); color: var(--text); }
+        th.head-fem { background: #fef3c7; color: #92400e; }
+        th.head-fab { background: #e0f2fe; color: #075985; }
+        th.head-inst { background: #dcfce7; color: #166534; }
+        
+        body.dark-mode th.head-fem { background: #78350f; color: #fef3c7; }
+        body.dark-mode th.head-fab { background: #075985; color: #e0f2fe; }
+        body.dark-mode th.head-inst { background: #14532d; color: #dcfce7; }
+
+        th.head-med-base { background: #facc15; color: #000; }
+        th.head-med-atual { background: #4ade80; color: #000; }
+        th.head-med-fin { background: #a3e635; color: #000; }
+        th.head-med-retenca { background: #f87171; color: #fff; }
+
+        td input { width: 100%; border: 1px solid transparent; background: transparent; color: var(--text); padding: 4px 6px; text-align: center; font-size: 0.8rem; }
+        td input:focus { border-color: var(--primary-accent); background: var(--input-bg); outline: none; border-radius: 4px; }
+        td input.text-left { text-align: left; }
+
+        .chart-box-container { display: flex; flex-direction: column; gap: 20px; margin-top: 10px; }
+        .chart-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; box-shadow: var(--card-shadow); }
+        .chart-card-title { text-align: center; font-size: 0.9rem; font-weight: 700; color: var(--text-light); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .chart-canvas-wrapper { position: relative; width: 100%; height: 250px; }
+        .chart-resumo-wrapper { max-width: 500px; margin: 0 auto; height: 300px; }
+
+        /* BARRAS ESTILIZADAS DE MEDIÇÃO */
+        .print-style-bar {
+            background-color: #f7fee7;
+            border: 2px solid #84cc16;
+            border-radius: 12px;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        body.dark-mode .print-style-bar {
+            background-color: #142007;
+            border-color: #65a30d;
+        }
+
+        .print-card {
+            background: #ffffff;
+            border: 1px solid #d9f99d;
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        body.dark-mode .print-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .print-card .title {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #3f6212;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        body.dark-mode .print-card .title { color: #a3e635; }
+
+        .print-card .value {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        body.dark-mode .print-card .value { color: #f8fafc; }
+
+        /* Estilos com as cores fiéis do print */
+        .card-yellow { background-color: #fef9c3 !important; border-color: #fef08a !important; }
+        .card-yellow .title { color: #854d0e !important; }
+        .card-yellow .value { color: #713f12 !important; }
+
+        .card-green { background-color: #dcfce7 !important; border-color: #bbf7d0 !important; }
+        .card-green .title { color: #166534 !important; }
+        .card-green .value { color: #14532d !important; }
+
+        .card-red { background-color: #ffe4e6 !important; border-color: #fecdd3 !important; }
+        .card-red .title { color: #9f1239 !important; }
+        .card-red .value { color: #881337 !important; }
+
+        .card-blue { background-color: #38bdf8 !important; border-color: #0284c7 !important; }
+        .card-blue .title { color: #075985 !important; }
+        .card-blue .value { color: #0c4a6e !important; }
+
+        .nav-medicao-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .nav-btn {
+            background: #475569;
+            color: #fff;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .nav-btn:hover { background: #334155; }
+        .nav-text { font-size: 1rem; font-weight: 800; }
+
+        .progress-bar-bg { background: var(--border); border-radius: 4px; height: 14px; width: 80px; display: inline-block; vertical-align: middle; overflow: hidden; margin-right: 6px; }
+        .progress-bar-fill { height: 100%; background: var(--warning); transition: width 0.3s; }
+        .progress-bar-fill.complete { background: var(--success); }
+
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
+        .modal { background: var(--card-bg); color: var(--text); padding: 24px; border-radius: 12px; width: 100%; max-width: 700px; border: 1px solid var(--border); }
+        .modal h3 { margin-bottom: 12px; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--text-light); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; }
+
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .config-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .config-item input { width: auto; transform: scale(1.2); }
+
+        .medicao-historico-banner {
+            background: #f59e0b; color: #000; font-weight: bold; padding: 8px 12px; border-radius: 6px;
+            margin-bottom: 12px; text-align: center; font-size: 0.85rem; display: none;
+        }
+
+        @media print {
+            body { background: white; color: black; padding: 0; font-size: 10pt; }
+            header, .project-selector, .tabs, button, .search-box, .actions-cell, th:last-child, td:last-child { display: none !important; }
+            .card { border: none; padding: 0; margin: 0; background: white; }
+            .table-responsive { max-height: none; overflow: visible; border: none; }
+            table { width: 100%; border: 1px solid #000; }
+            th, td { border: 1px solid #000 !important; color: black !important; }
+            .print-style-bar { border: 1px solid #000; background: #f0f0f0; }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+<div class="container">
+    <header>
+        <div class="header-title-container">
+            <div class="header-title-info">
+                <h1 id="obraTitle">BURJ LAVIE</h1>
+                <p>Painel de Acompanhamento de Produção e Instalação</p>
+            </div>
+            <div class="contract-badge">
+                <span class="label">Contrato Global</span>
+                <span class="val" id="headerValorContrato">R$ 0,00</span>
+            </div>
+        </div>
+        <div class="project-selector">
+            <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
+            <select id="selectObra" onchange="trocarObra(this.value)"></select>
+            <button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button>
+            <button class="success" onclick="abrirModalNovaObra()">+ Nova Obra</button>
+            <button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button>
+            <button class="secondary" onclick="exportarDados()">💾 Backup</button>
+            <button class="secondary" onclick="document.getElementById('fileRestoreInput').click()">📥 Restaurar</button>
+            <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
+        </div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn" id="btn-tab-itens" onclick="trocarAba('itens')">📐 Painel Geral de Produção</button>
+        <button class="tab-btn" id="btn-tab-liberacao" onclick="trocarAba('liberacao')">📋 Avanço de Liberação (FEM)</button>
+        <button class="tab-btn" id="btn-tab-medicoes" onclick="trocarAba('medicoes')">📝 Boletim de Medição (Financeiro)</button>
+        <button class="tab-btn" id="btn-tab-graficos" onclick="trocarAba('graficos')">📊 Gráficos & Relatórios</button>
+        <button class="tab-btn" id="btn-tab-recebimento" onclick="trocarAba('recebimento')">📦 Recebimento de Materiais</button>
+    </div>
+
+    <!-- TAB 1: PAINEL GERAL DE ITENS -->
+    <div id="tab-itens" class="card" style="display:none;">
+        <div class="kpi-grid">
+            <div class="kpi-card"><div class="label">Total de Peças</div><div class="value" id="kpiQtdTotal">0</div></div>
+            <div class="kpi-card"><div class="label">Área Total Prevista</div><div class="value" id="kpiAreaTotal">0 m²</div></div>
+            <div class="kpi-card"><div class="label">Avanço Liberação (FEM)</div><div class="value" id="kpiProgressoFem" style="color: var(--warning);">0%</div></div>
+            <div class="kpi-card"><div class="label">Avanço Fabricação</div><div class="value" id="kpiProgressoFab" style="color: var(--primary-accent);">0%</div></div>
+            <div class="kpi-card"><div class="label">Avanço Instalação</div><div class="value" id="kpiProgressoInst" style="color: var(--success);">0%</div></div>
+        </div>
+
+        <div class="card-header">
+            <div class="card-title">Lista de Controle Completa (Produção / Instalação)</div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <div class="search-box"><input type="text" id="searchItens" placeholder="Filtrar por ref, tipo, loc..." oninput="debounceRender()"></div>
+                <button class="warning" style="color:#000" onclick="abrirModalConfig()">⚙️ Ocultar/Mostrar Colunas</button>
+                <button class="secondary" onclick="abrirModalImportarExcel('producao')">📋 Colar Planilha Geral</button>
+                <button class="success" onclick="abrirModalItem()">+ Adicionar Item</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead id="theadItens"></thead>
+                <tbody id="tbodyItens"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 2: LIBERAÇÃO -->
+    <div id="tab-liberacao" class="card" style="display:none;">
+        <div class="card-header">
+            <div class="card-title">Acompanhamento Detalhado de Liberação Técnica (FEM)</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <div class="search-box"><input type="text" id="searchLiberacao" placeholder="Filtrar liberação..." oninput="debounceRender()"></div>
+                <button class="secondary" onclick="window.print()">🖨️ Imprimir / Gerar PDF</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="head-base"><div class="th-content">Ref</div></th>
+                        <th class="head-base"><div class="th-content" style="min-width: 220px;">Tipologia / Caixilho</div></th>
+                        <th class="head-base"><div class="th-content" style="min-width: 160px;">Localização</div></th>
+                        <th class="head-base"><div class="th-content">Qtd Total</div></th>
+                        <th class="head-base"><div class="th-content">Área Total</div></th>
+                        <th class="head-fem"><div class="th-content">Qtd Liberada (FEM)</div></th>
+                        <th class="head-fem"><div class="th-content">Qtd Saldo a Liberar</div></th>
+                        <th class="head-fem"><div class="th-content">Área Liberada</div></th>
+                        <th class="head-fem"><div class="th-content" style="min-width: 160px;">Avanço % FEM</div></th>
+                        <th class="head-fem"><div class="th-content">Status Liberação</div></th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyLiberacao"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 3: BOLETIM DE MEDIÇÃO DETALHADO -->
+    <div id="tab-medicoes" class="card" style="display:none;">
+        <div class="print-style-bar">
+            <div class="print-card">
+                <span class="title" style="text-align:center;">NAVEGAR MEDIÇÃO</span>
+                <div class="nav-medicao-box">
+                    <button class="nav-btn" onclick="navegarMedicao(-1)">◀</button>
+                    <span class="nav-text" id="lblNavMedicaoNum">Nº 1</span>
+                    <button class="nav-btn" onclick="navegarMedicao(1)">▶</button>
+                </div>
+            </div>
+            <div class="print-card">
+                <span class="title">M² TOTAL DO CONTRATO</span>
+                <span class="value" id="medHeaderM2Contrato">0.00 m²</span>
+            </div>
+            <div class="print-card">
+                <span class="title">VALOR SERVIÇO TOTAL</span>
+                <span class="value" id="medHeaderValorServicoTotal">R$ 0,00</span>
+            </div>
+            <div class="print-card">
+                <span class="title">M² ACUMULADO</span>
+                <span class="value" id="medHeaderM2Acumulado">0.00 m²</span>
+            </div>
+            <div class="print-card">
+                <span class="title">VALOR ACUMULADO</span>
+                <span class="value" id="medHeaderValorAcumulado">R$ 0,00</span>
+            </div>
+        </div>
+
+        <div class="card-header">
+            <div class="card-title">Boletim de Medição Detalhado por Tipologia (Serviço de Instalação)</div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <div class="search-box"><input type="text" id="searchMedicao" placeholder="Filtrar medição..." oninput="debounceRender()"></div>
+                <button class="warning" style="color:#000" onclick="sincronizarComInstalacao()">🔄 Sincronizar com Instalação</button>
+                <button class="primary" style="background:#0284c7;" onclick="encerrarECriarNovaMedicao()">🔒 Encerrar Medição Atual e Criar Próxima</button>
+                <button class="secondary" onclick="abrirModalImportarExcel('medicao')">📋 Colar Medição (Excel)</button>
+                <button class="secondary" onclick="window.print()">🖨️ Imprimir / Gerar PDF</button>
+            </div>
+        </div>
+
+        <div class="print-style-bar" style="margin-top: 10px;">
+            <div class="print-card card-yellow">
+                <span class="title">M² MEDIÇÃO SELECIONADA</span>
+                <span class="value" id="medHeaderM2Atual">0.00 m²</span>
+            </div>
+            <div class="print-card card-green">
+                <span class="title">VALOR MEDIÇÃO SELECIONADA</span>
+                <span class="value" id="medHeaderValAtual">R$ 0,00</span>
+            </div>
+            <div class="print-card card-red">
+                <span class="title">RETENÇÃO TÉCNICA (5%)</span>
+                <span class="value" id="medHeaderRetencao">R$ 0,00</span>
+            </div>
+            <div class="print-card card-blue">
+                <span class="title">LÍQUIDO A PAGAR</span>
+                <span class="value" id="medHeaderLiquido">R$ 0,00</span>
+            </div>
+        </div>
+
+        <div id="bannerEdicaoHistorico" class="medicao-historico-banner">
+            ⚠️ VOCÊ ESTÁ VISUALIZANDO E EDITANDO O HISTÓRICO DA MEDIÇÃO Nº <span id="lblMedicaoHistoricoNum">1</span>. 
+            <button style="background:#000; color:#fff; padding:2px 8px; margin-left:10px;" onclick="irParaUltimaMedicao()">Voltar para a Medição Atual</button>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="head-base"><div class="th-content">Referência</div></th>
+                        <th class="head-base"><div class="th-content" style="min-width: 180px;">Tipologia</div></th>
+                        <th class="head-base"><div class="th-content">Qtd Total</div></th>
+                        <th class="head-base"><div class="th-content">Área Total M²</div></th>
+                        <th class="head-base"><div class="th-content">M² Anterior Acumulado</div></th>
+                        <th class="head-med-atual"><div class="th-content">M² Medição Selecionada</div></th>
+                        <th class="head-med-atual"><div class="th-content">M² Total Acumulado</div></th>
+                        <th class="head-med-base"><div class="th-content">Saldo M² a Medir</div></th>
+                        <th class="head-med-fin"><div class="th-content">Valor Medição Atual (R$)</div></th>
+                        <th class="head-med-retenca"><div class="th-content">Retenção 5% (R$)</div></th>
+                        <th class="head-med-fin"><div class="th-content">Líquido a Pagar (R$)</div></th>
+                        <th class="head-med-fin"><div class="th-content">Saldo Contrato (R$)</div></th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyMedicaoBoletim"></tbody>
+            </table>
+        </div>
+
+        <div style="margin-top:15px;">
+            <label style="font-weight:bold; font-size:0.85rem; color:var(--text-light); display:block; margin-bottom:5px;">Considerações desta Medição:</label>
+            <textarea id="medConsideracoes" rows="2" style="width:100%; border:1px solid var(--border); border-radius:6px; padding:8px;" onchange="salvarHeaderMedicao()" placeholder="Escreva aqui observações relativas a esta medição..."></textarea>
+        </div>
+    </div>
+
+    <!-- TAB 5: RECEBIMENTO DE MATERIAIS -->
+    <div id="tab-recebimento" class="card" style="display:none;">
+        <div class="recebimento-kpi-grid">
+            <div class="kpi-card"><div class="label">Registros de Recebimento</div><div class="value" id="recKpiRegistros">0</div></div>
+            <div class="kpi-card"><div class="label">Recebimentos Concluídos</div><div class="value" id="recKpiRecebidos" style="color:var(--success);">0</div></div>
+            <div class="kpi-card"><div class="label">Recebimentos Pendentes/Parciais</div><div class="value" id="recKpiPendentes" style="color:var(--warning);">0</div></div>
+            <div class="kpi-card"><div class="label">Quantidade Recebida</div><div class="value" id="recKpiQtd">0</div></div>
+        </div>
+        <div class="card-header">
+            <div class="card-title">Controle de Recebimento de Materiais</div>
+            <div class="recebimento-actions">
+                <div class="search-box"><input type="text" id="searchRecebimento" placeholder="Filtrar NF, fornecedor, material, ref..." oninput="debounceRender()"></div>
+                <button class="secondary" onclick="abrirModalImportarRecebimento()">📋 Colar Recebimentos (Excel)</button>
+                <button class="secondary" onclick="window.print()">🖨️ Imprimir / Gerar PDF</button>
+                <button class="success" onclick="abrirModalRecebimento()">+ Novo Recebimento</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="recebimento-table">
+                <thead><tr>
+                    <th class="head-base"><div class="th-content">Data</div></th>
+                    <th class="head-base"><div class="th-content">Lista de Corte</div></th>
+                    <th class="head-base"><div class="th-content">NF</div></th>
+                    <th class="head-base"><div class="th-content" style="min-width:130px;">Classe</div></th>
+                    <th class="head-base"><div class="th-content" style="min-width:140px;">Marca</div></th>
+                    <th class="head-base"><div class="th-content" style="min-width:170px;">Código - Cor</div></th>
+                    <th class="head-base"><div class="th-content" style="min-width:220px;">Descrição</div></th>
+                    <th class="head-base"><div class="th-content">Qtd. Recebida</div></th>
+                    <th class="head-base"><div class="th-content">Unid.</div></th>
+                    <th class="head-base"><div class="th-content">Status</div></th>
+                    <th class="head-base"><div class="th-content">Responsável</div></th>
+                    <th class="head-base"><div class="th-content">Local/Estoque</div></th>
+                    <th class="head-base"><div class="th-content" style="min-width:220px;">Observações</div></th>
+                    <th class="head-base"><div class="th-content">Ações</div></th>
+                </tr></thead>
+                <tbody id="tbodyRecebimento"></tbody>
+            </table>
+        </div>
+
+        <div style="margin-top:18px;">
+            <div class="card-header">
+                <div class="card-title">📦 Materiais Consolidados</div>
+                <div class="recebimento-actions">
+                    <span style="font-size:.78rem;color:var(--text-light);">Materiais iguais são agrupados automaticamente por Classe + Marca + Código/Cor.</span>
+                    <button class="secondary" onclick="exportarMateriaisConsolidados()">⬇️ Exportar Consolidado</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="recebimento-table">
+                    <thead><tr>
+                        <th class="head-base"><div class="th-content">Lista(s) de Corte</div></th>
+                        <th class="head-base"><div class="th-content">Classe</div></th>
+                        <th class="head-base"><div class="th-content">Marca</div></th>
+                        <th class="head-base"><div class="th-content">Código - Cor</div></th>
+                        <th class="head-base"><div class="th-content" style="min-width:260px;">Descrição</div></th>
+                        <th class="head-base"><div class="th-content">Qtd. Recebida</div></th>
+                        <th class="head-base"><div class="th-content">Unid.</div></th>
+                        <th class="head-base"><div class="th-content">Ocorrências</div></th>
+                        <th class="head-base"><div class="th-content">Último Recebimento</div></th>
+                    </tr></thead>
+                    <tbody id="tbodyMateriaisConsolidados"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: GRÁFICOS -->
+    <div id="tab-graficos" class="card" style="display:none;">
+        <div class="card-header">
+            <div class="card-title">Acompanhamento Gráfico de Produção e Instalação</div>
+            <button class="secondary" onclick="window.print()">🖨️ Imprimir Gráficos</button>
+        </div>
+
+        <div class="chart-box-container">
+            <div class="chart-card">
+                <div class="chart-card-title">LIBERAÇÃO DE MEDIDAS</div>
+                <div class="chart-canvas-wrapper"><canvas id="chartLiberacao"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-title">FABRICAÇÃO</div>
+                <div class="chart-canvas-wrapper"><canvas id="chartFabricacao"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-title">INSTALAÇÃO</div>
+                <div class="chart-canvas-wrapper"><canvas id="chartInstalacao"></canvas></div>
+            </div>
+            <div class="chart-card" style="margin-top: 10px;">
+                <div class="chart-card-title">RESUMO</div>
+                <div class="chart-canvas-wrapper chart-resumo-wrapper"><canvas id="chartResumo"></canvas></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAIS -->
+<div class="modal-bg" id="modalObra">
+    <div class="modal">
+        <h3 id="modalObraTitle">Configurar Obra Atual</h3>
+        <div class="form-group"><label>Nome da Obra</label><input type="text" id="inputNomeObra"></div>
+        <div class="form-group"><label>Valor Total do Contrato Global (R$)</label><input type="number" id="inputValorContrato" placeholder="Ex: 1750000"></div>
+        <div class="form-group">
+            <label>Porcentagem (%) Destinada ao Serviço de Instalação</label>
+            <input type="number" id="inputPctServico" value="20" placeholder="Ex: 20 para 20%">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+            <button class="secondary" onclick="fecharModais()">Cancelar</button>
+            <button class="success" onclick="salvarConfigObra()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-bg" id="modalConfig">
+    <div class="modal" style="max-width: 500px;">
+        <h3>⚙️ Configuração de Visibilidade</h3>
+        <div class="config-grid">
+            <label class="config-item"><input type="checkbox" id="cfg-dimensoes" onchange="salvarConfig()"> Exibir Largura/Altura</label>
+            <label class="config-item"><input type="checkbox" id="cfg-fem" onchange="salvarConfig()"> Exibir Módulo FEM</label>
+            <label class="config-item"><input type="checkbox" id="cfg-fab" onchange="salvarConfig()"> Exibir Módulo Fabricação</label>
+            <label class="config-item"><input type="checkbox" id="cfg-inst" onchange="salvarConfig()"> Exibir Módulo Instalação</label>
+        </div>
+        <button class="success" onclick="fecharModais()">Concluir</button>
+    </div>
+</div>
+
+<div class="modal-bg" id="modalImportarExcel">
+    <div class="modal">
+        <h3 id="importModalTitle">Copiar e Colar Dados do Excel</h3>
+        <p style="font-size:0.8rem; color:var(--text-light); margin-bottom:10px;">Cole abaixo as colunas copiadas da sua planilha.</p>
+        <textarea id="excelPasteArea" rows="9" style="width:100%"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+            <button class="secondary" onclick="fecharModais()">Cancelar</button>
+            <button class="success" onclick="processarImportacaoExcel()">Importar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-bg" id="modalRecebimento">
+        <div class="modal" style="max-width:850px;">
+            <h3>📦 Cadastrar Recebimento de Material</h3>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                <div class="form-group"><label>Data do Recebimento</label><input type="date" id="recData"></div>
+                <div class="form-group"><label>Nº da Lista de Corte</label><input type="text" id="recListaCorte" placeholder="Ex.: LC-001"></div>
+                <div class="form-group"><label>Nota Fiscal</label><input type="text" id="recNF" placeholder="Ex.: 12345"></div>
+                <div class="form-group"><label>Fornecedor</label><input type="text" id="recFornecedor"></div>
+                <div class="form-group"><label>Classe</label><input type="text" id="recClasse" placeholder="Ex.: COMPONENTES"></div>
+                <div class="form-group"><label>Marca</label><input type="text" id="recMarca" placeholder="Ex.: FISCHER"></div>
+                <div class="form-group"><label>Código - Cor</label><input type="text" id="recCodigoCor"></div>
+                <div class="form-group"><label>Descrição</label><input type="text" id="recDescricao"></div>
+                <div class="form-group"><label>Material</label><input type="text" id="recMaterial"></div>
+                <div class="form-group"><label>Referência / Código</label><input type="text" id="recRef"></div>
+                <div class="form-group"><label>Unidade</label><select id="recUnidade">
+                    <option value="UN">UN</option><option value="M">M</option><option value="M²">M²</option><option value="KG">KG</option><option value="L">L</option><option value="CX">CX</option><option value="OUTRO">OUTRO</option>
+                </select></div>
+                <div class="form-group"><label>Quantidade Prevista</label><input type="number" step="0.01" min="0" id="recQtdPrevista" value="0"></div>
+                <div class="form-group"><label>Quantidade Recebida</label><input type="number" step="0.01" min="0" id="recQtdRecebida" value="0"></div>
+                <div class="form-group"><label>Status</label><select id="recStatus">
+                    <option value="Recebido">Recebido</option><option value="Parcial">Parcial</option><option value="Pendente">Pendente</option><option value="Rejeitado">Rejeitado</option>
+                </select></div>
+                <div class="form-group"><label>Responsável pelo Recebimento</label><input type="text" id="recResponsavel"></div>
+                <div class="form-group"><label>Local / Estoque</label><input type="text" id="recLocal"></div>
+                <div class="form-group"><label>Observações</label><input type="text" id="recObs"></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+                <button class="secondary" onclick="fecharModais()">Cancelar</button>
+                <button class="success" onclick="salvarNovoRecebimento()">Salvar Recebimento</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-bg" id="modalImportarRecebimento">
+        <div class="modal">
+            <h3>📋 Importar Lista de Materiais</h3>
+            <div class="recebimento-import-help">
+                <strong>Importação automática do PDF:</strong><br>
+                O sistema lê o arquivo da Lista de Acessórios e pega <b>somente as linhas da CLASSE:OBRA</b>. As demais classes (COLAGEM, FABRICA etc.) são ignoradas.
+                Também identifica automaticamente <b>Pedido/Lote</b> como Nº da Lista de Corte.
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;">
+                <input type="file" id="recebimentoPDF" accept=".pdf,application/pdf" onchange="lerPDFListaAcessorios(event)" style="flex:1;">
+                <span id="pdfImportStatus" style="font-size:.78rem;color:var(--text-light);">Nenhum PDF selecionado</span>
+            </div>
+            <div style="font-size:.75rem;color:var(--text-light);margin-bottom:10px;">
+                Se preferir, ainda é possível colar manualmente uma lista no campo abaixo.
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px;">
+                <div class="form-group"><label>Data do Recebimento</label><input type="date" id="impRecData"></div>
+                <div class="form-group"><label>Nº da Lista de Corte</label><input type="text" id="impRecListaCorte" placeholder="Ex.: LC-001"></div>
+                <div class="form-group"><label>Nota Fiscal</label><input type="text" id="impRecNF"></div>
+                <div class="form-group"><label>Fornecedor</label><input type="text" id="impRecFornecedor"></div>
+                <div class="form-group"><label>Classe da Lista</label><input type="text" id="impRecClasse" placeholder="Ex.: ACESSÓRIOS POR PEÇA"></div>
+            </div>
+            <textarea id="recebimentoPasteArea" rows="12" style="width:100%" placeholder="COMPONENTES&#9;NYPO03 - PRETO&#9;60&#9;Esquadrleta 45° em nylon
+COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 13..."></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+                <button class="secondary" onclick="fecharModais()">Cancelar</button>
+                <button class="success" onclick="processarImportacaoRecebimento()">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-bg" id="modalItem">
+    <div class="modal">
+        <h3>Adicionar Item</h3>
+        <div class="form-group"><label>Referência</label><input type="text" id="itemRef"></div>
+        <div class="form-group"><label>Tipologia</label><input type="text" id="itemTipo"></div>
+        <div class="form-group"><label>Localização</label><input type="text" id="itemLoc"></div>
+        <div style="display:flex; gap:8px;">
+            <div class="form-group" style="flex:1;"><label>Qtd</label><input type="number" id="itemQtd" value="1"></div>
+            <div class="form-group" style="flex:1;"><label>Largura</label><input type="number" step="0.001" id="itemLarg" value="1.0"></div>
+            <div class="form-group" style="flex:1;"><label>Altura</label><input type="number" step="0.001" id="itemAlt" value="1.0"></div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+            <button class="secondary" onclick="fecharModais()">Cancelar</button>
+            <button class="success" onclick="salvarNovoItem()">Adicionar</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
+<script>
+    let modoNovaObra = false;
+    let tipoImportacaoAtual = 'producao';
+    let medicaoselecionadaIndex = 1;
+    let renderTimer = null;
+
+    let chartInstanceLiberacao = null;
+    let chartInstanceFabricacao = null;
+    let chartInstanceInstalacao = null;
+    let chartInstanceResumo = null;
+
+    function alternarTema() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('theme_preference', isDark ? 'dark' : 'light');
+        document.getElementById('btnThemeToggle').innerText = isDark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+        render();
+    }
+
+    function carregarTemaPreferido() {
+        const pref = localStorage.getItem('theme_preference') || 'dark';
+        if (pref === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('btnThemeToggle').innerText = '☀️ Modo Claro';
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.getElementById('btnThemeToggle').innerText = '🌙 Modo Escuro';
+        }
+    }
+
+    function carregarBancoComMigracao() {
+        const chavesHistoricas = ['obrasDB_v8', 'obrasDB_v7', 'obrasDB_v6', 'obrasDB_v5', 'obrasDB_v4', 'obrasDB_v3', 'obrasDB_v2', 'obrasDB'];
+        let mapaObras = new Map();
+        let configRecuperada = { dimensoes: true, fem: true, fab: true, inst: true };
+        let ultimaObraAtiva = null;
+
+        for (let i = chavesHistoricas.length - 1; i >= 0; i--) {
+            let chave = chavesHistoricas[i];
+            let rawData = localStorage.getItem(chave);
+            if (rawData) {
+                try {
+                    let parsed = JSON.parse(rawData);
+                    if (parsed.config) configRecuperada = parsed.config;
+                    if (parsed.obraAtualId) ultimaObraAtiva = parsed.obraAtualId;
+
+                    let lista = parsed.obras || (Array.isArray(parsed) ? parsed : []);
+                    lista.forEach(o => {
+                        if (o && o.nome) {
+                            o.pctServico = o.pctServico !== undefined ? o.pctServico : 20;
+                            o.valorContrato = o.valorContrato || 0;
+                            o.numMedicaoMax = o.numMedicaoMax || 1;
+                            o.consideracoesPorMedicao = o.consideracoesPorMedicao || {};
+                            o.itens = o.itens || [];
+                            o.recebimentos = o.recebimentos || [];
+                            
+                            o.itens.forEach(it => {
+                                if (!it.historicoMedicoes) {
+                                    it.historicoMedicoes = {};
+                                    if (it.m2MedicaoAnterior) it.historicoMedicoes[1] = it.m2MedicaoAnterior;
+                                    if (it.m2MedicaoAtual) it.historicoMedicoes[o.numMedicaoMax] = it.m2MedicaoAtual;
+                                }
+                            });
+
+                            mapaObras.set(o.nome.trim().toUpperCase(), o);
+                        }
+                    });
+                } catch(e) { console.error("Erro ao ler chave " + chave, e); }
+            }
+        }
+
+        let obrasFinais = Array.from(mapaObras.values());
+        if (obrasFinais.length === 0) {
+            obrasFinais = [{ id: 'burj_lavie', nome: 'BURJ LAVIE', valorContrato: 1750000, pctServico: 20, numMedicaoMax: 1, consideracoesPorMedicao: {}, itens: [], recebimentos: [] }];
+        }
+
+        let obraAtualIdFinal = obrasFinais[0].id;
+        if (ultimaObraAtiva && obrasFinais.some(o => o.id === ultimaObraAtiva)) {
+            obraAtualIdFinal = ultimaObraAtiva;
+        }
+
+        return { obras: obrasFinais, obraAtualId: obraAtualIdFinal, config: configRecuperada };
+    }
+
+    let db = carregarBancoComMigracao();
+
+    function salvarDB(reRender = true) {
+        localStorage.setItem('obrasDB_v8', JSON.stringify(db));
+        if (reRender) render();
+    }
+
+    function debounceRender() {
+        clearTimeout(renderTimer);
+        renderTimer = setTimeout(() => render(), 250);
+    }
+
+    function getObraAtual() { 
+        let o = db.obras.find(o => o.id === db.obraAtualId);
+        if (!o) { o = db.obras[0]; db.obraAtualId = o.id; }
+        return o;
+    }
+
+    function itemBateFiltro(item, termo) {
+        if(!termo) return true;
+        termo = termo.toLowerCase().trim();
+        return (item.ref || '').toLowerCase().includes(termo) ||
+               (item.tipo || '').toLowerCase().includes(termo) ||
+               (item.loc || '').toLowerCase().includes(termo);
+    }
+
+    function render() {
+        const obra = getObraAtual();
+        document.getElementById('obraTitle').innerText = obra.nome;
+        
+        const valorContratoGlobal = Number(obra.valorContrato || 0);
+        document.getElementById('headerValorContrato').innerText = "R$ " + valorContratoGlobal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        const select = document.getElementById('selectObra');
+        select.innerHTML = '';
+        const fragmentOpts = document.createDocumentFragment();
+        db.obras.forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o.id; opt.innerText = "Obra: " + o.nome;
+            if (o.id === db.obraAtualId) opt.selected = true;
+            fragmentOpts.appendChild(opt);
+        });
+        select.appendChild(fragmentOpts);
+
+        let qtdTotalPecas = 0, areaTotalPrevista = 0, totalFemPecas = 0, totalFabricadoPecas = 0, totalInstaladoPecas = 0, areaTotalInstalada = 0;
+        (obra.itens || []).forEach(i => {
+            const areaItem = i.qtd * (i.larg * i.alt);
+            qtdTotalPecas += Number(i.qtd || 0); areaTotalPrevista += areaItem;
+            totalFemPecas += Number(i.fem || 0); totalFabricadoPecas += Number(i.fabricado || 0); totalInstaladoPecas += Number(i.instalado || 0);
+            areaTotalInstalada += (Number(i.instalado || 0) * (i.larg * i.alt));
+        });
+
+        const pctFemGeral = qtdTotalPecas > 0 ? (totalFemPecas/qtdTotalPecas)*100 : 0;
+        const pctFabGeral = qtdTotalPecas > 0 ? (totalFabricadoPecas/qtdTotalPecas)*100 : 0;
+        const pctInstGeral = areaTotalPrevista > 0 ? (areaTotalInstalada/areaTotalPrevista)*100 : 0;
+        const valorServicoTotal = (valorContratoGlobal * (Number(obra.pctServico || 20) / 100));
+
+        // KPIS 1ª Aba
+        document.getElementById('kpiQtdTotal').innerText = qtdTotalPecas.toLocaleString('pt-BR');
+        document.getElementById('kpiAreaTotal').innerText = areaTotalPrevista.toFixed(2) + " m²";
+        document.getElementById('kpiProgressoFem').innerText = pctFemGeral.toFixed(1) + "%";
+        document.getElementById('kpiProgressoFab').innerText = pctFabGeral.toFixed(1) + "%";
+        document.getElementById('kpiProgressoInst').innerText = pctInstGeral.toFixed(1) + "%";
+
+        renderTabelaPrincipal(obra);
+        renderTabelaLiberacao(obra);
+        renderBoletimMedicao(obra, areaTotalPrevista, valorServicoTotal);
+        renderRecebimentos(obra);
+        renderGraficosEstiloExcel(obra, pctFemGeral, pctFabGeral, pctInstGeral);
+    }
+
+    function normalizarStatusRecebimento(status) {
+        const s = (status || '').toString().trim().toLowerCase();
+        if (s === 'recebido') return 'Recebido';
+        if (s === 'parcial' || s === 'parcialmente recebido') return 'Parcial';
+        if (s === 'rejeitado') return 'Rejeitado';
+        return 'Pendente';
+    }
+
+    function escaparHTML(valor) {
+        return String(valor ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
+    function normalizarRecebimentosAntigos(obra) {
+        if (!obra.recebimentos) obra.recebimentos = [];
+        obra.recebimentos.forEach(r => {
+            if (r.listaCorte === undefined) r.listaCorte = '';
+            if (r.classe === undefined) r.classe = '';
+            if (r.marca === undefined) r.marca = '';
+            if (r.codigoCor === undefined) r.codigoCor = r.ref || '';
+            if (r.descricao === undefined) r.descricao = r.material || '';
+            if (r.material === undefined) r.material = r.descricao || '';
+            if (r.ref === undefined) r.ref = r.codigoCor || '';
+        });
+    }
+
+
+    function normalizarChaveMaterial(valor) {
+        return String(valor || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toUpperCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function chaveMaterialConsolidado(r) {
+        const classe = normalizarChaveMaterial(r.classe);
+        const marca = normalizarChaveMaterial(r.marca);
+        const codigo = normalizarChaveMaterial(r.codigoCor || r.ref);
+        const descricao = normalizarChaveMaterial(r.descricao || r.material);
+
+        // Código/Cor é o identificador principal. Quando não existir,
+        // usamos Marca + Descrição para não juntar materiais diferentes.
+        return codigo
+            ? [classe, marca, codigo].join('||')
+            : [classe, marca, descricao].join('||');
+    }
+
+    function obterMateriaisConsolidados(obra) {
+        normalizarRecebimentosAntigos(obra);
+        const mapa = new Map();
+
+        (obra.recebimentos || []).forEach(r => {
+            const chave = chaveMaterialConsolidado(r);
+            if (!mapa.has(chave)) {
+                mapa.set(chave, {
+                    classe: r.classe || '',
+                    marca: r.marca || '',
+                    codigoCor: r.codigoCor || r.ref || '',
+                    descricao: r.descricao || r.material || '',
+                    unidade: r.unidade || 'UN',
+                    qtdRecebida: 0,
+                    qtdPrevista: 0,
+                    ocorrencias: 0,
+                    listasCorte: new Set(),
+                    ultimoRecebimento: r.data || ''
+                });
+            }
+
+            const item = mapa.get(chave);
+            item.qtdRecebida += Number(r.qtdRecebida || 0);
+            item.qtdPrevista += Number(r.qtdPrevista || 0);
+            item.ocorrencias += 1;
+            if (r.listaCorte) item.listasCorte.add(String(r.listaCorte));
+
+            // Mantém a descrição mais completa encontrada.
+            const descAtual = String(item.descricao || '');
+            const descNova = String(r.descricao || r.material || '');
+            if (descNova.length > descAtual.length) item.descricao = descNova;
+
+            if ((r.data || '') > (item.ultimoRecebimento || '')) {
+                item.ultimoRecebimento = r.data || '';
+            }
+        });
+
+        const resultado = Array.from(mapa.values());
+        resultado.forEach(item => item.listasCorte = Array.from(item.listasCorte).sort());
+        return resultado.sort((a,b) =>
+            `${a.classe} ${a.marca} ${a.codigoCor}`.localeCompare(
+                `${b.classe} ${b.marca} ${b.codigoCor}`, 'pt-BR'
+            )
+        );
+    }
+
+    function renderMateriaisConsolidados(obra) {
+        const tbody = document.getElementById('tbodyMateriaisConsolidados');
+        if (!tbody) return;
+
+        const materiais = obterMateriaisConsolidados(obra);
+
+        tbody.innerHTML = materiais.map(m => `<tr>
+            <td>${escaparHTML((m.listasCorte || []).join(', ') || '-')}</td>
+            <td><span class="material-badge">${escaparHTML(m.classe || '-')}</span></td>
+            <td class="text-left">${escaparHTML(m.marca || '-')}</td>
+            <td class="text-left">${escaparHTML(m.codigoCor || '-')}</td>
+            <td class="text-left">${escaparHTML(m.descricao || '-')}</td>
+            <td>${Number(m.qtdRecebida || 0).toLocaleString('pt-BR', {maximumFractionDigits:2})}</td>
+            <td>${escaparHTML(m.unidade || 'UN')}</td>
+            <td>${m.ocorrencias}</td>
+            <td>${escaparHTML(m.ultimoRecebimento || '-')}</td>
+        </tr>`).join('');
+    }
+
+    function exportarMateriaisConsolidados() {
+        const obra = getObraAtual();
+        const materiais = obterMateriaisConsolidados(obra);
+        if (!materiais.length) {
+            alert('Não há materiais para consolidar.');
+            return;
+        }
+
+        const linhas = [
+            ['Lista(s) de Corte','Classe','Marca','Código - Cor','Descrição','Quantidade Recebida','Unidade','Ocorrências','Último Recebimento'],
+            ...materiais.map(m => [
+                (m.listasCorte || []).join(', '), m.classe, m.marca, m.codigoCor, m.descricao,
+                m.qtdRecebida, m.unidade, m.ocorrencias, m.ultimoRecebimento
+            ])
+        ];
+
+        const csv = linhas.map(l => l.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(';')).join('\n');
+        const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `materiais_consolidados_${obra.nome.replace(/[^\w\-]+/g,'_')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function renderRecebimentos(obra) {
+        const tbody = document.getElementById('tbodyRecebimento');
+        if (!tbody) return;
+        normalizarRecebimentosAntigos(obra);
+        const termo = (document.getElementById('searchRecebimento')?.value || '').toLowerCase().trim();
+        const registros = obra.recebimentos.filter(r => !termo || [r.data,r.listaCorte,r.nf,r.classe,r.marca,r.codigoCor,r.descricao,r.fornecedor,r.material,r.ref,r.responsavel,r.local,r.obs].some(v => String(v||'').toLowerCase().includes(termo)));
+
+        document.getElementById('recKpiRegistros').innerText = obra.recebimentos.length.toLocaleString('pt-BR');
+        document.getElementById('recKpiRecebidos').innerText = obra.recebimentos.filter(r => normalizarStatusRecebimento(r.status)==='Recebido').length.toLocaleString('pt-BR');
+        document.getElementById('recKpiPendentes').innerText = obra.recebimentos.filter(r => ['Pendente','Parcial'].includes(normalizarStatusRecebimento(r.status))).length.toLocaleString('pt-BR');
+        document.getElementById('recKpiQtd').innerText = obra.recebimentos.reduce((s,r)=>s+Number(r.qtdRecebida||0),0).toLocaleString('pt-BR',{maximumFractionDigits:2});
+
+        tbody.innerHTML = registros.map(r => {
+            const status = normalizarStatusRecebimento(r.status);
+            return `<tr>
+                <td><input type="date" value="${escaparHTML(r.data)}" onchange="editarRecebimento(${r.id},'data',this.value)"></td>
+                <td><input type="text" value="${escaparHTML(r.listaCorte || '')}" onchange="editarRecebimento(${r.id},'listaCorte',this.value)"></td>
+                <td><input type="text" value="${escaparHTML(r.nf)}" onchange="editarRecebimento(${r.id},'nf',this.value)"></td>
+                <td><input class="text-left" type="text" value="${escaparHTML(r.classe)}" onchange="editarRecebimento(${r.id},'classe',this.value)"></td>
+                <td><input class="text-left" type="text" value="${escaparHTML(r.marca)}" onchange="editarRecebimento(${r.id},'marca',this.value)"></td>
+                <td><input type="text" value="${escaparHTML(r.codigoCor || r.ref)}" onchange="editarRecebimento(${r.id},'codigoCor',this.value)"></td>
+                <td><input class="text-left" type="text" value="${escaparHTML(r.descricao || r.material)}" onchange="editarRecebimento(${r.id},'descricao',this.value)"></td>
+                <td><input type="number" step="0.01" min="0" value="${Number(r.qtdRecebida||0)}" onchange="editarRecebimento(${r.id},'qtdRecebida',this.value)"></td>
+                <td><select onchange="editarRecebimento(${r.id},'unidade',this.value)">${['UN','M','M²','KG','L','CX','OUTRO'].map(u=>`<option value="${u}" ${r.unidade===u?'selected':''}>${u}</option>`).join('')}</select></td>
+                <td><select onchange="editarRecebimento(${r.id},'status',this.value)">${['Recebido','Parcial','Pendente','Rejeitado'].map(s=>`<option value="${s}" ${status===s?'selected':''}>${s}</option>`).join('')}</select></td>
+                <td><input class="text-left" type="text" value="${escaparHTML(r.responsavel)}" onchange="editarRecebimento(${r.id},'responsavel',this.value)"></td>
+                <td><input class="text-left" type="text" value="${escaparHTML(r.local)}" onchange="editarRecebimento(${r.id},'local',this.value)"></td>
+                <td><input class="text-left" type="text" value="${escaparHTML(r.obs)}" onchange="editarRecebimento(${r.id},'obs',this.value)"></td>
+                <td><button class="danger" onclick="excluirRecebimento(${r.id})">❌</button></td>
+            </tr>`;
+        }).join('');
+
+        renderMateriaisConsolidados(obra);
+    }
+
+    function abrirModalRecebimento() {
+        document.getElementById('recData').value = new Date().toISOString().slice(0,10);
+        ['recListaCorte','recNF','recFornecedor','recClasse','recMarca','recCodigoCor','recDescricao','recMaterial','recRef','recResponsavel','recLocal','recObs'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('recQtdPrevista').value=0;
+        document.getElementById('recQtdRecebida').value=0;
+        document.getElementById('recUnidade').value='UN';
+        document.getElementById('recStatus').value='Recebido';
+        document.getElementById('modalRecebimento').style.display='flex';
+    }
+
+    function salvarNovoRecebimento() {
+        const obra=getObraAtual();
+        if(!obra.recebimentos) obra.recebimentos=[];
+        const qtdPrevista=Number(document.getElementById('recQtdPrevista').value)||0;
+        const qtdRecebida=Number(document.getElementById('recQtdRecebida').value)||0;
+        let status=document.getElementById('recStatus').value;
+        if(status==='Recebido' && qtdPrevista>0 && qtdRecebida<qtdPrevista) status='Parcial';
+        obra.recebimentos.push({
+            id:Date.now()+Math.random(),
+            data:document.getElementById('recData').value||'',
+            listaCorte:document.getElementById('recListaCorte').value.trim(),
+            nf:document.getElementById('recNF').value.trim(),
+            fornecedor:document.getElementById('recFornecedor').value.trim(),
+            classe:document.getElementById('recClasse').value.trim(),
+            marca:document.getElementById('recMarca').value.trim(),
+            codigoCor:document.getElementById('recCodigoCor').value.trim(),
+            descricao:document.getElementById('recDescricao').value.trim(),
+            material:document.getElementById('recMaterial').value.trim(),
+            ref:document.getElementById('recRef').value.trim(),
+            qtdPrevista,qtdRecebida,
+            unidade:document.getElementById('recUnidade').value,
+            status,
+            responsavel:document.getElementById('recResponsavel').value.trim(),
+            local:document.getElementById('recLocal').value.trim(),
+            obs:document.getElementById('recObs').value.trim()
+        });
+        fecharModais(); salvarDB();
+    }
+
+    function editarRecebimento(id,campo,valor) {
+        const obra=getObraAtual();
+        const item=(obra.recebimentos||[]).find(r=>r.id===id);
+        if(!item) return;
+        item[campo]=['qtdPrevista','qtdRecebida'].includes(campo)?(Number(valor)||0):valor;
+        if((campo==='qtdPrevista'||campo==='qtdRecebida') && item.status!=='Rejeitado'){
+            if(item.qtdRecebida<=0) item.status='Pendente';
+            else if(item.qtdPrevista>0 && item.qtdRecebida<item.qtdPrevista) item.status='Parcial';
+            else item.status='Recebido';
+        }
+        salvarDB(false); renderRecebimentos(obra);
+    }
+
+    function excluirRecebimento(id) {
+        const obra=getObraAtual();
+        if(confirm('Excluir este registro de recebimento?')){
+            obra.recebimentos=(obra.recebimentos||[]).filter(r=>r.id!==id);
+            salvarDB();
+        }
+    }
+
+    function abrirModalImportarRecebimento() {
+        document.getElementById('recebimentoPasteArea').value='';
+        document.getElementById('impRecData').value = new Date().toISOString().slice(0,10);
+        document.getElementById('impRecListaCorte').value = '';
+        document.getElementById('impRecNF').value = '';
+        document.getElementById('impRecFornecedor').value = '';
+        document.getElementById('impRecClasse').value = '';
+        document.getElementById('modalImportarRecebimento').style.display='flex';
+    }
+
+
+    async function lerPDFListaAcessorios(event) {
+        const file = event.target.files[0];
+        const statusEl = document.getElementById('pdfImportStatus');
+        if (!file) {
+            statusEl.textContent = 'Nenhum PDF selecionado';
+            return;
+        }
+
+        statusEl.textContent = 'Lendo PDF...';
+
+        try {
+            // PDF.js é carregado como módulo no navegador.
+            const pdfjs = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs');
+            pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
+
+            const buffer = await file.arrayBuffer();
+            const pdf = await pdfjs.getDocument({data: buffer}).promise;
+            let linhasTodasPaginas = [];
+
+            for (let pagina = 1; pagina <= pdf.numPages; pagina++) {
+                const page = await pdf.getPage(pagina);
+                const content = await page.getTextContent();
+
+                // Reconstrói linhas usando a posição vertical do PDF.
+                const grupos = [];
+                content.items.forEach(item => {
+                    const txt = String(item.str || '').trim();
+                    if (!txt) return;
+                    const y = Math.round((item.transform?.[5] || 0) * 10) / 10;
+                    let grupo = grupos.find(g => Math.abs(g.y - y) <= 1.5);
+                    if (!grupo) {
+                        grupo = {y, itens:[]};
+                        grupos.push(grupo);
+                    }
+                    grupo.itens.push({x:item.transform?.[4] || 0, txt});
+                });
+
+                grupos.sort((a,b) => b.y - a.y);
+                grupos.forEach(g => {
+                    g.itens.sort((a,b) => a.x - b.x);
+                    const linha = g.itens.map(i => i.txt).join(' ').replace(/\s+/g,' ').trim();
+                    if (linha) linhasTodasPaginas.push(linha);
+                });
+            }
+
+            const texto = linhasTodasPaginas.join('\n');
+            const resultado = extrairSomenteClasseObra(texto);
+
+            document.getElementById('recebimentoPasteArea').value = resultado.linhas.map(r =>
+                [r.marca, r.codigoCor, r.quantidade, r.descricao].join('\t')
+            ).join('\n');
+
+            // Dados do cabeçalho do PDF.
+            if (resultado.pedidoLote) document.getElementById('impRecListaCorte').value = resultado.pedidoLote;
+            // A data de impressão não é tratada como data de recebimento.
+            // O usuário informa a data real do recebimento no campo próprio.
+            document.getElementById('impRecClasse').value = 'OBRA';
+
+            statusEl.textContent = `${resultado.linhas.length} material(is) da CLASSE:OBRA encontrado(s).`;
+            if (!resultado.linhas.length) {
+                alert('O PDF foi lido, mas nenhuma linha da CLASSE:OBRA foi encontrada.');
+            }
+        } catch (err) {
+            console.error(err);
+            statusEl.textContent = 'Não foi possível ler o PDF.';
+            alert('Não foi possível ler o PDF automaticamente. Verifique sua conexão com a internet e tente novamente, ou use a opção de colar a lista.');
+        }
+    }
+
+    function extrairSomenteClasseObra(texto) {
+        const linhas = texto.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        let emObra = false;
+        let pedidoLote = '';
+        let dataImpressao = '';
+        const resultado = [];
+
+        for (let i = 0; i < linhas.length; i++) {
+            const linha = linhas[i];
+
+            const pedido = linha.match(/Pedido\/Lote:\s*([^\s]+)/i);
+            if (pedido && !pedidoLote) pedidoLote = pedido[1];
+
+            const data = linha.match(/Data de Impressão:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})/i);
+            if (data && !dataImpressao) dataImpressao = data[1];
+
+            // Entra somente nas seções explicitamente marcadas como CLASSE:OBRA.
+            const classe = linha.match(/Classe:\s*(.*?)\s+CLASSE\s*:\s*OBRA\b/i);
+            if (classe) {
+                emObra = true;
+                continue;
+            }
+
+            // Qualquer outra classe encerra a seção atual.
+            if (/^Classe:\s*.*\bCLASSE\s*:/i.test(linha) && !classe) {
+                emObra = false;
+                continue;
+            }
+
+            if (!emObra) continue;
+            if (/^Marca\s+Código/i.test(linha)) continue;
+
+            // Linhas de descrição que são continuação da linha anterior são anexadas abaixo.
+            // Uma nova linha de material sempre contém marca + código + quantidade.
+            const match = linha.match(/^(\S+)\s+(.+?)\s+(\d[\d.]*(?:,\d+)?)\s*(m²|m|kg|un)?\s+(.+)$/i);
+
+            if (match) {
+                const marca = match[1];
+                const codigoCor = match[2].trim();
+                const quantidade = Number(match[3].replace(/\./g,'').replace(',','.')) || 0;
+                const unidade = (match[4] || 'UN').toUpperCase();
+                let descricao = match[5].trim();
+
+                // Junta linhas seguintes de descrição até encontrar outra linha de material ou nova classe.
+                let j = i + 1;
+                while (j < linhas.length) {
+                    const prox = linhas[j];
+                    if (/^Classe:\s*.*\bCLASSE\s*:/i.test(prox)) break;
+                    if (/^Marca\s+Código/i.test(prox)) break;
+                    if (/^(\S+)\s+.+\s+\d[\d.]*(?:,\d+)?\s*(?:m²|m|kg|un)?\s+.+$/i.test(prox)) break;
+                    if (/^Pedido\/Lote:/i.test(prox)) break;
+                    descricao += ' ' + prox;
+                    j++;
+                    i = j - 1;
+                }
+
+                resultado.push({marca, codigoCor, quantidade, unidade, descricao: descricao.replace(/\s+/g,' ').trim()});
+            }
+        }
+
+        return {linhas: resultado, pedidoLote, dataImpressao};
+    }
+
+    function processarImportacaoRecebimento() {
+        const texto = document.getElementById('recebimentoPasteArea').value.trim();
+        if (!texto) return;
+
+        const obra = getObraAtual();
+        if (!obra.recebimentos) obra.recebimentos = [];
+
+        const dataImportacao = document.getElementById('impRecData').value || new Date().toISOString().slice(0,10);
+        const listaCorteImportacao = document.getElementById('impRecListaCorte').value.trim();
+        const nfImportacao = document.getElementById('impRecNF').value.trim();
+        const fornecedorImportacao = document.getElementById('impRecFornecedor').value.trim();
+        const classeImportacao = document.getElementById('impRecClasse').value.trim();
+
+        const linhas = texto.split(/\r?\n/);
+        const parseNum = v => Number(String(v ?? '').replace(/\./g,'').replace(',','.').trim()) || 0;
+
+        linhas.forEach((linha, index) => {
+            const col = linha.split('\t').map(v => (v || '').trim());
+            if (col.length < 4) return;
+
+            // Ignora o cabeçalho caso ele também seja colado.
+            if (index === 0 && /marca/i.test(col[0]) && /c[oó]digo/i.test(col[1])) return;
+
+            // Formato da imagem:
+            // MARCA | CÓDIGO - COR | QUANTIDADE | DESCRIÇÃO
+            const marca = col[0];
+            const codigoCor = col[1];
+            const quantidade = parseNum(col[2]);
+            const descricao = col.slice(3).join(' ');
+
+            if (!marca && !codigoCor && !descricao) return;
+
+            obra.recebimentos.push({
+                id: Date.now() + Math.random(),
+                data: dataImportacao,
+                listaCorte: listaCorteImportacao,
+                nf: nfImportacao,
+                fornecedor: fornecedorImportacao,
+                classe: classeImportacao,
+                marca,
+                codigoCor,
+                descricao,
+                material: descricao,
+                ref: codigoCor,
+                qtdPrevista: quantidade,
+                qtdRecebida: quantidade,
+                unidade: 'UN',
+                status: quantidade > 0 ? 'Recebido' : 'Pendente',
+                responsavel: '',
+                local: '',
+                obs: 'Importado da lista de materiais'
+            });
+        });
+
+        document.getElementById('recebimentoPasteArea').value='';
+        const totalLinhas = linhas.filter(l => l.trim()).length;
+        const totalConsolidado = obterMateriaisConsolidados(obra).length;
+        fecharModais();
+        salvarDB();
+        alert(`${totalLinhas} linha(s) importada(s). Materiais consolidados: ${totalConsolidado}. Materiais repetidos foram agrupados automaticamente na visão consolidada.`);
+    }
+
+    function renderTabelaPrincipal(obra) {
+        const thead = document.getElementById('theadItens');
+        const tbody = document.getElementById('tbodyItens');
+        const cfg = db.config;
+        const termoSearch = document.getElementById('searchItens')?.value || '';
+        let colDados = cfg.dimensoes ? 7 : 5; 
+        
+        let htmlThead1 = `<tr><th colspan="${colDados}" class="head-base"><div class="th-content">DADOS BÁSICOS</div></th>`;
+        if(cfg.fem) htmlThead1 += `<th colspan="3" class="head-fem"><div class="th-content">LIBERAÇÃO (FEM)</div></th>`;
+        if(cfg.fab) htmlThead1 += `<th colspan="3" class="head-fab"><div class="th-content">FABRICAÇÃO</div></th>`;
+        if(cfg.inst) htmlThead1 += `<th colspan="4" class="head-inst"><div class="th-content">INSTALAÇÃO</div></th>`;
+        htmlThead1 += `<th rowspan="2" class="head-base"><div class="th-content">Ações</div></th></tr>`;
+
+        let htmlThead2 = `<tr><th class="head-base"><div class="th-content">Ref</div></th><th class="head-base"><div class="th-content" style="min-width: 180px;">Tipologia</div></th><th class="head-base"><div class="th-content" style="min-width: 140px;">Localização</div></th><th class="head-base"><div class="th-content">Qtd</div></th>`;
+        if(cfg.dimensoes) htmlThead2 += `<th class="head-base"><div class="th-content">Larg (m)</div></th><th class="head-base"><div class="th-content">Alt (m)</div></th>`;
+        htmlThead2 += `<th class="head-base"><div class="th-content">Área Total</div></th>`;
+        if(cfg.fem) htmlThead2 += `<th class="head-fem"><div class="th-content">FEM</div></th><th class="head-fem"><div class="th-content">Saldo</div></th><th class="head-fem"><div class="th-content">% FEM</div></th>`;
+        if(cfg.fab) htmlThead2 += `<th class="head-fab"><div class="th-content">Fabricado</div></th><th class="head-fab"><div class="th-content">Saldo</div></th><th class="head-fab"><div class="th-content">% Fab</div></th>`;
+        if(cfg.inst) htmlThead2 += `<th class="head-inst"><div class="th-content">Instalado</div></th><th class="head-inst"><div class="th-content">M² Inst</div></th><th class="head-inst"><div class="th-content">M² Saldo</div></th><th class="head-inst"><div class="th-content">% Inst</div></th>`;
+        htmlThead2 += `</tr>`;
+        
+        thead.innerHTML = htmlThead1 + htmlThead2;
+
+        const rows = [];
+        (obra.itens || []).filter(i => itemBateFiltro(i, termoSearch)).forEach(item => {
+            const areaUnit = item.larg * item.alt;
+            const areaTotal = item.qtd * areaUnit;
+            const isCompleted = item.instalado && item.instalado >= item.qtd;
+
+            let htmlRow = `<tr class="${isCompleted ? 'row-completed' : ''}">
+                <td><input type="text" class="text-left" value="${item.ref||''}" onchange="editarItem(${item.id}, 'ref', this.value)"></td>
+                <td><input type="text" class="text-left" value="${item.tipo||''}" onchange="editarItem(${item.id}, 'tipo', this.value)"></td>
+                <td><input type="text" class="text-left" value="${item.loc||''}" onchange="editarItem(${item.id}, 'loc', this.value)"></td>
+                <td><input type="number" value="${item.qtd}" onchange="editarItem(${item.id}, 'qtd', this.value)"></td>`;
+            
+            if(cfg.dimensoes) htmlRow += `
+                <td><input type="number" step="0.001" value="${item.larg}" onchange="editarItem(${item.id}, 'larg', this.value)"></td>
+                <td><input type="number" step="0.001" value="${item.alt}" onchange="editarItem(${item.id}, 'alt', this.value)"></td>`;
+            
+            htmlRow += `<td><div class="td-content"><b>${areaTotal.toFixed(2)}</b></div></td>`;
+
+            if(cfg.fem) htmlRow += `<td><input type="number" value="${item.fem||0}" onchange="editarItem(${item.id}, 'fem', this.value)"></td><td><div class="td-content">${item.qtd - (item.fem||0)}</div></td><td><div class="td-content"><b>${(item.qtd>0?((item.fem||0)/item.qtd)*100:0).toFixed(0)}%</b></div></td>`;
+            if(cfg.fab) htmlRow += `<td><input type="number" value="${item.fabricado||0}" onchange="editarItem(${item.id}, 'fabricado', this.value)"></td><td><div class="td-content">${item.qtd - (item.fabricado||0)}</div></td><td><div class="td-content"><b>${(item.qtd>0?((item.fabricado||0)/item.qtd)*100:0).toFixed(0)}%</b></div></td>`;
+            if(cfg.inst) htmlRow += `<td><input type="number" value="${item.instalado||0}" onchange="editarItem(${item.id}, 'instalado', this.value)"></td><td><div class="td-content">${((item.instalado||0)*areaUnit).toFixed(2)}</div></td><td><div class="td-content">${(areaTotal - ((item.instalado||0)*areaUnit)).toFixed(2)}</div></td><td><div class="td-content"><b>${(areaTotal>0?(((item.instalado||0)*areaUnit)/areaTotal)*100:0).toFixed(0)}%</b></div></td>`;
+            
+            htmlRow += `<td><div class="actions-cell"><button class="danger" onclick="excluirItem(${item.id})">❌</button></div></td></tr>`;
+            rows.push(htmlRow);
+        });
+        tbody.innerHTML = rows.join('');
+    }
+
+    function renderTabelaLiberacao(obra) {
+        const tbody = document.getElementById('tbodyLiberacao');
+        const termoSearch = document.getElementById('searchLiberacao')?.value || '';
+        const rows = [];
+
+        (obra.itens || []).filter(i => itemBateFiltro(i, termoSearch)).forEach(item => {
+            const area = item.qtd * (item.larg * item.alt);
+            const fem = item.fem || 0;
+            const pct = item.qtd > 0 ? (fem / item.qtd) * 100 : 0;
+            const isCompleted = pct >= 100;
+
+            rows.push(`<tr class="${isCompleted ? 'row-completed' : ''}">
+                <td><div class="td-content"><b>${item.ref||'S/N'}</b></div></td>
+                <td style="text-align:left;"><div class="td-content">${item.tipo||''}</div></td>
+                <td style="text-align:left;"><div class="td-content">${item.loc||''}</div></td>
+                <td><div class="td-content">${item.qtd}</div></td>
+                <td><div class="td-content">${area.toFixed(2)} m²</div></td>
+                <td><div class="td-content"><b style="color: var(--warning);">${fem}</b></div></td>
+                <td><div class="td-content">${item.qtd - fem}</div></td>
+                <td><div class="td-content"><b>${(fem * (item.larg * item.alt)).toFixed(2)} m²</b></div></td>
+                <td><div class="td-content"><div class="progress-bar-bg"><div class="progress-bar-fill ${pct>=100?'complete':''}" style="width: ${Math.min(pct,100)}%;"></div></div><b>${pct.toFixed(0)}%</b></div></td>
+                <td><div class="td-content">${pct>=100?'<span style="color:#10b981;font-weight:bold;">100% Liberado</span>':(pct>0?'<span style="color:#f59e0b;font-weight:bold;">Em Liberação</span>':'<span style="opacity:0.6;">Pendente</span>')}</div></td>
+            </tr>`);
+        });
+        tbody.innerHTML = rows.join('');
+    }
+
+    function renderBoletimMedicao(obra, areaTotalGeral, valorServicoTotal) {
+        const tbody = document.getElementById('tbodyMedicaoBoletim');
+        const termoSearch = document.getElementById('searchMedicao')?.value || '';
+
+        const maxMed = obra.numMedicaoMax || 1;
+        if (medicaoselecionadaIndex > maxMed) medicaoselecionadaIndex = maxMed;
+        if (medicaoselecionadaIndex < 1) medicaoselecionadaIndex = 1;
+
+        const isHistorico = medicaoselecionadaIndex < maxMed;
+        const banner = document.getElementById('bannerEdicaoHistorico');
+        if (isHistorico) {
+            banner.style.display = 'block';
+            document.getElementById('lblMedicaoHistoricoNum').innerText = medicaoselecionadaIndex;
+        } else {
+            banner.style.display = 'none';
+        }
+
+        document.getElementById('lblNavMedicaoNum').innerText = `Nº ${medicaoselecionadaIndex}`;
+        document.getElementById('medConsideracoes').value = (obra.consideracoesPorMedicao && obra.consideracoesPorMedicao[medicaoselecionadaIndex]) || "";
+
+        const valorPorM2 = areaTotalGeral > 0 ? (valorServicoTotal / areaTotalGeral) : 0;
+        let totalM2RealizadoAtual = 0;
+        let totalValorRealizadoAtual = 0;
+        let totalM2AcumuladoGeral = 0;
+        let totalValorAcumuladoGeral = 0;
+        let totalRetencao = 0;
+        let totalLiquido = 0;
+        const rows = [];
+
+        (obra.itens || []).filter(i => itemBateFiltro(i, termoSearch)).forEach(item => {
+            const areaUnit = item.larg * item.alt;
+            const areaTotalItem = item.qtd * areaUnit;
+
+            if (!item.historicoMedicoes) item.historicoMedicoes = {};
+
+            let m2Anterior = 0;
+            for (let m = 1; m < medicaoselecionadaIndex; m++) {
+                m2Anterior += Number(item.historicoMedicoes[m] || 0);
+            }
+
+            const m2Atual = Number(item.historicoMedicoes[medicaoselecionadaIndex] || 0);
+            let m2TotalAcumulado = m2Anterior + m2Atual;
+            const saldoM2 = areaTotalItem - m2TotalAcumulado;
+
+            const valorMedicaoAtualItem = m2Atual * valorPorM2;
+            const retencaoItem = valorMedicaoAtualItem * 0.05;
+            const liquidoPagarItem = valorMedicaoAtualItem - retencaoItem;
+            
+            const valorContratoItem = areaTotalItem * valorPorM2;
+            const valorAcumuladoTotalItem = m2TotalAcumulado * valorPorM2;
+            const saldoContratoItem = valorContratoItem - valorAcumuladoTotalItem;
+
+            totalM2RealizadoAtual += m2Atual;
+            totalValorRealizadoAtual += valorMedicaoAtualItem;
+            totalM2AcumuladoGeral += m2TotalAcumulado;
+            totalValorAcumuladoGeral += valorAcumuladoTotalItem;
+            totalRetencao += retencaoItem;
+            totalLiquido += liquidoPagarItem;
+
+            const isCompleted = saldoM2 <= 0.001 && areaTotalItem > 0;
+
+            rows.push(`<tr class="${isCompleted ? 'row-completed' : ''}">
+                <td><div class="td-content"><b>${item.ref || ''}</b></div></td>
+                <td style="text-align:left;"><div class="td-content">${item.tipo || ''}</div></td>
+                <td><div class="td-content">${item.qtd}</div></td>
+                <td><div class="td-content"><b>${areaTotalItem.toFixed(2)}</b></div></td>
+                <td><div class="td-content" style="background:rgba(255,255,255,0.05);">${m2Anterior.toFixed(2)}</div></td>
+                <td><input type="number" step="0.01" style="background:#fef9c3; color:#000; font-weight:bold;" value="${m2Atual.toFixed(2)}" onchange="editarM2Medicao(${item.id}, this.value)"></td>
+                <td><div class="td-content"><b>${m2TotalAcumulado.toFixed(2)}</b></div></td>
+                <td><div class="td-content">${saldoM2.toFixed(2)}</div></td>
+                <td><div class="td-content">R$ ${valorMedicaoAtualItem.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div></td>
+                <td><div class="td-content" style="color:#ef4444; font-weight:bold;">R$ ${retencaoItem.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div></td>
+                <td><div class="td-content" style="color:#10b981; font-weight:bold;">R$ ${liquidoPagarItem.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div></td>
+                <td><div class="td-content" style="background:#fef08a; color:#000;"><b>R$ ${saldoContratoItem.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</b></div></td>
+            </tr>`);
+        });
+        tbody.innerHTML = rows.join('');
+
+        // Atualização dos Cards Superiores
+        document.getElementById('medHeaderM2Contrato').innerText = areaTotalGeral.toFixed(2) + " m²";
+        document.getElementById('medHeaderValorServicoTotal').innerText = "R$ " + valorServicoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        document.getElementById('medHeaderM2Acumulado').innerText = totalM2AcumuladoGeral.toFixed(2) + " m²";
+        document.getElementById('medHeaderValorAcumulado').innerText = "R$ " + totalValorAcumuladoGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        
+        // Atualização dos Cards Inferiores
+        document.getElementById('medHeaderM2Atual').innerText = totalM2RealizadoAtual.toFixed(2) + " m²";
+        document.getElementById('medHeaderValAtual').innerText = "R$ " + totalValorRealizadoAtual.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        document.getElementById('medHeaderRetencao').innerText = "R$ " + totalRetencao.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        document.getElementById('medHeaderLiquido').innerText = "R$ " + totalLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    }
+
+    function navegarMedicao(delta) {
+        const obra = getObraAtual();
+        const novaMed = medicaoselecionadaIndex + delta;
+        if (novaMed >= 1 && novaMed <= (obra.numMedicaoMax || 1)) {
+            medicaoselecionadaIndex = novaMed;
+            render();
+        }
+    }
+
+    function irParaUltimaMedicao() {
+        const obra = getObraAtual();
+        medicaoselecionadaIndex = obra.numMedicaoMax || 1;
+        render();
+    }
+
+    function encerrarECriarNovaMedicao() {
+        const obra = getObraAtual();
+        const maxMed = obra.numMedicaoMax || 1;
+
+        if (medicaoselecionadaIndex !== maxMed) {
+            alert(`Por favor, volte para a Medição Atual (Nº ${maxMed}) antes de criar a próxima!`);
+            irParaUltimaMedicao();
+            return;
+        }
+
+        if (confirm(`Deseja fechar a Medição Nº ${maxMed} e abrir a Medição Nº ${maxMed + 1}?`)) {
+            obra.numMedicaoMax = maxMed + 1;
+            medicaoselecionadaIndex = obra.numMedicaoMax;
+            salvarDB();
+            alert(`Medição Nº ${maxMed} encerrada! Agora você está editando a Medição Nº ${obra.numMedicaoMax}.`);
+        }
+    }
+
+    function renderGraficosEstiloExcel(obra, pctFemGeral, pctFabGeral, pctInstGeral) {
+        const isDark = document.body.classList.contains('dark-mode');
+        const textColor = isDark ? '#f8fafc' : '#1e293b';
+        const gridColor = isDark ? '#334155' : '#cbd5e1';
+
+        const labels = (obra.itens || []).map(i => i.ref || 'S/N');
+        const dataFem = (obra.itens || []).map(i => i.qtd > 0 ? Math.round(((i.fem || 0) / i.qtd) * 100) : 0);
+        const dataFab = (obra.itens || []).map(i => i.qtd > 0 ? Math.round(((i.fabricado || 0) / i.qtd) * 100) : 0);
+        const dataInst = (obra.itens || []).map(i => {
+            const areaTotal = i.qtd * (i.larg * i.alt);
+            const areaInst = (i.instalado || 0) * (i.larg * i.alt);
+            return areaTotal > 0 ? Math.round((areaInst / areaTotal) * 100) : 0;
+        });
+
+        const barChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { min: 0, max: 100, ticks: { color: textColor, callback: v => v + '%' }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor, maxRotation: 90, minRotation: 90, font: { size: 9 } }, grid: { display: false } }
+            }
+        };
+
+        if (chartInstanceLiberacao) chartInstanceLiberacao.destroy();
+        chartInstanceLiberacao = new Chart(document.getElementById('chartLiberacao'), {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ data: dataFem, backgroundColor: '#f59e0b', barPercentage: 0.6 }] },
+            options: barChartOptions
+        });
+
+        if (chartInstanceFabricacao) chartInstanceFabricacao.destroy();
+        chartInstanceFabricacao = new Chart(document.getElementById('chartFabricacao'), {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ data: dataFab, backgroundColor: '#3b82f6', barPercentage: 0.6 }] },
+            options: barChartOptions
+        });
+
+        if (chartInstanceInstalacao) chartInstanceInstalacao.destroy();
+        chartInstanceInstalacao = new Chart(document.getElementById('chartInstalacao'), {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ data: dataInst, backgroundColor: '#10b981', barPercentage: 0.6 }] },
+            options: barChartOptions
+        });
+
+        if (chartInstanceResumo) chartInstanceResumo.destroy();
+        chartInstanceResumo = new Chart(document.getElementById('chartResumo'), {
+            type: 'bar',
+            data: {
+                labels: ['AVANÇO GLOBAL'],
+                datasets: [
+                    { label: 'LIBERAÇÃO (FEM)', data: [Math.round(pctFemGeral)], backgroundColor: '#f59e0b' },
+                    { label: 'FABRICAÇÃO', data: [Math.round(pctFabGeral)], backgroundColor: '#3b82f6' },
+                    { label: 'INSTALAÇÃO', data: [Math.round(pctInstGeral)], backgroundColor: '#10b981' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: textColor } } },
+                scales: {
+                    y: { min: 0, max: 100, ticks: { color: textColor, stepSize: 10, callback: v => v + '%' }, grid: { color: gridColor } },
+                    x: { ticks: { color: textColor } }
+                }
+            }
+        });
+    }
+
+    function editarM2Medicao(id, valor) {
+        const obra = getObraAtual();
+        const item = obra.itens.find(i => i.id === id);
+        if (item) {
+            if (!item.historicoMedicoes) item.historicoMedicoes = {};
+            item.historicoMedicoes[medicaoselecionadaIndex] = Number(valor) || 0;
+            // Salva sem forçar renderização completa para manter o foco do cursor
+            salvarDB(false);
+        }
+    }
+
+    function sincronizarComInstalacao() {
+        const obra = getObraAtual();
+        (obra.itens || []).forEach(item => {
+            if (!item.historicoMedicoes) item.historicoMedicoes = {};
+            
+            let m2Anterior = 0;
+            for (let m = 1; m < medicaoselecionadaIndex; m++) {
+                m2Anterior += Number(item.historicoMedicoes[m] || 0);
+            }
+
+            const areaUnit = item.larg * item.alt;
+            const m2TotalInstalado = (item.instalado || 0) * areaUnit;
+            item.historicoMedicoes[medicaoselecionadaIndex] = Math.max(0, m2TotalInstalado - m2Anterior);
+        });
+        salvarDB();
+    }
+
+    function salvarHeaderMedicao() {
+        const obra = getObraAtual();
+        if (!obra.consideracoesPorMedicao) obra.consideracoesPorMedicao = {};
+        obra.consideracoesPorMedicao[medicaoselecionadaIndex] = document.getElementById('medConsideracoes').value;
+        localStorage.setItem('obrasDB_v8', JSON.stringify(db));
+    }
+
+    function abrirModalImportarExcel(tipo) {
+        tipoImportacaoAtual = tipo;
+        document.getElementById('importModalTitle').innerText = (tipo === 'producao') ? "Copiar e Colar Planilha Geral" : "Copiar e Colar Valoração da Medição";
+        document.getElementById('modalImportarExcel').style.display = 'flex';
+    }
+
+    function processarImportacaoExcel() {
+        const texto = document.getElementById('excelPasteArea').value;
+        if (!texto.trim()) return;
+
+        const linhas = texto.trim().split('\n');
+        const obra = getObraAtual();
+        if (!obra.itens) obra.itens = [];
+
+        linhas.forEach(linha => {
+            const col = linha.split('\t');
+            const parseNum = (val) => Number(val?.toString().replace(/\./g, '').replace(',', '.').trim()) || 0;
+
+            if (tipoImportacaoAtual === 'producao' && col.length >= 6) {
+                obra.itens.push({
+                    id: Date.now() + Math.random(),
+                    ref: col[0]?.trim() || '',
+                    tipo: col[1]?.trim() || '',
+                    loc: col[2]?.trim() || '',
+                    qtd: parseNum(col[3]) || 1,
+                    larg: parseNum(col[4]),
+                    alt: parseNum(col[5]),
+                    fem: col.length >= 8 ? parseNum(col[7]) : 0,
+                    fabricado: col.length >= 11 ? parseNum(col[10]) : 0,
+                    instalado: col.length >= 14 ? parseNum(col[13]) : 0,
+                    historicoMedicoes: {}
+                });
+            } else if (tipoImportacaoAtual === 'medicao' && col.length >= 2) {
+                const refTarget = col[0]?.trim();
+                const m2OuQtd = parseNum(col[5] || col[1]);
+                const item = obra.itens.find(i => i.ref === refTarget);
+                if (item) {
+                    if (!item.historicoMedicoes) item.historicoMedicoes = {};
+                    item.historicoMedicoes[medicaoselecionadaIndex] = m2OuQtd;
+                }
+            }
+        });
+
+        document.getElementById('excelPasteArea').value = '';
+        fecharModais();
+        salvarDB();
+    }
+
+    function inicializarArrasteTabelas() {
+        document.querySelectorAll('.table-responsive').forEach(slider => {
+            let isDown = false, startX, startY, scrollLeft, scrollTop;
+            slider.addEventListener('mousedown', (e) => {
+                if (['INPUT', 'BUTTON', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+                const isResizing = (e.target.offsetWidth - e.offsetX) < 15 && e.target.classList.contains('th-content');
+                if (isResizing) return;
+
+                isDown = true; slider.classList.add('active');
+                startX = e.pageX - slider.offsetLeft; startY = e.pageY - slider.offsetTop;
+                scrollLeft = slider.scrollLeft; scrollTop = slider.scrollTop;
+            });
+            slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('active'); });
+            slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('active'); });
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                slider.scrollLeft = scrollLeft - ((e.pageX - slider.offsetLeft) - startX) * 1.5;
+                slider.scrollTop = scrollTop - ((e.pageY - slider.offsetTop) - startY) * 1.5;
+            });
+        });
+    }
+
+    function trocarAba(aba) {
+        localStorage.setItem('abaAtivaDB', aba);
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-tab-' + aba).classList.add('active');
+        document.getElementById('tab-itens').style.display = (aba === 'itens') ? 'block' : 'none';
+        document.getElementById('tab-liberacao').style.display = (aba === 'liberacao') ? 'block' : 'none';
+        document.getElementById('tab-medicoes').style.display = (aba === 'medicoes') ? 'block' : 'none';
+        document.getElementById('tab-graficos').style.display = (aba === 'graficos') ? 'block' : 'none';
+        document.getElementById('tab-recebimento').style.display = (aba === 'recebimento') ? 'block' : 'none';
+    }
+
+    function restaurarAba() {
+        const abaSalva = localStorage.getItem('abaAtivaDB') || 'itens';
+        trocarAba(abaSalva);
+    }
+
+    function abrirModalConfig() {
+        document.getElementById('cfg-dimensoes').checked = db.config.dimensoes;
+        document.getElementById('cfg-fem').checked = db.config.fem;
+        document.getElementById('cfg-fab').checked = db.config.fab;
+        document.getElementById('cfg-inst').checked = db.config.inst;
+        document.getElementById('modalConfig').style.display = 'flex';
+    }
+
+    function salvarConfig() {
+        db.config.dimensoes = document.getElementById('cfg-dimensoes').checked;
+        db.config.fem = document.getElementById('cfg-fem').checked;
+        db.config.fab = document.getElementById('cfg-fab').checked;
+        db.config.inst = document.getElementById('cfg-inst').checked;
+        salvarDB();
+    }
+
+    function abrirModalObra() { 
+        modoNovaObra = false;
+        const obra = getObraAtual();
+        document.getElementById('modalObraTitle').innerText = "Configurar Obra Atual (" + obra.nome + ")";
+        document.getElementById('inputNomeObra').value = obra.nome;
+        document.getElementById('inputValorContrato').value = obra.valorContrato || 0;
+        document.getElementById('inputPctServico').value = obra.pctServico || 20;
+        document.getElementById('modalObra').style.display = 'flex'; 
+    }
+
+    function abrirModalNovaObra() {
+        modoNovaObra = true;
+        document.getElementById('modalObraTitle').innerText = "Cadastrar Nova Obra";
+        document.getElementById('inputNomeObra').value = "";
+        document.getElementById('inputValorContrato').value = "";
+        document.getElementById('inputPctServico').value = 20;
+        document.getElementById('modalObra').style.display = 'flex';
+    }
+    
+    function abrirModalItem() { document.getElementById('modalItem').style.display = 'flex'; }
+    function fecharModais() { document.querySelectorAll('.modal-bg').forEach(m => m.style.display = 'none'); }
+
+    // Fechar modais ao clicar no fundo escuro ou ao apertar ESC
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-bg')) fecharModais();
+    });
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') fecharModais();
+    });
+
+    function editarItem(id, campo, valor) { 
+        const obra = getObraAtual(); 
+        const item = obra.itens.find(i => i.id === id); 
+        if(item){ 
+            item[campo] = ['ref','tipo','loc'].includes(campo) ? valor : Number(valor); 
+            // Salva no LocalStorage sem perder o foco na célula editada
+            salvarDB(false); 
+        } 
+    }
+
+    function excluirItem(id) { getObraAtual().itens = getObraAtual().itens.filter(i => i.id !== id); salvarDB(); }
+    
+    function trocarObra(id) { 
+        db.obraAtualId = id; 
+        const obra = getObraAtual();
+        medicaoselecionadaIndex = obra.numMedicaoMax || 1;
+        salvarDB(); 
+    }
+    
+    function excluirObraAtual() { 
+        if(db.obras.length > 1 && confirm("Tem certeza que deseja excluir esta obra?")){ 
+            db.obras = db.obras.filter(o => o.id !== db.obraAtualId); 
+            db.obraAtualId = db.obras[0].id; 
+            salvarDB(); 
+        } else if (db.obras.length <= 1) {
+            alert("Você precisa ter pelo menos uma obra cadastrada no sistema.");
+        }
+    }
+    
+    function salvarConfigObra() { 
+        const nome = document.getElementById('inputNomeObra').value.trim(); 
+        const valor = Number(document.getElementById('inputValorContrato').value) || 0;
+        const pct = Number(document.getElementById('inputPctServico').value) || 20;
+
+        if(!nome) { alert("Digite o nome da obra!"); return; }
+
+        if(modoNovaObra) {
+            const id = 'obra_' + Date.now(); 
+            db.obras.push({id, nome, valorContrato: valor, pctServico: pct, numMedicaoMax: 1, consideracoesPorMedicao: {}, itens:[], recebimentos:[]}); 
+            db.obraAtualId = id;
+            medicaoselecionadaIndex = 1;
+        } else {
+            const obraExistente = getObraAtual();
+            obraExistente.nome = nome;
+            obraExistente.valorContrato = valor;
+            obraExistente.pctServico = pct;
+        }
+
+        fecharModais(); 
+        salvarDB(); 
+    }
+    
+    function salvarNovoItem() { 
+        const obra = getObraAtual();
+        if (!obra.itens) obra.itens = [];
+        
+        obra.itens.push({ 
+            id: Date.now(), 
+            ref: document.getElementById('itemRef').value||'', 
+            tipo: document.getElementById('itemTipo').value||'', 
+            loc: document.getElementById('itemLoc').value||'', 
+            qtd: Number(document.getElementById('itemQtd').value)||1, 
+            larg: Number(document.getElementById('itemLarg').value)||0, 
+            alt: Number(document.getElementById('itemAlt').value)||0, 
+            fem:0, fabricado:0, instalado:0, historicoMedicoes: {}
+        }); 
+        fecharModais(); 
+        salvarDB(); 
+    }
+
+    function exportarDados() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+        const a = document.createElement('a'); a.href = dataStr; a.download = "controle_obras_backup.json"; a.click();
+    }
+
+    function restaurarBackupJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (importedData && importedData.obras) {
+                    db = importedData;
+                    db.obras.forEach(o => { o.itens = o.itens || []; o.recebimentos = o.recebimentos || []; normalizarRecebimentosAntigos(o); });
+                    const obra = getObraAtual();
+                    medicaoselecionadaIndex = obra.numMedicaoMax || 1;
+                    salvarDB();
+                    alert("Backup restaurado com sucesso!");
+                } else {
+                    alert("Arquivo de backup inválido.");
+                }
+            } catch (err) { alert("Erro ao ler o arquivo JSON."); }
+        };
+        reader.readAsText(file);
+    }
+
+    // Inicialização da aplicação
+    carregarTemaPreferido();
+    salvarDB();
+    restaurarAba(); 
+    inicializarArrasteTabelas();
+</script>
+</body>
+</html>

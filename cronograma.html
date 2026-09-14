@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRONOGRAMA EQUIPES JOÃO PESSOA</title>
+  <style>
+    :root {
+      --primary: #1e293b;
+      --primary-accent: #2563eb;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    h1[contenteditable="true"] {
+      margin: 0;
+      color: var(--primary);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      padding: 6px 12px;
+      border: 1px dashed transparent;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    h1[contenteditable="true"]:hover {
+      border-color: #cbd5e1;
+      background-color: #ffffff;
+    }
+
+    h1[contenteditable="true"]:focus {
+      outline: none;
+      border-color: var(--primary-accent);
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* CARDS METRICAS */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      padding: 16px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-card strong {
+      display: block;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 4px;
+      text-transform: none;
+    }
+
+    /* FORMULARIO */
+    .form-container {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .form-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .form-group input, .form-group select {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* BOTÕES */
+    button {
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-add { background-color: #10b981; color: white; }
+    .btn-add:hover { background-color: #059669; }
+
+    .btn-print { background-color: var(--primary-accent); color: white; }
+    .btn-print:hover { background-color: #1d4ed8; }
+
+    .btn-backup { background-color: #8b5cf6; color: white; }
+    .btn-backup:hover { background-color: #7c3aed; }
+
+    .btn-sec { background-color: #64748b; color: white; }
+    .btn-sec:hover { background-color: #475569; }
+
+    .btn-toggle-report { background-color: #f59e0b; color: white; }
+    .btn-toggle-report:hover { background-color: #d97706; }
+
+    /* FILTROS E AÇÕES DE IMPRESSÃO */
+    .search-bar {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .search-bar input, .search-bar select {
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    /* TABELA GANTT (TELA) */
+    .gantt-wrapper {
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      overflow-x: auto;
+      margin-bottom: 24px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      white-space: nowrap;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 0;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .col-task, .col-date, .col-dur, .col-status, .group-header, .group-cell, th {
+      padding: 6px 8px;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    .col-task { text-align: left; min-width: 250px; font-weight: 600; color: var(--text-main); }
+    .col-date { width: 85px; }
+    .col-dur { width: 45px; font-weight: 700; }
+    .col-status { width: 130px; }
+    .col-day { width: 22px; min-width: 22px; font-size: 9px; }
+    
+    .weekend { background-color: #f8fafc; color: #94a3b8; }
+    .today-highlight { background-color: #fef3c7 !important; color: #92400e; font-weight: 700; }
+
+    .group-header { 
+      background-color: var(--primary); 
+      color: white; 
+      font-weight: 700; 
+      text-align: left; 
+      font-size: 12px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .print-checkbox {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    
+    .group-cell {
+      background-color: var(--primary);
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .editable-text {
+      display: inline-block;
+      width: calc(100% - 60px);
+      outline: none;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .editable-text:focus {
+      background-color: #fef08a;
+      color: var(--text-main);
+    }
+
+    /* BADGES DE STATUS */
+    .badge-status {
+      padding: 3px 6px;
+      border-radius: 12px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .badge-done { background: #d1fae5; color: #065f46; }
+    .badge-early { background: #cfe4ff; color: #1e40af; }
+    .badge-late-done { background: #fee2e2; color: #991b1b; }
+    .badge-delayed { background: #fecaca; color: #7f1d1d; border: 1px dashed #ef4444; }
+    .badge-doing { background: #fef3c7; color: #92400e; }
+    .badge-todo { background: #f1f5f9; color: #475569; }
+
+    .input-inline-date {
+      border: 1px solid transparent;
+      background: transparent;
+      font-size: 11px;
+      font-family: inherit;
+      text-align: center;
+      width: 100%;
+      border-radius: 4px;
+    }
+    .input-inline-date:hover, .input-inline-date:focus {
+      border-color: var(--border-color);
+      background: #fff;
+    }
+
+    .select-inline-color {
+      border: none;
+      background: transparent;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .bar {
+      height: 100%;
+      min-height: 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .bar-verde { background-color: #10b981; }
+    .bar-azul { background-color: #3b82f6; }
+    .bar-laranja { background-color: #f59e0b; }
+    .bar-vermelho { background-color: #ef4444; }
+    .bar-roxo { background-color: #8b5cf6; }
+    .bar-amarelo { background-color: #eab308; }
+    .bar-rosa { background-color: #ec4899; }
+    .bar-cinza { background-color: #64748b; }
+
+    .btn-del {
+      background-color: #ef4444;
+      color: white;
+      padding: 2px 6px;
+      font-size: 10px;
+      border-radius: 4px;
+    }
+    .btn-del:hover { background-color: #dc2626; }
+
+    .btn-clone {
+      background-color: #f59e0b;
+      color: white;
+      padding: 2px 6px;
+      font-size: 10px;
+      border-radius: 4px;
+    }
+    .btn-clone:hover { background-color: #d97706; }
+
+    /* RELATÓRIOS NA TELA (Ocultos na impressão) */
+    .report-section {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-top: 24px;
+    }
+
+    .report-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .report-section h2 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .report-table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    .report-table th, .report-table td {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .report-table th {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .progress-bar-bg {
+      background-color: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 10px;
+      width: 100%;
+    }
+
+    .progress-bar-fill {
+      background-color: #10b981;
+      height: 100%;
+      border-radius: 6px;
+    }
+
+    .text-report-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--primary);
+      white-space: pre-wrap;
+      line-height: 1.6;
+      max-height: 450px;
+      overflow-y: auto;
+    }
+
+    /* ========================================================
+       REGRAS ULTRA COMPACTAS DE IMPRESSÃO (FOLHAS A4 E A3)
+       ======================================================== */
+    @media print {
+      @page { 
+        size: landscape; 
+        margin: 0.3cm; 
+      }
+
+      html, body { 
+        background-color: white !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        width: 100% !important;
+      }
+
+      .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      
+      /* OCULTAR ELEMENTOS INDESEJADOS DA IMPRESSÃO */
+      .form-container, 
+      .header-actions, 
+      .btn-del, 
+      .btn-clone, 
+      .metrics-bar, 
+      .search-bar, 
+      .btn-toggle-report, 
+      .report-section, 
+      .print-checkbox { 
+        display: none !important; 
+      }
+
+      /* OCULTAR GRUPOS/TAREFAS NÃO MARCADAS */
+      tr.print-hidden {
+        display: none !important;
+      }
+
+      /* COMPACTAÇÃO DA TABELA */
+      .gantt-wrapper { 
+        box-shadow: none !important; 
+        border: none !important; 
+        overflow: visible !important; 
+        width: 100% !important;
+      }
+
+      table {
+        width: 100% !important;
+        table-layout: auto !important;
+        font-size: 8px !important;
+      }
+
+      th, td {
+        padding: 1px 2px !important;
+        height: 18px !important;
+      }
+
+      /* AJUSTE DAS COLUNAS FIXAS */
+      .col-task { 
+        min-width: 140px !important; 
+        max-width: 180px !important;
+        white-space: normal !important;
+        font-size: 8px !important;
+        line-height: 1.1 !important;
+      }
+
+      .col-date { 
+        width: 48px !important; 
+        font-size: 7.5px !important;
+      }
+
+      .col-dur { 
+        width: 25px !important; 
+        font-size: 8px !important;
+      }
+
+      .col-status { 
+        width: 75px !important; 
+      }
+
+      /* COLUNAS DE DIAS EXTREMAMENTE COMPACTAS */
+      .col-day { 
+        width: auto !important; 
+        min-width: 10px !important; 
+        font-size: 6.5px !important;
+        padding: 0 !important;
+        letter-spacing: -0.5px;
+      }
+
+      .badge-status {
+        font-size: 7px !important;
+        padding: 1px 3px !important;
+      }
+
+      h1[contenteditable="true"] { 
+        border: none !important; 
+        padding: 0 !important; 
+        font-size: 14px !important;
+        margin-bottom: 6px !important;
+      }
+
+      input[type="date"] { 
+        border: none !important; 
+        appearance: none !important; 
+        -webkit-appearance: none !important; 
+        font-size: 7.5px !important;
+        padding: 0 !important;
+      }
+
+      .select-inline-color { 
+        display: none !important; 
+      }
+
+      .bar {
+        min-height: 14px !important;
+      }
+
+      * { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header-container">
+      <h1 id="mainTitle" contenteditable="true" spellcheck="true" onblur="saveToStorage()" title="Clique para editar o título principal">CRONOGRAMA EQUIPES JOÃO PESSOA</h1>
+      <div class="header-actions">
+        <button class="btn-toggle-report" onclick="toggleReport()">📊 Painel de Relatórios</button>
+        <button class="btn-backup" onclick="exportData()" title="Baixar cópia de segurança">💾 Salvar Backup</button>
+        <button class="btn-sec" onclick="importData()" title="Restaurar dados de backup">📂 Restaurar Backup</button>
+        <button class="btn-print" onclick="triggerSelectedPrint()">🖨️ Imprimir Selecionados</button>
+      </div>
+    </div>
+
+    <div class="metrics-bar">
+      <div class="metric-card">
+        Projetos / Grupos
+        <strong id="metricGroups">0</strong>
+      </div>
+      <div class="metric-card">
+        Total de Tarefas
+        <strong id="metricTasks">0</strong>
+      </div>
+      <div class="metric-card">
+        Período Geral
+        <strong id="metricDays">0 dias</strong>
+      </div>
+      <div class="metric-card">
+        Média por Tarefa
+        <strong id="metricAvgDuration">0 dias</strong>
+      </div>
+    </div>
+
+    <div class="form-container">
+      <div class="form-group">
+        <label>Projeto/Grupo</label>
+        <input type="text" id="groupName" placeholder="Ex: GET A WAY - EDILSON" value="GET A WAY - EDILSON E LENNON" spellcheck="true" onblur="this.value = toTitleCase(this.value)">
+      </div>
+      <div class="form-group">
+        <label>Nome da Tarefa</label>
+        <input type="text" id="taskName" placeholder="Ex: Instalação de Muxarabís" spellcheck="true" onblur="this.value = toTitleCase(this.value)">
+      </div>
+      <div class="form-group">
+        <label>Data Início</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="form-group">
+        <label>Término Previsto</label>
+        <input type="date" id="endDate">
+      </div>
+      <div class="form-group">
+        <label>Término Real (Opcional)</label>
+        <input type="date" id="actualEndDate" title="Preencha caso a tarefa já tenha sido concluída">
+      </div>
+      <div class="form-group">
+        <label>Cor da Barra</label>
+        <select id="barColor">
+          <option value="verde">🟢 Verde</option>
+          <option value="azul">🔵 Azul</option>
+          <option value="laranja">🟠 Laranja</option>
+          <option value="vermelho">🔴 Vermelho</option>
+          <option value="roxo">🟣 Roxo</option>
+          <option value="amarelo">🟡 Amarelo</option>
+          <option value="rosa">🩷 Rosa</option>
+          <option value="cinza">⚪ Cinza</option>
+        </select>
+      </div>
+      <button class="btn-add" onclick="addTask()">+ Adicionar Tarefa</button>
+    </div>
+
+    <div class="search-bar">
+      <span>🔍 Filtrar Tela:</span>
+      <input type="text" id="filterInput" placeholder="Buscar por tarefa..." onkeyup="renderTasks()">
+      
+      <select id="filterGroup" onchange="renderTasks()">
+        <option value="all">📁 Todos os Projetos</option>
+      </select>
+
+      <select id="filterStatus" onchange="renderTasks()">
+        <option value="all">Todos os Status</option>
+        <option value="early">⚡ Concluído Antecipado</option>
+        <option value="done">✅ Concluído no Prazo</option>
+        <option value="late-done">🚨 Concluído c/ Atraso</option>
+        <option value="delayed">⚠️ Em Atraso (Não Finalizado)</option>
+        <option value="doing">⏳ Em Andamento</option>
+        <option value="todo">📅 A Fazer</option>
+      </select>
+
+      <div style="margin-left: auto; display: flex; gap: 8px;">
+        <button class="btn-sec" onclick="toggleAllPrintCheckboxes(true)" title="Marcar todos para impressão">☑️ Marcar Todos</button>
+        <button class="btn-sec" onclick="toggleAllPrintCheckboxes(false)" title="Desmarcar todos para impressão">☐ Desmarcar Todos</button>
+        <button class="btn-print" onclick="triggerSelectedPrint()">🖨️ Imprimir Selecionados</button>
+      </div>
+    </div>
+
+    <!-- DIAGRAMA DE GANTT (TELA + IMPRESSÃO) -->
+    <div class="gantt-wrapper">
+      <table id="ganttTable">
+        <thead>
+          <tr id="headerDates">
+            <th colspan="7" style="background:var(--primary); color:white;">INFORMAÇÕES DA TAREFA</th>
+          </tr>
+          <tr id="headerDays">
+            <th class="col-task">TAREFA</th>
+            <th class="col-date">INÍCIO</th>
+            <th class="col-date">PREVISTO</th>
+            <th class="col-date">CONCLUSÃO</th>
+            <th class="col-dur">DIAS</th>
+            <th class="col-status">STATUS</th>
+            <th style="width: 45px;">COR</th>
+          </tr>
+        </thead>
+        <tbody id="ganttBody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAINEL DE RELATÓRIO (APENAS TELA) -->
+    <div class="report-section" id="reportContainer" style="display: none;">
+      <div class="report-header-flex">
+        <h2>📊 Resumo Executivo por Projeto</h2>
+      </div>
+      
+      <div style="margin-bottom: 15px; font-size: 13px; color: var(--text-muted);" id="reportSummaryText"></div>
+
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Projeto / Grupo</th>
+            <th style="text-align: center;">Tarefas</th>
+            <th style="text-align: center;">Início do Projeto</th>
+            <th style="text-align: center;">Término Previsto</th>
+            <th style="text-align: center;">Duração Total</th>
+            <th style="width: 20%;">Carga de Trabalho (% Tarefas)</th>
+          </tr>
+        </thead>
+        <tbody id="reportTableBody">
+        </tbody>
+      </table>
+
+      <div class="report-header-flex">
+        <h2>📝 Relatório Detalhado de Atividades</h2>
+        <button class="btn-add" onclick="copyTextReport()">📋 Copiar Texto Formatado</button>
+      </div>
+      
+      <div class="text-report-box" id="textReportBox"></div>
+    </div>
+  </div>
+
+  <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleFileSelect(event)">
+
+  <script>
+    const lowerWords = new Set([
+      'a', 'o', 'e', 'de', 'do', 'da', 'dos', 'das', 
+      'em', 'no', 'na', 'nos', 'nas', 'um', 'uma', 
+      'por', 'para', 'com', 'sem', 'sob', 'ante', 'até'
+    ]);
+
+    function toTitleCase(str) {
+      if (!str) return '';
+      return str.trim().split(/\s+/).map((word, index) => {
+        let cleanWord = word.toLowerCase();
+        if (index === 0) return cleanWord.charAt(0).toUpperCase() + cleanWord.slice(1);
+        if (lowerWords.has(cleanWord) || (cleanWord.length <= 2 && !/[0-9]/.test(cleanWord))) return cleanWord;
+        return cleanWord.charAt(0).toUpperCase() + cleanWord.slice(1);
+      }).join(' ');
+    }
+
+    function formatDateBR(dateStr) {
+      if(!dateStr) return '-';
+      const [year, month, day] = dateStr.split('-');
+      return `${day}/${month}/${year}`;
+    }
+
+    function getTaskStatus(startStr, endStr, actualEndStr) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      
+      const start = new Date(startStr + "T00:00:00");
+      const end = new Date(endStr + "T00:00:00");
+
+      if (actualEndStr) {
+        const actualEnd = new Date(actualEndStr + "T00:00:00");
+        if (actualEnd < end) {
+          return { label: '⚡ Concluído Antecipado', code: 'early', badge: 'badge-early' };
+        } else if (actualEnd > end) {
+          return { label: '🚨 Concluído c/ Atraso', code: 'late-done', badge: 'badge-late-done' };
+        } else {
+          return { label: '✅ Concluído no Prazo', code: 'done', badge: 'badge-done' };
+        }
+      }
+
+      if (today > end) {
+        return { label: '⚠️ Em Atraso', code: 'delayed', badge: 'badge-delayed' };
+      }
+
+      if (today >= start && today <= end) {
+        return { label: '⏳ Em Andamento', code: 'doing', badge: 'badge-doing' };
+      }
+
+      return { label: '📅 A Fazer', code: 'todo', badge: 'badge-todo' };
+    }
+
+    const colorOptions = [
+      { value: 'verde', label: '🟢' },
+      { value: 'azul', label: '🔵' },
+      { value: 'laranja', label: '🟠' },
+      { value: 'vermelho', label: '🔴' },
+      { value: 'roxo', label: '🟣' },
+      { value: 'amarelo', label: '🟡' },
+      { value: 'rosa', label: '🩷' },
+      { value: 'cinza', label: '⚪' }
+    ];
+
+    const defaultTasks = [
+      { id: 1, group: "GET A WAY - EDILSON E LENNON", name: "Instalação de Muxarabís Térreo", start: "2026-08-03", end: "2026-09-02", actualEnd: "", color: "verde" },
+      { id: 2, group: "GET A WAY - EDILSON E LENNON", name: "Instalação de Corrimão", start: "2026-07-01", end: "2026-07-15", actualEnd: "2026-07-10", color: "azul" },
+      { id: 3, group: "GET FOR YOU - VALDEMIR E CLEYTON", name: "Instalação de Ajustes Guarda Corpo", start: "2026-07-01", end: "2026-07-20", actualEnd: "2026-07-25", color: "vermelho" },
+      { id: 4, group: "PRIME VIEW", name: "Verificar Infiltrações dos Apartamentos", start: "2026-07-01", end: "2026-07-28", actualEnd: "", color: "laranja" }
+    ];
+
+    let tasks = [];
+    let selectedPrintGroups = {};
+    const daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+    let chartStart = new Date();
+    let totalDays = 0;
+
+    function loadStorage() {
+      const savedTasks = localStorage.getItem('gantt_tasks');
+      const savedTitle = localStorage.getItem('gantt_title');
+
+      tasks = savedTasks ? JSON.parse(savedTasks) : defaultTasks;
+      if (savedTitle) {
+        document.getElementById('mainTitle').innerText = savedTitle;
+      }
+
+      const groups = [...new Set(tasks.map(t => t.group))];
+      groups.forEach(g => { selectedPrintGroups[g] = true; });
+
+      document.getElementById('startDate').value = "2026-08-03";
+      document.getElementById('endDate').value = "2026-08-14";
+    }
+
+    function saveToStorage() {
+      localStorage.setItem('gantt_tasks', JSON.stringify(tasks));
+      localStorage.setItem('gantt_title', document.getElementById('mainTitle').innerText);
+      updateGroupDropdown();
+      updateMetrics();
+      renderReport();
+    }
+
+    function updateGroupDropdown() {
+      const selectGroup = document.getElementById('filterGroup');
+      const currentSelected = selectGroup.value;
+      const groups = [...new Set(tasks.map(t => t.group))];
+
+      selectGroup.innerHTML = '<option value="all">📁 Todos os Projetos</option>';
+      groups.forEach(g => {
+        const option = document.createElement('option');
+        option.value = g;
+        option.textContent = `📁 ${g}`;
+        selectGroup.appendChild(option);
+      });
+
+      if (groups.includes(currentSelected)) {
+        selectGroup.value = currentSelected;
+      }
+    }
+
+    function updateMetrics() {
+      const groups = new Set(tasks.map(t => t.group));
+      document.getElementById('metricGroups').innerText = groups.size;
+      document.getElementById('metricTasks').innerText = tasks.length;
+      document.getElementById('metricDays').innerText = `${totalDays} dias`;
+
+      let totalTaskDays = 0;
+      tasks.forEach(t => {
+        let dStart = new Date(t.start + "T00:00:00");
+        let dEnd = new Date((t.actualEnd || t.end) + "T00:00:00");
+        totalTaskDays += Math.max(1, Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1);
+      });
+
+      let avg = tasks.length > 0 ? (totalTaskDays / tasks.length).toFixed(1) : 0;
+      document.getElementById('metricAvgDuration').innerText = `${avg} dias`;
+    }
+
+    function calculateCalendarRange() {
+      if (tasks.length === 0) {
+        chartStart = new Date();
+        totalDays = 30;
+        return;
+      }
+
+      let minDate = new Date(tasks[0].start + "T00:00:00");
+      let maxDate = new Date((tasks[0].actualEnd || tasks[0].end) + "T00:00:00");
+
+      tasks.forEach(t => {
+        let dStart = new Date(t.start + "T00:00:00");
+        let dEnd = new Date((t.actualEnd || t.end) + "T00:00:00");
+
+        if (dStart < minDate) minDate = dStart;
+        if (dEnd > maxDate) maxDate = dEnd;
+      });
+
+      chartStart = new Date(minDate);
+      let diffTime = Math.abs(maxDate - minDate);
+      totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    function renderCalendarHeader() {
+      const headerDates = document.getElementById('headerDates');
+      const headerDays = document.getElementById('headerDays');
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      headerDates.innerHTML = `<th colspan="7" style="background:var(--primary); color:white;">INFORMAÇÕES DA TAREFA</th>`;
+      headerDays.innerHTML = `
+        <th class="col-task">TAREFA</th>
+        <th class="col-date">INÍCIO</th>
+        <th class="col-date">PREVISTO</th>
+        <th class="col-date">CONCLUSÃO</th>
+        <th class="col-dur">DIAS</th>
+        <th class="col-status">STATUS</th>
+        <th style="width: 45px;">COR</th>
+      `;
+
+      for (let i = 0; i < totalDays; i++) {
+        let currDate = new Date(chartStart);
+        currDate.setDate(chartStart.getDate() + i);
+
+        let currDateStr = currDate.toISOString().split('T')[0];
+        let dateStr = `${String(currDate.getDate()).padStart(2, '0')}/${String(currDate.getMonth() + 1).padStart(2, '0')}`;
+        let dayName = daysOfWeek[currDate.getDay()];
+        
+        let isWeekend = (currDate.getDay() === 0 || currDate.getDay() === 6) ? 'weekend' : '';
+        let isToday = (currDateStr === todayStr) ? 'today-highlight' : '';
+
+        let thDate = document.createElement('th');
+        thDate.className = `col-day ${isWeekend} ${isToday}`;
+        thDate.innerText = dateStr;
+        headerDates.appendChild(thDate);
+
+        let thDay = document.createElement('th');
+        thDay.className = `col-day ${isWeekend} ${isToday}`;
+        thDay.innerText = `${dayName}\n${currDate.getDate()}`;
+        headerDays.appendChild(thDay);
+      }
+    }
+
+    function getGroupMetrics(groupName) {
+      const groupTasks = tasks.filter(t => t.group === groupName);
+      if (groupTasks.length === 0) return { start: '-', end: '-', days: '-', count: 0 };
+
+      let minDate = new Date(groupTasks[0].start + "T00:00:00");
+      let maxDate = new Date((groupTasks[0].actualEnd || groupTasks[0].end) + "T00:00:00");
+
+      groupTasks.forEach(t => {
+        let dStart = new Date(t.start + "T00:00:00");
+        let dEnd = new Date((t.actualEnd || t.end) + "T00:00:00");
+        if (dStart < minDate) minDate = dStart;
+        if (dEnd > maxDate) maxDate = dEnd;
+      });
+
+      let duration = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1;
+
+      return {
+        start: minDate.toLocaleDateString('pt-BR'),
+        end: maxDate.toLocaleDateString('pt-BR'),
+        days: `${duration}d`,
+        count: groupTasks.length
+      };
+    }
+
+    function togglePrintGroup(groupName, isChecked) {
+      selectedPrintGroups[groupName] = isChecked;
+    }
+
+    function toggleAllPrintCheckboxes(status) {
+      const checkboxes = document.querySelectorAll('.print-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = status;
+        const groupName = cb.getAttribute('data-group');
+        selectedPrintGroups[groupName] = status;
+      });
+    }
+
+    function renderTasks() {
+      calculateCalendarRange();
+      renderCalendarHeader();
+
+      const tbody = document.getElementById('ganttBody');
+      const filter = document.getElementById('filterInput').value.toLowerCase();
+      const statusFilter = document.getElementById('filterStatus').value;
+      const groupFilter = document.getElementById('filterGroup').value;
+
+      tbody.innerHTML = '';
+      let currentGroup = "";
+
+      tasks.forEach((task, index) => {
+        const taskStatus = getTaskStatus(task.start, task.end, task.actualEnd);
+
+        if (filter && !task.name.toLowerCase().includes(filter)) return;
+        if (statusFilter !== 'all' && taskStatus.code !== statusFilter) return;
+        if (groupFilter !== 'all' && task.group !== groupFilter) return;
+
+        if (task.group !== currentGroup) {
+          currentGroup = task.group;
+          const groupMetrics = getGroupMetrics(currentGroup);
+          const isChecked = selectedPrintGroups[currentGroup] !== false;
+
+          let groupRow = document.createElement('tr');
+          groupRow.className = `group-row-header`;
+          groupRow.setAttribute('data-group-name', currentGroup);
+
+          groupRow.innerHTML = `
+            <td class="group-header">
+              <input type="checkbox" class="print-checkbox" data-group="${currentGroup}" ${isChecked ? 'checked' : ''} onchange="togglePrintGroup('${currentGroup}', this.checked)" title="Marcar/Desmarcar para impressão">
+              <span contenteditable="true" spellcheck="true" onblur="updateGroup('${currentGroup}', this.innerText)">${currentGroup}</span>
+            </td>
+            <td class="group-cell">${groupMetrics.start}</td>
+            <td class="group-cell">${groupMetrics.end}</td>
+            <td class="group-cell">-</td>
+            <td class="group-cell">${groupMetrics.days}</td>
+            <td class="group-cell"></td>
+            <td class="group-cell"></td>
+            <td colspan="${totalDays}" class="group-cell"></td>
+          `;
+          tbody.appendChild(groupRow);
+        }
+
+        let dStart = new Date(task.start + "T00:00:00");
+        let effectiveEnd = task.actualEnd || task.end;
+        let dEnd = new Date(effectiveEnd + "T00:00:00");
+        let duration = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+        if(isNaN(duration) || duration < 1) duration = 1;
+
+        let row = document.createElement('tr');
+        row.setAttribute('data-task-group', task.group);
+
+        let colorOptionsHTML = colorOptions.map(opt => 
+          `<option value="${opt.value}" ${task.color === opt.value ? 'selected' : ''}>${opt.label}</option>`
+        ).join('');
+
+        let html = `
+          <td class="col-task">
+            <button class="btn-del" onclick="deleteTask(${index})" title="Excluir">✕</button> 
+            <button class="btn-clone" onclick="duplicateTask(${index})" title="Duplicar">📋</button>
+            <span class="editable-text" contenteditable="true" spellcheck="true" onblur="updateTaskName(${index}, this.innerText)">${task.name}</span>
+          </td>
+          <td class="col-date">
+            <input type="date" class="input-inline-date" value="${task.start}" onchange="updateTaskStart(${index}, this.value)">
+          </td>
+          <td class="col-date">
+            <input type="date" class="input-inline-date" value="${task.end}" onchange="updateTaskEnd(${index}, this.value)">
+          </td>
+          <td class="col-date">
+            <input type="date" class="input-inline-date" value="${task.actualEnd || ''}" onchange="updateTaskActualEnd(${index}, this.value)" title="Informe se foi concluída">
+          </td>
+          <td class="col-dur">${duration}d</td>
+          <td class="col-status">
+            <span class="badge-status ${taskStatus.badge}">${taskStatus.label}</span>
+          </td>
+          <td>
+            <select class="select-inline-color" onchange="updateTaskColor(${index}, this.value)">
+              ${colorOptionsHTML}
+            </select>
+          </td>
+        `;
+
+        for (let i = 0; i < totalDays; i++) {
+          let currDate = new Date(chartStart);
+          currDate.setDate(chartStart.getDate() + i);
+
+          let isWeekend = (currDate.getDay() === 0 || currDate.getDay() === 6) ? 'weekend' : '';
+          
+          if (currDate >= dStart && currDate <= dEnd) {
+            html += `<td class="${isWeekend}"><div class="bar bar-${task.color}"></div></td>`;
+          } else {
+            html += `<td class="${isWeekend}"></td>`;
+          }
+        }
+
+        row.innerHTML = html;
+        tbody.appendChild(row);
+      });
+
+      saveToStorage();
+    }
+
+    function triggerSelectedPrint() {
+      const allRows = document.querySelectorAll('#ganttBody tr');
+      let countSelected = 0;
+
+      allRows.forEach(row => {
+        let groupName = row.getAttribute('data-group-name') || row.getAttribute('data-task-group');
+        if (groupName && selectedPrintGroups[groupName] === false) {
+          row.classList.add('print-hidden');
+        } else {
+          row.classList.remove('print-hidden');
+          countSelected++;
+        }
+      });
+
+      if (countSelected === 0) {
+        alert("Nenhum projeto está marcado para impressão! Marque a caixinha de ao menos um grupo.");
+        return;
+      }
+
+      window.print();
+    }
+
+    function renderReport() {
+      const tbody = document.getElementById('reportTableBody');
+      const summaryText = document.getElementById('reportSummaryText');
+      const textBox = document.getElementById('textReportBox');
+
+      tbody.innerHTML = '';
+
+      if (tasks.length === 0) {
+        summaryText.innerHTML = 'Nenhuma tarefa cadastrada no sistema.';
+        textBox.innerText = 'Sem atividades cadastradas.';
+        return;
+      }
+
+      const title = document.getElementById('mainTitle').innerText;
+      const groups = [...new Set(tasks.map(t => t.group))];
+      let minGlobalDate = new Date(tasks[0].start + "T00:00:00");
+      let maxGlobalDate = new Date((tasks[0].actualEnd || tasks[0].end) + "T00:00:00");
+
+      let textReport = `==================================================\n`;
+      textReport += `📋 RELATÓRIO DE ACOMPANHAMENTO DE ATIVIDADES\n`;
+      textReport += `📌 PROJETO: ${title}\n`;
+      textReport += `📅 DATA EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}\n`;
+      textReport += `==================================================\n\n`;
+
+      groups.forEach(groupName => {
+        const metrics = getGroupMetrics(groupName);
+        const percentage = ((metrics.count / tasks.length) * 100).toFixed(1);
+
+        let groupTasks = tasks.filter(t => t.group === groupName);
+        
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${groupName}</strong></td>
+          <td style="text-align: center;">${metrics.count}</td>
+          <td style="text-align: center;">${metrics.start}</td>
+          <td style="text-align: center;">${metrics.end}</td>
+          <td style="text-align: center;">${metrics.days}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
+              </div>
+              <span style="font-size: 11px; font-weight: 600;">${percentage}%</span>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        textReport += `🏗️ PROJETO/EQUIPE: ${groupName}\n`;
+        textReport += `--------------------------------------------------\n`;
+
+        groupTasks.forEach(t => {
+          let dStart = new Date(t.start + "T00:00:00");
+          let dEnd = new Date((t.actualEnd || t.end) + "T00:00:00");
+          let duration = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+          let status = getTaskStatus(t.start, t.end, t.actualEnd);
+
+          if (dStart < minGlobalDate) minGlobalDate = dStart;
+          if (dEnd > maxGlobalDate) maxGlobalDate = dEnd;
+
+          textReport += `  • Tarefa: ${t.name}\n`;
+          textReport += `    Status: [${status.label.toUpperCase()}]\n`;
+          textReport += `    Prazo Previsto: ${formatDateBR(t.start)} até ${formatDateBR(t.end)}\n`;
+          if (t.actualEnd) {
+            textReport += `    Concluído em: ${formatDateBR(t.actualEnd)}\n`;
+          }
+          textReport += `    Duração Total: ${duration} dia(s)\n\n`;
+        });
+      });
+
+      summaryText.innerHTML = `
+        Este cronograma abrange <strong>${groups.length} projetos/grupos</strong> com <strong>${tasks.length} tarefas</strong> no total. 
+        A execução global está planejada para iniciar em <strong>${minGlobalDate.toLocaleDateString('pt-BR')}</strong> e finalizar em <strong>${maxGlobalDate.toLocaleDateString('pt-BR')}</strong> (${totalDays} dias de operação).
+      `;
+
+      textReport += `==================================================\n`;
+      textReport += `📊 RESUMO OPERACIONAL:\n`;
+      textReport += `  - Total de Projetos: ${groups.length}\n`;
+      textReport += `  - Total de Atividades: ${tasks.length}\n`;
+      textReport += `  - Janela Geral: ${minGlobalDate.toLocaleDateString('pt-BR')} a ${maxGlobalDate.toLocaleDateString('pt-BR')} (${totalDays} dias)\n`;
+      textReport += `==================================================`;
+
+      textBox.innerText = textReport;
+    }
+
+    function copyTextReport() {
+      const text = document.getElementById('textReportBox').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Relatório em texto copiado para a área de transferência!");
+      }).catch(err => {
+        alert("Erro ao copiar o texto. Tente selecionar e copiar manualmente.");
+      });
+    }
+
+    function toggleReport() {
+      const container = document.getElementById('reportContainer');
+      container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function duplicateTask(index) {
+      const original = tasks[index];
+      const clonedTask = {
+        id: Date.now(),
+        group: original.group,
+        name: toTitleCase(`${original.name} (Cópia)`),
+        start: original.start,
+        end: original.end,
+        actualEnd: original.actualEnd || "",
+        color: original.color
+      };
+
+      tasks.splice(index + 1, 0, clonedTask);
+      renderTasks();
+    }
+
+    function updateGroup(oldGroup, newGroup) {
+      newGroup = toTitleCase(newGroup.trim());
+      if (!newGroup) return;
+      tasks.forEach(t => {
+        if (t.group === oldGroup) t.group = newGroup;
+      });
+      if (selectedPrintGroups[oldGroup] !== undefined) {
+        selectedPrintGroups[newGroup] = selectedPrintGroups[oldGroup];
+        delete selectedPrintGroups[oldGroup];
+      }
+      renderTasks();
+    }
+
+    function updateTaskName(index, newName) {
+      tasks[index].name = toTitleCase(newName.trim());
+      saveToStorage();
+      renderTasks();
+    }
+
+    function updateTaskStart(index, val) {
+      if (!val) return;
+      tasks[index].start = val;
+      saveToStorage();
+      renderTasks();
+    }
+
+    function updateTaskEnd(index, val) {
+      if (!val) return;
+      tasks[index].end = val;
+      saveToStorage();
+      renderTasks();
+    }
+
+    function updateTaskActualEnd(index, val) {
+      tasks[index].actualEnd = val;
+      saveToStorage();
+      renderTasks();
+    }
+
+    function updateTaskColor(index, val) {
+      tasks[index].color = val;
+      saveToStorage();
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      if (confirm(`Tem certeza que deseja excluir a tarefa "${tasks[index].name}"?`)) {
+        tasks.splice(index, 1);
+        renderTasks();
+      }
+    }
+
+    function addTask() {
+      const groupInput = document.getElementById('groupName');
+      const taskInput = document.getElementById('taskName');
+      const startInput = document.getElementById('startDate');
+      const endInput = document.getElementById('endDate');
+      const actualEndInput = document.getElementById('actualEndDate');
+      const colorInput = document.getElementById('barColor');
+
+      const group = toTitleCase(groupInput.value);
+      const name = toTitleCase(taskInput.value);
+      const start = startInput.value;
+      const end = endInput.value;
+      const actualEnd = actualEndInput.value;
+      const color = colorInput.value;
+
+      if (!group || !name || !start || !end) {
+        alert("Por favor, preencha os campos obrigatórios (Grupo, Nome, Início e Término Previsto).");
+        return;
+      }
+
+      tasks.push({
+        id: Date.now(),
+        group: group,
+        name: name,
+        start: start,
+        end: end,
+        actualEnd: actualEnd || "",
+        color: color
+      });
+
+      if (selectedPrintGroups[group] === undefined) {
+        selectedPrintGroups[group] = true;
+      }
+
+      taskInput.value = '';
+      actualEndInput.value = '';
+      renderTasks();
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        title: document.getElementById('mainTitle').innerText,
+        tasks: tasks
+      }, null, 2));
+      
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `cronograma_backup_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importData() {
+      document.getElementById('importFile').click();
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.tasks && Array.isArray(imported.tasks)) {
+            tasks = imported.tasks;
+            if (imported.title) {
+              document.getElementById('mainTitle').innerText = imported.title;
+            }
+            renderTasks();
+            alert("✅ Backup restaurado com sucesso!");
+          } else {
+            alert("❌ Arquivo de backup inválido.");
+          }
+        } catch (err) {
+          alert("❌ Erro ao ler o arquivo JSON.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    window.onload = function() {
+      loadStorage();
+      updateGroupDropdown();
+      renderTasks();
+    };
+  </script>
+</body>
+</html>
