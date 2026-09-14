@@ -59638,21 +59638,52 @@ if (document.readyState === 'loading') {
         
           /* caixinha de aviso que segue o mouse */
           function dica(texto, ev) {
+            var area = document.getElementById('p120Area');
             var d = document.getElementById('p120Dica');
+            if (!area) return;
             if (!d) {
               d = document.createElement('div');
               d.id = 'p120Dica';
-              document.body.appendChild(d);
             }
-            if (!texto) { d.style.display = 'none'; return; }
+            if (d.parentNode !== area) area.appendChild(d);
+            if (!texto) {
+              /* Ao sair de um grafico, nao some enquanto o mouse continuar dentro
+                 da area do Centro de Custos. O proximo grafico atualiza a tarja. */
+              if (ev && area.contains(ev.target)) return;
+              d.style.display = 'none';
+              return;
+            }
             d.innerHTML = texto;
-            d.style.display = 'block';
-            var x = ev.clientX + 14;
-            var y = ev.clientY + 14;
-            if (x + d.offsetWidth > window.innerWidth - 8) { x = ev.clientX - d.offsetWidth - 12; }
-            if (y + d.offsetHeight > window.innerHeight - 8) { y = ev.clientY - d.offsetHeight - 12; }
-            d.style.left = Math.max(4, x) + 'px';
-            d.style.top = Math.max(4, y) + 'px';
+            d.style.setProperty('display', 'block', 'important');
+            d.style.setProperty('position', 'absolute', 'important');
+            d.style.setProperty('z-index', '30', 'important');
+            d.style.setProperty('pointer-events', 'none', 'important');
+            d.style.setProperty('right', 'auto', 'important');
+            d.style.setProperty('bottom', 'auto', 'important');
+
+            var e = ev;
+            if (!e || typeof e.clientX !== 'number' || typeof e.clientY !== 'number') {
+              var r0 = area.getBoundingClientRect();
+              e = {clientX:r0.left + 16, clientY:r0.top + 16};
+            }
+            var r = area.getBoundingClientRect();
+            var x = e.clientX - r.left + 14;
+            var y = e.clientY - r.top + 14;
+            var w = d.offsetWidth || 220;
+            var h = d.offsetHeight || 55;
+            var maxX = Math.max(8, r.width - w - 8);
+            var maxY = Math.max(8, r.height - h - 8);
+            if (x > maxX) x = e.clientX - r.left - w - 14;
+            if (y > maxY) y = e.clientY - r.top - h - 14;
+            x = Math.max(8, Math.min(x, maxX));
+            y = Math.max(8, Math.min(y, maxY));
+            d.style.setProperty('left', Math.round(x) + 'px', 'important');
+            d.style.setProperty('top', Math.round(y) + 'px', 'important');
+
+            if (d.__p120Timer) clearTimeout(d.__p120Timer);
+            d.__p120Timer = setTimeout(function () {
+              d.style.setProperty('display', 'none', 'important');
+            }, 4000);
           }
 
           /* PATCH V29: rede de seguranca contra o tooltip ficar preso na tela.
@@ -59685,10 +59716,11 @@ if (document.readyState === 'loading') {
              o tooltip. Nao depende de nenhum encadeamento de funcao dar certo. */
           setInterval(function () {
             var d = document.getElementById('p120Dica');
-            if (!d || d.style.display === 'none') { return; }
             var area = document.getElementById('p120Area');
-            if (!area || area.offsetParent === null) { d.style.display = 'none'; }
-          }, 400);
+            if (!d || !area || !area.contains(d) || area.offsetParent === null) {
+              if (d) d.style.display = 'none';
+            }
+          }, 500);
         
           /* deixa o restante da aba com a mesma cara: campos, botoes, sub-abas e
              tabelas. So aparencia, nenhum comportamento muda. */
@@ -73713,124 +73745,11 @@ if (document.readyState === 'loading') {
   }
   #p120Dica b { display:block !important; font-size:12px !important; margin-bottom:3px !important; }
 </style>
-<script id="patch162FinalFix">
-(function(){
-  'use strict';
-  if (window.__patch162FinalFix) return;
-  window.__patch162FinalFix = true;
-
-  function esconder(){
-    var d = document.getElementById('p120Dica');
-    if (d) {
-      d.style.setProperty('display','none','important');
-      d.setAttribute('aria-hidden','true');
-    }
-  }
-
-  function garantirCaixa(){
-    var area = document.getElementById('p120Area');
-    var d = document.getElementById('p120Dica');
-    if (!area) { esconder(); return null; }
-    if (!d) {
-      d = document.createElement('div');
-      d.id = 'p120Dica';
-    }
-    if (d.parentNode !== area) area.appendChild(d);
-    return d;
-  }
-
-  window.ocultarDicaP120 = esconder;
-  window.dica = function(texto){
-    var d = garantirCaixa();
-    if (!d || !texto) { esconder(); return; }
-    d.innerHTML = String(texto);
-    d.style.setProperty('display','block','important');
-    d.style.removeProperty('left');
-    d.style.removeProperty('top');
-    d.setAttribute('aria-hidden','false');
-  };
-
-  /* Qualquer clique, troca de aba ou saida do painel fecha a caixa. */
-  document.addEventListener('click', function(ev){
-    var area = document.getElementById('p120Area');
-    if (!area || !area.contains(ev.target)) esconder();
-  }, true);
-  document.addEventListener('pointerdown', function(ev){
-    var area = document.getElementById('p120Area');
-    if (!area || !area.contains(ev.target)) esconder();
-  }, true);
-  document.addEventListener('mousemove', function(ev){
-    var area = document.getElementById('p120Area');
-    if (!area || !area.contains(ev.target)) esconder();
-  }, true);
-  window.addEventListener('blur', esconder);
-  document.addEventListener('visibilitychange', esconder);
-  window.addEventListener('mouseout', function(ev){
-    if (!ev.relatedTarget) esconder();
-  }, true);
-
-  /* Se o Centro de Custos for redesenhado, a tarja antiga nao pode sobreviver. */
-  try {
-    var obs = new MutationObserver(function(){
-      var area = document.getElementById('p120Area');
-      var d = document.getElementById('p120Dica');
-      if (d && (!area || !area.contains(d))) esconder();
-    });
-    obs.observe(document.body, {childList:true, subtree:true});
-  } catch(e) {}
-
-  /* Reaplica o CSS final caso algum patch antigo injete outra folha depois. */
-  setInterval(function(){
-    var area = document.getElementById('p120Area');
-    var d = document.getElementById('p120Dica');
-    if (!area || !d) { if (d) esconder(); return; }
-    if (!area.contains(d)) { esconder(); return; }
-    d.style.setProperty('position','absolute','important');
-    d.style.setProperty('right','12px','important');
-    d.style.setProperty('bottom','12px','important');
-    d.style.setProperty('left','auto','important');
-    d.style.setProperty('top','auto','important');
-    d.style.setProperty('z-index','30','important');
-  }, 500);
-
-  /* Reforca a presenca do botao Diario no menu, sem criar duplicatas. */
-  function garantirDiarioMenu(){
-    var cx = document.querySelector('#meu-menu-abas .tabs') ||
-             document.querySelector('details#meu-menu-abas .tabs');
-    var b = document.getElementById('p84Botao');
-    if (!b || !cx) return;
-    if (b.parentNode !== cx) cx.appendChild(b);
-    b.style.removeProperty('position');
-    b.style.removeProperty('right');
-    b.style.removeProperty('bottom');
-    b.style.removeProperty('z-index');
-    b.style.removeProperty('display');
-    b.style.setProperty('display','inline-flex','important');
-  }
-
-  function abrirDiarioSeguro(){
-    try {
-      if (typeof window.p84AbrirDiario === 'function') return window.p84AbrirDiario();
-    } catch(e) {}
-    try {
-      var f = document.getElementById('p84Fundo');
-      if (f) {
-        f.classList.remove('p86b-oculto','p87-oculto','p87b-oculto');
-        f.style.display = 'flex';
-        return true;
-      }
-    } catch(e2) {}
-    return false;
-  }
-  window.patch162AbrirDiario = abrirDiarioSeguro;
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(garantirDiarioMenu, 250); });
-  } else {
-    setTimeout(garantirDiarioMenu, 250);
-  }
-  setInterval(garantirDiarioMenu, 1500);
-})();
-</script>
+<style id="patch163TooltipStyle">
+#p120Area{position:relative!important;}
+#p120Dica{position:absolute!important;z-index:30!important;pointer-events:none!important;display:none;box-sizing:border-box;min-width:190px;max-width:300px;padding:9px 12px!important;border:1px solid rgba(148,163,184,.35);border-radius:10px!important;background:rgba(15,23,42,.96)!important;color:#fff!important;font-size:.76rem!important;line-height:1.4!important;box-shadow:0 8px 24px rgba(0,0,0,.25)!important;margin:0!important;}
+#p120Dica b{display:block;font-size:.8rem;margin-bottom:3px;}
+</style>
+<script id="patch163TooltipFollowMouse"><!-- mantido para compatibilidade; a funcao real do Centro de Custos e corrigida acima. --></script>
 </body>
 </html>
