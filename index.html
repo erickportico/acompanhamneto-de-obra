@@ -59639,6 +59639,16 @@ if (document.readyState === 'loading') {
               window.trocarAba = nova;
             }
           })();
+          /* PATCH V31: reforco independente - verifica periodicamente se a area do
+             grafico ainda esta visivel; se nao estiver (trocou de aba/sub-aba por
+             qualquer caminho, mesmo um que nao passe pelas funcoes acima), esconde
+             o tooltip. Nao depende de nenhum encadeamento de funcao dar certo. */
+          setInterval(function () {
+            var d = document.getElementById('p120Dica');
+            if (!d || d.style.display === 'none') { return; }
+            var area = document.getElementById('p120Area');
+            if (!area || area.offsetParent === null) { d.style.display = 'none'; }
+          }, 400);
         
           /* deixa o restante da aba com a mesma cara: campos, botoes, sub-abas e
              tabelas. So aparencia, nenhum comportamento muda. */
@@ -73101,7 +73111,7 @@ if (document.readyState === 'loading') {
 
     var plano = menu.querySelector('#btn-tab-obraflow');
     if (plano) {
-      plano.innerHTML = '📐 <span class="pmenu-txt">Plano Mestre da Obra</span>';
+      plano.innerHTML = '📐 <span class="pmenu-txt">Gestão de Obras e Equipes</span>';
       plano.setAttribute('title', 'Plano Mestre da Obra');
       plano.setAttribute('data-menu-renomeado', '1');
     }
