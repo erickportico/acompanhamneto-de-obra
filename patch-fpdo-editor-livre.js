@@ -3,9 +3,10 @@
  */
 (function () {
   'use strict';
-  if (window.__patchFpdoEditorLivre2) return;
+  if (window.__patchFpdoEditorLivre3) return;
   window.__patchFpdoEditorLivre = true;
   window.__patchFpdoEditorLivre2 = true;
+  window.__patchFpdoEditorLivre3 = true;
 
   function css() {
     if (document.getElementById('fpdoLivreCss')) return;
@@ -154,8 +155,46 @@
 
   document.addEventListener('pointerup', function () { drag = null; }, true);
 
+  function botaoNoFpdo() {
+    var pe = document.getElementById('p92Pe');
+    if (!pe || document.getElementById('fpdoBtnGrafPe')) return;
+    var b = document.createElement('button');
+    b.id = 'fpdoBtnGrafPe';
+    b.className = 'p92-btn p92-btn-ok';
+    b.type = 'button';
+    b.textContent = 'Puxar graficos do painel';
+    b.onclick = function () {
+      var ids = ['chartLiberacao', 'chartFabricacao', 'chartInstalacao', 'chartResumo'];
+      var ok = 0;
+      var box = document.getElementById('fpdoGrafPreview');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'fpdoGrafPreview';
+        box.style.cssText = 'position:fixed;inset:8% 8%;z-index:2147483000;background:#0f172a;color:#fff;overflow:auto;padding:12px;border-radius:12px';
+        document.body.appendChild(box);
+      }
+      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><b>Graficos da aba Graficos e Relatorios</b><button type="button" id="fpdoGrafFecha">Fechar</button></div>';
+      ids.forEach(function (id) {
+        var c = document.getElementById(id);
+        if (!c || !c.toDataURL) return;
+        var img = document.createElement('img');
+        img.src = c.toDataURL('image/png');
+        img.style.cssText = 'width:100%;background:#fff;margin:8px 0';
+        box.appendChild(img);
+        ok++;
+      });
+      if (!ok) {
+        box.innerHTML += '<p>Abra Menu - Graficos e Relatorios, espere as barras e clique de novo.</p>';
+      }
+      var f = document.getElementById('fpdoGrafFecha');
+      if (f) f.onclick = function () { box.remove(); };
+    };
+    pe.appendChild(b);
+  }
+
   setInterval(function () {
     css();
+    botaoNoFpdo();
     if (document.getElementById('p94Lupa')) { barra(); esconderTrena(); }
   }, 1200);
 
