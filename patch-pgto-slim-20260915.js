@@ -1,7 +1,8 @@
 (function () {
   'use strict';
-  if (window.__patchPgtoSlim20260915) return;
+  if (window.__patchPgtoSlim20260915b) return;
   window.__patchPgtoSlim20260915 = true;
+  window.__patchPgtoSlim20260915b = true;
 
   var s = document.createElement('style');
   s.id = 'pgtoSlimCss';
@@ -21,7 +22,7 @@
     'height:32px!important;min-height:32px!important;text-align:right!important;' +
     'padding:0 8px!important;box-sizing:border-box!important;margin:0 auto!important}' +
     '#tab-pagamento td:last-child, #tab-pagamento td.col-pago{text-align:right!important;vertical-align:middle!important}' +
-    '#tab-pagamento .pgto-setas, #tab-pagamento [data-print-hide]{display:none!important}';
+    '#tab-pagamento .totais, #tab-pagamento [class*="totais"] span, #tab-pagamento [class*="totais"] div{white-space:nowrap}#tab-pagamento [class*="custo"],#tab-pagamento [class*="Custo"]{display:flex!important;justify-content:space-between!important;align-items:center!important}#tab-pagamento .pgto-setas, #tab-pagamento [data-print-hide]{display:none!important}';
   document.head.appendChild(s);
 
   function acharBotao() {
