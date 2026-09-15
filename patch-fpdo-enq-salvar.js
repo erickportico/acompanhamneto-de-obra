@@ -4,8 +4,9 @@
  */
 (function () {
   'use strict';
-  if (window.__patchFpdoEnqSalvar) return;
+  if (window.__patchFpdoEnqSalvar2) return;
   window.__patchFpdoEnqSalvar = true;
+  window.__patchFpdoEnqSalvar2 = true;
 
   var K = 'p96_enq_leve_v1';
 
@@ -22,11 +23,18 @@
     var st = document.createElement('style');
     st.id = 'fpdoEnqCss';
     st.textContent =
-      '#p94Lupa .p94-folha .p94-i img,#p94Impr .p94-folha .p94-i img{' +
+      '#p94Lupa .p94-folha.fpdo-capa-cheia,' +
+      '#p94Impr .p94-folha.fpdo-capa-cheia{' +
+      'position:relative!important}' +
+      '#p94Lupa .p94-folha.fpdo-capa-cheia .p94-i,' +
+      '#p94Impr .p94-folha.fpdo-capa-cheia .p94-i{' +
+      'position:absolute!important;left:0!important;top:0!important;' +
+      'width:100%!important;height:100%!important;max-width:none!important;' +
+      'max-height:none!important;border:0!important;background:transparent!important;z-index:1}' +
+      '#p94Lupa .p94-folha.fpdo-capa-cheia .p94-i img,' +
+      '#p94Impr .p94-folha.fpdo-capa-cheia .p94-i img{' +
       'object-fit:cover!important;width:100%!important;height:100%!important}' +
-      '.p94-folha.fpdo-capa-cheia,.p94-folha.fpdo-capa-cheia .p94-i{' +
-      'position:absolute!important;inset:0!important;width:100%!important;height:100%!important}' +
-      '.p94-folha.fpdo-capa-cheia img{object-fit:cover!important}';
+      '#p94Lupa .p94-folha.fpdo-capa-cheia .p94-t{z-index:2}';
     document.head.appendChild(st);
   }
 
@@ -44,17 +52,30 @@
     }
   };
 
+  function encher(folha) {
+    if (!folha) return;
+    folha.classList.add('fpdo-capa-cheia');
+    var caixas = folha.querySelectorAll('.p94-i');
+    for (var i = 0; i < caixas.length; i++) {
+      caixas[i].style.left = '0';
+      caixas[i].style.top = '0';
+      caixas[i].style.width = '100%';
+      caixas[i].style.height = '100%';
+    }
+    var imgs = folha.querySelectorAll('img');
+    for (var j = 0; j < imgs.length; j++) {
+      imgs[j].style.objectFit = 'cover';
+      imgs[j].style.width = '100%';
+      imgs[j].style.height = '100%';
+    }
+  }
+
   function aplicarCapaCheia() {
     var folhas = document.querySelectorAll('#p94Lupa .p94-folha, #p94Impr .p94-folha');
     if (!folhas.length) return;
-    var primeira = folhas[0];
-    primeira.classList.add('fpdo-capa-cheia');
-    var img = primeira.querySelector('img');
-    if (img) {
-      img.style.objectFit = 'cover';
-      img.style.width = '100%';
-      img.style.height = '100%';
-    }
+    encher(folhas[0]);
+    if (folhas[1]) encher(folhas[1]);
+    if (folhas.length > 2) encher(folhas[folhas.length - 1]);
   }
 
   document.addEventListener('click', function (ev) {
