@@ -7,6 +7,7 @@
   window.__patchFpdoEditorLivre = true;
   window.__patchFpdoEditorLivre2 = true;
   window.__patchFpdoEditorLivre3 = true;
+  window.__patchFpdoEditorLivre4 = true;
 
   function css() {
     if (document.getElementById('fpdoLivreCss')) return;
@@ -170,16 +171,24 @@
       if (!box) {
         box = document.createElement('div');
         box.id = 'fpdoGrafPreview';
-        box.style.cssText = 'position:fixed;inset:8% 8%;z-index:2147483000;background:#0f172a;color:#fff;overflow:auto;padding:12px;border-radius:12px';
+        box.style.cssText = 'position:fixed;right:16px;bottom:16px;width:min(400px,92vw);max-height:65vh;z-index:2147483000;background:#0f172a;color:#fff;overflow:auto;padding:10px;border-radius:12px';
         document.body.appendChild(box);
       }
-      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><b>Graficos da aba Graficos e Relatorios</b><button type="button" id="fpdoGrafFecha">Fechar</button></div>';
+      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><b>Graficos</b><button type="button" id="fpdoGrafFecha">Fechar</button></div><p style="font-size:12px">Clique no grafico para por no slide. Depois arraste.</p>';
       ids.forEach(function (id) {
         var c = document.getElementById(id);
         if (!c || !c.toDataURL) return;
         var img = document.createElement('img');
         img.src = c.toDataURL('image/png');
-        img.style.cssText = 'width:100%;background:#fff;margin:8px 0';
+        img.style.cssText = 'width:100%;max-height:110px;object-fit:contain;background:#fff;margin:6px 0;cursor:pointer';
+        img.onclick = function () {
+          var folha = document.querySelector('#p94Lupa .p94-folha');
+          if (!folha) { alert('Abra Ver slides e clique no grafico de novo.'); return; }
+          var n = document.createElement('img');
+          n.src = img.src;
+          n.style.cssText = 'position:absolute;left:8%;top:18%;width:84%;height:30%;object-fit:contain;background:#fff;cursor:move';
+          folha.appendChild(n);
+        };
         box.appendChild(img);
         ok++;
       });
