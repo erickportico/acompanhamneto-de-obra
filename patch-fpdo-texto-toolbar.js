@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  if (window.__patchFpdoTextoToolbar3) return;
-  window.__patchFpdoTextoToolbar3 = true;
+  if (window.__patchFpdoTextoToolbar4) return;
+  window.__patchFpdoTextoToolbar4 = true;
 
   var alvo = null;
 
@@ -49,12 +49,12 @@
       '<button type="button" id="fpdoTxtFecha">Fechar</button>';
     document.body.appendChild(b);
     document.getElementById('fpdoTxtTam').onchange = function () { if (alvo) alvo.style.fontSize = this.value + 'px'; };
-    document.getElementById('fpdoTxtCor').oninput = function () { if (alvo) { alvo.style.color = this.value; alvo.style.webkitTextFillColor = this.value; } };
+    document.getElementById('fpdoTxtCor').oninput = function () { if (!alvo) return; var c=this.value; alvo.style.setProperty('color',c,'important'); alvo.style.setProperty('-webkit-text-fill-color',c,'important'); alvo.querySelectorAll('*').forEach(function(n){n.style.setProperty('color',c,'important');}); };
     document.getElementById('fpdoTxtN').onclick = function () { if (alvo) alvo.style.fontWeight = '400'; };
     document.getElementById('fpdoTxtB').onclick = function () { if (alvo) alvo.style.fontWeight = '700'; };
     document.getElementById('fpdoTxtCopia').onclick = function () {
-      var t = alvo ? (alvo.tagName === 'IMG' ? alvo.src : alvo.innerText) : '';
-      if (t && navigator.clipboard) navigator.clipboard.writeText(t);
+      if (!alvo) { alert('Clique no item antes de copiar.'); return; }
+      window.__fpdoClip = { html: alvo.outerHTML, src: alvo.getAttribute && alvo.getAttribute('src') };
     };
     document.getElementById('fpdoTxtCola').onclick = function () { colar(); };
     document.getElementById('fpdoTxtApagar').onclick = function () { if (alvo) alvo.remove(); alvo = null; };
@@ -62,9 +62,10 @@
     document.getElementById('fpdoTxtSalvar').onclick = function () {
       var n = document.querySelectorAll('button');
       for (var i=0;i<n.length;i++) {
-        var x=String(n[i].textContent||'').trim();
-        if (x==='Salvar edicao do slide' || x==='Salvar PPTX' || x==='Salvar') { n[i].click(); break; }
+        var x=String(n[i].textContent||'').replace(/\s+/g,' ').trim();
+        if (x==='Salvar PPTX' || x==='Salvar PDF' || x.indexOf('Salvar edicao')===0) { n[i].click(); return; }
       }
+      alert('Use Salvar PPTX no topo do Ver slides.');
     };
     b.onmousedown = function (ev) {
       if (ev.target !== b && ev.target.tagName !== 'SPAN') return;
@@ -78,9 +79,33 @@
     return b;
   }
 
+  function folhaVisivel() {
+    var list = document.querySelectorAll('#p94Lupa .p94-folha');
+    var best = null, area = 0;
+    list.forEach(function (f) {
+      var r = f.getBoundingClientRect();
+      var a = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) * r.width;
+      if (a > area) { area = a; best = f; }
+    });
+    return best || document.querySelector('#p94Lupa .p94-folha');
+  }
   function colar(ev) {
-    var folha = document.querySelector('#p94Lupa .p94-folha');
+    var folha = folhaVisivel();
     if (!folha || !slideAberto()) return;
+    if (window.__fpdoClip && window.__fpdoClip.html && !(ev && ev.clipboardData)) {
+      var w = document.createElement('div');
+      w.innerHTML = window.__fpdoClip.html;
+      var n = w.firstElementChild;
+      if (n) {
+        n.style.position = 'absolute';
+        n.style.left = '12%';
+        n.style.top = '22%';
+        n.style.zIndex = '6';
+        folha.appendChild(n);
+        alvo = n;
+      }
+      return;
+    }
     var dt = ev && ev.clipboardData;
     function texto(t) {
       var d = document.createElement('div');
