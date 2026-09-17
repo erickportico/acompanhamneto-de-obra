@@ -3370,10 +3370,23 @@ div:empty,
           }
     </style>
     <style id="print-pgto-resumo-css">
-        .print-pgto-resumo-mode body > *:not(#panelPgtoResumo) { display:none !important; }
-        .print-pgto-resumo-mode #panelPgtoResumo { position:static !important; width:100% !important; margin:0 !important; padding:10px !important; box-shadow:none !important; }
-        .print-pgto-resumo-mode .pgto-month-nav button { display:none !important; }
-        .print-pgto-resumo-mode .lanc-actions { display:none !important; }
+        body.print-pgto-resumo-mode > *:not(#panelPgtoResumo) { display:none !important; }
+        body.print-pgto-resumo-mode #panelPgtoResumo { position:static !important; width:100% !important; margin:0 !important; padding:10px !important; box-shadow:none !important; background:#fff !important; color:#000 !important; }
+        body.print-pgto-resumo-mode #panelPgtoResumo * { visibility:visible !important; }
+        body.print-pgto-resumo-mode .pgto-month-nav button { display:none !important; }
+        body.print-pgto-resumo-mode .lanc-actions { display:none !important; }
+        body.print-pgto-resumo-mode #meu-menu-abas { display:none !important; }
+        body.print-pgto-resumo-mode header { display:none !important; }
+    </style>
+    <style id="print-pgto-lancamentos-css">
+        body.print-pgto-lancamentos-mode > *:not(#panelPgtoLancamentos) { display:none !important; }
+        body.print-pgto-lancamentos-mode #panelPgtoLancamentos { position:static !important; width:100% !important; margin:0 !important; padding:10px !important; box-shadow:none !important; background:#fff !important; color:#000 !important; }
+        body.print-pgto-lancamentos-mode #panelPgtoLancamentos * { visibility:visible !important; }
+        body.print-pgto-lancamentos-mode .pgto-month-nav button { display:none !important; }
+        body.print-pgto-lancamentos-mode .lanc-actions { display:none !important; }
+        body.print-pgto-lancamentos-mode .lanc-form-grid { display:none !important; }
+        body.print-pgto-lancamentos-mode #meu-menu-abas { display:none !important; }
+        body.print-pgto-lancamentos-mode header { display:none !important; }
     </style>
 
     <style>
@@ -5543,6 +5556,42 @@ body.dark-mode #painelMultiplasTarefas td{border-color:#334155}
 body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
 </style>
 
+
+<style id="patch164-print-safe">
+  @media print {
+    #meu-menu-abas,
+    #meu-menu-abas.pmenu-rail,
+    #meu-menu-abas.pmenu-oreate,
+    #meu-menu-abas[open],
+    .project-selector,
+    header,
+    .tabs,
+    .tab-header,
+    .pgto-sub-tabs,
+    .sub-tabs,
+    button,
+    .btn-add,
+    .search-box,
+    .filter-bar,
+    #ctmFiltersBar,
+    .actions-cell,
+    .card-header,
+    .sub-tab-btn,
+    .lanc-form-grid,
+    .pgto-action-bar,
+    .lanc-actions,
+    .form-container,
+    input,
+    select,
+    textarea {
+      display: none !important;
+    }
+    body {
+      padding-left: 0 !important;
+      margin: 0 !important;
+    }
+  }
+</style>
 </head>
 
 <!-- PATCH 161: TOOLTIP FIX + DADOS DA TAREFA -->
@@ -13531,10 +13580,16 @@ function trocarSubTabPgtoNovo(tab) {
               document.getElementById('modalLancamentoPgto').style.display = 'none';
             }
 
-            function imprimirPaginaPgtoResumo() {
-              document.body.classList.add('print-pgto-resumo-mode');
-              window.print();
-              document.body.classList.remove('print-pgto-resumo-mode');
+            /* PATCH164: imprime a sub-aba ativa de Pagamento (Lançamentos ou Resumo) */
+function imprimirPaginaPgtoResumo() {
+              var lancPanel = document.getElementById('panelPgtoLancamentos');
+              var resPanel  = document.getElementById('panelPgtoResumo');
+              var isLancamentos = lancPanel && lancPanel.style.display !== 'none';
+              var classe = isLancamentos ? 'print-pgto-lancamentos-mode' : 'print-pgto-resumo-mode';
+              document.body.classList.add(classe);
+              try { window.print(); } finally {
+                document.body.classList.remove(classe);
+              }
             }
             
             // --- Delete lançamento ---
@@ -42082,7 +42137,8 @@ try{if(typeof _supabase!=='undefined'&&_supabase){
                       b = document.createElement('button');
                       b.id = 'p84Botao';
                       b.type = 'button';
-                      b.textContent = 'Diário de Obra';
+                      b.className = 'tab-btn';
+                      b.textContent = '📋 Diário de Obra';
                       b.addEventListener('click', function (ev) {
                         ev.preventDefault();
                         ev.stopPropagation();
@@ -42691,6 +42747,8 @@ try{if(typeof _supabase!=='undefined'&&_supabase){
  * fechamento original do módulo P84. Este trecho permanece dentro da função
  * imprimir(), portanto usa h, cssImpressao e janelaImpressao já existentes. */
 
+/* PATCH164: write protegido */
+try {
 janelaImpressao.document.write(
   '<!doctype html>' +
   '<html lang="pt-BR"><head>' +
@@ -42703,6 +42761,7 @@ janelaImpressao.document.write(
   '
 </body></html>'
 );
+} catch(e) { console.error('[P84] Erro impressão:', e); janelaImpressao.document.write('<!doctype html><html>' + '<head><meta charset=UTF-8><title>Erro</title></head>' + '<body><p style=color:red>Erro ao gerar impressão.</p></body></html>'); janelaImpressao.document.close(); }
 janelaImpressao.document.close();
 
 var imprimirJanela = function () {
@@ -42813,9 +42872,20 @@ function importar() {
 /* ================================================================ *
  * inicio
  * ================================================================ */
+/* PATCH164: retry robusto + proteção contra erros */
 function iniciar() {
-  estilo();
-  colocarBotao();
+  try { estilo(); } catch(e) { console.warn('[P84] estilo falhou:', e); }
+  try { colocarBotao(); } catch(e) { console.warn('[P84] colocarBotao falhou:', e); }
+  /* retry a cada 2s caso o menu ainda não exista */
+  var tentativas = 0;
+  var retry = setInterval(function(){
+    tentativas++;
+    if (document.getElementById('p84Botao') && document.getElementById('p84Botao').parentNode) {
+      clearInterval(retry); return;
+    }
+    if (tentativas > 15) { clearInterval(retry); return; }
+    try { colocarBotao(); } catch(e) {}
+  }, 2000);
   if (typeof window.__varreduraUnica === 'function') {
     window.__varreduraUnica(colocarBotao);
   }
@@ -74070,25 +74140,21 @@ if (document.readyState === 'loading') {
   }
   #p120Dica b { display:block !important; font-size:12px !important; margin-bottom:3px !important; }
 </style>
-<style id="patch163TooltipStyle">
-#p120Area{position:relative!important;}
-#p120Dica{position:absolute!important;z-index:30!important;pointer-events:none!important;display:none;box-sizing:border-box;min-width:190px;max-width:300px;padding:9px 12px!important;border:1px solid rgba(148,163,184,.35);border-radius:10px!important;background:rgba(15,23,42,.96)!important;color:#fff!important;font-size:.76rem!important;line-height:1.4!important;box-shadow:0 8px 24px rgba(0,0,0,.25)!important;margin:0!important;}
-#p120Dica b{display:block;font-size:.8rem;margin-bottom:3px;}
-</style>
-<script id="patch163TooltipFollowMouse"><!-- mantido para compatibilidade; a funcao real do Centro de Custos e corrigida acima. --></script>
-<script src="/patch-custo-colab-20260914.js"></script>
-<script src="/patch-anti-flicker.js"></script>
-<script src="/patch-fpdo-modelo-20260914.js"></script>
-<script src="/patch-fpdo-enq-salvar.js"></script>
-<script src="/patch-header-contrato-20260915.js"></script>
-<script src="/patch-print-isolamento-20260915.js"></script>
-<script src="/patch-pgto-slim-20260915.js"></script>
-<script src="/patch-fpdo-editor-livre.js"></script>
-<script src="/patch-fpdo-fotos-mover.js"></script>
-<script src="/patch-hide-selo-espera.js"></script>
-<script src="/patch-fpdo-graf-inserir.js"></script>
-<script src="/patch-painel-responsivo.js"></script>
-<script src="/patch-fpdo-texto-toolbar.js"></script>
+<!-- PATCH164: patch163TooltipStyle removido -->
+<!-- PATCH164: patch163TooltipFollowMouse removido -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-custo-colab-20260914.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-anti-flicker.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-fpdo-modelo-20260914.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-fpdo-enq-salvar.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-header-contrato-20260915.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-print-isolamento-20260915.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-pgto-slim-20260915.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-fpdo-editor-livre.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-fpdo-fotos-mover.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-hide-selo-espera.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-fpdo-graf-inserir.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-painel-responsivo.js"></script> -->
+<!-- PATCH164: removido script externo ausente: <script src="/patch-fpdo-texto-toolbar.js"></script> -->
 
 <script id="patch162Js">
 // === PATCH 162: Múltiplas Tarefas por Colaborador ===
@@ -74399,4 +74465,6 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 </body>
 
 <!-- __patch162bCorrecao:1 -->
+
+<!-- PATCH164 aplicado em 2026-09-17 20:01:20 -->
 </html>
