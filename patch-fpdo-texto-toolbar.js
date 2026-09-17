@@ -48,18 +48,44 @@
       '<button type="button" id="fpdoTxtSalvar" style="background:#16a34a;color:#fff">Salvar</button>' +
       '<button type="button" id="fpdoTxtFecha">Fechar</button>';
     document.body.appendChild(b);
-    document.getElementById('fpdoTxtTam').onchange = function () { if (alvo) alvo.style.fontSize = this.value + 'px'; };
-    document.getElementById('fpdoTxtCor').oninput = function () { if (!alvo) return; var c=this.value; alvo.style.setProperty('color',c,'important'); alvo.style.setProperty('-webkit-text-fill-color',c,'important'); alvo.querySelectorAll('*').forEach(function(n){n.style.setProperty('color',c,'important');}); };
-    document.getElementById('fpdoTxtN').onclick = function () { if (alvo) alvo.style.fontWeight = '400'; };
-    document.getElementById('fpdoTxtB').onclick = function () { if (alvo) alvo.style.fontWeight = '700'; };
+    document.getElementById('fpdoTxtTam').onchange = function () {
+      if (!alvo) { return; }
+      if (window.P99 && window.P99.definirTamanho) { window.P99.definirTamanho(alvo, this.value); return; }
+      alvo.style.fontSize = this.value + 'px';
+    };
+    document.getElementById('fpdoTxtCor').oninput = function () {
+      if (!alvo) { return; }
+      var c = this.value;
+      if (window.P99 && window.P99.definirCor) { window.P99.definirCor(alvo, c); return; }
+      alvo.style.setProperty('color',c,'important'); alvo.style.setProperty('-webkit-text-fill-color',c,'important'); alvo.querySelectorAll('*').forEach(function(n){n.style.setProperty('color',c,'important');});
+    };
+    document.getElementById('fpdoTxtN').onclick = function () {
+      if (!alvo) { return; }
+      if (window.P99 && window.P99.definirNegrito) { window.P99.definirNegrito(alvo, false); return; }
+      alvo.style.fontWeight = '400';
+    };
+    document.getElementById('fpdoTxtB').onclick = function () {
+      if (!alvo) { return; }
+      if (window.P99 && window.P99.definirNegrito) { window.P99.definirNegrito(alvo, true); return; }
+      alvo.style.fontWeight = '700';
+    };
     document.getElementById('fpdoTxtCopia').onclick = function () {
       if (!alvo) { alert('Clique no item antes de copiar.'); return; }
+      if (window.P99 && window.P99.copiar) { window.P99.copiar(alvo); return; }
       window.__fpdoClip = { html: alvo.outerHTML, src: alvo.getAttribute && alvo.getAttribute('src') };
     };
-    document.getElementById('fpdoTxtCola').onclick = function () { colar(); };
-    document.getElementById('fpdoTxtApagar').onclick = function () { if (alvo) alvo.remove(); alvo = null; };
+    document.getElementById('fpdoTxtCola').onclick = function () {
+      if (window.P99 && window.P99.colar) { window.P99.colar(); return; }
+      colar();
+    };
+    document.getElementById('fpdoTxtApagar').onclick = function () {
+      if (!alvo) { return; }
+      if (window.P99 && window.P99.apagar) { window.P99.apagar(alvo); alvo = null; return; }
+      alvo.remove(); alvo = null;
+    };
     document.getElementById('fpdoTxtFecha').onclick = fechar;
     document.getElementById('fpdoTxtSalvar').onclick = function () {
+      if (window.P99 && window.P99.salvar) { window.P99.salvar(); return; }
       var n = document.querySelectorAll('button');
       for (var i=0;i<n.length;i++) {
         var x=String(n[i].textContent||'').replace(/\s+/g,' ').trim();
@@ -151,7 +177,8 @@
     if (!lupa.contains(ev.target)) { fechar(); return; }
     var el = ev.target.closest('img, .p94-t, [contenteditable], p, h1, h2, h3, span');
     if (!el) return;
-    alvo = el;
+    var caixa = el.closest ? el.closest('.p94-t, .p94-i, .p94-q') : null;
+    alvo = caixa || el;
     bar();
     document.body.classList.add('fpdo-slide-on');
     bar().style.display = 'flex';

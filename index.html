@@ -53823,6 +53823,47 @@ if (document.readyState === 'loading') {
             pedir();
           }
         
+          /* ---------------- API publica para outros patches (ex.: barra flutuante de texto) ----------------
+             Assim, qualquer outro script consegue usar o MESMO motor de salvar deste editor,
+             em vez de reinventar (e nao gravar de verdade) por conta propria. */
+          window.P99 = {
+            salvar: salvarAgora,
+            fechar: fecharPainelAtalho,
+            selecionar: function (el) { selecionar(el || null); },
+            definirCor: function (el, cor) {
+              if (!el || el.classList.contains('p94-i')) { return; }
+              guardaPassado();
+              var r = regDe(el, true);
+              if (r) { r.cor = cor; gravar(); }
+              mudou();
+            },
+            definirNegrito: function (el, ligado) {
+              if (!el || el.classList.contains('p94-i') || el.classList.contains('p94-q')) { return; }
+              guardaPassado();
+              var r = regDe(el, true);
+              if (r) { r.b = !!ligado; gravar(); }
+              mudou();
+            },
+            definirTamanho: function (el, px) {
+              if (!el || el.classList.contains('p94-i') || el.classList.contains('p94-q')) { return; }
+              guardaPassado();
+              var r = regDe(el, true);
+              if (r) { r.fs = parseFloat(px) || 16; gravar(); }
+              mudou();
+            },
+            copiar: function (el) {
+              if (!el) { return; }
+              selecionar(el);
+              copiarSel();
+            },
+            colar: function () { colarCopia(); },
+            apagar: function (el) {
+              if (!el) { return; }
+              selecionar(el);
+              excluirSel();
+            }
+          };
+        
           /* ---------------- comecar ---------------- */
           function iniciar() {
             estilo();
