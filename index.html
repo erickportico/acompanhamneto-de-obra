@@ -13407,8 +13407,8 @@ function trocarSubTabPgtoNovo(tab) {
                     taxaAjud: 4,
                     profissionais: [],
                     ajudantes: [],
-                    valorProf: parseFloat((m2 * 6).toFixed(2)),
-                    valorAjud: parseFloat((m2 * 4).toFixed(2)),
+                    valorProf: 0,
+                    valorAjud: 0,
                     importado: true,
                     itemId: it.id
                   };
@@ -13440,8 +13440,8 @@ function trocarSubTabPgtoNovo(tab) {
             
               initLancamentosProducao(obra);
             
-              const numProf = profIds.length || 1;
-              const numAjud = ajudIds.length || 1;
+              const numProf = profIds.length || 0;
+              const numAjud = ajudIds.length || 0;
             
               const lanc = {
                 id: gerarIdPgto(),
@@ -13455,8 +13455,8 @@ function trocarSubTabPgtoNovo(tab) {
                 taxaAjud: taxaAjud,
                 profissionais: profIds,
                 ajudantes: ajudIds,
-                valorProf: m2 * taxaProf / numProf,
-                valorAjud: m2 * taxaAjud / numAjud,
+                valorProf: numProf > 0 ? m2 * taxaProf / numProf : 0,
+                valorAjud: numAjud > 0 ? m2 * taxaAjud / numAjud : 0,
                 importado: false,
                 itemId: null
               };
@@ -13518,10 +13518,10 @@ function trocarSubTabPgtoNovo(tab) {
               lanc.taxaAjud = parseFloat(document.getElementById('editLancTaxaAjud').value) || 4;
               lanc.profissionais = Array.from(document.getElementById('editLancProfissionais').selectedOptions).map(o => o.value);
               lanc.ajudantes = Array.from(document.getElementById('editLancAjudantes').selectedOptions).map(o => o.value);
-              const numProf = lanc.profissionais.length || 1;
-              const numAjud = lanc.ajudantes.length || 1;
-              lanc.valorProf = lanc.instalacaoM2 * lanc.taxaProf / numProf;
-              lanc.valorAjud = lanc.instalacaoM2 * lanc.taxaAjud / numAjud;
+              const numProf = lanc.profissionais.length || 0;
+              const numAjud = lanc.ajudantes.length || 0;
+              lanc.valorProf = numProf > 0 ? lanc.instalacaoM2 * lanc.taxaProf / numProf : 0;
+              lanc.valorAjud = numAjud > 0 ? lanc.instalacaoM2 * lanc.taxaAjud / numAjud : 0;
               salvarDB();
               fecharModalLancamento();
               renderPagamento();
@@ -13723,7 +13723,9 @@ function trocarSubTabPgtoNovo(tab) {
                 let totalM2 = 0, totalValProf = 0, totalValAjud = 0;
                 g.items.forEach(l => {
                   totalM2 += l.instalacaoM2;
+                  if ((l.profissionais || []).length > 0 && l.valorProf > 0)
                   totalValProf += (l.profissionais || []).length * l.valorProf;
+                  if ((l.ajudantes || []).length > 0 && l.valorAjud > 0)
                   totalValAjud += (l.ajudantes || []).length * l.valorAjud;
                 });
             
@@ -13743,7 +13745,7 @@ function trocarSubTabPgtoNovo(tab) {
                     return c ? c.nome : aid;
                   });
             
-                  html += '<tr>';
+                  html += '<tr data-lanc-row="' + l.id + '">';
                   html += '<td>' + (l.data || '-') + '</td>';
                   html += '<td>' + escaparHTML(l.material || '-') + '</td>';
                   html += '<td>' + l.instalacaoM2.toLocaleString('pt-BR') + '</td>';
@@ -13751,10 +13753,10 @@ function trocarSubTabPgtoNovo(tab) {
                   html += '<td>R$ ' + l.taxaAjud.toLocaleString('pt-BR', {minimumFractionDigits:2}) + '/m²</td>';
                   html += '<td>' + (profNomes.length ? profNomes.map(n => escaparHTML(n)).join(', ') : '-') + '</td>';
                   html += '<td>' + (ajudNomes.length ? ajudNomes.map(n => escaparHTML(n)).join(', ') : '-') + '</td>';
-                  html += '<td>R$ ' + l.valorProf.toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</td>';
-                  html += '<td>R$ ' + l.valorAjud.toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</td>';
+                  html += '<td' + ((l.profissionais || []).length > 0 && l.valorProf > 0 ? '' : ' style="color:#94a3b8;font-style:italic"') + '>' + ((l.profissionais || []).length > 0 && l.valorProf > 0 ? 'R$ ' + l.valorProf.toLocaleString('pt-BR', {minimumFractionDigits:2}) : '—') + '</td>';
+                  html += '<td' + ((l.ajudantes || []).length > 0 && l.valorAjud > 0 ? '' : ' style="color:#94a3b8;font-style:italic"') + '>' + ((l.ajudantes || []).length > 0 && l.valorAjud > 0 ? 'R$ ' + l.valorAjud.toLocaleString('pt-BR', {minimumFractionDigits:2}) : '—') + '</td>';
                   html += '<td class="lanc-actions">';
-                  html += '<button class="btn-icon-sm" onclick="editarLancamentoPgto(\'' + l.id + '\',\'' + l._obraId + '\')" title="Editar">✏️</button>';
+                  html += '<button class="btn-icon-sm btn-ocultar-lanc" data-lanc-id="' + l.id + '" onclick="toggleOcultarLanc(this,\'' + l.id + '\')" title="Ocultar/Mostrar">👁</button><button class="btn-icon-sm" onclick="editarLancamentoPgto(\'' + l.id + '\',\'' + l._obraId + '\')" title="Editar">✏️</button>';
                   html += '<button class="btn-icon-sm" onclick="excluirLancamentoPgto(\'' + l.id + '\',\'' + l._obraId + '\')" title="Excluir">🗑️</button>';
                   html += '</td>';
                   html += '</tr>';
@@ -13793,8 +13795,10 @@ function trocarSubTabPgtoNovo(tab) {
                 lancs.forEach(l => {
                   allLanc.push({ ...l, _obraId: obra.id });
                   totalM2 += l.instalacaoM2;
-                  totalProf += (l.profissionais || []).length * l.valorProf;
-                  totalAjud += (l.ajudantes || []).length * l.valorAjud;
+                  if ((l.profissionais || []).length > 0 && l.valorProf > 0)
+                    totalProf += (l.profissionais || []).length * l.valorProf;
+                  if ((l.ajudantes || []).length > 0 && l.valorAjud > 0)
+                    totalAjud += (l.ajudantes || []).length * l.valorAjud;
                 });
               });
             
@@ -22256,10 +22260,10 @@ function trocarSubTabPgtoNovo(tab) {
                         lancs.forEach(function(l){
                           if (!l) return;
                           (l.profissionais || []).forEach(function(pid){
-                            acumular(pid, l.valorProf, "prof", l.data);
+                            acumular(pid, l.valorProf > 0 ? l.valorProf : 0, "prof", l.data);
                           });
                           (l.ajudantes || []).forEach(function(aid){
-                            acumular(aid, l.valorAjud, "ajud", l.data);
+                            acumular(aid, l.valorAjud > 0 ? l.valorAjud : 0, "ajud", l.data);
                           });
                         });
                 
@@ -45013,7 +45017,8 @@ if (document.readyState === 'loading') {
               lista(o.lancamentosProducao).forEach(function (l) {
                 if (!l) { return; }
                 if (mesSel && String(l.mesAnoKey) !== mesSel) { return; }
-                var vp = num(l.valorProf), va = num(l.valorAjud);
+                var vp = (lista(l.profissionais).length > 0) ? num(l.valorProf) : 0,
+    va = (lista(l.ajudantes).length > 0) ? num(l.valorAjud) : 0;
                 lin.lanc++;
                 lin.m2 += num(l.instalacaoM2);
                 lista(l.profissionais).forEach(function (pid) {
@@ -59108,7 +59113,9 @@ if (document.readyState === 'loading') {
           function pagamentos(obra) {
             var porMes = {}, total = 0;
             (obra && obra.lancamentosProducao ? obra.lancamentosProducao : []).forEach(function (l) {
-              var v = num(l.valorProf) + num(l.valorAjud);
+              var vp = (Array.isArray(l.profissionais) && l.profissionais.length > 0) ? num(l.valorProf) : 0;
+              var va = (Array.isArray(l.ajudantes) && l.ajudantes.length > 0) ? num(l.valorAjud) : 0;
+              var v = vp + va;
               total += v;
               var k = String(l.mesAnoKey || '').match(/^\d{4}-\d{2}$/) ?
                       l.mesAnoKey : chaveMes(l.data);
@@ -74315,6 +74322,80 @@ if (document.readyState === 'loading') {
 })();
 </script>
 
+
+<!-- PATCH 163b: ocultar/mostrar + blank values -->
+<style id="patch163bOcultar">
+.lanc-table tr.lanc-row-oculto{opacity:.35;text-decoration:line-through;color:#94a3b8}
+.lanc-table tr.lanc-row-oculto td{color:#94a3b8}
+.btn-ocultar-lanc{position:relative;cursor:pointer}
+.btn-ocultar-lanc.oculto::after{content:'';position:absolute;top:50%;left:2px;width:calc(100% - 4px);height:2px;background:#ef4444;transform:rotate(-45deg);pointer-events:none;border-radius:1px}
+body.dark-mode .lanc-table tr.lanc-row-oculto td{color:#475569}
+</style>
+<script id="patch163bOcultarJS">
+(function(){
+'use strict';
+if(window.__patch163bOcultar)return;
+window.__patch163bOcultar=true;
+var SK='pgto_lanc_ocultos';
+function load(){try{var r=sessionStorage.getItem(SK);return r?JSON.parse(r):{}}catch(e){return{}}}
+function save(o){try{sessionStorage.setItem(SK,JSON.stringify(o))}catch(e){}}
+window.toggleOcultarLanc=function(btn,lid){
+  var tr=btn.closest?btn.closest('tr'):document.querySelector('tr[data-lanc-row="'+lid+'"]');
+  if(!tr)return;
+  var oc=load();
+  var esta=tr.classList.contains('lanc-row-oculto');
+  if(esta){tr.classList.remove('lanc-row-oculto');btn.classList.remove('oculto');btn.title='Ocultar';delete oc[lid]}
+  else{tr.classList.add('lanc-row-oculto');btn.classList.add('oculto');btn.title='Mostrar';oc[lid]=true}
+  save(oc);recalcVis();
+};
+function recalcVis(){
+  document.querySelectorAll('.lanc-obra-group').forEach(function(g){
+    var tb=g.querySelector('tbody'),tf=g.querySelector('tfoot');
+    if(!tb||!tf)return;
+    var tM2=0,tVP=0,tVA=0;
+    tb.querySelectorAll('tr').forEach(function(tr){
+      if(tr.classList.contains('lanc-row-oculto'))return;
+      var cs=tr.children;if(cs.length<9)return;
+      var m2=parseFloat(cs[2].textContent.replace(/[\s.]/g,'').replace(',','.'))||0;tM2+=m2;
+      var vp=cs[7].textContent.trim();
+      if(vp&&vp!=='—'){vp=parseFloat(vp.replace('R$','').replace(/[\s.]/g,'').replace(',','.'))||0;tVP+=vp}
+      var va=cs[8].textContent.trim();
+      if(va&&va!=='—'){va=parseFloat(va.replace('R$','').replace(/[\s.]/g,'').replace(',','.'))||0;tVA+=va}
+    });
+    var fr=tf.querySelector('tr');if(!fr)return;var fc=fr.children;
+    if(fc.length>8){fc[2].innerHTML='<strong>'+tM2.toLocaleString('pt-BR')+'</strong>';fc[7].innerHTML='<strong>R$ '+tVP.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong>';fc[8].innerHTML='<strong>R$ '+tVA.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong>'}
+  });
+}
+function setupP163b(){
+  var orig=window.renderLancamentosPgto;
+  if(typeof orig!=='function'||orig.__p163boc)return;
+  var nw=function(){
+    var r=orig.apply(this,arguments);
+    try{
+      var oc=load();
+      Object.keys(oc).forEach(function(lid){
+        var tr=document.querySelector('tr[data-lanc-row="'+lid+'"]');
+        if(tr&&!tr.classList.contains('lanc-row-oculto')){
+          tr.classList.add('lanc-row-oculto');
+          var b=tr.querySelector('.btn-ocultar-lanc');
+          if(b){b.classList.add('oculto');b.title='Mostrar'}
+        }
+      });
+      recalcVis();
+    }catch(e){console.error("patch163b",e)}
+    return r;
+  };
+  nw.__p163boc=true;
+  if(orig.__historico20260913)nw.__historico20260913=true;
+  if(orig.__p63)nw.__p63=true;
+  if(orig.__p71)nw.__p71=true;
+  if(orig.__p70)nw.__p70=true;
+  window.renderLancamentosPgto=nw;
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',setupP163b)}else{setupP163b()}
+})();
+</script>
+<!-- FIM PATCH 163b -->
 </body>
 
 <!-- __patch162bCorrecao:1 -->
