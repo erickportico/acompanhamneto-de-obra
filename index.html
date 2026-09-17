@@ -549,7 +549,20 @@ if (typeof window.renderCTMDashboard !== 'function') window.renderCTMDashboard =
                     console.warn('[P156] getSession falhou:', e0.message || e0);
                 }
                 if (!ok) {
-                    console.warn('[P156] Sem sessao Supabase ainda. Entre com e-mail e senha na tela de login.');
+                    console.log('[P161] Sem sessao. Tentando signInAnonymously()...');
+                    try {
+                        var anonRes = await _supabase.auth.signInAnonymously();
+                        if (anonRes && anonRes.data && anonRes.data.session) {
+                            console.log('[P161] Sessao anonima criada com sucesso!');
+                            ok = true;
+                        } else if (anonRes && anonRes.error) {
+                            console.warn('[P161] signInAnonymously falhou:', anonRes.error.message);
+                            console.warn('[P161] Ative "Anonymous Sign-ins" em Authentication > Providers no Supabase Dashboard.');
+                        }
+                    } catch (eAnon) {
+                        console.warn('[P161] Excecao em signInAnonymously:', eAnon.message || eAnon);
+                        console.warn('[P161] Ative "Anonymous Sign-ins" em Authentication > Providers no Supabase Dashboard.');
+                    }
                 }
                 resolve({ authOk: ok });
             })();
