@@ -45,6 +45,7 @@
       '<button type="button" id="fpdoTxtCopia">Copiar</button>' +
       '<button type="button" id="fpdoTxtCola">Colar</button>' +
       '<button type="button" id="fpdoTxtApagar">Apagar item</button>' +
+      '<button type="button" id="fpdoTxtSalvar" style="background:#16a34a;color:#fff">Salvar</button>' +
       '<button type="button" id="fpdoTxtFecha">Fechar</button>';
     document.body.appendChild(b);
     document.getElementById('fpdoTxtTam').onchange = function () { if (alvo) alvo.style.fontSize = this.value + 'px'; };
@@ -58,6 +59,22 @@
     document.getElementById('fpdoTxtCola').onclick = function () { colar(); };
     document.getElementById('fpdoTxtApagar').onclick = function () { if (alvo) alvo.remove(); alvo = null; };
     document.getElementById('fpdoTxtFecha').onclick = fechar;
+    document.getElementById('fpdoTxtSalvar').onclick = function () {
+      var n = document.querySelectorAll('button');
+      for (var i=0;i<n.length;i++) {
+        var x=String(n[i].textContent||'').trim();
+        if (x==='Salvar edicao do slide' || x==='Salvar PPTX' || x==='Salvar') { n[i].click(); break; }
+      }
+    };
+    b.onmousedown = function (ev) {
+      if (ev.target !== b && ev.target.tagName !== 'SPAN') return;
+      var r=b.getBoundingClientRect(), x0=ev.clientX, y0=ev.clientY, l=r.left, t0=r.top;
+      function mv(e){ b.style.left=(l+e.clientX-x0)+'px'; b.style.top=(t0+e.clientY-y0)+'px'; b.style.transform='none'; }
+      function up(){ document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); }
+      document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+    };
+    b.style.cursor='move';
+
     return b;
   }
 
