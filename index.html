@@ -47942,6 +47942,8 @@ if (document.readyState === 'loading') {
                 '<div id="p92Corpo"></div>' +
                 '<div id="p92Pe">' +
                   '<button class="p92-btn p92-btn-ok" type="button" data-a="salvar">Salvar</button>' +
+                  '<button class="p92-btn" type="button" data-a="relAnterior" title="Abrir o relatório anterior">◀ Relatório anterior</button>' +
+                  '<button class="p92-btn" type="button" data-a="relProximo" title="Abrir o próximo relatório">Próximo relatório ▶</button>' +
                   '<button class="p92-btn" type="button" data-a="novo">Novo relatório</button>' +
                   '<button class="p92-btn" type="button" data-a="copiarMes">Copiar do mês anterior</button>' +
                   '<button class="p92-btn" type="button" data-a="imprimir">Imprimir / PDF</button>' +
@@ -48788,6 +48790,30 @@ if (document.readyState === 'loading') {
             arr[i] = arr[k];
             arr[k] = tmp;
           }
+
+          function navegarRelatorio(passo) {
+            carregarTodos(function (arr) {
+              lista = (arr || []).sort(function (a, b) {
+                return String(b.alterado || b.criado || '').localeCompare(String(a.alterado || a.criado || ''));
+              });
+              if (!lista.length) { aviso('Ainda não existem relatórios salvos.', 'erro'); return; }
+              var pos = -1, i;
+              for (i = 0; i < lista.length; i++) {
+                if (atual && lista[i].id === atual.id) { pos = i; break; }
+              }
+              if (pos < 0) { pos = passo > 0 ? 0 : lista.length - 1; }
+              var destino = pos + passo;
+              if (destino < 0 || destino >= lista.length) {
+                aviso(passo < 0 ? 'Este já é o relatório mais antigo.' : 'Este já é o relatório mais recente.', 'erro');
+                return;
+              }
+              atual = arrumar(lista[destino]);
+              sec = 'dados';
+              try { localStorage.setItem(K_ULT, atual.id); } catch (e) {}
+              render();
+              aviso('Relatório aberto: ' + (atual.mes || atual.obra || 'sem identificação'));
+            });
+          }
         
           function aoClicar(ev) {
             var el = ev.target;
@@ -48803,6 +48829,8 @@ if (document.readyState === 'loading') {
         
             if (a === 'fechar') { fechar(); return; }
             if (a === 'sec') { sec = b.getAttribute('data-s') || 'dados'; render(); return; }
+            if (a === 'relAnterior') { navegarRelatorio(-1); return; }
+            if (a === 'relProximo') { navegarRelatorio(1); return; }
             if (a === 'voltar') { render(); return; }
             if (a === 'lista') { verLista(); return; }
             if (a === 'salvar') { salvarAgora(); return; }
@@ -49537,7 +49565,8 @@ if (document.readyState === 'loading') {
             /* --- 2) dados da obra ---------------------------------------- */
             el = nova();
             var fotoLado = capa.length > 1 ? capa[1] : (capa.length ? capa[0] : null);
-            if (fotoLado) { el.push(I(0.0, 0.0, 42.0, 100.0, fotoLado.url, 'cover')); }
+            /* A contracapa usa a imagem em tela cheia, sem faixa lateral vazia. */
+            if (fotoLado) { el.push(I(0.0, 0.0, 100.0, 100.0, fotoLado.url, 'cover')); }
             var dados = [
               ['Obra: ', obra],
               ['Mes: ', mes],
