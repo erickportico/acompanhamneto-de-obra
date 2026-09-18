@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -504,8 +504,7 @@
 
 
     <script id="v26_ehAdmin_boot">if(typeof window.ehAdmin==='undefined'){window.ehAdmin=function(){try{var s=window.PainelNucleo?window.PainelNucleo.sessao():null;if(!s&&window.P128&&window.P128.estado&&window.P128.estado.perfil){s={usuario:window.P128.estado.email,perfil:window.P128.estado.perfil};}if(!s)return false;return String(s.perfil||'').toLowerCase()==='admin';}catch(e){return false;}};}</script>
-    <!-- 1. Carrega o SDK do Supabase PRIMEIRO -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SDK do Supabase ja carregado no <head> (duplicata removida pelo PATCH170) -->
 
     <script>
         // Funções auxiliares para evitar erros de renderização/abas
@@ -74820,7 +74819,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     }
   }
 </style>
-</body>
+
 
 <!-- PATCH166: trava renderizacao/salvamento para impedir recursao no pagamento -->
 <script id="patch166AntiRecursaoPagamento">
@@ -74874,7 +74873,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 <!-- PATCH169: versão antiga da múltipla tarefa removida; implementação consolidada acima -->
 
 <!-- PATCH164 aplicado em 2026-09-17 20:01:20 -->
-</html>
+
 <!-- PATCH165 aplicado em 2026-09-17 21:25:15 -->
 
 <!-- PATCH167: renderPagamento protegido contra reentrada e chamadas duplicadas -->
@@ -74919,3 +74918,6 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   window.renderPagamento.__patch167Original = original;
 })();
 </script>
+</body>
+</html>
+<!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
