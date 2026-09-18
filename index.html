@@ -6788,6 +6788,10 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
           <label style="font-size:.76rem;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Ajudante(s)</label>
           <div id="mtCheckAjud" class="lanc-checkbox-list" style="max-height:80px;"></div>
         </div>
+        <div style="flex:1 1 200px;">
+          <label style="font-size:.76rem;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Terceirizado(s)</label>
+          <div id="mtCheckTerce" class="lanc-checkbox-list" style="max-height:80px;"></div>
+        </div>
       </div>
       <!-- Taxas -->
       <div style="display:flex;gap:14px;margin-bottom:14px;">
@@ -73988,12 +73992,21 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     return {id:c.id,nome:c.nome||'',funcao:c.funcao||'',empresa:c.empresa||''};
   }
   function findColabInObra(obra,id){
-    return obra&&Array.isArray(obra.colaboradores)?obra.colaboradores.find(function(c){return c&&c.id===id;}):null;
+    if(!obra)return null;
+    var listas=[obra.colaboradores,obra.colaboradoresPgto];
+    for(var li=0;li<listas.length;li++){
+      var lista=listas[li];
+      if(!Array.isArray(lista))continue;
+      var achado=lista.find(function(c){return c&&String(c.id)===String(id);});
+      if(achado)return achado;
+    }
+    return null;
   }
   function ensureSnapshot(lanc, obra){
     if(!lanc||!obra)return;
     if(!Array.isArray(lanc.profissionaisHistorico))lanc.profissionaisHistorico=[];
     if(!Array.isArray(lanc.ajudantesHistorico))lanc.ajudantesHistorico=[];
+    if(!Array.isArray(lanc.terceirizadosHistorico))lanc.terceirizadosHistorico=[];
     (lanc.profissionais||[]).forEach(function(id){
       if(!lanc.profissionaisHistorico.some(function(x){return x&&x.id===id;})){
         var c=findColabInObra(obra,id); if(c)lanc.profissionaisHistorico.push(cloneColab(c));
@@ -74004,9 +74017,14 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
         var c=findColabInObra(obra,id); if(c)lanc.ajudantesHistorico.push(cloneColab(c));
       }
     });
+    (lanc.terceirizados||[]).forEach(function(id){
+      if(!lanc.terceirizadosHistorico.some(function(x){return x&&x.id===id;})){
+        var c=findColabInObra(obra,id); if(c)lanc.terceirizadosHistorico.push(cloneColab(c));
+      }
+    });
   }
   function snapName(lanc,id,tipo){
-    var arr=tipo==='profissionais'?lanc.profissionaisHistorico:lanc.ajudantesHistorico;
+    var arr=tipo==='profissionais'?lanc.profissionaisHistorico:(tipo==='terceirizados'?lanc.terceirizadosHistorico:lanc.ajudantesHistorico);
     var x=(arr||[]).find(function(c){return c&&c.id===id;});
     if(x&&x.nome)return x.nome;
     var all=typeof getColaboradoresAll==='function'?getColaboradoresAll():[];
@@ -74460,18 +74478,55 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     });
   }
 
-  // ── Trocar obra → recarregar colaboradores ──
+  // ── Trocar obra → carregar toda a equipe vinculada à obra ──
+  function textoFuncao(c){
+    return String(c && (c.funcao || c.tipo || c.categoria || '') || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  }
+
+  function equipeDaObra(obra){
+    var porId = {};
+    var todos = [];
+    var fontes = [];
+    /* A obra escolhida define onde o lancamento sera salvo, mas a equipe
+       disponivel vem de todas as obras, independentemente da alocacao atual. */
+    (db.obras || []).forEach(function(o){
+      fontes.push(o && o.colaboradores, o && o.colaboradoresPgto);
+    });
+    fontes.push(obra && obra.colaboradores, obra && obra.colaboradoresPgto);
+    fontes.forEach(function(lista){
+      (Array.isArray(lista) ? lista : []).forEach(function(c){
+        if(!c || c.id == null || porId[String(c.id)]) return;
+        porId[String(c.id)] = true;
+        todos.push(c);
+      });
+    });
+
+    var profs = [], ajuds = [], terce = [];
+    todos.forEach(function(c){
+      var f = textoFuncao(c);
+      var item = { id:c.id, nome:c.nome || c.razaoSocial || c.empresa || String(c.id) };
+      if(/terce|prestador|empresa|contratad/.test(f)) terce.push(item);
+      else if(/ajud/.test(f)) ajuds.push(item);
+      else profs.push(item);
+    });
+    return { profs: profs, ajuds: ajuds, terce: terce };
+  }
+
   window.mtTrocarObra = function(){
     var obraId = (document.getElementById('mtObra')||{}).value||'';
     var obra = (db.obras||[]).find(function(o){return o.id===obraId;});
-    if(!obra){ mtRenderCheckboxes('mtCheckProf',[]); mtRenderCheckboxes('mtCheckAjud',[]); return; }
-    var profs = (obra.colaboradores||[]).filter(function(c){return c.funcao==='Profissional'||c.funcao==='profissional';});
-    var ajuds = (obra.colaboradores||[]).filter(function(c){return c.funcao==='Ajudante'||c.funcao==='ajudante';});
-    if(!profs.length) profs = (obra.colaboradores||[]).slice();
-    if(!ajuds.length){ ajuds = []; }
-    mtRenderCheckboxes('mtCheckProf', profs.map(function(c){return {id:c.id,nome:c.nome};}));
-    mtRenderCheckboxes('mtCheckAjud', ajuds.map(function(c){return {id:c.id,nome:c.nome};}));
-    if(profs.length===1){
+    if(!obra){
+      mtRenderCheckboxes('mtCheckProf',[]);
+      mtRenderCheckboxes('mtCheckAjud',[]);
+      mtRenderCheckboxes('mtCheckTerce',[]);
+      return;
+    }
+    var equipe = equipeDaObra(obra);
+    mtRenderCheckboxes('mtCheckProf', equipe.profs);
+    mtRenderCheckboxes('mtCheckAjud', equipe.ajuds);
+    mtRenderCheckboxes('mtCheckTerce', equipe.terce);
+    if(equipe.profs.length===1){
       var cb = document.querySelector('#mtCheckProf input[type=checkbox]');
       if(cb) cb.checked = true;
     }
@@ -74563,7 +74618,8 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     if(!obraId){ alert('Selecione uma obra.'); return; }
     var profIds = mtGetChecked('mtCheckProf');
     var ajudIds = mtGetChecked('mtCheckAjud');
-    if(!profIds.length && !ajudIds.length){ alert('Selecione ao menos um profissional ou ajudante.'); return; }
+    var terceIds = mtGetChecked('mtCheckTerce');
+    if(!profIds.length && !ajudIds.length && !terceIds.length){ alert('Selecione ao menos um profissional, ajudante ou terceirizado.'); return; }
     if(!fila.length){ alert('Adicione ao menos uma tarefa à fila.'); return; }
 
     var taxaProf = parseFloat((document.getElementById('mtTaxaProf')||{}).value)||6;
@@ -74590,6 +74646,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
         taxaAjud: taxaAjud,
         profissionais: profIds.slice(),
         ajudantes: ajudIds.slice(),
+        terceirizados: terceIds.slice(),
         valorProf: t.m2 * taxaProf / numProf,
         valorAjud: t.m2 * taxaAjud / numAjud,
         importado: false,
@@ -74608,6 +74665,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
         if(!l||l.importado) continue;
         if(!Array.isArray(l.profissionaisHistorico)) l.profissionaisHistorico=[];
         if(!Array.isArray(l.ajudantesHistorico)) l.ajudantesHistorico=[];
+        if(!Array.isArray(l.terceirizadosHistorico)) l.terceirizadosHistorico=[];
         profIds.forEach(function(id){
           var c = findColabInObra(obra,id);
           if(c && !l.profissionaisHistorico.some(function(x){return x&&x.id===id;}))
@@ -74617,6 +74675,11 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
           var c = findColabInObra(obra,id);
           if(c && !l.ajudantesHistorico.some(function(x){return x&&x.id===id;}))
             l.ajudantesHistorico.push(cloneColab(c));
+        });
+        terceIds.forEach(function(id){
+          var c = findColabInObra(obra,id);
+          if(c && !l.terceirizadosHistorico.some(function(x){return x&&x.id===id;}))
+            l.terceirizadosHistorico.push(cloneColab(c));
         });
       }
     }
@@ -74736,6 +74799,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   proteger('renderResumoPgto');
 })();
 </script>
+<!-- PATCH169: equipe multipla por obra, incluindo terceirizados -->
 
 <!-- __patch162bCorrecao:1 -->
 
