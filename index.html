@@ -42789,8 +42789,7 @@ janelaImpressao.document.write(
   cssImpressao +
   '</head><body>' +
   h +
-  '
-</body></html>'
+  '</body></html>'
 );
 } catch(e) { console.error('[P84] Erro impressão:', e); janelaImpressao.document.write('<!doctype html><html>' + '<head><meta charset=UTF-8><title>Erro</title></head>' + '<body><p style=color:red>Erro ao gerar impressão.</p></body></html>'); janelaImpressao.document.close(); }
 janelaImpressao.document.close();
@@ -73880,7 +73879,204 @@ if (document.readyState === 'loading') {
 <!-- FIM PATCH V32_HISTORICO_ALTERACOES -->
 
 <!-- PATCH 20260913 - UI MODERNO + HISTORICO DE COLABORADORES -->
-<style id="patchModernLancamentos20260913">\n#tab-pagamento #panelPgtoLancamentos{padding-top:6px}\n#tab-pagamento .lanc-form-grid{\n  display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:0;\n  padding:0;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:1px solid #dbe3ec;\n  border-radius:16px;box-shadow:0 10px 30px rgba(15,23,42,.07);overflow:hidden;margin-bottom:18px;\n}\n#tab-pagamento .lanc-form-grid .lanc-section{padding:20px 22px;border-bottom:0;border-right:1px solid #e2e8f0;background:rgba(255,255,255,.72)}\n#tab-pagamento .lanc-form-grid .lanc-section:nth-child(2){background:rgba(248,250,252,.9);border-right:0}\n#tab-pagamento .lanc-form-grid .lanc-section:nth-child(3){grid-column:1/-1;border-right:0;border-top:1px solid #e2e8f0;background:rgba(255,255,255,.55)}\n#tab-pagamento .lanc-form-grid .lanc-section-title{font-size:.74rem;color:#334155;letter-spacing:.09em;margin-bottom:15px;gap:8px}\n#tab-pagamento .lanc-form-grid .lanc-section-title::first-letter{font-size:1rem}\n#tab-pagamento .lanc-form-grid .lanc-fields-row{gap:14px}\n#tab-pagamento .lanc-form-grid .lanc-field{flex:1 1 150px}\n#tab-pagamento .lanc-form-grid .lanc-field.lanc-field-wide{flex:2 1 240px}\n#tab-pagamento .lanc-form-grid .lanc-field label{font-size:.74rem;font-weight:700;color:#64748b;margin-bottom:7px}\n#tab-pagamento .lanc-form-grid .lanc-field input,#tab-pagamento .lanc-form-grid .lanc-field select{\n  min-height:42px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#0f172a;\n  font-size:.88rem;outline:none;transition:border-color .18s,box-shadow .18s,transform .18s;\n}\n#tab-pagamento .lanc-form-grid .lanc-field input:focus,#tab-pagamento .lanc-form-grid .lanc-field select:focus{border-color:#64748b;box-shadow:0 0 0 3px rgba(100,116,139,.12)}\n#tab-pagamento .lanc-checkbox-list{max-height:126px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:5px;box-shadow:inset 0 1px 2px rgba(15,23,42,.03)}\n#tab-pagamento .lanc-checkbox-item{border-radius:7px;padding:8px 10px;font-size:.83rem;white-space:nowrap}\n#tab-pagamento .lanc-checkbox-item:hover{background:#f1f5f9}\n#tab-pagamento .lanc-checkbox-item input[type=checkbox]{width:16px;height:16px;accent-color:#334155}\n#tab-pagamento .lanc-form-grid .lanc-submit-row{grid-column:1/-1;padding:16px 22px;background:#eef2f7;border-top:1px solid #dbe3ec}\n#tab-pagamento .lanc-form-grid .lanc-submit-row .btn-add{\n  min-height:44px;padding:0 22px;border:0;border-radius:10px;background:#0f766e;color:#fff;\n  font-size:.86rem;font-weight:800;letter-spacing:.01em;box-shadow:0 5px 14px rgba(15,118,110,.22);transition:transform .15s,box-shadow .15s,filter .15s;\n}\n#tab-pagamento .lanc-form-grid .lanc-submit-row .btn-add:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,118,110,.27);filter:brightness(1.04)}\n#tab-pagamento .lanc-obra-group{margin-bottom:18px;border:1px solid #dbe3ec;border-radius:14px;box-shadow:0 6px 20px rgba(15,23,42,.045);overflow:hidden;background:#fff}\n#tab-pagamento .lanc-obra-header{padding:13px 16px;background:linear-gradient(90deg,#0f172a,#1e293b);color:#fff;border:0;font-size:.9rem;letter-spacing:.01em}\n#tab-pagamento .lanc-table{font-size:.82rem}\n#tab-pagamento .lanc-table th{padding:10px 11px;background:#f8fafc;color:#475569;border-bottom:1px solid #dbe3ec;font-size:.72rem;text-transform:uppercase;letter-spacing:.035em}\n#tab-pagamento .lanc-table td{padding:9px 11px;border-bottom:1px solid #eef2f7}\n#tab-pagamento .lanc-table tbody tr:hover{background:#f8fafc}\n#tab-pagamento .lanc-totals-row{background:#f8fafc;border-top:1px solid #cbd5e1}\n#tab-pagamento .lanc-actions button{border:1px solid #dbe3ec;border-radius:8px;padding:5px 8px;background:#fff}\n#tab-pagamento .lanc-actions button:hover{background:#f1f5f9;transform:translateY(-1px)}\n#tab-pagamento .pgto-month-nav{gap:8px;margin:0 0 14px;font-size:.9rem}\n#tab-pagamento .pgto-month-nav span{min-width:110px;text-align:center;padding:8px 12px;border:1px solid #dbe3ec;border-radius:9px;background:#fff;box-shadow:0 2px 7px rgba(15,23,42,.04)}\n#tab-pagamento .pgto-month-nav button{width:34px;height:34px;padding:0;border-radius:9px;background:#eef2f7;border:1px solid #dbe3ec}\n@media(max-width:900px){#tab-pagamento .lanc-form-grid{grid-template-columns:1fr}#tab-pagamento .lanc-form-grid .lanc-section{border-right:0;border-bottom:1px solid #e2e8f0}#tab-pagamento .lanc-form-grid .lanc-section:nth-child(3){grid-column:auto}}\nbody.dark-mode #tab-pagamento .lanc-form-grid{background:linear-gradient(135deg,#111827,#0f172a);border-color:#334155}\nbody.dark-mode #tab-pagamento .lanc-form-grid .lanc-section{background:rgba(30,41,59,.72);border-color:#334155}\nbody.dark-mode #tab-pagamento .lanc-form-grid .lanc-section:nth-child(2){background:rgba(15,23,42,.72)}\nbody.dark-mode #tab-pagamento .lanc-form-grid .lanc-section:nth-child(3){background:rgba(30,41,59,.5)}\nbody.dark-mode #tab-pagamento .lanc-form-grid .lanc-section-title{color:#cbd5e1}\nbody.dark-mode #tab-pagamento .lanc-form-grid .lanc-field input,body.dark-mode #tab-pagamento .lanc-form-grid .lanc-field select,body.dark-mode #tab-pagamento .lanc-checkbox-list{background:#0f172a;color:#f8fafc;border-color:#475569}\nbody.dark-mode #tab-pagamento .lanc-form-grid .lanc-submit-row{background:#111827;border-color:#334155}\nbody.dark-mode #tab-pagamento .lanc-obra-group{background:#0f172a;border-color:#334155}\nbody.dark-mode #tab-pagamento .lanc-table th{background:#111827;color:#cbd5e1;border-color:#334155}\nbody.dark-mode #tab-pagamento .lanc-table td{border-color:#1e293b}\nbody.dark-mode #tab-pagamento .lanc-table tbody tr:hover{background:#162032}\nbody.dark-mode #tab-pagamento .pgto-month-nav span{background:#111827;border-color:#334155;color:#f8fafc}\n\n/* Mantem o historico financeiro independente da lotacao atual do colaborador. */\n#tab-pagamento .historico-colab-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;background:#f1f5f9;color:#334155;font-weight:650;line-height:1.25}\nbody.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e8f0}\n</style>\n<script>\n(function(){\n  'use strict';\n  if(window.__patchModernLancamentos20260913)return;\n  window.__patchModernLancamentos20260913=true;\n\n  function cloneColab(c){\n    if(!c)return null;\n    return {id:c.id,nome:c.nome||'',funcao:c.funcao||'',empresa:c.empresa||''};\n  }\n  function findColabInObra(obra,id){\n    return obra&&Array.isArray(obra.colaboradores)?obra.colaboradores.find(function(c){return c&&c.id===id;}):null;\n  }\n  function ensureSnapshot(lanc, obra){\n    if(!lanc||!obra)return;\n    if(!Array.isArray(lanc.profissionaisHistorico))lanc.profissionaisHistorico=[];\n    if(!Array.isArray(lanc.ajudantesHistorico))lanc.ajudantesHistorico=[];\n    (lanc.profissionais||[]).forEach(function(id){\n      if(!lanc.profissionaisHistorico.some(function(x){return x&&x.id===id;})){\n        var c=findColabInObra(obra,id); if(c)lanc.profissionaisHistorico.push(cloneColab(c));\n      }\n    });\n    (lanc.ajudantes||[]).forEach(function(id){\n      if(!lanc.ajudantesHistorico.some(function(x){return x&&x.id===id;})){\n        var c=findColabInObra(obra,id); if(c)lanc.ajudantesHistorico.push(cloneColab(c));\n      }\n    });\n  }\n  function snapName(lanc,id,tipo){\n    var arr=tipo==='profissionais'?lanc.profissionaisHistorico:lanc.ajudantesHistorico;\n    var x=(arr||[]).find(function(c){return c&&c.id===id;});\n    if(x&&x.nome)return x.nome;\n    var all=typeof getColaboradoresAll==='function'?getColaboradoresAll():[];\n    var c=all.find(function(c){return c&&c.id===id;});\n    return c?c.nome:id;\n  }\n\n  /* Antes de mover/editar um colaborador, congela seus dados nos lancamentos antigos. */\n  function protegerHistoricoColaborador(id,obraId){\n    try{\n      var obras=(window.db&&Array.isArray(db.obras))?db.obras:[];\n      var alvo=obras.find(function(o){return o.id===obraId;});\n      var c=findColabInObra(alvo,id);\n      if(!c)return;\n      obras.forEach(function(o){\n        (o.lancamentosProducao||[]).forEach(function(l){\n          var emProf=(l.profissionais||[]).indexOf(id)!==-1;\n          var emAjud=(l.ajudantes||[]).indexOf(id)!==-1;\n          if(!emProf&&!emAjud)return;\n          ensureSnapshot(l,o);\n          if(emProf&&!l.profissionaisHistorico.some(function(x){return x&&x.id===id;}))l.profissionaisHistorico.push(cloneColab(c));\n          if(emAjud&&!l.ajudantesHistorico.some(function(x){return x&&x.id===id;}))l.ajudantesHistorico.push(cloneColab(c));\n        });\n      });\n    }catch(e){}\n  }\n\n  /* Intercepta a troca de obra do colaborador sem tocar nos lancamentos da obra antiga. */\n  var originalSalvarColab=window.salvarColaborador;\n  if(typeof originalSalvarColab==='function'&&!originalSalvarColab.__historico20260913){\n    var wrappedSalvarColab=function(){\n      try{\n        var id=(document.getElementById('colabEditId')||{}).value||'';\n        var oldId=(document.getElementById('colabEditObraId')||{}).value||'';\n        if(id&&oldId)protegerHistoricoColaborador(id,oldId);\n      }catch(e){}\n      var r=originalSalvarColab.apply(this,arguments);\n      return r;\n    };\n    wrappedSalvarColab.__historico20260913=true;\n    window.salvarColaborador=wrappedSalvarColab;\n  }\n\n  /* Ao criar um lancamento, grava a identidade do colaborador no proprio registro. */\n  var originalSalvarLanc=window.salvarLancamentoPgto;\n  if(typeof originalSalvarLanc==='function'&&!originalSalvarLanc.__historico20260913){\n    var wrappedSalvarLanc=function(){\n      var obraId='',profIds=[],ajudIds=[];\n      try{\n        obraId=(document.getElementById('inputLancObra')||{}).value||'';\n        profIds=typeof getCheckedIds==='function'?getCheckedIds('checklistLancProfissionais'):[];\n        ajudIds=typeof getCheckedIds==='function'?getCheckedIds('checklistLancAjudantes'):[];\n      }catch(e){}\n      var r=originalSalvarLanc.apply(this,arguments);\n      try{\n        var obra=(db.obras||[]).find(function(o){return o.id===obraId;});\n        if(obra){\n          var lista=obra.lancamentosProducao||[];\n          var l=lista[lista.length-1];\n          if(l&&!l.importado){\n            l.profissionaisHistorico=profIds.map(function(id){return cloneColab(findColabInObra(obra,id));}).filter(Boolean);\n            l.ajudantesHistorico=ajudIds.map(function(id){return cloneColab(findColabInObra(obra,id));}).filter(Boolean);\n            if(typeof salvarDB==='function')salvarDB();\n          }\n        }\n      }catch(e){}\n      return r;\n    };\n    wrappedSalvarLanc.__historico20260913=true;\n    window.salvarLancamentoPgto=wrappedSalvarLanc;\n  }\n\n  /* Render historico: primeiro usa o retrato salvo no lancamento; so depois consulta o cadastro atual. */\n  var originalRender=window.renderLancamentosPgto;\n  if(typeof originalRender==='function'&&!originalRender.__historico20260913){\n    var wrappedRender=function(){\n      var r=originalRender.apply(this,arguments);\n      try{\n        var container=document.getElementById('containerLancamentosPgto');\n        if(!container)return r;\n        (db.obras||[]).forEach(function(obra){(obra.lancamentosProducao||[]).forEach(function(l){ensureSnapshot(l,obra);});});\n        /* Reescreve somente nomes de colaboradores nas celulas existentes. */\n        var rows=container.querySelectorAll('tbody tr');\n        rows.forEach(function(tr){\n          var lancId=null;\n          var edit=tr.querySelector('button[title="Editar"]');\n          if(edit){var m=(edit.getAttribute('onclick')||'').match(/editarLancamentoPgto\\('([^']+)'/);if(m)lancId=m[1];}\n          if(!lancId)return;\n          var lanc=null,obraRef=null;\n          (db.obras||[]).some(function(o){var x=(o.lancamentosProducao||[]).find(function(z){return z.id===lancId;});if(x){lanc=x;obraRef=o;return true;}return false;});\n          if(!lanc)return;\n          var cells=tr.children;\n          if(cells.length>=7){\n            cells[5].innerHTML=(lanc.profissionais||[]).length?lanc.profissionais.map(function(id){return '<span class="historico-colab-tag">'+String(snapName(lanc,id,'profissionais')).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span>';}).join(' '):'-';\n            cells[6].innerHTML=(lanc.ajudantes||[]).length?lanc.ajudantes.map(function(id){return '<span class="historico-colab-tag">'+String(snapName(lanc,id,'ajudantes')).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span>';}).join(' '):'-';\n          }\n        });\n        if(typeof salvarDB==='function')salvarDB();\n      }catch(e){}\n      return r;\n    };\n    wrappedRender.__historico20260913=true;\n    window.renderLancamentosPgto=wrappedRender;\n  }\n})();\n</script>\n<!-- FIM PATCH 20260913 -->\n
+<style id="patchModernLancamentos20260913">
+#tab-pagamento #panelPgtoLancamentos{padding-top:6px}
+#tab-pagamento .lanc-form-grid{
+  display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:0;
+  padding:0;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:1px solid #dbe3ec;
+  border-radius:16px;box-shadow:0 10px 30px rgba(15,23,42,.07);overflow:hidden;margin-bottom:18px;
+}
+#tab-pagamento .lanc-form-grid .lanc-section{padding:20px 22px;border-bottom:0;border-right:1px solid #e2e8f0;background:rgba(255,255,255,.72)}
+#tab-pagamento .lanc-form-grid .lanc-section:nth-child(2){background:rgba(248,250,252,.9);border-right:0}
+#tab-pagamento .lanc-form-grid .lanc-section:nth-child(3){grid-column:1/-1;border-right:0;border-top:1px solid #e2e8f0;background:rgba(255,255,255,.55)}
+#tab-pagamento .lanc-form-grid .lanc-section-title{font-size:.74rem;color:#334155;letter-spacing:.09em;margin-bottom:15px;gap:8px}
+#tab-pagamento .lanc-form-grid .lanc-section-title::first-letter{font-size:1rem}
+#tab-pagamento .lanc-form-grid .lanc-fields-row{gap:14px}
+#tab-pagamento .lanc-form-grid .lanc-field{flex:1 1 150px}
+#tab-pagamento .lanc-form-grid .lanc-field.lanc-field-wide{flex:2 1 240px}
+#tab-pagamento .lanc-form-grid .lanc-field label{font-size:.74rem;font-weight:700;color:#64748b;margin-bottom:7px}
+#tab-pagamento .lanc-form-grid .lanc-field input,#tab-pagamento .lanc-form-grid .lanc-field select{
+  min-height:42px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#0f172a;
+  font-size:.88rem;outline:none;transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+#tab-pagamento .lanc-form-grid .lanc-field input:focus,#tab-pagamento .lanc-form-grid .lanc-field select:focus{border-color:#64748b;box-shadow:0 0 0 3px rgba(100,116,139,.12)}
+#tab-pagamento .lanc-checkbox-list{max-height:126px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:5px;box-shadow:inset 0 1px 2px rgba(15,23,42,.03)}
+#tab-pagamento .lanc-checkbox-item{border-radius:7px;padding:8px 10px;font-size:.83rem;white-space:nowrap}
+#tab-pagamento .lanc-checkbox-item:hover{background:#f1f5f9}
+#tab-pagamento .lanc-checkbox-item input[type=checkbox]{width:16px;height:16px;accent-color:#334155}
+#tab-pagamento .lanc-form-grid .lanc-submit-row{grid-column:1/-1;padding:16px 22px;background:#eef2f7;border-top:1px solid #dbe3ec}
+#tab-pagamento .lanc-form-grid .lanc-submit-row .btn-add{
+  min-height:44px;padding:0 22px;border:0;border-radius:10px;background:#0f766e;color:#fff;
+  font-size:.86rem;font-weight:800;letter-spacing:.01em;box-shadow:0 5px 14px rgba(15,118,110,.22);transition:transform .15s,box-shadow .15s,filter .15s;
+}
+#tab-pagamento .lanc-form-grid .lanc-submit-row .btn-add:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,118,110,.27);filter:brightness(1.04)}
+#tab-pagamento .lanc-obra-group{margin-bottom:18px;border:1px solid #dbe3ec;border-radius:14px;box-shadow:0 6px 20px rgba(15,23,42,.045);overflow:hidden;background:#fff}
+#tab-pagamento .lanc-obra-header{padding:13px 16px;background:linear-gradient(90deg,#0f172a,#1e293b);color:#fff;border:0;font-size:.9rem;letter-spacing:.01em}
+#tab-pagamento .lanc-table{font-size:.82rem}
+#tab-pagamento .lanc-table th{padding:10px 11px;background:#f8fafc;color:#475569;border-bottom:1px solid #dbe3ec;font-size:.72rem;text-transform:uppercase;letter-spacing:.035em}
+#tab-pagamento .lanc-table td{padding:9px 11px;border-bottom:1px solid #eef2f7}
+#tab-pagamento .lanc-table tbody tr:hover{background:#f8fafc}
+#tab-pagamento .lanc-totals-row{background:#f8fafc;border-top:1px solid #cbd5e1}
+#tab-pagamento .lanc-actions button{border:1px solid #dbe3ec;border-radius:8px;padding:5px 8px;background:#fff}
+#tab-pagamento .lanc-actions button:hover{background:#f1f5f9;transform:translateY(-1px)}
+#tab-pagamento .pgto-month-nav{gap:8px;margin:0 0 14px;font-size:.9rem}
+#tab-pagamento .pgto-month-nav span{min-width:110px;text-align:center;padding:8px 12px;border:1px solid #dbe3ec;border-radius:9px;background:#fff;box-shadow:0 2px 7px rgba(15,23,42,.04)}
+#tab-pagamento .pgto-month-nav button{width:34px;height:34px;padding:0;border-radius:9px;background:#eef2f7;border:1px solid #dbe3ec}
+@media(max-width:900px){#tab-pagamento .lanc-form-grid{grid-template-columns:1fr}#tab-pagamento .lanc-form-grid .lanc-section{border-right:0;border-bottom:1px solid #e2e8f0}#tab-pagamento .lanc-form-grid .lanc-section:nth-child(3){grid-column:auto}}
+body.dark-mode #tab-pagamento .lanc-form-grid{background:linear-gradient(135deg,#111827,#0f172a);border-color:#334155}
+body.dark-mode #tab-pagamento .lanc-form-grid .lanc-section{background:rgba(30,41,59,.72);border-color:#334155}
+body.dark-mode #tab-pagamento .lanc-form-grid .lanc-section:nth-child(2){background:rgba(15,23,42,.72)}
+body.dark-mode #tab-pagamento .lanc-form-grid .lanc-section:nth-child(3){background:rgba(30,41,59,.5)}
+body.dark-mode #tab-pagamento .lanc-form-grid .lanc-section-title{color:#cbd5e1}
+body.dark-mode #tab-pagamento .lanc-form-grid .lanc-field input,body.dark-mode #tab-pagamento .lanc-form-grid .lanc-field select,body.dark-mode #tab-pagamento .lanc-checkbox-list{background:#0f172a;color:#f8fafc;border-color:#475569}
+body.dark-mode #tab-pagamento .lanc-form-grid .lanc-submit-row{background:#111827;border-color:#334155}
+body.dark-mode #tab-pagamento .lanc-obra-group{background:#0f172a;border-color:#334155}
+body.dark-mode #tab-pagamento .lanc-table th{background:#111827;color:#cbd5e1;border-color:#334155}
+body.dark-mode #tab-pagamento .lanc-table td{border-color:#1e293b}
+body.dark-mode #tab-pagamento .lanc-table tbody tr:hover{background:#162032}
+body.dark-mode #tab-pagamento .pgto-month-nav span{background:#111827;border-color:#334155;color:#f8fafc}
+
+/* Mantem o historico financeiro independente da lotacao atual do colaborador. */
+#tab-pagamento .historico-colab-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;background:#f1f5f9;color:#334155;font-weight:650;line-height:1.25}
+body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e8f0}
+</style>
+<script>
+(function(){
+  'use strict';
+  if(window.__patchModernLancamentos20260913)return;
+  window.__patchModernLancamentos20260913=true;
+
+  function cloneColab(c){
+    if(!c)return null;
+    return {id:c.id,nome:c.nome||'',funcao:c.funcao||'',empresa:c.empresa||''};
+  }
+  function findColabInObra(obra,id){
+    return obra&&Array.isArray(obra.colaboradores)?obra.colaboradores.find(function(c){return c&&c.id===id;}):null;
+  }
+  function ensureSnapshot(lanc, obra){
+    if(!lanc||!obra)return;
+    if(!Array.isArray(lanc.profissionaisHistorico))lanc.profissionaisHistorico=[];
+    if(!Array.isArray(lanc.ajudantesHistorico))lanc.ajudantesHistorico=[];
+    (lanc.profissionais||[]).forEach(function(id){
+      if(!lanc.profissionaisHistorico.some(function(x){return x&&x.id===id;})){
+        var c=findColabInObra(obra,id); if(c)lanc.profissionaisHistorico.push(cloneColab(c));
+      }
+    });
+    (lanc.ajudantes||[]).forEach(function(id){
+      if(!lanc.ajudantesHistorico.some(function(x){return x&&x.id===id;})){
+        var c=findColabInObra(obra,id); if(c)lanc.ajudantesHistorico.push(cloneColab(c));
+      }
+    });
+  }
+  function snapName(lanc,id,tipo){
+    var arr=tipo==='profissionais'?lanc.profissionaisHistorico:lanc.ajudantesHistorico;
+    var x=(arr||[]).find(function(c){return c&&c.id===id;});
+    if(x&&x.nome)return x.nome;
+    var all=typeof getColaboradoresAll==='function'?getColaboradoresAll():[];
+    var c=all.find(function(c){return c&&c.id===id;});
+    return c?c.nome:id;
+  }
+
+  /* Antes de mover/editar um colaborador, congela seus dados nos lancamentos antigos. */
+  function protegerHistoricoColaborador(id,obraId){
+    try{
+      var obras=(window.db&&Array.isArray(db.obras))?db.obras:[];
+      var alvo=obras.find(function(o){return o.id===obraId;});
+      var c=findColabInObra(alvo,id);
+      if(!c)return;
+      obras.forEach(function(o){
+        (o.lancamentosProducao||[]).forEach(function(l){
+          var emProf=(l.profissionais||[]).indexOf(id)!==-1;
+          var emAjud=(l.ajudantes||[]).indexOf(id)!==-1;
+          if(!emProf&&!emAjud)return;
+          ensureSnapshot(l,o);
+          if(emProf&&!l.profissionaisHistorico.some(function(x){return x&&x.id===id;}))l.profissionaisHistorico.push(cloneColab(c));
+          if(emAjud&&!l.ajudantesHistorico.some(function(x){return x&&x.id===id;}))l.ajudantesHistorico.push(cloneColab(c));
+        });
+      });
+    }catch(e){}
+  }
+
+  /* Intercepta a troca de obra do colaborador sem tocar nos lancamentos da obra antiga. */
+  var originalSalvarColab=window.salvarColaborador;
+  if(typeof originalSalvarColab==='function'&&!originalSalvarColab.__historico20260913){
+    var wrappedSalvarColab=function(){
+      try{
+        var id=(document.getElementById('colabEditId')||{}).value||'';
+        var oldId=(document.getElementById('colabEditObraId')||{}).value||'';
+        if(id&&oldId)protegerHistoricoColaborador(id,oldId);
+      }catch(e){}
+      var r=originalSalvarColab.apply(this,arguments);
+      return r;
+    };
+    wrappedSalvarColab.__historico20260913=true;
+    window.salvarColaborador=wrappedSalvarColab;
+  }
+
+  /* Ao criar um lancamento, grava a identidade do colaborador no proprio registro. */
+  var originalSalvarLanc=window.salvarLancamentoPgto;
+  if(typeof originalSalvarLanc==='function'&&!originalSalvarLanc.__historico20260913){
+    var wrappedSalvarLanc=function(){
+      var obraId='',profIds=[],ajudIds=[];
+      try{
+        obraId=(document.getElementById('inputLancObra')||{}).value||'';
+        profIds=typeof getCheckedIds==='function'?getCheckedIds('checklistLancProfissionais'):[];
+        ajudIds=typeof getCheckedIds==='function'?getCheckedIds('checklistLancAjudantes'):[];
+      }catch(e){}
+      var r=originalSalvarLanc.apply(this,arguments);
+      try{
+        var obra=(db.obras||[]).find(function(o){return o.id===obraId;});
+        if(obra){
+          var lista=obra.lancamentosProducao||[];
+          var l=lista[lista.length-1];
+          if(l&&!l.importado){
+            l.profissionaisHistorico=profIds.map(function(id){return cloneColab(findColabInObra(obra,id));}).filter(Boolean);
+            l.ajudantesHistorico=ajudIds.map(function(id){return cloneColab(findColabInObra(obra,id));}).filter(Boolean);
+            if(typeof salvarDB==='function')salvarDB();
+          }
+        }
+      }catch(e){}
+      return r;
+    };
+    wrappedSalvarLanc.__historico20260913=true;
+    window.salvarLancamentoPgto=wrappedSalvarLanc;
+  }
+
+  /* Render historico: primeiro usa o retrato salvo no lancamento; so depois consulta o cadastro atual. */
+  var originalRender=window.renderLancamentosPgto;
+  if(typeof originalRender==='function'&&!originalRender.__historico20260913){
+    var wrappedRender=function(){
+      var r=originalRender.apply(this,arguments);
+      try{
+        var container=document.getElementById('containerLancamentosPgto');
+        if(!container)return r;
+        (db.obras||[]).forEach(function(obra){(obra.lancamentosProducao||[]).forEach(function(l){ensureSnapshot(l,obra);});});
+        /* Reescreve somente nomes de colaboradores nas celulas existentes. */
+        var rows=container.querySelectorAll('tbody tr');
+        rows.forEach(function(tr){
+          var lancId=null;
+          var edit=tr.querySelector('button[title="Editar"]');
+          if(edit){var m=(edit.getAttribute('onclick')||'').match(/editarLancamentoPgto\('([^']+)'/);if(m)lancId=m[1];}
+          if(!lancId)return;
+          var lanc=null,obraRef=null;
+          (db.obras||[]).some(function(o){var x=(o.lancamentosProducao||[]).find(function(z){return z.id===lancId;});if(x){lanc=x;obraRef=o;return true;}return false;});
+          if(!lanc)return;
+          var cells=tr.children;
+          if(cells.length>=7){
+            cells[5].innerHTML=(lanc.profissionais||[]).length?lanc.profissionais.map(function(id){return '<span class="historico-colab-tag">'+String(snapName(lanc,id,'profissionais')).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span>';}).join(' '):'-';
+            cells[6].innerHTML=(lanc.ajudantes||[]).length?lanc.ajudantes.map(function(id){return '<span class="historico-colab-tag">'+String(snapName(lanc,id,'ajudantes')).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span>';}).join(' '):'-';
+          }
+        });
+        if(typeof salvarDB==='function')salvarDB();
+      }catch(e){}
+      return r;
+    };
+    wrappedRender.__historico20260913=true;
+    window.renderLancamentosPgto=wrappedRender;
+  }
+})();
+</script>
+<!-- FIM PATCH 20260913 -->\n
 
 <!-- PATCH 160: REGIAO CANONICA + COLABORADOR UNICO -->
 <script id="patch160RegiaoColaborador">
@@ -74420,79 +74616,7 @@ if (document.readyState === 'loading') {
 </script>
 
 
-<!-- PATCH 163b: ocultar/mostrar + blank values -->
-<style id="patch163bOcultar">
-.lanc-table tr.lanc-row-oculto{opacity:.35;text-decoration:line-through;color:#94a3b8}
-.lanc-table tr.lanc-row-oculto td{color:#94a3b8}
-.btn-ocultar-lanc{position:relative;cursor:pointer}
-.btn-ocultar-lanc.oculto::after{content:'';position:absolute;top:50%;left:2px;width:calc(100% - 4px);height:2px;background:#ef4444;transform:rotate(-45deg);pointer-events:none;border-radius:1px}
-body.dark-mode .lanc-table tr.lanc-row-oculto td{color:#475569}
-</style>
-<script id="patch163bOcultarJS">
-(function(){
-'use strict';
-if(window.__patch163bOcultar)return;
-window.__patch163bOcultar=true;
-var SK='pgto_lanc_ocultos';
-function load(){try{var r=sessionStorage.getItem(SK);return r?JSON.parse(r):{}}catch(e){return{}}}
-function save(o){try{sessionStorage.setItem(SK,JSON.stringify(o))}catch(e){}}
-window.toggleOcultarLanc=function(btn,lid){
-  var tr=btn.closest?btn.closest('tr'):document.querySelector('tr[data-lanc-row="'+lid+'"]');
-  if(!tr)return;
-  var oc=load();
-  var esta=tr.classList.contains('lanc-row-oculto');
-  if(esta){tr.classList.remove('lanc-row-oculto');btn.classList.remove('oculto');btn.title='Ocultar';delete oc[lid]}
-  else{tr.classList.add('lanc-row-oculto');btn.classList.add('oculto');btn.title='Mostrar';oc[lid]=true}
-  save(oc);recalcVis();
-};
-function recalcVis(){
-  document.querySelectorAll('.lanc-obra-group').forEach(function(g){
-    var tb=g.querySelector('tbody'),tf=g.querySelector('tfoot');
-    if(!tb||!tf)return;
-    var tM2=0,tVP=0,tVA=0;
-    tb.querySelectorAll('tr').forEach(function(tr){
-      if(tr.classList.contains('lanc-row-oculto'))return;
-      var cs=tr.children;if(cs.length<9)return;
-      var m2=parseFloat(cs[2].textContent.replace(/[\s.]/g,'').replace(',','.'))||0;tM2+=m2;
-      var vp=cs[7].textContent.trim();
-      if(vp&&vp!=='—'){vp=parseFloat(vp.replace('R$','').replace(/[\s.]/g,'').replace(',','.'))||0;tVP+=vp}
-      var va=cs[8].textContent.trim();
-      if(va&&va!=='—'){va=parseFloat(va.replace('R$','').replace(/[\s.]/g,'').replace(',','.'))||0;tVA+=va}
-    });
-    var fr=tf.querySelector('tr');if(!fr)return;var fc=fr.children;
-    if(fc.length>8){fc[2].innerHTML='<strong>'+tM2.toLocaleString('pt-BR')+'</strong>';fc[7].innerHTML='<strong>R$ '+tVP.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong>';fc[8].innerHTML='<strong>R$ '+tVA.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong>'}
-  });
-}
-function setupP163b(){
-  var orig=window.renderLancamentosPgto;
-  if(typeof orig!=='function'||orig.__p163boc)return;
-  var nw=function(){
-    var r=orig.apply(this,arguments);
-    try{
-      var oc=load();
-      Object.keys(oc).forEach(function(lid){
-        var tr=document.querySelector('tr[data-lanc-row="'+lid+'"]');
-        if(tr&&!tr.classList.contains('lanc-row-oculto')){
-          tr.classList.add('lanc-row-oculto');
-          var b=tr.querySelector('.btn-ocultar-lanc');
-          if(b){b.classList.add('oculto');b.title='Mostrar'}
-        }
-      });
-      recalcVis();
-    }catch(e){console.error("patch163b",e)}
-    return r;
-  };
-  nw.__p163boc=true;
-  if(orig.__historico20260913)nw.__historico20260913=true;
-  if(orig.__p63)nw.__p63=true;
-  if(orig.__p71)nw.__p71=true;
-  if(orig.__p70)nw.__p70=true;
-  window.renderLancamentosPgto=nw;
-}
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',setupP163b)}else{setupP163b()}
-})();
-</script>
-<!-- FIM PATCH 163b -->
+
 </body>
 
 <!-- __patch162bCorrecao:1 -->
