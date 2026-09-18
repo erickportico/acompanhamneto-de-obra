@@ -75110,7 +75110,41 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 })();
 </script>
 
+<!-- PATCH172: permitir arrastar texto/imagem por toque no editor de slides -->
+<script id="patch172ArrastarSlidesToque">
+(function(){
+  'use strict';
+  if(window.__patch172ArrastarSlidesToque) return;
+  window.__patch172ArrastarSlidesToque = true;
+
+  var CSS = [
+    /* Modo de edicao ligado: o toque nos itens do slide deve MOVER, nao rolar */
+    '.p99-edit .p94-t, .p99-edit .p94-i, .p99-edit .p94-q { touch-action: none !important; }',
+    /* a folha inteira do slide tambem, para o gesto nao virar rolagem */
+    '.p99-edit .p94-folha { touch-action: none !important; }',
+    /* as bolinhas verdes de redimensionar */
+    '.p99-mk, .p99-mk .p99-h, .p99-h[data-p99h] { touch-action: none !important; }',
+    /* enquanto escreve num texto, volta ao comportamento normal */
+    '.p99-edit [contenteditable="true"] { touch-action: auto !important; }'
+  ].join('\n');
+
+  function injetar(){
+    if(document.getElementById('p172style')) return;
+    var st = document.createElement('style');
+    st.id = 'p172style';
+    st.setAttribute('data-html2canvas-ignore', 'true');
+    st.textContent = CSS;
+    (document.head || document.documentElement).appendChild(st);
+    console.log('[PATCH172] touch-action aplicado aos itens do slide (arraste por toque).');
+  }
+
+  if(document.readyState !== 'loading') injetar();
+  else document.addEventListener('DOMContentLoaded', injetar);
+})();
+</script>
+
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
 <!-- PATCH171 aplicado em 2026-09-18 14:07:32 -->
+<!-- PATCH172 aplicado em 2026-09-18 16:42:44 -->
