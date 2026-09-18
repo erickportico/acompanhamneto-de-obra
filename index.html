@@ -47946,6 +47946,7 @@ if (document.readyState === 'loading') {
                   '<button class="p92-btn" type="button" data-a="relProximo" title="Abrir o próximo relatório">Próximo relatório ▶</button>' +
                   '<button class="p92-btn" type="button" data-a="novo">Novo relatório</button>' +
                   '<button class="p92-btn" type="button" data-a="copiarMes">Copiar do mês anterior</button>' +
+                  '<button class="p92-btn p92-btn-ok" type="button" data-a="avancarMes" title="Leva este mês para o anterior e prepara o próximo no mesmo relatório">Subir mês / próximo relatório</button>' +
                   '<button class="p92-btn" type="button" data-a="imprimir">Imprimir / PDF</button>' +
                   '<button class="p92-btn" type="button" data-a="pdf">Salvar PDF</button>' +
                   '<button class="p92-btn" type="button" data-a="editorVisual">Editor visual 16:9</button>' +
@@ -48815,6 +48816,45 @@ if (document.readyState === 'loading') {
             });
           }
         
+          function proximoMesRotulo(rotulo) {
+            var m = /^(Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)\s+(\d{4})$/i.exec(String(rotulo || ''));
+            if (!m) { return ''; }
+            var nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            var idx = nomes.map(function (x) { return x.toLowerCase(); }).indexOf(m[1].toLowerCase());
+            if (idx < 0) { return ''; }
+            idx++;
+            var ano = parseInt(m[2], 10);
+            if (idx >= 12) { idx = 0; ano++; }
+            return nomes[idx] + ' ' + ano;
+          }
+
+          function clonarFoto(f) {
+            return { id: novoId('f'), url: f && f.url || '', leg: f && f.leg || '' };
+          }
+
+          function avancarMes() {
+            if (!atual) { return; }
+            var proximo = proximoMesRotulo(atual.mes);
+            if (!proximo) { aviso('Informe o mês no formato "Setembro 2026" antes de avançar.', 'erro'); return; }
+            if (!confirm('Avançar ' + atual.mes + ' para ' + proximo + '?\n\nAs fotos atuais de depois serão mantidas como antes e os campos de novas fotos serão limpos.')) { return; }
+            (atual.elevacoes || []).forEach(function (e) {
+              e.fotosAntes = (e.fotosDepois || []).map(clonarFoto);
+              e.fotosDepois = [];
+              e.rotAntes = atual.mes;
+              e.rotDepois = proximo;
+              e.obs = '';
+            });
+            atual.capaFotos = [];
+            atual.fotosFinal = [];
+            (atual.itens || []).forEach(function (it) { it.fotos = []; });
+            (atual.pendencias || []).forEach(function (p) { p.fotos = []; });
+            atual.mes = proximo;
+            atual.dataRelatorio = hoje();
+            salvarAgora('Mês avançado no mesmo relatório; pronto para novas fotos.');
+            sec = 'evolucao';
+            render();
+          }
+
           function aoClicar(ev) {
             var el = ev.target;
             var b = el && el.closest ? el.closest('[data-a]') : null;
@@ -48831,6 +48871,7 @@ if (document.readyState === 'loading') {
             if (a === 'sec') { sec = b.getAttribute('data-s') || 'dados'; render(); return; }
             if (a === 'relAnterior') { navegarRelatorio(-1); return; }
             if (a === 'relProximo') { navegarRelatorio(1); return; }
+            if (a === 'avancarMes') { avancarMes(); return; }
             if (a === 'voltar') { render(); return; }
             if (a === 'lista') { verLista(); return; }
             if (a === 'salvar') { salvarAgora(); return; }
