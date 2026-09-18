@@ -74654,6 +74654,39 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 
 
 
+<!-- PATCH168: rolagem horizontal nas tabelas, sem barra durante a impressao -->
+<style id="patch168RolagemHorizontal">
+  /* Na tela, cada grupo de lancamentos pode ser rolado sem cortar colunas. */
+  #tab-pagamento .lanc-obra-group {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #tab-pagamento .lanc-table {
+    min-width: 1250px;
+  }
+
+  /* A impressao mostra o conteudo completo e nao exibe barras de rolagem. */
+  @media print {
+    #tab-pagamento .lanc-obra-group,
+    #tab-pagamento .table-responsive,
+    #tab-pagamento #containerLancamentosPgto {
+      overflow: visible !important;
+      max-width: none !important;
+    }
+
+    #tab-pagamento .lanc-obra-group {
+      scrollbar-width: none !important;
+    }
+
+    #tab-pagamento .lanc-obra-group::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+  }
+</style>
 </body>
 
 <!-- PATCH166: trava renderizacao/salvamento para impedir recursao no pagamento -->
