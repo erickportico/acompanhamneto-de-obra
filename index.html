@@ -2072,7 +2072,12 @@ body.dark-mode #panelPgtoColaboradores .btn-icon-sm:hover { background: var(--ca
 td.lanc-actions { overflow: visible !important; white-space: nowrap; }
 .lanc-table tbody tr:nth-child(even) { background: #fafbfc; }
 .lanc-table tfoot tr { border-top: 2px solid #facc15; }
-.lanc-totals-row { background: #fef9c3; font-weight: 700; }
+/* PATCH165: estilo para lancamento oculto */
+              .lanc-oculto-row td { text-decoration: line-through !important; color: #94a3b8 !important; opacity: 0.45; }
+              .lanc-oculto-row td.lanc-actions { opacity: 1; }
+              .lanc-oculto-row td.lanc-actions button { opacity: 1; }
+              .btn-oculto-active { background: #fef3c7 !important; border-color: #d97706 !important; }
+              .lanc-totals-row { background: #fef9c3; font-weight: 700; }
 .lanc-totals-row td { padding: 8px 10px; }
 .btn-icon-sm { background: transparent; border: 1px solid #e2e8f0; border-radius: 4px; padding: 3px 7px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
 .btn-icon-sm:hover { background: #f1f5f9; }
@@ -5592,7 +5597,13 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
     }
   }
 </style>
-</head>
+
+<style id="patch165-print-css">
+  @media print {
+    .lanc-oculto-row td { text-decoration: line-through !important; color: #94a3b8 !important; }
+    .lanc-oculto-row { opacity: 0.45 !important; }
+  }
+</style></head>
 
 <!-- PATCH 161: TOOLTIP FIX + DADOS DA TAREFA -->
 <body class="dark-mode">
@@ -13745,7 +13756,22 @@ function imprimirPaginaPgtoResumo() {
               }
             }
             
-            function renderLancamentosPgto() {
+            /* PATCH165: ocultar/desocultar lancamento */
+function toggleOcultarLanc(btn, lancId) {
+  var lanc=null;
+  db.obras.forEach(function(o){
+    initLancamentosProducao(o);
+    (o.lancamentosProducao||[]).forEach(function(l){
+      if(l.id===lancId) lanc=l;
+    });
+  });
+  if(!lanc) return;
+  lanc.oculto=!lanc.oculto;
+  salvarDB();
+  renderPagamento();
+}
+
+function renderLancamentosPgto() {
               const mesKey = getChaveMesPgto();
               const container = document.getElementById('containerLancamentosPgto');
               if (!container) return;
@@ -13777,11 +13803,13 @@ function imprimirPaginaPgtoResumo() {
                 const g = grouped[obKey];
                 let totalM2 = 0, totalValProf = 0, totalValAjud = 0;
                 g.items.forEach(l => {
+                  /* PATCH165 */ if (!l.oculto) {
                   totalM2 += l.instalacaoM2;
                   if ((l.profissionais || []).length > 0 && l.valorProf > 0)
                   totalValProf += (l.profissionais || []).length * l.valorProf;
                   if ((l.ajudantes || []).length > 0 && l.valorAjud > 0)
                   totalValAjud += (l.ajudantes || []).length * l.valorAjud;
+                  }
                 });
             
                 html += '<div class="lanc-obra-group">';
@@ -13800,7 +13828,7 @@ function imprimirPaginaPgtoResumo() {
                     return c ? c.nome : aid;
                   });
             
-                  html += '<tr data-lanc-row="' + l.id + '">';
+                  html += '<tr class="' + (l.oculto ? 'lanc-oculto-row' : '') + '" data-lanc-row="' + l.id + '">';
                   html += '<td>' + (l.data || '-') + '</td>';
                   html += '<td>' + escaparHTML(l.material || '-') + '</td>';
                   html += '<td>' + l.instalacaoM2.toLocaleString('pt-BR') + '</td>';
@@ -13811,7 +13839,7 @@ function imprimirPaginaPgtoResumo() {
                   html += '<td' + ((l.profissionais || []).length > 0 && l.valorProf > 0 ? '' : ' style="color:#94a3b8;font-style:italic"') + '>' + ((l.profissionais || []).length > 0 && l.valorProf > 0 ? 'R$ ' + l.valorProf.toLocaleString('pt-BR', {minimumFractionDigits:2}) : '—') + '</td>';
                   html += '<td' + ((l.ajudantes || []).length > 0 && l.valorAjud > 0 ? '' : ' style="color:#94a3b8;font-style:italic"') + '>' + ((l.ajudantes || []).length > 0 && l.valorAjud > 0 ? 'R$ ' + l.valorAjud.toLocaleString('pt-BR', {minimumFractionDigits:2}) : '—') + '</td>';
                   html += '<td class="lanc-actions">';
-                  html += '<button class="btn-icon-sm btn-ocultar-lanc" data-lanc-id="' + l.id + '" onclick="toggleOcultarLanc(this,\'' + l.id + '\')" title="Ocultar/Mostrar">👁</button><button class="btn-icon-sm" onclick="editarLancamentoPgto(\'' + l.id + '\',\'' + l._obraId + '\')" title="Editar">✏️</button>';
+                  html += '<button class="btn-icon-sm btn-ocultar-lanc' + (l.oculto ? ' btn-oculto-active' : '') + '" data-lanc-id="' + l.id + '" onclick="toggleOcultarLanc(this,\'' + l.id + '\')" title="Ocultar/Mostrar">👁</button><button class="btn-icon-sm" onclick="editarLancamentoPgto(\'' + l.id + '\',\'' + l._obraId + '\')" title="Editar">✏️</button>';
                   html += '<button class="btn-icon-sm" onclick="excluirLancamentoPgto(\'' + l.id + '\',\'' + l._obraId + '\')" title="Excluir">🗑️</button>';
                   html += '</td>';
                   html += '</tr>';
@@ -13848,12 +13876,14 @@ function imprimirPaginaPgtoResumo() {
                 initLancamentosProducao(obra);
                 const lancs = getLancamentosMes(obra, mesKey);
                 lancs.forEach(l => {
+                  /* PATCH165 */ if (!l.oculto) {
                   allLanc.push({ ...l, _obraId: obra.id });
                   totalM2 += l.instalacaoM2;
                   if ((l.profissionais || []).length > 0 && l.valorProf > 0)
                     totalProf += (l.profissionais || []).length * l.valorProf;
                   if ((l.ajudantes || []).length > 0 && l.valorAjud > 0)
                     totalAjud += (l.ajudantes || []).length * l.valorAjud;
+                  }
                 });
               });
             
@@ -13862,6 +13892,7 @@ function imprimirPaginaPgtoResumo() {
               // Build colaboradores resumo
               const colabsMap = {};
               allLanc.forEach(l => {
+                /* PATCH165 */ if (l.oculto) return;
                 (l.profissionais || []).forEach(pid => {
                   if (!colabsMap[pid]) {
                     const c = getColaboradoresAll().find(x => x.id === pid);
@@ -74468,3 +74499,4 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 <!-- PATCH164 aplicado em 2026-09-17 20:01:20 -->
 </html>
+<!-- PATCH165 aplicado em 2026-09-17 21:25:15 -->
