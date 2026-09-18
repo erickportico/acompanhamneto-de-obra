@@ -74918,6 +74918,199 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   window.renderPagamento.__patch167Original = original;
 })();
 </script>
+<!-- PATCH171: opcao "Outros" (nova funcao / nova empresa) no cadastro de colaborador -->
+<script id="patch171OutrosColaborador">
+(function(){
+  'use strict';
+  if(window.__patch171OutrosColaborador) return;
+  window.__patch171OutrosColaborador = true;
+
+  var OUTRO = '__outro__';
+  function byId(id){ return document.getElementById(id); }
+
+  function ensureOption(sel){
+    if(!sel) return;
+    var tem = Array.prototype.some.call(sel.options, function(o){ return o.value === OUTRO; });
+    if(!tem){
+      var opt = document.createElement('option');
+      opt.value = OUTRO;
+      opt.textContent = '\u2795 Outros (digitar)\u2026';
+      sel.appendChild(opt);
+    }
+  }
+
+  function ensureInput(sel, id, placeholder){
+    if(!sel) return null;
+    var inp = byId(id);
+    if(!inp){
+      inp = document.createElement('input');
+      inp.type = 'text';
+      inp.id = id;
+      inp.placeholder = placeholder;
+      inp.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;margin-top:6px;display:none;';
+      sel.parentNode.appendChild(inp);
+    }
+    return inp;
+  }
+
+  function wire(selId, inpId, placeholder){
+    var sel = byId(selId);
+    if(!sel) return;
+    ensureOption(sel);
+    var inp = ensureInput(sel, inpId, placeholder);
+    function toggle(){
+      if(sel.value === OUTRO){
+        inp.style.display = '';
+        setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 40);
+      } else {
+        inp.style.display = 'none';
+      }
+    }
+    if(!sel.__p171wired){
+      sel.addEventListener('change', toggle);
+      sel.__p171wired = true;
+    }
+  }
+
+  function setup(){
+    wire('colabInputFuncao', 'colabInputFuncaoOutro', 'Digite a nova fun\u00e7\u00e3o');
+    wire('colabInputEmpresa', 'colabInputEmpresaOutro', 'Digite a nova empresa');
+  }
+
+  function valOutro(inpId){
+    var inp = byId(inpId);
+    return inp ? String(inp.value || '').trim() : '';
+  }
+
+  // Se o valor salvo nao esta na lista padrao, abre em "Outros" com o texto.
+  function preencher(selId, inpId, valor){
+    var sel = byId(selId);
+    var inp = byId(inpId);
+    if(!sel) return;
+    valor = (valor == null) ? '' : String(valor);
+    var achou = Array.prototype.some.call(sel.options, function(o){
+      return o.value !== OUTRO && o.value === valor;
+    });
+    if(valor && !achou){
+      sel.value = OUTRO;
+      if(inp){ inp.value = valor; inp.style.display = ''; }
+    } else if(inp){
+      inp.value = '';
+      inp.style.display = 'none';
+    }
+  }
+
+  function tempOption(sel, valor){
+    if(!sel) return null;
+    var opt = document.createElement('option');
+    opt.value = valor;
+    opt.textContent = valor;
+    sel.appendChild(opt);
+    sel.value = valor;
+    return function(){ try{ sel.removeChild(opt); }catch(e){} };
+  }
+
+  function findColabById(id){
+    var found = null;
+    ((window.db && db.obras) || []).forEach(function(o){
+      (o.colaboradores || []).forEach(function(c){ if(c.id === id) found = c; });
+    });
+    return found;
+  }
+
+  function localizarSalvo(obraId, editId, antesIds){
+    if(editId) return findColabById(editId);
+    var obra = ((window.db && db.obras) || []).find(function(o){ return o.id === obraId; });
+    if(!obra || !obra.colaboradores) return null;
+    var novo = null;
+    obra.colaboradores.forEach(function(c){ if(antesIds.indexOf(c.id) < 0) novo = c; });
+    return novo;
+  }
+
+  // ---- wrap abrirModalColaborador: garante setup e limpa os campos ----
+  var _abrir = window.abrirModalColaborador;
+  window.abrirModalColaborador = function(){
+    var r = _abrir ? _abrir.apply(this, arguments) : undefined;
+    setup();
+    var fi = byId('colabInputFuncaoOutro'); if(fi){ fi.value=''; fi.style.display='none'; }
+    var ei = byId('colabInputEmpresaOutro'); if(ei){ ei.value=''; ei.style.display='none'; }
+    return r;
+  };
+
+  // ---- wrap editarColaborador: pre-seleciona "Outros" conforme os dados ----
+  var _editar = window.editarColaborador;
+  window.editarColaborador = function(id, obraId){
+    var r = _editar ? _editar.apply(this, arguments) : undefined;
+    setup();
+    var c = null;
+    try{
+      var obra = ((window.db && db.obras) || []).find(function(o){ return o.id === obraId; });
+      if(obra && obra.colaboradores) c = obra.colaboradores.find(function(x){ return x.id === id; });
+    }catch(e){}
+    if(c){
+      preencher('colabInputFuncao', 'colabInputFuncaoOutro', c.funcao);
+      preencher('colabInputEmpresa', 'colabInputEmpresaOutro', c.empresa);
+    }
+    return r;
+  };
+
+  // ---- wrap salvarColaborador: grava o texto digitado em "Outros" ----
+  var _salvar = window.salvarColaborador;
+  window.salvarColaborador = function(){
+    var selF = byId('colabInputFuncao');
+    var selE = byId('colabInputEmpresa');
+    var customFuncao = null, customEmpresa = null;
+
+    if(selF && selF.value === OUTRO){
+      customFuncao = valOutro('colabInputFuncaoOutro');
+      if(!customFuncao){ alert('Digite a nova fun\u00e7\u00e3o.'); return; }
+    }
+    if(selE && selE.value === OUTRO){
+      customEmpresa = valOutro('colabInputEmpresaOutro');
+      if(!customEmpresa){ alert('Digite a nova empresa.'); return; }
+    }
+
+    // troca temporaria: o salvar original le um value valido no select
+    var restoreF = (customFuncao != null) ? tempOption(selF, customFuncao) : null;
+    var restoreE = (customEmpresa != null) ? tempOption(selE, customEmpresa) : null;
+
+    var obraId = byId('colabInputObra') ? byId('colabInputObra').value : '';
+    var editId = byId('colabEditId') ? byId('colabEditId').value : '';
+    var antesIds = [];
+    var obraAntes = ((window.db && db.obras) || []).find(function(o){ return o.id === obraId; });
+    if(obraAntes && obraAntes.colaboradores){
+      antesIds = obraAntes.colaboradores.map(function(c){ return c.id; });
+    }
+
+    var r = _salvar ? _salvar.apply(this, arguments) : undefined;
+
+    // o salvar original normaliza a funcao (Prof/Ajud); recolocamos o texto real
+    if(customFuncao != null || customEmpresa != null){
+      try{
+        var alvo = localizarSalvo(obraId, editId, antesIds);
+        if(alvo){
+          if(customFuncao != null) alvo.funcao = customFuncao;
+          if(customEmpresa != null) alvo.empresa = customEmpresa;
+          if(typeof salvarDB === 'function') salvarDB();
+          if(typeof renderListaColaboradores === 'function') renderListaColaboradores();
+          if(typeof popularSelectsPgto === 'function') popularSelectsPgto();
+        }
+      }catch(e){ console.error('[PATCH171] pos-salvar:', e); }
+    }
+
+    if(restoreF) restoreF();
+    if(restoreE) restoreE();
+    return r;
+  };
+
+  if(document.readyState !== 'loading') setup();
+  else document.addEventListener('DOMContentLoaded', setup);
+
+  console.log('[PATCH171] opcao "Outros" no cadastro de colaborador ativa.');
+})();
+</script>
+
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
+<!-- PATCH171 aplicado em 2026-09-18 14:07:32 -->
