@@ -7565,8 +7565,45 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                     }, 4000);
                 }
             
+                var backupLocalUltimo = 0;
+                var backupLocalTimer = null;
+                var backupLocalPendente = false;
+                var BACKUP_LOCAL_INTERVALO = 10000;
+
+                function gravarBackupLocalAgora() {
+                    try {
+                        localStorage.setItem('obrasDB_v8', JSON.stringify(db));
+                        backupLocalUltimo = Date.now();
+                        backupLocalPendente = false;
+                        return true;
+                    } catch (e) {
+                        console.warn('[BACKUP] Falha ao salvar backup local:', e);
+                        return false;
+                    }
+                }
+
                 function salvarLocalComoBackup() {
-                    try { localStorage.setItem('obrasDB_v8', JSON.stringify(db)); } catch (e) { console.warn(e); }
+                    var agora = Date.now();
+                    var decorrido = agora - backupLocalUltimo;
+
+                    /* No maximo uma gravacao por intervalo. Se houver novas
+                       alteracoes durante a espera, grava somente o estado final. */
+                    if (backupLocalUltimo && decorrido < BACKUP_LOCAL_INTERVALO) {
+                        backupLocalPendente = true;
+                        if (!backupLocalTimer) {
+                            backupLocalTimer = setTimeout(function () {
+                                backupLocalTimer = null;
+                                if (backupLocalPendente) gravarBackupLocalAgora();
+                            }, BACKUP_LOCAL_INTERVALO - decorrido);
+                        }
+                        return true;
+                    }
+
+                    if (backupLocalTimer) {
+                        clearTimeout(backupLocalTimer);
+                        backupLocalTimer = null;
+                    }
+                    return gravarBackupLocalAgora();
                 }
             
                 /* ---------- MERGE nuvem↔local (preserva dados locais que nuvem não tem) ---------- */
@@ -74619,8 +74656,99 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 
 </body>
 
+<!-- PATCH166: trava renderizacao/salvamento para impedir recursao no pagamento -->
+<script id="patch166AntiRecursaoPagamento">
+(function () {
+  'use strict';
+  if (window.__patch166AntiRecursaoPagamento) return;
+  window.__patch166AntiRecursaoPagamento = true;
+
+  var emRenderPagamento = false;
+  var salvarDBOriginal = window.salvarDB;
+
+  /* Um render nao pode iniciar outro salvamento, pois salvarDB pode chamar
+     render novamente. O salvamento continua liberado nas acoes do usuario. */
+  if (typeof salvarDBOriginal === 'function') {
+    window.salvarDB = function () {
+      if (emRenderPagamento) return false;
+      return salvarDBOriginal.apply(this, arguments);
+    };
+    window.salvarDB.__patch166 = true;
+  }
+
+  function proteger(nome) {
+    var original = window[nome];
+    if (typeof original !== 'function' || original.__patch166) return;
+
+    var protegido = function () {
+      if (emRenderPagamento) {
+        return original.apply(this, arguments);
+      }
+
+      emRenderPagamento = true;
+      try {
+        return original.apply(this, arguments);
+      } finally {
+        emRenderPagamento = false;
+      }
+    };
+
+    protegido.__patch166 = true;
+    protegido.__patch166Original = original;
+    window[nome] = protegido;
+  }
+
+  proteger('renderPagamento');
+  proteger('renderLancamentosPgto');
+  proteger('renderResumoPgto');
+})();
+</script>
+
 <!-- __patch162bCorrecao:1 -->
 
 <!-- PATCH164 aplicado em 2026-09-17 20:01:20 -->
 </html>
 <!-- PATCH165 aplicado em 2026-09-17 21:25:15 -->
+
+<!-- PATCH167: renderPagamento protegido contra reentrada e chamadas duplicadas -->
+<script id="patch167RenderPagamentoSeguro">
+(function () {
+  'use strict';
+  if (window.__patch167RenderPagamentoSeguro) return;
+  window.__patch167RenderPagamentoSeguro = true;
+
+  var original = window.renderPagamento;
+  if (typeof original !== 'function') return;
+
+  var executando = false;
+  var ultimaExecucao = 0;
+  var INTERVALO_MINIMO = 40;
+
+  window.renderPagamento = function () {
+    var agora = Date.now();
+
+    /* Impede o ciclo renderPagamento -> render -> renderPagamento. */
+    if (executando) return false;
+
+    /* Varios wrappers podem solicitar o mesmo desenho no mesmo instante.
+       O primeiro ja atualiza a tela; os seguintes sao descartados. */
+    if (agora - ultimaExecucao < INTERVALO_MINIMO) return false;
+
+    executando = true;
+    try {
+      var resultado = original.apply(this, arguments);
+      ultimaExecucao = Date.now();
+      return resultado;
+    } catch (e) {
+      console.error('[PATCH167] Falha em renderPagamento:', e);
+      ultimaExecucao = Date.now();
+      return false;
+    } finally {
+      executando = false;
+    }
+  };
+
+  window.renderPagamento.__patch167 = true;
+  window.renderPagamento.__patch167Original = original;
+})();
+</script>
