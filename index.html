@@ -6766,7 +6766,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
 
                     <!-- Lançamentos table (grouped by obra) -->
                     
-<!-- PATCH 162: Painel Múltiplas Tarefas -->
+<!-- PATCH169: Painel Múltiplas Tarefas consolidado -->
 <div id="painelMultiplasTarefas" style="display:none;margin-bottom:14px;">
   <div style="border:2px solid #0f766e;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#f0fdfa,#ccfbf1);box-shadow:0 4px 16px rgba(15,118,110,.12);">
     <div style="padding:12px 18px;background:linear-gradient(90deg,#0f766e,#14b8a6);color:#fff;font-weight:800;font-size:.88rem;letter-spacing:.02em;display:flex;justify-content:space-between;align-items:center;">
@@ -6831,7 +6831,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
     </div>
   </div>
 </div>
-<!-- FIM PATCH 162 HTML -->
+<!-- FIM PATCH169 HTML -->
 
 <div id="containerLancamentosPgto"></div>
                 </div>
@@ -74438,12 +74438,12 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 <!-- PATCH164: removido script externo ausente: <script src="/patch-painel-responsivo.js"></script> -->
 <!-- PATCH164: removido script externo ausente: <script src="/patch-fpdo-texto-toolbar.js"></script> -->
 
-<script id="patch162Js">
-// === PATCH 162: Múltiplas Tarefas por Colaborador ===
+<script id="patch169Js">
+// === PATCH 169: Múltiplas Tarefas por Colaborador — versão consolidada ===
 (function(){
   'use strict';
-  if(window.__patch162MultiplasTarefas)return;
-  window.__patch162MultiplasTarefas=true;
+  if(window.__patch169MultiplasTarefas)return;
+  window.__patch169MultiplasTarefas=true;
 
   // Estado da fila
   var fila = []; // [{data,material,m2}]
@@ -74456,7 +74456,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     mtSetDataHoje();
     fila = [];
     mtRenderTabela();
-    console.log('[P162] Painel Múltiplas Tarefas aberto');
+    console.log('[P169] Painel Múltiplas Tarefas aberto');
   };
 
   // ── Fechar painel ──
@@ -74464,7 +74464,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     var p = document.getElementById('painelMultiplasTarefas');
     if(p) p.style.display = 'none';
     fila = [];
-    console.log('[P162] Painel Múltiplas Tarefas fechado');
+    console.log('[P169] Painel Múltiplas Tarefas fechado');
   };
 
   // ── Popular select de obra ──
@@ -74711,7 +74711,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     });
   });
 
-  console.log('[P162] Script Múltiplas Tarefas carregado (patch162b)');
+  console.log('[P169] Script Múltiplas Tarefas consolidado carregado');
 })();
 </script>
 
@@ -74801,7 +74801,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 </script>
 <!-- PATCH169: equipe multipla por obra, incluindo terceirizados -->
 
-<!-- __patch162bCorrecao:1 -->
+<!-- PATCH169: versão antiga da múltipla tarefa removida; implementação consolidada acima -->
 
 <!-- PATCH164 aplicado em 2026-09-17 20:01:20 -->
 </html>
