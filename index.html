@@ -75716,6 +75716,198 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   try { console.log('[PATCH176] Outros = nova categoria no Centro de Custos ativo.'); } catch (e) {}
 })();
 </script>
+<script id="patch177">
+(function () {
+  'use strict';
+  if (window.__patch177) { return; }
+  window.__patch177 = true;
+
+  function parseLS(k) {
+    try { var s = localStorage.getItem(k); return s ? JSON.parse(s) : null; }
+    catch (e) { return null; }
+  }
+
+  function nomeObra(o) { return (o && (o.nome || o.titulo || o.id)) || '(sem nome)'; }
+
+  function scan(dbobj) {
+    var out = [];
+    if (dbobj && dbobj.obras && dbobj.obras.length) {
+      dbobj.obras.forEach(function (o) {
+        var t = (o && o.obraflow && o.obraflow.tarefas) || [];
+        if (t && t.length) { out.push({ id: o.id, nome: nomeObra(o), n: t.length, tarefas: t }); }
+      });
+    }
+    return out;
+  }
+
+  function obraAtual() {
+    try { if (typeof window.getObraAtual === 'function') return window.getObraAtual(); } catch (e) {}
+    return null;
+  }
+
+  function acharPorId(lista, id) {
+    for (var i = 0; i < lista.length; i++) { if (lista[i].id === id) return lista[i]; }
+    return null;
+  }
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function fecharPainel() {
+    var d = document.getElementById('p177box');
+    if (d && d.parentNode) { d.parentNode.removeChild(d); }
+  }
+
+  function restaurar(tarefas) {
+    var obra = obraAtual();
+    if (!obra) { alert('Nenhuma obra selecionada.'); return; }
+    var atuais = (obra.obraflow && obra.obraflow.tarefas) || [];
+    if (atuais.length) {
+      if (!confirm('A obra atual ja tem ' + atuais.length + ' tarefa(s). Deseja SUBSTITUIR pelo backup?')) { return; }
+    }
+    if (!obra.obraflow || typeof obra.obraflow !== 'object') { obra.obraflow = { versao: 1, titulo: '', tarefas: [] }; }
+    obra.obraflow.tarefas = JSON.parse(JSON.stringify(tarefas));
+    try {
+      if (window.OF && typeof window.OF.load === 'function') { window.OF.load(); }
+      if (window.OF && typeof window.OF.save === 'function') { window.OF.save(); }
+      if (window.OF && typeof window.OF.render === 'function') { window.OF.render(); }
+    } catch (e) { try { console.error('[patch177] restaurar:', e); } catch (e2) {} }
+    fecharPainel();
+    alert('Pronto! Restaurei ' + tarefas.length + ' tarefa(s) na obra atual. Confira e, se estiver certo, o app ja salvou.');
+  }
+
+  function linhaFonte(titulo, lista, idAtual) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'margin:8px 0;padding:8px 10px;background:#0f172a;border:1px solid #334155;border-radius:8px;';
+    var h = document.createElement('div');
+    h.style.cssText = 'font-weight:700;color:#93c5fd;margin-bottom:4px;';
+    h.textContent = titulo;
+    wrap.appendChild(h);
+    if (!lista.length) {
+      var vazio = document.createElement('div');
+      vazio.style.cssText = 'color:#94a3b8;';
+      vazio.textContent = 'Nenhuma obra com Plano Mestre aqui.';
+      wrap.appendChild(vazio);
+      return wrap;
+    }
+    lista.forEach(function (it) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 0;';
+      var txt = document.createElement('span');
+      txt.innerHTML = esc(it.nome) + ' \u2014 <b>' + it.n + '</b> tarefa(s)' +
+        (it.id === idAtual ? ' <span style="color:#22c55e">(obra atual)</span>' : '');
+      row.appendChild(txt);
+      if (it.id === idAtual && it.tarefas) {
+        var btn = document.createElement('button');
+        btn.textContent = 'Restaurar aqui';
+        btn.style.cssText = 'background:#16a34a;color:#fff;border:0;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;';
+        btn.addEventListener('click', function () { restaurar(it.tarefas); });
+        row.appendChild(btn);
+      }
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
+  function abrirPainel(forcado) {
+    fecharPainel();
+    var atual = obraAtual();
+    var idAtual = atual ? atual.id : null;
+    var mem = scan(window.db);
+    var ls  = scan(parseLS('obrasDB_v8'));
+    var bk  = scan(parseLS('obrasDB_v8_pre_nuvem_backup'));
+
+    var d = document.createElement('div');
+    d.id = 'p177box';
+    d.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:2147483647;width:360px;max-width:92vw;' +
+      'max-height:80vh;overflow:auto;background:#1e293b;color:#e2e8f0;font:13px/1.45 Arial,sans-serif;' +
+      'padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.45);border:1px solid #334155;';
+
+    var head = document.createElement('div');
+    head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+    var tit = document.createElement('strong');
+    tit.textContent = '\uD83D\uDD0E Onde esta o Plano Mestre';
+    tit.style.color = '#f1f5f9';
+    var x = document.createElement('button');
+    x.textContent = '\u2715';
+    x.style.cssText = 'background:transparent;color:#94a3b8;border:0;font-size:16px;cursor:pointer;';
+    x.addEventListener('click', fecharPainel);
+    head.appendChild(tit); head.appendChild(x);
+    d.appendChild(head);
+
+    var info = document.createElement('div');
+    info.style.cssText = 'color:#cbd5e1;margin-bottom:6px;';
+    var qAtual = (atual && atual.obraflow && atual.obraflow.tarefas) ? atual.obraflow.tarefas.length : 0;
+    info.innerHTML = 'Obra atual: <b>' + esc(nomeObra(atual)) + '</b> \u2014 ' + qAtual + ' tarefa(s) no Plano Mestre.';
+    d.appendChild(info);
+
+    d.appendChild(linhaFonte('1) Obras carregadas agora', mem, idAtual));
+    d.appendChild(linhaFonte('2) Salvamento local (localStorage)', ls, idAtual));
+    d.appendChild(linhaFonte('3) Backup antes da nuvem', bk, idAtual));
+
+    var dica = document.createElement('div');
+    dica.style.cssText = 'margin-top:8px;color:#fbbf24;';
+    if (mem.length && !acharPorId(mem, idAtual)) {
+      dica.innerHTML = 'Parece que seu Plano Mestre esta em <b>outra obra</b> (veja a lista 1). Troque a obra selecionada no topo.';
+    } else if (!mem.length && (ls.length || bk.length)) {
+      dica.innerHTML = 'Os dados sumiram da memoria mas existem em um backup abaixo. Use "Restaurar aqui" na obra certa.';
+    } else if (!mem.length && !ls.length && !bk.length) {
+      dica.innerHTML = 'Nao encontrei nenhum Plano Mestre em lugar nenhum deste aparelho. Tire um print e me mande.';
+    } else {
+      dica.innerHTML = 'Se os dados estao em outra obra, troque a obra no topo; se estao no backup, use "Restaurar aqui".';
+    }
+    d.appendChild(dica);
+
+    document.body.appendChild(d);
+  }
+  window.__p177abrir = abrirPainel;
+
+  /* botao fixo pequeno para reabrir o diagnostico quando quiser */
+  function botaoFixo() {
+    if (document.getElementById('p177btn')) return;
+    var meu = document.getElementById('tab-obraflow');
+    if (!meu || meu.style.display === 'none') return;
+    var b = document.createElement('button');
+    b.id = 'p177btn';
+    b.textContent = '\uD83D\uDD0E Cade meus dados?';
+    b.title = 'Diagnostico do Plano Mestre';
+    b.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:2147483646;background:#2563eb;color:#fff;' +
+      'border:0;border-radius:20px;padding:8px 14px;cursor:pointer;font:12px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);';
+    b.addEventListener('click', function () { abrirPainel(true); });
+    document.body.appendChild(b);
+  }
+
+  /* envolve OF.render: quando a tabela desenhar e estiver vazia, abre o painel */
+  var jaAvisou = false;
+  function ligar() {
+    if (!window.OF || typeof window.OF.render !== 'function' || window.OF.__p177) { return false; }
+    var orig = window.OF.render;
+    window.OF.render = function () {
+      var r = orig.apply(this, arguments);
+      try {
+        botaoFixo();
+        var vazio = !(window.OF.state && window.OF.state.tarefas && window.OF.state.tarefas.length);
+        var visivel = (function () { var m = document.getElementById('tab-obraflow'); return m && m.style.display !== 'none'; })();
+        if (vazio && visivel && !jaAvisou) { jaAvisou = true; setTimeout(function () { abrirPainel(false); }, 150); }
+        if (!vazio) { jaAvisou = false; }
+      } catch (e) {}
+      return r;
+    };
+    window.OF.__p177 = true;
+    return true;
+  }
+
+  var tentativas = 0;
+  var iv = setInterval(function () {
+    tentativas++;
+    if (ligar() || tentativas > 40) { clearInterval(iv); }
+  }, 500);
+
+  try { console.log('[PATCH177] diagnostico/recuperacao do Plano Mestre ativo.'); } catch (e) {}
+})();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
