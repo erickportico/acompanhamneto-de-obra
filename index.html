@@ -75568,6 +75568,154 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   window.P175 = { salvarAgora: salvarAgora, protegerCampos: protegerCampos };
 })();
 </script>
+<script id="patch176">
+(function () {
+  'use strict';
+  if (window.__patch176) { return; }
+  window.__patch176 = true;
+
+  var LS = '__custoCatsCustom176';
+  var SENT = 'Outros';
+
+  function byId(id) { return document.getElementById(id); }
+
+  function getCustom() {
+    try { return JSON.parse(localStorage.getItem(LS)) || []; }
+    catch (e) { return []; }
+  }
+  function saveCustom(a) {
+    try { localStorage.setItem(LS, JSON.stringify(a)); } catch (e) {}
+  }
+  function addCustom(cat) {
+    var a = getCustom();
+    if (a.indexOf(cat) < 0) { a.push(cat); saveCustom(a); }
+  }
+
+  function acharOutros(sel) {
+    var out = null;
+    Array.prototype.forEach.call(sel.options, function (o) {
+      if (o.value === SENT) { out = o; }
+    });
+    return out;
+  }
+
+  function injetarCustom(sel) {
+    if (!sel) { return; }
+    var out = acharOutros(sel);
+    getCustom().forEach(function (cat) {
+      var existe = Array.prototype.some.call(sel.options, function (o) {
+        return o.value === cat;
+      });
+      if (!existe) {
+        var opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        if (out) { sel.insertBefore(opt, out); } else { sel.appendChild(opt); }
+      }
+    });
+  }
+
+  function rotularOutros(sel) {
+    Array.prototype.forEach.call(sel.options, function (o) {
+      if (o.value === SENT && o.textContent.indexOf('Nova') < 0) {
+        o.textContent = '\u2795 Outros / Nova categoria\u2026';
+      }
+    });
+  }
+
+  function garantirInput(sel) {
+    if (!sel) { return null; }
+    var inp = byId('custoInputCategoriaNova');
+    if (!inp) {
+      inp = document.createElement('input');
+      inp.type = 'text';
+      inp.id = 'custoInputCategoriaNova';
+      inp.placeholder = 'Digite a nova categoria';
+      inp.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #cbd5e1;' +
+        'border-radius:6px;box-sizing:border-box;margin-top:6px;display:none;font-size:0.85rem;';
+      sel.parentNode.appendChild(inp);
+    }
+    return inp;
+  }
+
+  function setup() {
+    var sel = byId('custoInputCategoria');
+    if (!sel) { return false; }
+    injetarCustom(sel);
+    rotularOutros(sel);
+    var inp = garantirInput(sel);
+    if (!sel.__p176) {
+      sel.addEventListener('change', function () {
+        if (sel.value === SENT) {
+          inp.style.display = '';
+          setTimeout(function () { try { inp.focus(); } catch (e) {} }, 40);
+        } else {
+          inp.style.display = 'none';
+        }
+      });
+      sel.__p176 = true;
+    }
+    if (sel.value !== SENT) { inp.style.display = 'none'; }
+    return true;
+  }
+
+  function wrapSalvar() {
+    if (window.__p176salvar) { return; }
+    var orig = window.salvarCusto;
+    if (typeof orig !== 'function') { return; }
+    window.__p176salvar = true;
+    window.salvarCusto = function () {
+      var sel = byId('custoInputCategoria');
+      var inp = byId('custoInputCategoriaNova');
+      var novaCat = null;
+      if (sel && sel.value === SENT && inp) {
+        var t = String(inp.value || '').trim();
+        if (t) { novaCat = t; }
+        else {
+          alert('Digite o nome da nova categoria.');
+          try { inp.focus(); } catch (e) {}
+          return;
+        }
+      }
+      if (novaCat) {
+        var existe = Array.prototype.some.call(sel.options, function (o) {
+          return o.value === novaCat;
+        });
+        if (!existe) {
+          var opt = document.createElement('option');
+          opt.value = novaCat;
+          opt.textContent = novaCat;
+          var out = acharOutros(sel);
+          if (out) { sel.insertBefore(opt, out); } else { sel.appendChild(opt); }
+        }
+        sel.value = novaCat;
+      }
+      var r = orig.apply(this, arguments);
+      if (novaCat) {
+        addCustom(novaCat);
+        if (inp) { inp.value = ''; inp.style.display = 'none'; }
+        try { sel.selectedIndex = 0; } catch (e) {}
+      }
+      return r;
+    };
+  }
+
+  function init() { setup(); wrapSalvar(); }
+
+  if (document.readyState !== 'loading') { init(); }
+  else { document.addEventListener('DOMContentLoaded', init); }
+
+  /* a aba de Custos pode montar depois; tenta ate encontrar o select */
+  var tentativas = 0;
+  var iv = setInterval(function () {
+    tentativas++;
+    if (byId('custoInputCategoria')) { init(); clearInterval(iv); }
+    else if (tentativas > 30) { clearInterval(iv); }
+  }, 500);
+
+  try { console.log('[PATCH176] Outros = nova categoria no Centro de Custos ativo.'); } catch (e) {}
+})();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
