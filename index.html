@@ -76176,6 +76176,190 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   try { window.syncChecklistsFromSelects(); } catch(e){}
 })();
 </script>
+<script id="patch180">
+(function () {
+  'use strict';
+  if (window.__patch180) { return; }
+  window.__patch180 = true;
+
+  function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function byId(id){ return document.getElementById(id); }
+  function normNome(o){ return String((o&&(o.nome||o.titulo))||'').trim().toLowerCase(); }
+
+  function pesoObra(o){
+    if(!o) return 0; var n=0;
+    ['itens','centrosCusto','colaboradores','medicoes','recebimentos','pagamentos','compromissos','listasCorte','lancamentosProducao'].forEach(function(k){
+      if(o[k] && o[k].length) n += o[k].length;
+    });
+    if(o.obraflow && o.obraflow.tarefas && o.obraflow.tarefas.length) n += o.obraflow.tarefas.length;
+    if((o.valorContrato||0) > 0) n += 1;
+    return n;
+  }
+
+  // Coleta todas as obras de qualquer backup no localStorage
+  function coletarCandidatas(){
+    var achadas = {}; // id -> {obra, fonte, peso}
+    function considerar(obra, fonte){
+      if(!obra || typeof obra !== 'object') return;
+      var id = obra.id || ('semid_' + normNome(obra));
+      if(!id) return;
+      var p = pesoObra(obra);
+      if(!achadas[id] || p > achadas[id].peso){
+        achadas[id] = { obra: obra, fonte: fonte, peso: p };
+      }
+    }
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      var raw = null;
+      try { raw = localStorage.getItem(k); } catch(e){ continue; }
+      if(!raw || raw.indexOf('"obras"')===-1 && raw.indexOf('nome')===-1) { /* segue tentando */ }
+      var val = null;
+      try { val = JSON.parse(raw); } catch(e){ continue; }
+      var obras = null;
+      if(Array.isArray(val)) obras = val;
+      else if(val && Array.isArray(val.obras)) obras = val.obras;
+      if(!obras) continue;
+      obras.forEach(function(o){ considerar(o, k); });
+    }
+    return achadas;
+  }
+
+  function idsNomesAtuais(){
+    var ids={}, nomes={};
+    var obras = (window.db && window.db.obras) ? window.db.obras : [];
+    obras.forEach(function(o){ if(o.id) ids[o.id]=1; var n=normNome(o); if(n) nomes[n]=1; });
+    return { ids:ids, nomes:nomes };
+  }
+
+  function reSalvar(){
+    try{ localStorage.setItem('obrasDB_v8', JSON.stringify(window.db)); }catch(e){}
+    try{ if(typeof salvarLocalComoBackup==='function') salvarLocalComoBackup(); }catch(e){}
+    try{ if(typeof salvarDB==='function') salvarDB(); }catch(e){}
+    try{ if(typeof sincronizarBancoNuvem==='function') sincronizarBancoNuvem(); }catch(e){}
+    try{ if(typeof popularSelectObras==='function') popularSelectObras(); }catch(e){}
+    try{ if(typeof render==='function') render(); }catch(e){}
+  }
+
+  function fechar(){ var d=byId('p180box'); if(d&&d.parentNode) d.parentNode.removeChild(d); }
+
+  function restaurar(lista){
+    if(!lista.length){ alert('Selecione ao menos uma obra para recuperar.'); return; }
+    if(!window.db){ alert('Base de dados indisponivel.'); return; }
+    if(!Array.isArray(window.db.obras)) window.db.obras = [];
+    if(!confirm('Recuperar '+lista.length+' obra(s)? Vou guardar um backup do estado atual antes. Nada sera apagado.')) return;
+    try{ localStorage.setItem('obrasDB_v8_pre_recuperar180', JSON.stringify(window.db)); }catch(e){}
+    var existentes={}; window.db.obras.forEach(function(o){ if(o.id) existentes[o.id]=1; });
+    var add=0;
+    lista.forEach(function(o){
+      if(o.id && existentes[o.id]) return;
+      window.db.obras.push(o);
+      if(o.id) existentes[o.id]=1;
+      add++;
+    });
+    reSalvar();
+    alert('Pronto! Recuperei '+add+' obra(s) e re-salvei/sincronizei. Backup do estado anterior em obrasDB_v8_pre_recuperar180.\n\nConfira a contagem de obras no topo e clique em "Salvar agora".');
+    montar();
+  }
+
+  function bloco(t){
+    var w=document.createElement('div');
+    w.style.cssText='margin:8px 0;padding:9px 11px;background:#0f172a;border:1px solid #334155;border-radius:8px;';
+    var h=document.createElement('div');
+    h.style.cssText='font-weight:700;color:#93c5fd;margin-bottom:6px;';
+    h.textContent=t; w.appendChild(h); return w;
+  }
+  function botao(txt,cor,fn){
+    var b=document.createElement('button'); b.textContent=txt;
+    b.style.cssText='background:'+cor+';color:#fff;border:0;border-radius:6px;padding:6px 11px;cursor:pointer;font-size:12px;margin-top:6px;';
+    b.addEventListener('click',fn); return b;
+  }
+
+  function montar(){
+    fechar();
+    var achadas = coletarCandidatas();
+    var atuais = idsNomesAtuais();
+
+    // faltantes = candidatas que nao estao na base atual (por id e por nome)
+    var faltantes=[];
+    Object.keys(achadas).forEach(function(id){
+      var c = achadas[id];
+      var n = normNome(c.obra);
+      var estaId = c.obra.id && atuais.ids[c.obra.id];
+      var estaNome = n && atuais.nomes[n];
+      if(!estaId && !estaNome) faltantes.push(c);
+    });
+    faltantes.sort(function(a,b){ return b.peso - a.peso; });
+
+    var d=document.createElement('div');
+    d.id='p180box';
+    d.style.cssText='position:fixed;right:14px;bottom:14px;z-index:2147483647;width:400px;max-width:93vw;max-height:82vh;overflow:auto;background:#1e293b;color:#e2e8f0;font:13px/1.45 Arial,sans-serif;padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);border:1px solid #334155;';
+
+    var head=document.createElement('div');
+    head.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+    var tit=document.createElement('strong'); tit.textContent='\u267B\uFE0F Recuperar obras'; tit.style.color='#f1f5f9';
+    var x=document.createElement('button'); x.textContent='\u2715';
+    x.style.cssText='background:transparent;color:#94a3b8;border:0;font-size:16px;cursor:pointer;';
+    x.addEventListener('click',fechar);
+    head.appendChild(tit); head.appendChild(x); d.appendChild(head);
+
+    var atuaisN = (window.db && window.db.obras) ? window.db.obras.length : 0;
+    var info=document.createElement('div'); info.style.cssText='color:#cbd5e1;margin-bottom:6px;';
+    info.innerHTML='Obras na base atual: <b>'+atuaisN+'</b>. Encontradas em backups: <b>'+Object.keys(achadas).length+'</b>. Recuperaveis (faltando agora): <b>'+faltantes.length+'</b>.';
+    d.appendChild(info);
+
+    var b=bloco('Obras que sumiram e podem ser recuperadas');
+    var chks=[];
+    if(!faltantes.length){
+      var ok=document.createElement('div'); ok.style.color='#22c55e';
+      ok.textContent='Nenhuma obra faltando foi encontrada nos backups locais. Se elas estao na nuvem, use "Carregar Nuvem". \uD83D\uDC4D';
+      b.appendChild(ok);
+    } else {
+      faltantes.forEach(function(c){
+        var nome = c.obra.nome || c.obra.titulo || c.obra.id;
+        var n = normNome(c.obra);
+        var prioridade = (n.indexOf('jardins')!==-1 || n.indexOf('manaira')!==-1);
+        var row=document.createElement('label');
+        row.style.cssText='display:flex;align-items:flex-start;gap:8px;padding:4px 0;cursor:pointer;border-top:1px solid #273449;';
+        var ck=document.createElement('input'); ck.type='checkbox'; ck.checked=prioridade; ck.__c=c;
+        chks.push(ck);
+        var sp=document.createElement('span');
+        sp.innerHTML='<b>'+esc(nome)+'</b> <span style="color:#64748b">('+c.peso+' dados)</span><br><span style="color:#64748b;font-size:11px">backup: '+esc(c.fonte)+'</span>';
+        row.appendChild(ck); row.appendChild(sp); b.appendChild(row);
+      });
+      b.appendChild(botao('Recuperar obras marcadas','#16a34a',function(){
+        var lista=chks.filter(function(k){return k.checked;}).map(function(k){return k.__c.obra;});
+        restaurar(lista);
+      }));
+    }
+    d.appendChild(b);
+
+    var aviso=document.createElement('div');
+    aviso.style.cssText='margin-top:8px;color:#94a3b8;font-size:11px;';
+    aviso.textContent='Depois de recuperar, clique em "Salvar agora" no topo e confira a lista de obras.';
+    d.appendChild(aviso);
+
+    document.body.appendChild(d);
+  }
+  window.__p180abrir = montar;
+
+  function botaoFixo(){
+    if(byId('p180btn')) return;
+    var b=document.createElement('button');
+    b.id='p180btn';
+    b.textContent='\u267B\uFE0F Recuperar obras';
+    b.title='Vasculha backups locais e devolve obras que sumiram';
+    b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:2147483646;background:#16a34a;color:#fff;border:0;border-radius:20px;padding:8px 14px;cursor:pointer;font:12px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);';
+    b.addEventListener('click', montar);
+    document.body.appendChild(b);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', botaoFixo);
+  } else {
+    botaoFixo();
+  }
+})();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
