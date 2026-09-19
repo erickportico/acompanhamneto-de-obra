@@ -76087,6 +76087,95 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   try{ console.log('[PATCH178] limpeza de cache/dados obsoletos ativa.'); }catch(e){}
 })();
 </script>
+<script id="patch179">
+(function(){
+  if (window.__patch179) return;
+  window.__patch179 = true;
+
+  function esc(s){
+    if (typeof escaparHTML === 'function') return escaparHTML(s);
+    return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function funcNorm(v){ return String(v==null?'':v).trim().toLowerCase(); }
+  function ehAjudante(v){ return funcNorm(v).indexOf('ajud') === 0; }
+
+  // 1) Preserva funcoes custom (nao achatar para Profissional)
+  window._normalizarFuncaoColab = function(valor){
+    var raw = String(valor==null?'':valor).trim();
+    if (!raw) return 'Profissional';
+    if (ehAjudante(raw)) return 'Ajudante';
+    return raw; // mantem o valor real (Encarregado, Eletricista, etc.)
+  };
+
+  // 2) Profissionais = todos que NAO sao ajudantes (inclui funcoes custom)
+  if (typeof getColaboradoresAll === 'function'){
+    window.getProfissionaisAll = function(){
+      return getColaboradoresAll().filter(function(c){ return !ehAjudante(c.funcao); });
+    };
+    window.getAjudantesAll = function(){
+      return getColaboradoresAll().filter(function(c){ return ehAjudante(c.funcao); });
+    };
+  }
+
+  // 3) Render agrupado por funcao real
+  window.renderChecklistGroupedByFuncao = function(containerId, items, selectedIds){
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    if (!items || !items.length){
+      el.innerHTML = '<div class="lanc-checkbox-empty">Nenhum colaborador nesta obra</div>';
+      return;
+    }
+    var groups = {}, order = [];
+    items.forEach(function(it){
+      var g = (it.funcao && String(it.funcao).trim()) ? String(it.funcao).trim() : 'Profissional';
+      if (!groups[g]) { groups[g] = []; order.push(g); }
+      groups[g].push(it);
+    });
+    order.sort(function(a,b){ return a.localeCompare(b, 'pt'); });
+    var html = '';
+    order.forEach(function(g){
+      html += '<div class="lanc-grp-funcao" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#64748b;margin:6px 0 2px;padding-top:4px;border-top:1px solid #e2e8f0;">' + esc(g) + '</div>';
+      groups[g].forEach(function(item){
+        var checked = (selectedIds && selectedIds.indexOf(item.id) !== -1) ? 'checked' : '';
+        html += '<label class="lanc-checkbox-item"><input type="checkbox" value="' + esc(item.id) + '" ' + checked + '> ' + esc(item.nome) + '</label>';
+      });
+    });
+    el.innerHTML = html;
+  };
+
+  // Sobrescreve o sync das checklists para agrupar a coluna de profissionais
+  window.syncChecklistsFromSelects = function(){
+    var mapF = {};
+    try { (getColaboradoresAll() || []).forEach(function(c){ mapF[c.id] = c.funcao; }); } catch(e){}
+
+    var selProf = document.getElementById('inputLancProfissionais');
+    var clProf  = document.getElementById('checklistLancProfissionais');
+    if (selProf && clProf){
+      var items = [];
+      Array.from(selProf.options).forEach(function(opt){
+        if (opt.value) items.push({ id: opt.value, nome: opt.textContent, funcao: mapF[opt.value] });
+      });
+      var selected = Array.from(selProf.selectedOptions).map(function(o){ return o.value; });
+      window.renderChecklistGroupedByFuncao('checklistLancProfissionais', items, selected);
+    }
+
+    var selAjud = document.getElementById('inputLancAjudantes');
+    var clAjud  = document.getElementById('checklistLancAjudantes');
+    if (selAjud && clAjud){
+      var items2 = [];
+      Array.from(selAjud.options).forEach(function(opt){
+        if (opt.value) items2.push({ id: opt.value, nome: opt.textContent });
+      });
+      var selected2 = Array.from(selAjud.selectedOptions).map(function(o){ return o.value; });
+      if (typeof renderChecklist === 'function') renderChecklist('checklistLancAjudantes', items2, selected2);
+    }
+  };
+
+  // 4) Repopular os selects/checklists ja com a nova regra
+  try { if (typeof popularSelectsPgto === 'function') popularSelectsPgto(); } catch(e){}
+  try { window.syncChecklistsFromSelects(); } catch(e){}
+})();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
