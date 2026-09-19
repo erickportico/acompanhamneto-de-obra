@@ -75908,6 +75908,185 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   try { console.log('[PATCH177] diagnostico/recuperacao do Plano Mestre ativo.'); } catch (e) {}
 })();
 </script>
+<script id="patch178">
+(function () {
+  'use strict';
+  if (window.__patch178) { return; }
+  window.__patch178 = true;
+
+  var PROTEGIDAS = { 'obrasDB_v8': 1, 'painel_seg_sessao_v1': 1, 'theme_preference': 1, '__custoCatsCustom176': 1 };
+  var CACHE_UI = ['custoSubAbaAtiva','p120Grupo','p152_trocar_ok','p159ResetColunasRecebimento','painelColunas_tbodyInstalacao','painelColunas_tbodyRecebimento','painelPatch36LayoutLimpo','periodo_instalacao','painel_obras_dados'];
+
+  function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function byId(id){ return document.getElementById(id); }
+
+  function pesoObra(o){
+    if(!o) return 0;
+    var n = 0;
+    ['itens','centrosCusto','colaboradores','medicoes','recebimentos','pagamentos','compromissos','listasCorte'].forEach(function(k){
+      if(o[k] && o[k].length) n += o[k].length;
+    });
+    if(o.obraflow && o.obraflow.tarefas && o.obraflow.tarefas.length) n += o.obraflow.tarefas.length;
+    if((o.valorContrato||0) > 0) n += 1;
+    return n;
+  }
+
+  function reSalvar(){
+    try{ localStorage.setItem('obrasDB_v8', JSON.stringify(window.db)); }catch(e){}
+    try{ if(typeof salvarLocalComoBackup==='function') salvarLocalComoBackup(); }catch(e){}
+    try{ if(typeof sincronizarBancoNuvem==='function') sincronizarBancoNuvem(); }catch(e){}
+    try{ if(typeof popularSelectObras==='function') popularSelectObras(); }catch(e){}
+    try{ if(typeof render==='function') render(); }catch(e){}
+  }
+
+  function fechar(){ var d=byId('p178box'); if(d&&d.parentNode) d.parentNode.removeChild(d); }
+
+  function limparCacheUI(){
+    var achadas = CACHE_UI.filter(function(k){ return localStorage.getItem(k)!==null; });
+    if(!achadas.length){ alert('Nenhum cache de interface para limpar.'); return; }
+    if(!confirm('Vou limpar '+achadas.length+' item(ns) de cache da interface (filtros, colunas, aba ativa). Seus dados NAO sao afetados. Continuar?')) return;
+    achadas.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+    alert('Cache limpo ('+achadas.length+' itens). Recarregue a pagina para ver o efeito.');
+    montar();
+  }
+
+  function limparBackupAntigo(){
+    var k='obrasDB_v8_pre_nuvem_backup';
+    if(localStorage.getItem(k)===null){ alert('Nao ha backup antigo pre-nuvem.'); return; }
+    if(!confirm('Apagar o backup antigo "pre-nuvem"? Ele guarda obras/versoes velhas. Seus dados atuais (obrasDB_v8) continuam intactos.')) return;
+    try{ localStorage.removeItem(k); }catch(e){}
+    alert('Backup antigo removido.');
+    montar();
+  }
+
+  function removerObras(ids){
+    if(!ids.length){ alert('Selecione ao menos uma obra.'); return; }
+    if(!window.db || !window.db.obras){ alert('Base de obras indisponivel.'); return; }
+    if(!confirm('Remover '+ids.length+' obra(s) selecionada(s)? Vou guardar um backup antes. Esta acao mexe nos seus dados.')) return;
+    try{ localStorage.setItem('obrasDB_v8_pre_limpeza178', JSON.stringify(window.db)); }catch(e){}
+    var set={}; ids.forEach(function(i){ set[i]=1; });
+    window.db.obras = window.db.obras.filter(function(o){ return !set[o.id]; });
+    if(window.db.obraAtualId && set[window.db.obraAtualId]){
+      window.db.obraAtualId = window.db.obras.length ? window.db.obras[0].id : null;
+    }
+    reSalvar();
+    alert('Pronto! Removi '+ids.length+' obra(s) e re-salvei na nuvem. Backup guardado em obrasDB_v8_pre_limpeza178.');
+    montar();
+  }
+
+  function bloco(titulo){
+    var w=document.createElement('div');
+    w.style.cssText='margin:8px 0;padding:9px 11px;background:#0f172a;border:1px solid #334155;border-radius:8px;';
+    var h=document.createElement('div');
+    h.style.cssText='font-weight:700;color:#93c5fd;margin-bottom:6px;';
+    h.textContent=titulo; w.appendChild(h);
+    return w;
+  }
+  function botao(txt,cor,fn){
+    var b=document.createElement('button');
+    b.textContent=txt;
+    b.style.cssText='background:'+cor+';color:#fff;border:0;border-radius:6px;padding:6px 11px;cursor:pointer;font-size:12px;margin-top:4px;';
+    b.addEventListener('click',fn); return b;
+  }
+
+  function montar(){
+    fechar();
+    var d=document.createElement('div');
+    d.id='p178box';
+    d.style.cssText='position:fixed;left:14px;bottom:14px;z-index:2147483647;width:380px;max-width:93vw;max-height:82vh;overflow:auto;background:#1e293b;color:#e2e8f0;font:13px/1.45 Arial,sans-serif;padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);border:1px solid #334155;';
+
+    var head=document.createElement('div');
+    head.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+    var tit=document.createElement('strong'); tit.textContent='\uD83E\uDDF9 Limpeza do painel'; tit.style.color='#f1f5f9';
+    var x=document.createElement('button'); x.textContent='\u2715';
+    x.style.cssText='background:transparent;color:#94a3b8;border:0;font-size:16px;cursor:pointer;';
+    x.addEventListener('click',fechar);
+    head.appendChild(tit); head.appendChild(x); d.appendChild(head);
+
+    /* 1) cache UI */
+    var b1=bloco('1) Cache da interface (seguro)');
+    var achadas=CACHE_UI.filter(function(k){ return localStorage.getItem(k)!==null; });
+    var p1=document.createElement('div'); p1.style.color='#cbd5e1';
+    p1.innerHTML= achadas.length ? ('Encontrei <b>'+achadas.length+'</b> item(ns) de cache (filtros, colunas, aba). Nao afeta seus dados.') : 'Nenhum cache de interface pendente.';
+    b1.appendChild(p1);
+    if(achadas.length) b1.appendChild(botao('Limpar cache da interface','#2563eb',limparCacheUI));
+    d.appendChild(b1);
+
+    /* 2) backup antigo */
+    var b2=bloco('2) Backup antigo (pre-nuvem)');
+    var temBk=localStorage.getItem('obrasDB_v8_pre_nuvem_backup')!==null;
+    var p2=document.createElement('div'); p2.style.color='#cbd5e1';
+    p2.innerHTML= temBk ? 'Existe um backup antigo guardado. Pode ser removido com seguranca.' : 'Nenhum backup antigo pendente.';
+    b2.appendChild(p2);
+    if(temBk) b2.appendChild(botao('Apagar backup antigo','#b45309',limparBackupAntigo));
+    d.appendChild(b2);
+
+    /* 3) obras obsoletas/duplicadas */
+    var b3=bloco('3) Obras vazias ou duplicadas');
+    var obras=(window.db && window.db.obras) ? window.db.obras : [];
+    var p3=document.createElement('div'); p3.style.color='#cbd5e1'; p3.style.marginBottom='4px';
+    p3.innerHTML='Total de obras: <b>'+obras.length+'</b>. Marque as que quer remover.';
+    b3.appendChild(p3);
+
+    var nomeCount={};
+    obras.forEach(function(o){ var n=String(o.nome||o.titulo||'').trim().toLowerCase(); nomeCount[n]=(nomeCount[n]||0)+1; });
+
+    var chks=[];
+    obras.forEach(function(o){
+      var peso=pesoObra(o);
+      var nomeN=String(o.nome||o.titulo||'').trim().toLowerCase();
+      var dup=nomeCount[nomeN]>1;
+      var flag = (peso===0) ? ' \u2014 <span style="color:#f59e0b">vazia</span>' : '';
+      if(dup) flag += ' <span style="color:#f472b6">(nome repetido)</span>';
+      if(peso===0 || dup){
+        var row=document.createElement('label');
+        row.style.cssText='display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;';
+        var c=document.createElement('input'); c.type='checkbox'; c.value=o.id; c.__id=o.id;
+        chks.push(c);
+        var sp=document.createElement('span');
+        sp.innerHTML=esc(o.nome||o.titulo||o.id)+flag+' <span style="color:#64748b">('+peso+' dados)</span>';
+        row.appendChild(c); row.appendChild(sp); b3.appendChild(row);
+      }
+    });
+    if(!chks.length){
+      var ok=document.createElement('div'); ok.style.color='#22c55e';
+      ok.textContent='Nenhuma obra vazia ou duplicada encontrada. \uD83D\uDC4D';
+      b3.appendChild(ok);
+    } else {
+      b3.appendChild(botao('Remover obras marcadas','#dc2626',function(){
+        var ids=chks.filter(function(c){return c.checked;}).map(function(c){return c.__id;});
+        removerObras(ids);
+      }));
+    }
+    d.appendChild(b3);
+
+    var aviso=document.createElement('div');
+    aviso.style.cssText='margin-top:8px;color:#94a3b8;font-size:11px;';
+    aviso.textContent='Dica: depois de limpar, use "Salvar agora" e confira a contagem de obras no topo.';
+    d.appendChild(aviso);
+
+    document.body.appendChild(d);
+  }
+  window.__p178abrir = montar;
+
+  function botaoFixo(){
+    if(byId('p178btn')) return;
+    var b=document.createElement('button');
+    b.id='p178btn';
+    b.textContent='\uD83E\uDDF9 Limpeza';
+    b.title='Limpar cache e dados obsoletos do painel';
+    b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:2147483646;background:#0ea5e9;color:#fff;border:0;border-radius:20px;padding:8px 14px;cursor:pointer;font:12px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);';
+    b.addEventListener('click', montar);
+    document.body.appendChild(b);
+  }
+
+  if(document.readyState!=='loading') botaoFixo();
+  else document.addEventListener('DOMContentLoaded', botaoFixo);
+  setTimeout(botaoFixo, 1500);
+
+  try{ console.log('[PATCH178] limpeza de cache/dados obsoletos ativa.'); }catch(e){}
+})();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
