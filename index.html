@@ -5718,7 +5718,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                         <div class="card-title">Controle de Produção e Instalação</div>
                         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                             <div class="search-box">
-                                <input type="text" id="searchItens" placeholder="Filtrar por ref, tipo, loc..." oninput="window.debounceRender()">
+                                <input type="text" id="searchItens" name="p175_searchItens" autocomplete="off" data-lpignore="true" data-1p-ignore="true" placeholder="Filtrar por ref, tipo, loc..." oninput="window.debounceRender()">
                             </div>
                             <button class="btn-primary" onclick="abrirModalListaCorte()" style="background: #4a5568; color: #fff;">Inserir Listas de Corte</button>
                             <button class="warning" style="color:#000" onclick="abrirModalConfig()">Ocultar/Mostrar Colunas</button>
@@ -5751,7 +5751,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                             <div class="card-title">Acompanhamento Detalhado de Liberação Técnica (FEM)</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchLiberacao" placeholder="Filtrar liberação..." oninput="window.debounceRender()">
+                                    <input type="text" id="searchLiberacao" name="p175_searchLiberacao" autocomplete="off" data-lpignore="true" data-1p-ignore="true" placeholder="Filtrar liberação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -5812,7 +5812,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                             <div class="card-title">Acompanhamento Detalhado de Fabricação</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchFabricacao" placeholder="Filtrar fabricação..." oninput="window.debounceRender()">
+                                    <input type="text" id="searchFabricacao" name="p175_searchFabricacao" autocomplete="off" data-lpignore="true" data-1p-ignore="true" placeholder="Filtrar fabricação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -5873,7 +5873,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                             <div class="card-title">Acompanhamento Detalhado de Instalação</div>
                             <div style="display:flex; gap:8px; align-items:center;">
                                 <div class="search-box">
-                                    <input type="text" id="searchInstalacao" placeholder="Filtrar instalação..." oninput="window.debounceRender()">
+                                    <input type="text" id="searchInstalacao" name="p175_searchInstalacao" autocomplete="off" data-lpignore="true" data-1p-ignore="true" placeholder="Filtrar instalação..." oninput="window.debounceRender()">
                                 </div>
                                 <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                             </div>
@@ -6089,7 +6089,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                     <!-- Specs Table -->
                     <div id="ctmSpecsTable" style="margin-bottom:16px;">
                         <div id="ctmFiltersBar" style="display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;">
-                            <input type="text" id="searchInput" placeholder="Buscar ref..." oninput="applyFiltersCTM()" style="padding:5px 8px;background:#1a1a2e;color:#fff;border:1px solid #333;border-radius:4px;flex:1;min-width:120px;">
+                            <input type="text" id="searchInput" name="p175_searchInput" autocomplete="off" data-lpignore="true" data-1p-ignore="true" placeholder="Buscar ref..." oninput="applyFiltersCTM()" style="padding:5px 8px;background:#1a1a2e;color:#fff;border:1px solid #333;border-radius:4px;flex:1;min-width:120px;">
                             <select id="typeFilter" onchange="applyFiltersCTM()" style="padding:5px 8px;background:#1a1a2e;color:#fff;border:1px solid #333;border-radius:4px;">
                                 <option value="">Tipologias</option>
                             </select>
@@ -6209,7 +6209,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                         <div class="card-title">Boletim de Medição Detalhado por Tipologia (Serviço de Instalação)</div>
                         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                             <div class="search-box">
-                                <input type="text" id="searchMedicao" placeholder="Filtrar medição..." oninput="window.debounceRender()">
+                                <input type="text" id="searchMedicao" name="p175_searchMedicao" autocomplete="off" data-lpignore="true" data-1p-ignore="true" placeholder="Filtrar medição..." oninput="window.debounceRender()">
                             </div>
                             <button class="warning" style="color:#000" onclick="sincronizarComInstalacao()">🔄 Sincronizar com Instalação
                             </button>
@@ -6335,7 +6335,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                         <div class="card-title">Controle de Recebimento de Materiais</div>
                         <div class="recebimento-actions">
                             <div class="search-box">
-                                <input type="text" id="searchRecebimento" placeholder="Filtrar NF, fornecedor, material, ref..." oninput="window.debounceRender()">
+                                <input type="text" id="searchRecebimento" name="p175_searchRecebimento" autocomplete="off" data-lpignore="true" data-1p-ignore="true" placeholder="Filtrar NF, fornecedor, material, ref..." oninput="window.debounceRender()">
                             </div>
                             <button class="secondary" onclick="abrirModalImportarRecebimento()">Inserir Recebimentos</button>
                             <button class="secondary" onclick="imprimirPagina()">Imprimir / Gerar PDF</button>
@@ -75384,8 +75384,193 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   }, true);
 })();
 </script>
+<script id="patch175">
+/* PATCH175
+ * 1) campos de busca (searchItens, searchLiberacao, ...) sem autopreenchimento do navegador:
+ *    o Chrome estava colocando o e-mail do login no filtro e a tabela ficava vazia.
+ * 2) botao "Salvar agora": forca o envio para o Supabase e diz se deu certo. */
+(function () {
+  'use strict';
+  if (window.__patch175) { return; }
+  window.__patch175 = true;
+
+  var RE_EMAIL = /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/;
+  var ID_BTN = 'btnSalvarAgora';
+  var TEMPO_LIMITE = 20000;
+  var aguardando = null;   /* existe enquanto um salvamento manual esta em curso */
+
+  /* ---------------------------------------------------------------- *
+   * 1) filtros de busca
+   * ---------------------------------------------------------------- */
+  function limparSeEmail(el) {
+    try {
+      if (el && RE_EMAIL.test(el.value || '')) {
+        el.value = '';
+        if (typeof window.debounceRender === 'function') { window.debounceRender(); }
+      }
+    } catch (e) { /* ignora */ }
+  }
+
+  function protegerCampos() {
+    var lista = [];
+    try { lista = document.querySelectorAll('input[id^="search"]'); } catch (e) { return; }
+    for (var i = 0; i < lista.length; i++) {
+      try {
+        lista[i].setAttribute('autocomplete', 'off');
+        lista[i].setAttribute('data-lpignore', 'true');
+        lista[i].setAttribute('data-1p-ignore', 'true');
+      } catch (e2) { /* ignora */ }
+      limparSeEmail(lista[i]);
+    }
+  }
+
+  function aoPreencher(ev) {
+    var t = ev && ev.target;
+    if (!t || t.tagName !== 'INPUT' || !t.id || t.id.indexOf('search') !== 0) { return; }
+    limparSeEmail(t);
+  }
+  document.addEventListener('input', aoPreencher, true);
+  document.addEventListener('change', aoPreencher, true);
+
+  /* ---------------------------------------------------------------- *
+   * 2) botao Salvar agora
+   * ---------------------------------------------------------------- */
+  function botao() { return document.getElementById(ID_BTN); }
+
+  function pintarBotao(texto, bloqueado) {
+    var b = botao();
+    if (!b) { return; }
+    b.textContent = texto;
+    b.disabled = !!bloqueado;
+  }
+
+  function aviso(msg, tipo) {
+    try {
+      if (typeof window.mostrarToastPainel === 'function') { window.mostrarToastPainel(msg, tipo); return; }
+    } catch (e) { /* cai no aviso proprio */ }
+    try {
+      var d = document.createElement('div');
+      d.textContent = msg;
+      d.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483647;padding:12px 18px;' +
+        'border-radius:8px;color:#fff;font:600 14px Arial,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);' +
+        'background:' + (tipo === 'erro' ? '#c0392b' : (tipo === 'ok' ? '#168a55' : '#5f6b7a'));
+      document.body.appendChild(d);
+      setTimeout(function () { if (d.parentNode) { d.parentNode.removeChild(d); } }, 6000);
+    } catch (e2) { /* ignora */ }
+  }
+
+  /* tira emoji/simbolo do comeco e poe a primeira letra maiuscula */
+  function limpo(texto) {
+    var t = String(texto == null ? '' : texto).replace(/^[^A-Za-z0-9\u00C0-\u00FF]+/, '');
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+  }
+
+  function terminar(tipo, msg, textoBotao, voltarEm) {
+    if (!aguardando) { return; }
+    clearTimeout(aguardando.timer);
+    aguardando = null;
+    aviso(msg, tipo);
+    pintarBotao(textoBotao || '\uD83D\uDCBE Salvar agora', false);
+    if (voltarEm) {
+      setTimeout(function () { if (!aguardando) { pintarBotao('\uD83D\uDCBE Salvar agora', false); } }, voltarEm);
+    }
+  }
+
+  /* escuta o indicador de nuvem do painel (atualizarStatusNuvem) sem mudar o que ele faz */
+  function ligarStatus() {
+    var atual = window.atualizarStatusNuvem;
+    if (typeof atual !== 'function') { return false; }
+    if (atual.__p175) { return true; }
+    var novo = function (texto, tipo) {
+      var r = atual.apply(this, arguments);
+      try { observar(texto, tipo); } catch (e) { /* ignora */ }
+      return r;
+    };
+    novo.__p175 = true;
+    window.atualizarStatusNuvem = novo;
+    return true;
+  }
+
+  function observar(texto, tipo) {
+    if (!aguardando) { return; }
+    if (tipo === 'ok') {
+      terminar('ok', '\u2705 ' + limpo(texto), '\u2705 Salvo', 3000);
+    } else if (tipo === 'erro') {
+      terminar('erro', '\u26A0\uFE0F N\u00E3o salvou: ' + limpo(texto) +
+        '. Suas altera\u00E7\u00F5es continuam neste computador.');
+    }
+    /* tipo 'normal' = ainda salvando: continua esperando */
+  }
+
+  function salvarAgora() {
+    if (aguardando) { return; }
+    aguardando = {
+      timer: setTimeout(function () {
+        terminar('erro', '\u26A0\uFE0F A nuvem n\u00E3o respondeu em ' + (TEMPO_LIMITE / 1000) +
+          ' segundos. Suas altera\u00E7\u00F5es continuam neste computador; tente de novo.');
+      }, TEMPO_LIMITE)
+    };
+    pintarBotao('\u23F3 Salvando...', true);
+    var escutando = ligarStatus();
+    try {
+      if (typeof window.salvarDB === 'function') { window.salvarDB(false); }
+      else if (typeof window.sincronizarBancoNuvem === 'function') { window.sincronizarBancoNuvem(); }
+      else { terminar('erro', '\u26A0\uFE0F Fun\u00E7\u00E3o de salvamento n\u00E3o encontrada nesta p\u00E1gina.'); return; }
+    } catch (e) {
+      terminar('erro', '\u26A0\uFE0F Erro ao salvar: ' + ((e && e.message) ? e.message : e));
+      return;
+    }
+    if (!escutando && aguardando) {
+      /* sem como confirmar: avisa que o envio foi pedido */
+      clearTimeout(aguardando.timer);
+      aguardando.timer = setTimeout(function () {
+        terminar('normal', 'Envio pedido. Confira o indicador de nuvem no topo da tela.');
+      }, 5000);
+    }
+  }
+
+  function criarBotao() {
+    if (botao()) { return; }
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.id = ID_BTN;
+    b.className = 'secondary';
+    b.style.cssText = 'margin-left:4px;font-size:0.75rem;';
+    b.title = 'Envia agora tudo o que foi alterado para a nuvem (Supabase) e avisa se deu certo';
+    b.textContent = '\uD83D\uDCBE Salvar agora';
+    b.addEventListener('click', function (ev) { ev.preventDefault(); salvarAgora(); });
+
+    var ref = document.querySelector('button[onclick^="carregarBancoDaNuvem"]');
+    if (ref && ref.parentNode) { ref.parentNode.insertBefore(b, ref.nextSibling); return; }
+    var st = document.getElementById('statusNuvem');
+    if (st && st.parentNode) { st.parentNode.insertBefore(b, st.nextSibling); return; }
+    var pai = document.querySelector('.project-selector');
+    if (pai) { pai.insertBefore(b, pai.firstChild); }
+  }
+
+  /* ---------------------------------------------------------------- *
+   * ligar tudo (o autopreenchimento do Chrome pode chegar depois da carga)
+   * ---------------------------------------------------------------- */
+  function iniciar() {
+    try { protegerCampos(); } catch (e) { /* ignora */ }
+    try { criarBotao(); } catch (e2) { /* ignora */ }
+    try { ligarStatus(); } catch (e3) { /* ignora */ }
+  }
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', iniciar); }
+  else { iniciar(); }
+  window.addEventListener('load', iniciar);
+  window.addEventListener('pageshow', iniciar);
+  setTimeout(iniciar, 400);
+  setTimeout(iniciar, 1500);
+  setTimeout(iniciar, 4000);
+
+  window.P175 = { salvarAgora: salvarAgora, protegerCampos: protegerCampos };
+})();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
 <!-- PATCH171 aplicado em 2026-09-18 14:07:32 -->
 <!-- PATCH172 aplicado em 2026-09-18 16:42:44 -->
+<!-- PATCH175 aplicado em 2026-09-19 13:37:40 -->
