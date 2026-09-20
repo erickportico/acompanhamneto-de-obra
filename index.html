@@ -73504,7 +73504,15 @@ if (document.readyState === 'loading') {
           #orMenu, #orMenuBtn, #pbxBotao, #pcalcBotao, header, .top-bar, #meu-menu-abas {
             display: none !important;
           }
-          #tab-pagamento, #panelPgtoLancamentos, #containerLancamentosPgto {
+          /* CORRECAO: esta regra valia para QUALQUER impressao e por isso o Pagamento
+             aparecia junto no papel do Plano Mestre, da Gestao de Obra etc. Agora so vale
+             quando o Pagamento e a aba que esta sendo impressa. */
+          body.print-pgto-lancamentos-mode #tab-pagamento,
+          body.print-pgto-lancamentos-mode #panelPgtoLancamentos,
+          body.print-pgto-lancamentos-mode #containerLancamentosPgto,
+          body.p73-so-aba #tab-pagamento.p73-aba-visivel,
+          body.p73-so-aba #tab-pagamento.p73-aba-visivel #panelPgtoLancamentos,
+          body.p73-so-aba #tab-pagamento.p73-aba-visivel #containerLancamentosPgto {
             display: block !important;
             width: 100% !important;
             max-width: 100% !important;
