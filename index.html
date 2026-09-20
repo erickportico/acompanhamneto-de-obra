@@ -7571,21 +7571,52 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                 var backupLocalUltimo = 0;
                 var backupLocalTimer = null;
                 var backupLocalPendente = false;
+                var backupLocalBloqueado = false;
+                var backupLocalAvisado = false;
                 var BACKUP_LOCAL_INTERVALO = 10000;
 
                 function gravarBackupLocalAgora() {
+                    /* O backup completo em localStorage e opcional. Quando o
+                       banco cresce por causa de fotos, a cota do navegador pode
+                       ser excedida. Nao insistir em novas tentativas: o dado
+                       principal continua sendo salvo pelo IndexedDB/nuvem. */
+                    if (backupLocalBloqueado || window.__backupLocalBloqueado) {
+                        backupLocalBloqueado = true;
+                        backupLocalPendente = false;
+                        return true;
+                    }
                     try {
                         localStorage.setItem('obrasDB_v8', JSON.stringify(db));
                         backupLocalUltimo = Date.now();
                         backupLocalPendente = false;
                         return true;
                     } catch (e) {
+                        if (e && (e.name === 'QuotaExceededError' || e.code === 22 ||
+                                  e.code === 1014 || /quota|storage|exceed/i.test(String(e.message || e)))) {
+                            backupLocalBloqueado = true;
+                            window.__backupLocalBloqueado = true;
+                            backupLocalPendente = false;
+                            if (backupLocalTimer) {
+                                clearTimeout(backupLocalTimer);
+                                backupLocalTimer = null;
+                            }
+                            if (!backupLocalAvisado) {
+                                backupLocalAvisado = true;
+                                console.warn('[BACKUP] Backup completo em localStorage desativado: cota excedida. O salvamento principal continua ativo.');
+                            }
+                            return true;
+                        }
                         console.warn('[BACKUP] Falha ao salvar backup local:', e);
                         return false;
                     }
                 }
 
                 function salvarLocalComoBackup() {
+                    if (backupLocalBloqueado || window.__backupLocalBloqueado) {
+                        backupLocalBloqueado = true;
+                        backupLocalPendente = false;
+                        return true;
+                    }
                     var agora = Date.now();
                     var decorrido = agora - backupLocalUltimo;
 
@@ -76502,3 +76533,4 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 <!-- PATCH171 aplicado em 2026-09-18 14:07:32 -->
 <!-- PATCH172 aplicado em 2026-09-18 16:42:44 -->
 <!-- PATCH175 aplicado em 2026-09-19 13:37:40 -->
+<!-- PATCH183: desativar backup completo em localStorage quando a cota exceder -->
