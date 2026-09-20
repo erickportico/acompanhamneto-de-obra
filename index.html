@@ -76368,6 +76368,134 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 #p178box { bottom: 60px !important; }
 #p180box { bottom: 60px !important; }
 </style>
+<script id="patch182">
+(function () {
+  'use strict';
+  if (window.__patch182) { return; }
+  window.__patch182 = true;
+
+  var PROTEGIDAS = {
+    'obrasDB_v8': 1,
+    'painel_seg_sessao_v1': 1,
+    'theme_preference': 1,
+    '__custoCatsCustom176': 1,
+    'patch78_funcoes_reparadas': 1
+  };
+
+  function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function byId(id){ return document.getElementById(id); }
+
+  function tamKey(k){
+    var v = null; try { v = localStorage.getItem(k); } catch(e){ return 0; }
+    if (v == null) return 0;
+    return (k.length + v.length) * 2; // aprox. bytes (UTF-16)
+  }
+  function fmt(bytes){
+    if (bytes >= 1048576) return (bytes/1048576).toFixed(2) + ' MB';
+    if (bytes >= 1024) return (bytes/1024).toFixed(0) + ' KB';
+    return bytes + ' B';
+  }
+
+  // Backups/copias descartaveis (NAO sao os dados reais)
+  function descartaveis(){
+    var lista = [];
+    for (var i=0; i<localStorage.length; i++){
+      var k = localStorage.key(i);
+      if (!k || PROTEGIDAS[k]) continue;
+      var alvo = (k.indexOf('obrasDB_v8_') === 0) ||
+                 (k.indexOf('_pre_') !== -1) ||
+                 /backup/i.test(k) ||
+                 /snapshot/i.test(k);
+      if (alvo) lista.push({ k: k, size: tamKey(k) });
+    }
+    lista.sort(function(a,b){ return b.size - a.size; });
+    return lista;
+  }
+
+  function usoTotal(){
+    var t = 0;
+    for (var i=0; i<localStorage.length; i++){ t += tamKey(localStorage.key(i)); }
+    return t;
+  }
+
+  function fechar(){ var d=byId('p182box'); if(d&&d.parentNode) d.parentNode.removeChild(d); }
+
+  function liberar(lista){
+    if(!confirm('Vou remover '+lista.length+' backup(s) antigo(s) para liberar espaco. Seus dados reais (obrasDB_v8) NAO serao tocados. Continuar?')) return;
+    var freed = 0, n = 0;
+    lista.forEach(function(it){
+      try { localStorage.removeItem(it.k); freed += it.size; n++; } catch(e){}
+    });
+    // tenta re-salvar e sincronizar
+    var reSalvouOk = true;
+    try { localStorage.setItem('obrasDB_v8', JSON.stringify(window.db)); } catch(e){ reSalvouOk = false; }
+    try { if (typeof salvarDB === 'function') salvarDB(); } catch(e){}
+    try { if (typeof sincronizarBancoNuvem === 'function') sincronizarBancoNuvem(); } catch(e){}
+    alert('Liberei '+fmt(freed)+' ('+n+' backup(s) removido(s)).' + (reSalvouOk ? '\nJa re-salvei seus dados.' : '\nAtencao: ainda pode estar apertado; use "Salvar agora" / "Carregar Nuvem".'));
+    montar();
+  }
+
+  function botao(txt,cor,fn){
+    var b=document.createElement('button'); b.textContent=txt;
+    b.style.cssText='background:'+cor+';color:#fff;border:0;border-radius:6px;padding:7px 13px;cursor:pointer;font-size:12px;margin-top:8px;';
+    b.addEventListener('click',fn); return b;
+  }
+
+  function montar(force){
+    fechar();
+    var lista = descartaveis();
+    var totalLixo = lista.reduce(function(s,x){ return s + x.size; }, 0);
+    // so mostra sozinho se houver algo relevante para liberar
+    if (!force && totalLixo < 50*1024) return;
+
+    var d=document.createElement('div');
+    d.id='p182box';
+    d.style.cssText='position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:2147483647;width:460px;max-width:94vw;max-height:80vh;overflow:auto;background:#1e293b;color:#e2e8f0;font:13px/1.45 Arial,sans-serif;padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);border:1px solid #7f1d1d;';
+
+    var head=document.createElement('div');
+    head.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+    var tit=document.createElement('strong'); tit.textContent='\uD83D\uDDC4\uFE0F Armazenamento cheio'; tit.style.color='#fca5a5';
+    var x=document.createElement('button'); x.textContent='\u2715';
+    x.style.cssText='background:transparent;color:#94a3b8;border:0;font-size:16px;cursor:pointer;';
+    x.addEventListener('click',fechar);
+    head.appendChild(tit); head.appendChild(x); d.appendChild(head);
+
+    var info=document.createElement('div'); info.style.color='#cbd5e1'; info.style.marginBottom='6px';
+    info.innerHTML='Uso total do armazenamento: <b>'+fmt(usoTotal())+'</b>.<br>Backups antigos ocupando espaco: <b>'+fmt(totalLixo)+'</b> ('+lista.length+' item(ns)).<br>Seus dados reais nao serao removidos.';
+    d.appendChild(info);
+
+    if(!lista.length){
+      var ok=document.createElement('div'); ok.style.color='#22c55e';
+      ok.textContent='Nenhum backup descartavel encontrado. \uD83D\uDC4D';
+      d.appendChild(ok);
+    } else {
+      var ul=document.createElement('div'); ul.style.cssText='margin:4px 0;max-height:34vh;overflow:auto;';
+      lista.forEach(function(it){
+        var row=document.createElement('div');
+        row.style.cssText='display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px solid #273449;color:#cbd5e1;';
+        row.innerHTML='<span style="word-break:break-all">'+esc(it.k)+'</span><span style="color:#f59e0b;white-space:nowrap">'+fmt(it.size)+'</span>';
+        ul.appendChild(row);
+      });
+      d.appendChild(ul);
+      d.appendChild(botao('\uD83E\uDDF9 Liberar '+fmt(totalLixo)+' agora','#dc2626',function(){ liberar(lista); }));
+    }
+
+    var aviso=document.createElement('div');
+    aviso.style.cssText='margin-top:8px;color:#94a3b8;font-size:11px;';
+    aviso.textContent='Depois de liberar, clique em "Salvar agora" no topo. Seus dados tambem ficam guardados na nuvem.';
+    d.appendChild(aviso);
+
+    document.body.appendChild(d);
+  }
+  window.__p182abrir = function(){ montar(true); };
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ montar(false); }, 1200); });
+  } else {
+    setTimeout(function(){ montar(false); }, 1200);
+  }
+})();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
