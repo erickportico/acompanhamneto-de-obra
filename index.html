@@ -76566,7 +76566,8 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     return out;
   }
   function nomeObra(o) { return texto(o && (o.nome || o.titulo || o.id)); }
-  function nomeItem(i) { return texto(i && (i.descricao || i.nome || i.titulo || i.tipo || i.ref)); }
+  function referenciaItem(i) { return texto(i && (i.ref || i.referencia || i.codigo || i.id)); }
+  function nomeItem(i) { return texto(i && (i.tipologia || i.descricao || i.nome || i.titulo || i.tipo || referenciaItem(i))); }
   function areaItem(i) {
     var a = numero(i && (i.area != null ? i.area : (i.m2 != null ? i.m2 : i.areaM2)));
     if (a > 0) { return a; }
@@ -76622,8 +76623,12 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   }
   function atualizarListas() {
     var nome = valorCampo('[data-k="obra"]');
-    var its = itensDaObra(nome).map(nomeItem).filter(Boolean);
-    datalist('p184ItensObra', its);
+    var its = itensDaObra(nome).filter(function (i) { return referenciaItem(i); });
+    var di = document.getElementById('p184ItensObra');
+    if (!di) { di = document.createElement('datalist'); di.id = 'p184ItensObra'; document.body.appendChild(di); }
+    di.innerHTML = its.map(function (i) {
+      return '<option value="' + esc(referenciaItem(i)) + '" label="' + esc(nomeItem(i)) + '"></option>';
+    }).join('');
     datalist('p184Colaboradores', colaboradores().map(function (c) {
       var n = texto(c && (c.nome || c.razaoSocial || c.empresa));
       var f = texto(c && c.funcao);
@@ -76633,7 +76638,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   function itemEncontrado(nome) {
     var n = texto(nome).toLowerCase();
     return itensDaObra(valorCampo('[data-k="obra"]')).filter(function (i) {
-      return nomeItem(i).toLowerCase() === n;
+      return referenciaItem(i).toLowerCase() === n || nomeItem(i).toLowerCase() === n;
     })[0] || null;
   }
   function calcularTarefa(itemEl) {
@@ -76652,7 +76657,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     if (!itemEl || !item) { calcularTarefa(itemEl); return; }
     var rid = itemEl.getAttribute('data-r');
     var desc = document.querySelector(MODAL + ' [data-r="' + CSS.escape(rid) + '"][data-rk="desc"]');
-    if (desc && !texto(desc.value)) { desc.value = nomeItem(item); disparar(desc); }
+    if (desc) { desc.value = nomeItem(item); disparar(desc); }
     calcularTarefa(itemEl);
   }
   function melhorarCampos() {
@@ -76686,6 +76691,26 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       el.setAttribute('list', 'p184Colaboradores');
       el.setAttribute('placeholder', 'Selecione ou digite a equipe');
       el.setAttribute('data-p184', '1');
+      var painel = document.createElement('select');
+      painel.className = 'p84-sel'; painel.multiple = true; painel.size = 3;
+      painel.title = 'Selecione um ou mais colaboradores para adicionar à equipe';
+      painel.setAttribute('data-p184-equipe', '1');
+      painel.innerHTML = colaboradores().map(function (c) {
+        var n = texto(c && (c.nome || c.razaoSocial || c.empresa));
+        var f = texto(c && c.funcao);
+        return n ? '<option value="' + esc(n) + '">' + esc(n + (f ? ' — ' + f : '')) + '</option>' : '';
+      }).join('');
+      el.parentNode.appendChild(painel);
+      painel.addEventListener('change', function () {
+        var atual = texto(el.value);
+        var partes = atual ? atual.split(/\s*(?:,|\/|;|\n)\s*/).filter(Boolean) : [];
+        Array.prototype.forEach.call(painel.selectedOptions || [], function (op) {
+          if (partes.indexOf(op.value) < 0) { partes.push(op.value); }
+        });
+        el.value = partes.join(' / ');
+        disparar(el);
+        Array.prototype.forEach.call(painel.options, function (op) { op.selected = false; });
+      });
     });
     Array.prototype.forEach.call(modal.querySelectorAll('[data-rk="quant"]'), function (q) {
       if (q.getAttribute('data-p184')) { return; }
@@ -76742,3 +76767,4 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 <!-- PATCH175 aplicado em 2026-09-19 13:37:40 -->
 <!-- PATCH183: desativar backup completo em localStorage quando a cota exceder -->
 <!-- PATCH184: Diario integrado com obras, itens, colaboradores e calculo automatico de m2 -->
+<!-- PATCH185: itens por referencia, tipologia, equipe multipla e calculo de quantidade instalada -->
