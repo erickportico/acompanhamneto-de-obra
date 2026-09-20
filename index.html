@@ -76527,6 +76527,213 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   }
 })();
 </script>
+<script id="patch184DiarioIntegracao">
+(function () {
+  'use strict';
+  if (window.__patch184DiarioIntegracao) { return; }
+  window.__patch184DiarioIntegracao = true;
+
+  var MODAL = '#p84Fundo';
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function texto(v) { return String(v == null ? '' : v).trim(); }
+  function numero(v) {
+    var s = texto(v).replace(/\s/g, '').replace(/\.(?=\d{3}(?:\D|$))/g, '').replace(',', '.');
+    var n = Number(s);
+    return isFinite(n) ? n : 0;
+  }
+  function obras() {
+    try { return window.db && Array.isArray(window.db.obras) ? window.db.obras : []; }
+    catch (e) { return []; }
+  }
+  function colaboradores() {
+    try {
+      if (typeof window.getColaboradoresAll === 'function') {
+        return window.getColaboradoresAll() || [];
+      }
+    } catch (e) {}
+    var out = [], vistos = {};
+    obras().forEach(function (o) {
+      [].concat(o && o.colaboradores || [], o && o.colaboradoresPgto || []).forEach(function (c) {
+        var id = String(c && (c.id || c.nome) || '');
+        if (id && !vistos[id]) { vistos[id] = true; out.push(c); }
+      });
+    });
+    return out;
+  }
+  function nomeObra(o) { return texto(o && (o.nome || o.titulo || o.id)); }
+  function nomeItem(i) { return texto(i && (i.descricao || i.nome || i.titulo || i.tipo || i.ref)); }
+  function areaItem(i) {
+    var a = numero(i && (i.area != null ? i.area : (i.m2 != null ? i.m2 : i.areaM2)));
+    if (a > 0) { return a; }
+    var l = numero(i && (i.largura != null ? i.largura : i.larg));
+    var h = numero(i && (i.altura != null ? i.altura : i.alt));
+    return l > 0 && h > 0 ? l * h : 0;
+  }
+  function itensDaObra(nome) {
+    var o = obras().filter(function (x) { return nomeObra(x) === texto(nome); })[0];
+    return o && Array.isArray(o.itens) ? o.itens : [];
+  }
+  function obraSelecionada(valor) {
+    return obras().filter(function (o) { return nomeObra(o) === texto(valor); })[0] || null;
+  }
+  function valorCampo(sel) {
+    var e = document.querySelector(MODAL + ' ' + sel);
+    return e ? e.value : '';
+  }
+  function disparar(el) {
+    if (!el) { return; }
+    try { el.dispatchEvent(new Event('input', { bubbles: true })); }
+    catch (e) { try { el.dispatchEvent(document.createEvent('Event')); } catch (e2) {} }
+  }
+  function alterarCampo(sel, valor) {
+    var el = document.querySelector(MODAL + ' ' + sel);
+    if (!el) { return; }
+    el.value = valor == null ? '' : valor;
+    disparar(el);
+  }
+  function dataObra(o, chaves) {
+    for (var i = 0; i < chaves.length; i++) {
+      if (o && o[chaves[i]]) { return o[chaves[i]]; }
+    }
+    return '';
+  }
+  function preencherObra(nome) {
+    var o = obraSelecionada(nome);
+    if (!o) { return; }
+    alterarCampo('[data-k="cliente"]', o.cliente || o.contratante || '');
+    alterarCampo('[data-k="inicioObra"]', dataObra(o, ['inicio', 'dataInicio', 'inicioObra']));
+    alterarCampo('[data-k="terminoObra"]', dataObra(o, ['termino', 'previsao', 'dataTermino', 'terminoObra']));
+    alterarCampo('[data-k="prazoObra"]', o.prazo || o.prazoObra || '');
+    alterarCampo('[data-k="respTecnico"]', o.responsavelTecnico || o.responsavel || o.fiscal || '');
+    atualizarListas();
+  }
+  function datalist(id, opcoes) {
+    var d = document.getElementById(id);
+    if (!d) {
+      d = document.createElement('datalist'); d.id = id;
+      document.body.appendChild(d);
+    }
+    d.innerHTML = opcoes.map(function (x) { return '<option value="' + esc(x) + '"></option>'; }).join('');
+  }
+  function atualizarListas() {
+    var nome = valorCampo('[data-k="obra"]');
+    var its = itensDaObra(nome).map(nomeItem).filter(Boolean);
+    datalist('p184ItensObra', its);
+    datalist('p184Colaboradores', colaboradores().map(function (c) {
+      var n = texto(c && (c.nome || c.razaoSocial || c.empresa));
+      var f = texto(c && c.funcao);
+      return n + (f ? ' — ' + f : '');
+    }).filter(Boolean));
+  }
+  function itemEncontrado(nome) {
+    var n = texto(nome).toLowerCase();
+    return itensDaObra(valorCampo('[data-k="obra"]')).filter(function (i) {
+      return nomeItem(i).toLowerCase() === n;
+    })[0] || null;
+  }
+  function calcularTarefa(itemEl) {
+    if (!itemEl) { return; }
+    var rid = itemEl.getAttribute('data-r');
+    var quantEl = document.querySelector(MODAL + ' [data-r="' + CSS.escape(rid) + '"][data-rk="quant"]');
+    var totalEl = document.querySelector(MODAL + ' [data-r="' + CSS.escape(rid) + '"][data-rk="totalM2"]');
+    if (!quantEl || !totalEl) { return; }
+    var item = itemEncontrado(itemEl.value);
+    var total = numero(quantEl.value) * areaItem(item);
+    totalEl.value = total > 0 ? total.toFixed(2).replace('.', ',') : '';
+    disparar(totalEl);
+  }
+  function completarItem(itemEl) {
+    var item = itemEncontrado(itemEl && itemEl.value);
+    if (!itemEl || !item) { calcularTarefa(itemEl); return; }
+    var rid = itemEl.getAttribute('data-r');
+    var desc = document.querySelector(MODAL + ' [data-r="' + CSS.escape(rid) + '"][data-rk="desc"]');
+    if (desc && !texto(desc.value)) { desc.value = nomeItem(item); disparar(desc); }
+    calcularTarefa(itemEl);
+  }
+  function melhorarCampos() {
+    var modal = document.querySelector(MODAL);
+    if (!modal || modal.style.display === 'none') { return; }
+    var obra = modal.querySelector('[data-k="obra"]');
+    if (obra && obra.tagName === 'INPUT' && !obra.getAttribute('data-p184')) {
+      var atual = obra.value;
+      var sel = document.createElement('select');
+      sel.className = obra.className; sel.setAttribute('data-k', 'obra'); sel.setAttribute('data-p184', '1');
+      sel.innerHTML = '<option value="">Selecione a obra...</option>' + obras().map(function (o) {
+        var n = nomeObra(o); return '<option value="' + esc(n) + '">' + esc(n) + '</option>';
+      }).join('');
+      if (atual && !obras().some(function (o) { return nomeObra(o) === atual; })) {
+        sel.innerHTML += '<option value="' + esc(atual) + '">Manual: ' + esc(atual) + '</option>';
+      }
+      sel.value = atual;
+      obra.parentNode.replaceChild(sel, obra);
+      if (sel.value) { preencherObra(sel.value); }
+    }
+    atualizarListas();
+    var itens = modal.querySelectorAll('[data-rk="item"]');
+    Array.prototype.forEach.call(itens, function (el) {
+      if (el.getAttribute('data-p184')) { return; }
+      el.setAttribute('list', 'p184ItensObra');
+      el.setAttribute('data-p184', '1');
+    });
+    var equipes = modal.querySelectorAll('[data-rk="empresa"]');
+    Array.prototype.forEach.call(equipes, function (el) {
+      if (el.getAttribute('data-p184')) { return; }
+      el.setAttribute('list', 'p184Colaboradores');
+      el.setAttribute('placeholder', 'Selecione ou digite a equipe');
+      el.setAttribute('data-p184', '1');
+    });
+    Array.prototype.forEach.call(modal.querySelectorAll('[data-rk="quant"]'), function (q) {
+      if (q.getAttribute('data-p184')) { return; }
+      q.setAttribute('placeholder', 'Ex.: 3,78');
+      q.setAttribute('data-p184', '1');
+      var rid = q.getAttribute('data-r');
+      var grupo = q.parentNode;
+      if (grupo && !modal.querySelector('[data-r="' + CSS.escape(rid) + '"][data-rk="totalM2"]')) {
+        grupo.insertAdjacentHTML('beforeend', '<label class="p84-c"><span>Total produzido (m²)</span><input class="p84-in" data-r="' + esc(rid) + '" data-rk="totalM2" value="" readonly title="Quantidade × área unitária do item"></label>');
+      }
+      calcularTarefa(q);
+    });
+  }
+  var observadorCorpo = null;
+  function ligarAoDiario() {
+    var alvo = document.getElementById('p84Corpo');
+    if (!alvo || alvo.getAttribute('data-p184-observer')) { return; }
+    alvo.setAttribute('data-p184-observer', '1');
+    new MutationObserver(function () { setTimeout(melhorarCampos, 0); }).observe(alvo, { childList: true, subtree: true });
+    melhorarCampos();
+  }
+  function iniciar() {
+    if (!document.body) { return; }
+    if (!observadorCorpo) {
+      observadorCorpo = new MutationObserver(function () {
+        ligarAoDiario();
+        melhorarCampos();
+      });
+      observadorCorpo.observe(document.body, { childList: true, subtree: true });
+    }
+    ligarAoDiario();
+  }
+  document.addEventListener('change', function (ev) {
+    var t = ev.target;
+    if (!t || !t.closest || !t.closest(MODAL)) { return; }
+    if (t.getAttribute('data-k') === 'obra') { preencherObra(t.value); }
+    if (t.getAttribute('data-rk') === 'item') { completarItem(t); }
+  }, true);
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t || !t.closest || !t.closest(MODAL)) { return; }
+    if (t.getAttribute('data-rk') === 'item') { completarItem(t); }
+    if (t.getAttribute('data-rk') === 'quant') { calcularTarefa(t); }
+  }, true);
+  [0, 500, 1200, 2500].forEach(function (ms) { setTimeout(function () { iniciar(); melhorarCampos(); }, ms); });
+  try { console.log('[PATCH184] Diario integrado com obras, itens, colaboradores e calculo de m².'); } catch (e) {}
+})();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
@@ -76534,3 +76741,4 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 <!-- PATCH172 aplicado em 2026-09-18 16:42:44 -->
 <!-- PATCH175 aplicado em 2026-09-19 13:37:40 -->
 <!-- PATCH183: desativar backup completo em localStorage quando a cota exceder -->
+<!-- PATCH184: Diario integrado com obras, itens, colaboradores e calculo automatico de m2 -->
