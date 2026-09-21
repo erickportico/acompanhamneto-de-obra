@@ -22564,7 +22564,8 @@ function renderLancamentosPgto() {
                     filtro: '',
                     editandoId: null,
                     paiNovo: null,
-                    carregado: false
+                    carregado: false,
+                    fonte: null   /* array de tarefas do db que este estado espelha */
                   };
                 
                   /* ------------------------------------------------------------------ *
@@ -22663,6 +22664,7 @@ function renderLancamentosPgto() {
                     }
                     if (!Array.isArray(obra.obraflow.tarefas)) obra.obraflow.tarefas = [];
                     st.tarefas = obra.obraflow.tarefas.map(function (t) { return tarefaNova(t); });
+                    st.fonte = obra.obraflow.tarefas;
                     st.carregado = true;
                   };
                 
@@ -22672,6 +22674,7 @@ function renderLancamentosPgto() {
                     if (!obra.obraflow) obra.obraflow = { versao: 1, titulo: '', tarefas: [] };
                     obra.obraflow.versao = 1;
                     obra.obraflow.tarefas = st.tarefas;
+                    st.fonte = obra.obraflow.tarefas;
                     var tt = document.getElementById('ofTitulo');
                     if (tt) obra.obraflow.titulo = tt.innerText || '';
                     try { localStorage.setItem('obrasDB_v8', JSON.stringify(db)); } catch (e) { console.warn('[PATCH157] Erro ao salvar EAP no localStorage:', e); }  /* PATCH157_EAP_DIRECT_SAVE */
@@ -22679,6 +22682,15 @@ function renderLancamentosPgto() {
                     try { if (typeof sincronizarBancoNuvem === 'function') sincronizarBancoNuvem(); } catch (e) {}
                   };
                 
+                  /* O estado do Plano Mestre (st.tarefas) e uma copia feita em OF.load(). Se o db mudar por fora
+                     (nuvem, restauracao, troca de obra), a copia fica velha e o proximo salvar gravaria a versao
+                     velha por cima. fonteMudou() detecta isso; quem chama recarrega com OF.load(). */
+                  function fonteMudou() {
+                    var o = obraAtual();
+                    if (!o || !o.obraflow || !Array.isArray(o.obraflow.tarefas)) return false;
+                    return o.obraflow.tarefas !== st.fonte;
+                  }
+                  
                   /* ------------------------------------------------------------------ *
                    * 3) hierarquia: filhos, EAP, recalculo das fases
                    * ------------------------------------------------------------------ */
@@ -22951,6 +22963,7 @@ function renderLancamentosPgto() {
                 
                   OF.render = function () {
                     if (!document.getElementById('tab-' + ABA)) return;
+                    if (!st.editandoId && fonteMudou()) OF.load();
                     recalcular(null);
                     var lista = achatar();
                     var busca = (st.filtro || '').trim().toLowerCase();
@@ -23283,7 +23296,10 @@ function renderLancamentosPgto() {
                   };
                 
                   OF.editar = function (id) {
-                    var t = porId(id); if (!t) return;
+                    if (fonteMudou()) OF.load();
+                    var t = porId(id);
+                    if (!t) { OF.load(); t = porId(id); }
+                    if (!t) { alerta('Nao encontrei esta tarefa (ela pode ter sido removida em outro computador). O plano foi recarregado.'); OF.render(); return; }
                     st.editandoId = id;
                     st.paiNovo = null;
                     setVal('ofFNome', t.nome);
@@ -23323,6 +23339,7 @@ function renderLancamentosPgto() {
                       obs: val('ofFObs') || ''
                     };
                 
+                    if (fonteMudou()) { var idEd = st.editandoId, idPai = st.paiNovo; OF.load(); st.editandoId = idEd; st.paiNovo = idPai; }
                     if (st.editandoId) {
                       var t = porId(st.editandoId);
                       if (t) for (var k in dados) t[k] = dados[k];
@@ -65758,8 +65775,10 @@ if (document.readyState === 'loading') {
         html body #p125Aviso button { pointer-events: auto !important; }
         /* qualquer caixa do painel nasce no centro da tela */
         html body .p130-centro {
+          /* CORRECAO: a classe nao forca mais display:flex. Antes ela ficava colada na janela depois
+             de fechada e a janela continuava na tela, bloqueando os cliques ate atualizar a pagina. */
           position: fixed !important; inset: 0 !important;
-          display: flex !important; align-items: center !important;
+          align-items: center !important;
           justify-content: center !important; padding: 18px !important;
         }
         html body .p130-centro > * {
@@ -66084,7 +66103,10 @@ if (document.readyState === 'loading') {
               if (!el || el.nodeType !== 1 || deixarQuieto(el)) { continue; }
               var est = null;
               try { est = window.getComputedStyle(el); } catch (e) { est = null; }
-              if (!est || est.display === 'none' || est.visibility === 'hidden') { continue; }
+              if (!est || est.display === 'none' || est.visibility === 'hidden') {
+                if (el.classList && el.classList.contains('p130-centro')) { el.classList.remove('p130-centro'); }  /* janela fechada: solta a marca */
+                continue;
+              }
               if (est.position !== 'fixed') { continue; }
               var r = el.getBoundingClientRect();
               if (!r || r.width < 40 || r.height < 40) { continue; }
