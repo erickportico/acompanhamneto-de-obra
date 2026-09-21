@@ -60068,39 +60068,83 @@ if (document.readyState === 'loading') {
           /* nome da obra a partir do id, sem quebrar se a obra nao existir mais */
           function nomeObra(id) {
             try {
-              var o = (db.obras || []).filter(function (x) { return x.id === id; })[0];
-              return o ? (o.nome || 'Obra sem nome') : 'Obra nao encontrada';
+              var o = (db.obras || []).filter(function (x) { return String(x.id) === String(id); })[0];
+              return o ? (o.nome || 'Obra sem nome') : 'Obra sem nome';
             } catch (e) { return 'Obra'; }
           }
-        
-          /* empresa do lancamento, ou a empresa do colaborador vinculado */
-          var cacheEmp = null;
-          function empresaDe(c) {
-            if (c && c.empresa) { return String(c.empresa).toUpperCase(); }
-            if (!cacheEmp) {
-              cacheEmp = {};
-              try {
-                (db.obras || []).forEach(function (o) {
-                  ['colaboradores', 'colaboradoresPgto'].forEach(function (k) {
-                    (o[k] || []).forEach(function (p) {
-                      if (p && p.nome && p.empresa) {
-                        cacheEmp[String(p.nome).trim().toLowerCase()] = String(p.empresa).toUpperCase();
-                      }
-                    });
+
+          function semAcentoP120(v) {
+            return String(v == null ? '' : v).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          }
+          function chaveNomeP120(v) {
+            return semAcentoP120(v).toLowerCase().replace(/\s+/g, ' ').trim();
+          }
+          function limparNomeP120(v) {
+            var s = String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+            s = s.replace(/\s*[\-–—]\s*[A-Za-z0-9Á-ú.&]+$/g, '');
+            s = s.replace(/\s*\((profissional|ajudante|profissional\/ajudante)\)\s*$/i, '');
+            return s.replace(/\s+/g, ' ').trim();
+          }
+          function chaveCatP120(v) {
+            var s = chaveNomeP120(v);
+            if (/produc/.test(s) || /pagamento produc/.test(s)) return 'producao';
+            return s;
+          }
+
+          var cachePessoa = null;
+          function mapaPessoaP120() {
+            if (cachePessoa) return cachePessoa;
+            var porChave = {}, porId = {};
+            try {
+              (db.obras || []).forEach(function (o) {
+                ['colaboradores', 'colaboradoresPgto'].forEach(function (k) {
+                  (o[k] || []).forEach(function (p) {
+                    if (!p) return;
+                    var nome = limparNomeP120(p.nome || '');
+                    var ch = chaveNomeP120(nome);
+                    var emp = String(p.empresa || '').trim().toUpperCase();
+                    var rec = { nome: nome || String(p.nome || '').trim(), empresa: emp };
+                    if (p.id) porId[String(p.id)] = rec;
+                    if (ch && !porChave[ch]) porChave[ch] = rec;
                   });
                 });
-              } catch (e) { cacheEmp = {}; }
-            }
-            var n = String((c && c.colaborador) || '').trim().toLowerCase();
-            return cacheEmp[n] || 'SEM EMPRESA';
+              });
+            } catch (e) {}
+            cachePessoa = { porChave: porChave, porId: porId };
+            return cachePessoa;
           }
-        
+          function pessoaDaLinha(c) {
+            var mp = mapaPessoaP120();
+            if (c && c.colaboradorId && mp.porId[String(c.colaboradorId)]) {
+              return mp.porId[String(c.colaboradorId)];
+            }
+            var ch = chaveNomeP120(limparNomeP120((c && c.colaborador) || ''));
+            return (ch && mp.porChave[ch]) || null;
+          }
+
+          function empresaDe(c) {
+            if (c && c.empresa && String(c.empresa).trim() && String(c.empresa).toUpperCase() !== 'SEM EMPRESA') {
+              return String(c.empresa).trim().toUpperCase();
+            }
+            var p = pessoaDaLinha(c);
+            return (p && p.empresa) ? p.empresa : 'SEM EMPRESA';
+          }
+
+          function nomeColabGrupo(c) {
+            var p = pessoaDaLinha(c);
+            if (p && p.nome) return p.nome;
+            var n = limparNomeP120((c && c.colaborador) || '');
+            return n || 'Sem colaborador';
+          }
+
           function chaveDe(c, grupo) {
             if (grupo === 'obra') { return nomeObra(c.obraId); }
-            if (grupo === 'regiao') { return String(c.regiao || '').trim() || 'Sem regiao'; }
-            if (grupo === 'colab') { return String(c.colaborador || '').trim() || 'Sem colaborador'; }
+            if (grupo === 'regiao') { return String(c.regiao || '').replace(/\s+/g, ' ').trim() || 'Sem regiao'; }
+            if (grupo === 'colab') { return nomeColabGrupo(c); }
             if (grupo === 'empresa') { return empresaDe(c); }
-            return String(c.categoria || '').trim() || 'Sem categoria';
+            var cat = String(c.categoria || '').trim();
+            if (chaveCatP120(cat) === 'producao') return 'Produção';
+            return cat || 'Sem categoria';
           }
         
           /* soma os lancamentos pelo agrupamento escolhido, do maior para o menor */
@@ -73634,9 +73678,9 @@ if (document.readyState === 'loading') {
           else tick();
         })();
     </script>
-<!-- <script src="patch_relocate_header_buttons.js"></script> -->
-<!-- <script src="patch_correcao.js"></script> -->
-<!-- <script src="patch_centro-custo-dinamico.js"></script> -->
+    <script src="patch_relocate_header_buttons.js"></script>
+<script src="patch_correcao.js"></script>
+<script src="patch_centro-custo-dinamico.js"></script>
 <script src="supabase_auth_client.js"></script>
 
 
