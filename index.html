@@ -22458,7 +22458,7 @@ function renderLancamentosPgto() {
                   /* roda uma funcao com as linhas de Producao presentes, e limpa no fim */
                   function comProducao(fn, ctx, args){
                     limpar();
-                    try { montar(); } catch(e){ console.error("PATCH 54 montar:", e); }
+                    /* PATCH186: nao monta mais linhas fantasma; getCustosFiltered unifica */
                     try {
                       return fn.apply(ctx, args);
                     } finally {
@@ -73634,9 +73634,9 @@ if (document.readyState === 'loading') {
           else tick();
         })();
     </script>
-<!-- <script src="patch_relocate_header_buttons.js"></script> -->
-<!-- <script src="patch_correcao.js"></script> -->
-<!-- <script src="patch_centro-custo-dinamico.js"></script> -->
+    <script src="patch_relocate_header_buttons.js"></script>
+<script src="patch_correcao.js"></script>
+<script src="patch_centro-custo-dinamico.js"></script>
 <script src="supabase_auth_client.js"></script>
 
 
@@ -76789,6 +76789,173 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   try { console.log('[PATCH184] Diario integrado com obras, itens, colaboradores e calculo de m².'); } catch (e) {}
 })();
 </script>
+
+<script id="patch186CustoUnico">
+(function () {
+  "use strict";
+  if (window.__patch186CustoUnico) return;
+  window.__patch186CustoUnico = true;
+
+  function obras() {
+    try { return (window.db && window.db.obras) || []; } catch (e) { return []; }
+  }
+  function pessoas(o) {
+    var porNome = {}, porId = {};
+    function ver(p) {
+      if (!p) return;
+      var nome = String(p.nome || "").trim();
+      var emp = String(p.empresa || "").trim();
+      var id = String(p.id || "").trim();
+      if (nome) porNome[nome.toLowerCase()] = { nome: nome, empresa: emp };
+      if (id) porId[id] = { nome: nome, empresa: emp };
+    }
+    ["colaboradores", "colaboradoresPgto"].forEach(function (k) {
+      (o[k] || []).forEach(ver);
+    });
+    return { porNome: porNome, porId: porId };
+  }
+  function nomeDe(mp, id) {
+    var x = mp.porId[String(id || "")];
+    return x && x.nome ? x.nome : String(id || "").trim();
+  }
+  function empDe(mp, nome, id) {
+    var a = mp.porNome[String(nome || "").toLowerCase()];
+    if (a && a.empresa) return a.empresa;
+    var b = mp.porId[String(id || "")];
+    return (b && b.empresa) || "";
+  }
+  function dataLanc(l) {
+    var d = String((l && l.data) || "").slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+    if (l && l.mesAnoKey) return String(l.mesAnoKey) + "-01";
+    return d;
+  }
+  function regio(o, l) {
+    var cid = String((l && (l.cidade || l.city)) || "").trim();
+    var uf = String((l && (l.estado || l.uf)) || "").trim();
+    if (cid && uf) return cid + " - " + uf;
+    if (cid) return cid;
+    var r = String((l && l.regiao) || (o && o.regiao) || "").trim();
+    return r && r.toLowerCase() !== "geral" ? r : (cid || r || "");
+  }
+  function chave(c) {
+    var cat = String(c.categoria || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (/produc/.test(cat)) cat = "producao";
+    return [String(c.obraId || ""), String(c.data || "").slice(0, 10),
+      String(c.colaborador || "").trim().toLowerCase(),
+      String(Math.round((Number(c.valor) || 0) * 100)), cat].join("|");
+  }
+  function extrasProducao() {
+    var extra = [];
+    obras().forEach(function (o) {
+      if (!o) return;
+      var mp = pessoas(o);
+      (o.lancamentosProducao || []).forEach(function (l) {
+        if (!l) return;
+        function add(idPes, valor, tipo) {
+          var v = Math.round((Number(valor) || 0) * 100) / 100;
+          if (!(v > 0)) return;
+          var nome = nomeDe(mp, idPes);
+          if (!nome) nome = "Colaborador";
+          extra.push({
+            id: "prod186_" + String(o.id) + "_" + String(l.id || l.data || "") + "_" + tipo + "_" + String(idPes),
+            obraId: o.id,
+            data: dataLanc(l),
+            categoria: "Produção",
+            descricao: "Pagamento de Produção — " + nome + " (" + (tipo === "prof" ? "Profissional" : "Ajudante") + ")",
+            valor: v,
+            regiao: regio(o, l),
+            colaborador: nome,
+            empresa: empDe(mp, nome, idPes),
+            __origem: "producao"
+          });
+        }
+        var vP = Number(l.valorProf || l.valorProfissional || 0);
+        var vA = Number(l.valorAjud || l.valorAjudante || 0);
+        var nP = (l.profissionais || []).length || 1;
+        var nA = (l.ajudantes || []).length || 1;
+        (l.profissionais || []).forEach(function (pid) { add(pid, nP ? vP / nP : vP, "prof"); });
+        (l.ajudantes || []).forEach(function (aid) { add(aid, nA ? vA / nA : vA, "ajud"); });
+      });
+    });
+    return extra;
+  }
+  function enriquecer(c) {
+    if (!c) return c;
+    var o = null;
+    obras().forEach(function (x) { if (String(x.id) === String(c.obraId)) o = x; });
+    if (!o) return c;
+    if (!c.obraId) c.obraId = o.id;
+    var mp = pessoas(o);
+    var n = String(c.colaborador || "").trim();
+    if (!c.empresa || String(c.empresa).toUpperCase() === "SEM EMPRESA") {
+      var e = empDe(mp, n, c.colaboradorId);
+      if (e) c.empresa = e;
+    }
+    if (!c.regiao || String(c.regiao).toLowerCase() === "geral") {
+      var r = regio(o, c);
+      if (r) c.regiao = r;
+    }
+    return c;
+  }
+  function unificar(lista) {
+    var out = [], seen = {};
+    function mete(c) {
+      if (!c) return;
+      if (String(c.id || "").indexOf("p54_prod_") === 0) return;
+      enriquecer(c);
+      var k = chave(c);
+      if (seen[k]) return;
+      seen[k] = 1;
+      out.push(c);
+    }
+    (lista || []).forEach(mete);
+    extrasProducao().forEach(mete);
+    return out;
+  }
+  function passaFiltro(c) {
+    function val(id) { var el = document.getElementById(id); return el ? (el.value || "") : ""; }
+    var obraId = val("custoFilterObra");
+    var mes = val("custoFilterMes");
+    var regiao = val("custoFilterRegiao").trim().toLowerCase();
+    var colab = val("custoFilterColaborador");
+    var emp = val("custoFilterEmpresa").toUpperCase();
+    if (obraId && String(c.obraId) !== String(obraId)) return false;
+    var dRef = String(c.data || "");
+    if (mes && dRef.substring(0, 7) !== mes) return false;
+    if (regiao && String(c.regiao || "").toLowerCase().indexOf(regiao) === -1) return false;
+    if (colab && String(c.colaborador || "") !== colab) return false;
+    if (emp) {
+      if (String(c.empresa || "").toUpperCase() !== emp) return false;
+    }
+    return true;
+  }
+  function wrap() {
+    var fn = window.getCustosFiltered;
+    if (typeof fn !== "function" || fn.__p186) return false;
+    var orig = fn;
+    var w = function () {
+      var base = orig.apply(this, arguments) || [];
+      var mistos = unificar(base);
+      if (fn.__p186skipFilter) return mistos;
+      return mistos.filter(passaFiltro);
+    };
+    w.__p186 = true;
+    window.getCustosFiltered = w;
+    try { getCustosFiltered = w; } catch (e) {}
+    return true;
+  }
+  var n = 0;
+  function tick() {
+    wrap();
+    n += 1;
+    if (n < 25) setTimeout(tick, 300);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
+  else tick();
+})();
+</script>
+
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
