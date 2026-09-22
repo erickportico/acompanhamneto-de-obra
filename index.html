@@ -61062,7 +61062,7 @@ if (document.readyState === 'loading') {
             window.renderCustoDashboard = function () {
               var r = antigo.apply(this, arguments);
               try {
-                cacheEmp = null;
+                cachePessoa = null;
                 E.lista = (typeof window.getCustosFiltered === 'function') ? window.getCustosFiltered() : [];
                 E.destaque = -1;
                 if (montar()) { pintar(); }
@@ -77050,6 +77050,47 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iniciar);
   else iniciar();
+})();
+</script>
+
+
+<script id="patch190AuthLocal">
+(function () {
+  if (window.__p190Auth) return;
+  window.__p190Auth = true;
+  if (!window.supabaseClient && window._supabase) window.supabaseClient = window._supabase;
+  function sb() {
+    return window._supabase || window.supabaseClient || null;
+  }
+  var alvo = window.PainelAuthSupabase || {};
+  window.PainelAuthSupabase = alvo;
+  if (typeof alvo.entrarComEmail !== "function") {
+    alvo.entrarComEmail = function (email, senha) {
+      var c = sb();
+      if (!c || !c.auth || !c.auth.signInWithPassword) {
+        return Promise.reject(new Error("SDK do Supabase nao carregou. Confira a internet (cdn.jsdelivr.net)."));
+      }
+      return c.auth.signInWithPassword({ email: String(email || "").trim(), password: String(senha || "") })
+        .then(function (r) {
+          if (r.error) throw new Error(r.error.message || "E-mail ou senha invalidos.");
+          var user = r.data && r.data.user;
+          if (!user) throw new Error("E-mail ou senha invalidos.");
+          var perfil = { usuario: email, nome: email, perfil: "usuario", trocar: false };
+          return c.from("painel_perfis").select("*").eq("id", user.id).limit(1).then(function (p) {
+            var linha = p && p.data && p.data[0];
+            if (linha) {
+              perfil = {
+                usuario: linha.email || email,
+                nome: linha.nome || email,
+                perfil: linha.perfil || "usuario",
+                trocar: !!linha.trocar_senha
+              };
+            }
+            return { user: user, perfil: perfil };
+          }).catch(function () { return { user: user, perfil: perfil }; });
+        });
+    };
+  }
 })();
 </script>
 
