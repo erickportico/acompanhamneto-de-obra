@@ -73662,10 +73662,12 @@ if (document.readyState === 'loading') {
           else tick();
         })();
     </script>
+    <!-- PATCH188: scripts locais ausentes no Render (404 / MIME text/html)
     <script src="patch_relocate_header_buttons.js"></script>
-<script src="patch_correcao.js"></script>
-<script src="patch_centro-custo-dinamico.js"></script>
-<script src="supabase_auth_client.js"></script>
+    <script src="patch_correcao.js"></script>
+    <script src="patch_centro-custo-dinamico.js"></script>
+    <script src="supabase_auth_client.js"></script>
+    -->
 
 
     <!-- PATCH148_CORRECOES_USUARIO -->
@@ -77003,6 +77005,35 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     } catch (e) {}
     return orig.call(this, alvo, opc);
   };
+})();
+</script>
+
+
+<script id="patch188MesLabel">
+(function () {
+  if (window.__p188Mes) return;
+  window.__p188Mes = true;
+  var MESES = ["janeiro","fevereiro","marco","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  function ymAgora() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+  }
+  function valido(v) { return /^\d{4}-\d{2}$/.test(String(v || "")); }
+  function garantir() {
+    var c = document.getElementById("custoFilterMes");
+    if (!c) return;
+    if (!valido(c.value)) {
+      c.value = ymAgora();
+      try { c.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
+    }
+  }
+  function iniciar() {
+    garantir();
+    setTimeout(garantir, 400);
+    setTimeout(garantir, 1600);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iniciar);
+  else iniciar();
 })();
 </script>
 
