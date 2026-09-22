@@ -47988,6 +47988,7 @@ if (document.readyState === 'loading') {
                   '<h3 id="p92Tit">Relatório <span>FPDO</span> &mdash; Fique por dentro da obra</h3>' +
                   '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
                     '<button class="p92-btn" type="button" data-a="lista">Relatórios salvos</button>' +
+                    '<button class="p92-btn p92-btn-ok" type="button" data-a="mestre">Modelo mestre PPTX</button>' +
                     '<button class="p92-btn" type="button" data-a="fechar">Fechar</button>' +
                   '</div>' +
                 '</header>' +
@@ -48921,6 +48922,10 @@ if (document.readyState === 'loading') {
             ev.preventDefault();
         
             if (a === 'fechar') { fechar(); return; }
+            if (a === 'mestre') {
+              if (typeof window.p192AbrirRelatorio === 'function') { window.p192AbrirRelatorio(); }
+              return;
+            }
             if (a === 'sec') { sec = b.getAttribute('data-s') || 'dados'; render(); return; }
             if (a === 'relAnterior') { navegarRelatorio(-1); return; }
             if (a === 'relProximo') { navegarRelatorio(1); return; }
@@ -77237,6 +77242,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     document.body.appendChild(fundo);
   }
 
+  window.p192AbrirRelatorio = abrir;
   function botao() {
     if (document.getElementById("p192Btn")) return;
     var b = document.createElement("button");
