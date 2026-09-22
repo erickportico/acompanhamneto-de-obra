@@ -53001,9 +53001,27 @@ if (document.readyState === 'loading') {
             var s = el.getAttribute('style') || '';
             function v(nome) {
               var m = new RegExp(nome + '\\s*:\\s*(-?[0-9.]+)%').exec(s);
-              return m ? n1(m[1]) : 0;
+              return m ? n1(m[1]) : null;
             }
-            return { l: v('left'), t: v('top'), w: v('width'), h: v('height') };
+            var g = { l: v('left'), t: v('top'), w: v('width'), h: v('height') };
+            if (g.l == null || g.t == null || !g.w || !g.h) {
+              try {
+                var f = folhaDe(el);
+                var re = el.getBoundingClientRect();
+                var rf = f ? f.getBoundingClientRect() : re;
+                var rw = rf.width || 1, rh = rf.height || 1;
+                if (g.l == null) g.l = n1((re.left - rf.left) / rw * 100);
+                if (g.t == null) g.t = n1((re.top - rf.top) / rh * 100);
+                if (!g.w) g.w = n1(re.width / rw * 100);
+                if (!g.h) g.h = n1(re.height / rh * 100);
+              } catch (e) {
+                if (g.l == null) g.l = 0;
+                if (g.t == null) g.t = 0;
+                if (!g.w) g.w = 20;
+                if (!g.h) g.h = 8;
+              }
+            }
+            return g;
           }
         
           function porGeom(el, g) {
@@ -53097,6 +53115,7 @@ if (document.readyState === 'loading') {
               }
               var o0 = el.__p99o;
               /* volta ao estado original antes de aplicar (deixa tudo previsivel) */
+              if (el.getAttribute('contenteditable') === 'true') { return; }
               porGeom(el, o0.g);
               if (el.innerHTML !== o0.html) { el.innerHTML = o0.html; }
               el.style.fontSize = o0.fs;
@@ -53410,7 +53429,7 @@ if (document.readyState === 'loading') {
             el.removeAttribute('contenteditable');
             var novo = textoLimpo(el);
             var velho = el.__p99txt == null ? '' : el.__p99txt;
-            if (novo === velho) { mudou(); return; }
+            if (novo === velho) { return; }
             guardaPassado();
             var r = regDe(el, true);
             if (r) { r.v = novo; gravar(); }
