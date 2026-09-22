@@ -291,7 +291,7 @@
                 pendente = true;
                 setTimeout(function () { pendente = false; rodarTodas(); }, 60);
               });
-              mo.observe(document.documentElement, { childList: true, subtree: true });
+              mo.observe(document.documentElement, { childList: true, subtree: false });
             }
           } catch (e) { /* ignora */ }
         
@@ -41408,7 +41408,7 @@ function renderLancamentosPgto() {
                         montarLista();
                         centralizarTelas();
                       });
-                      mo.observe(document.documentElement, { childList: true, subtree: true });
+                      mo.observe(document.documentElement, { childList: true, subtree: false });
                     } catch (e) {}
                   }
                 
@@ -54179,7 +54179,7 @@ if (document.readyState === 'loading') {
                   }
                 }
               });
-              mo.observe(document.body, { childList: true, subtree: true });
+              mo.observe(document.body, { childList: true, subtree: false });
             } catch (e3) {}
             setInterval(correr, 1200);
             pedir();
@@ -55079,7 +55079,7 @@ if (document.readyState === 'loading') {
             frente();
             try {
               var mo = new MutationObserver(function () { estilo(); frente(); });
-              mo.observe(document.body, { childList: true, subtree: true });
+              mo.observe(document.body, { childList: true, subtree: false });
             } catch (e) {}
             setInterval(function () { estilo(); frente(); }, 1500);
           }
@@ -55249,23 +55249,7 @@ if (document.readyState === 'loading') {
         
           /* ---------------- 5) segurar os relogios rapidos durante o arraste ---------------- */
           var intervaloOrig = window.setInterval;
-          if (typeof intervaloOrig === 'function') {
-            window.setInterval = function (fn, ms) {
-              var tempo = parseFloat(ms);
-              if (typeof fn !== 'function' || isNaN(tempo) || tempo > 3000) {
-                return intervaloOrig.apply(window, arguments);
-              }
-              var extras = Array.prototype.slice.call(arguments, 2);
-              var ult = 0;
-              var bater = function () {
-                if (arrastando()) { return; }
-                if (est.editando && (agora() - ult) < 1000) { return; }
-                ult = agora();
-                try { fn.apply(window, extras); } catch (e) {}
-              };
-              return intervaloOrig(bater, tempo);
-            };
-          }
+          /* PATCH187: nao envolve mais TODO setInterval com arrastando/editando */
         
           /* ---------------- comecar ---------------- */
           function iniciar() {
@@ -57376,7 +57360,7 @@ if (document.readyState === 'loading') {
                 if (document.querySelector('#agModal .ag-form')) { montarOpcoes(); }
               });
               if (document.body) {
-                obs.observe(document.body, { childList: true, subtree: true });
+                obs.observe(document.body, { childList: true, subtree: false });
               }
             } catch (e) {}
             setTimeout(function () { clearInterval(t); }, 60000);
@@ -58564,7 +58548,7 @@ if (document.readyState === 'loading') {
             /* a tela do boletim e remontada varias vezes: mantem tudo em ordem */
             try {
               var obs = new MutationObserver(function () { ligar(); sincronizar(); });
-              obs.observe(document.body, { childList: true, subtree: true });
+              obs.observe(document.body, { childList: true, subtree: false });
             } catch (e) {}
         
             setInterval(function () { ligar(); sincronizar(); }, 1200);
@@ -59108,7 +59092,7 @@ if (document.readyState === 'loading') {
               if (pendente) { clearTimeout(pendente); }
               pendente = setTimeout(function () { pendente = null; aplicarTudo(); }, 40);
             });
-            try { ob.observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+            try { ob.observe(document.body, { childList: true, subtree: false }); } catch (e) {}
           }
         
           function iniciar() {
@@ -70043,7 +70027,7 @@ if (document.readyState === 'loading') {
             try {
               if (window.MutationObserver && document.body) {
                 var ob = new MutationObserver(function () { olhar(); });
-                ob.observe(document.body, { childList: true, subtree: true });
+                ob.observe(document.body, { childList: true, subtree: false });
                 window.__p136Olho = ob;
               }
             } catch (e) { }
@@ -70516,7 +70500,7 @@ if (document.readyState === 'loading') {
             try {
               if (window.MutationObserver && document.body) {
                 var ob = new MutationObserver(function () { olhar(); });
-                ob.observe(document.body, { childList: true, subtree: true });
+                ob.observe(document.body, { childList: true, subtree: false });
                 window.__p137Olho = ob;
               }
             } catch (e) { }
@@ -73834,7 +73818,7 @@ if (document.readyState === 'loading') {
 
   limparMenu();
   if (window.MutationObserver) {
-    new MutationObserver(limparMenu).observe(document.documentElement, { childList: true, subtree: true });
+    new MutationObserver(limparMenu).observe(document.documentElement, { childList: true, subtree: false });
   }
   [0, 250, 1000, 2500, 5000].forEach(function (ms) { setTimeout(limparMenu, ms); });
 })();
@@ -75401,7 +75385,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   /* reaplica as posicoes guardadas depois que os slides sao redesenhados */
   try {
     var mo = new MutationObserver(function () { setTimeout(aplicarGuardadas, 30); });
-    mo.observe(document.body, { childList: true, subtree: true });
+    mo.observe(document.body, { childList: true, subtree: false });
   } catch (e) {}
   setInterval(aplicarGuardadas, 800);
   setTimeout(aplicarGuardadas, 300);
@@ -76813,7 +76797,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
         ligarAoDiario();
         melhorarCampos();
       });
-      observadorCorpo.observe(document.body, { childList: true, subtree: true });
+      observadorCorpo.observe(document.body, { childList: true, subtree: false });
     }
     ligarAoDiario();
   }
@@ -76997,6 +76981,28 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
   else tick();
+})();
+</script>
+
+
+<script id="patch187ObsTab">
+(function () {
+  if (window.__p187Obs) return;
+  window.__p187Obs = true;
+  var P = window.MutationObserver && window.MutationObserver.prototype;
+  if (!P || !P.observe || P.__p187) return;
+  P.__p187 = true;
+  var orig = P.observe;
+  P.observe = function (alvo, opc) {
+    opc = opc || {};
+    try {
+      var raiz = (alvo === document) || (alvo === document.documentElement) || (alvo === document.body);
+      if (raiz && opc.subtree) {
+        opc = { childList: !!opc.childList, subtree: false };
+      }
+    } catch (e) {}
+    return orig.call(this, alvo, opc);
+  };
 })();
 </script>
 
