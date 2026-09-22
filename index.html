@@ -55232,20 +55232,8 @@ if (document.readyState === 'loading') {
             };
           }
         
-          if (typeof MO === 'function') {
-            var Vigia = function (cb) {
-              if (typeof cb !== 'function') { return new MO(cb); }
-              var alvo = null;
-              var envolvido = envolver(cb);
-              alvo = new MO(function (regs) { envolvido(regs, alvo); });
-              return alvo;
-            };
-            try { Vigia.prototype = MO.prototype; } catch (e) {}
-            try {
-              window.MutationObserver = Vigia;
-              window.WebKitMutationObserver = Vigia;
-            } catch (e2) {}
-          }
+          /* PATCH189: nao envolve mais todo MutationObserver — isso atrasava
+             as alcas do FPDO e o arraste dos slides. */
         
           /* ---------------- 5) segurar os relogios rapidos durante o arraste ---------------- */
           var intervaloOrig = window.setInterval;
@@ -75237,6 +75225,10 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 <script id="patch173">
 (function () {
   if (window.__patch173) { return; }
+  if (window.__PS99) {
+    window.__patch173 = true;
+    return;
+  }
   window.__patch173 = true;
 
   var LS = 'p173-pos';
@@ -76999,7 +76991,12 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     opc = opc || {};
     try {
       var raiz = (alvo === document) || (alvo === document.documentElement) || (alvo === document.body);
-      if (raiz && opc.subtree) {
+      var fpdo = false;
+      try {
+        fpdo = !!(alvo && alvo.closest && alvo.closest('#p94Lupa, #p94Fundo, .p94-folha'));
+        if (alvo && alvo.id && (alvo.id === 'p94Lupa' || alvo.id === 'p94Fundo')) fpdo = true;
+      } catch (e2) {}
+      if (raiz && opc.subtree && !fpdo) {
         opc = { childList: !!opc.childList, subtree: false };
       }
     } catch (e) {}
