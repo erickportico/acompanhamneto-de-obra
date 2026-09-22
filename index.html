@@ -18,9 +18,9 @@
           if (window.__p90Pronto) { return; }
           window.__p90Pronto = true;
         
-          var JANELA = 2000;     /* tamanho da janela de medicao, em ms */
-          var TETO_MS = 700;     /* tempo maximo de CPU por vigia dentro da janela */
-          var ESPERA = 300;      /* descanso minimo entre duas execucoes de um vigia amplo */
+          var JANELA = 2000;
+          var TETO_MS = 400;     /* PATCH186: freia vigia mais cedo */
+          var ESPERA = 800;      /* PATCH186 */
           var ATRASO = 60;       /* agrupa varias mudancas seguidas numa so execucao */
           var registros = [];
         
@@ -274,7 +274,7 @@
           if (window.__varreduraUnica) { return; }
         
           var tarefas = [];
-          var INTERVALO = 900; /* igual ao menor intervalo usado antes, para nao atrasar nenhum patch */
+          var INTERVALO = 4000; /* PATCH186: varredura unica mais lenta */
           var pendente = false;
         
           function rodarTodas() {
@@ -330,8 +330,8 @@
         
           window.__p119Agenda = true;
         
-          var MINIMO = 250;      /* ritmos mais rapidos que isso ficam como estavam */
-          var TICK = 250;        /* batida do relogio mestre */
+          var MINIMO = 800;      /* PATCH186: agrupa ritmos curtos */
+          var TICK = 1000;       /* PATCH186: menos CPU */
           var LIMITE_PESADA = 150;   /* ms gastos numa rodada para considerar pesada */
           var TETO_ESTICADO = 3000;  /* ritmo maximo depois de afrouxar */
           var SONO = 2500;       /* ate esse ritmo, a tarefa dorme com a aba escondida */
