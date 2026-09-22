@@ -5677,6 +5677,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                         <button class="tab-btn" id="btn-tab-ctm" onclick="trocarAba('ctm')">🔲 Contramarco (CTM)</button>
                         <button class="tab-btn" id="btn-tab-custo" onclick="trocarAba('custo')">📊 Centro de Custos</button>
                         <button class="tab-btn" id="btn-tab-fpdo" type="button" onclick="if (window.p92AbrirFpdo) { window.p92AbrirFpdo(); } else { alert('O Relatório FPDO ainda está carregando. Tente novamente.'); }">📋 Relatório FPDO</button>
+                        <button class="tab-btn" id="btn-tab-fpdo-mestre" type="button" onclick="if (window.p193Abrir) window.p193Abrir();">FPDO</button>
                         <button class="tab-btn" id="btn-tab-admin" style="display:none" onclick="trocarAba('admin')">🔧 Administração</button>
                     </div>
 
@@ -48004,6 +48005,7 @@ if (document.readyState === 'loading') {
                   '<button class="p92-btn" type="button" data-a="imprimir">Imprimir / PDF</button>' +
                   '<button class="p92-btn" type="button" data-a="pdf">Salvar PDF</button>' +
                   '<button class="p92-btn" type="button" data-a="editorVisual">Editor visual 16:9</button>' +
+                  '<button class="p92-btn" type="button" data-a="jsonMestre">JSON modelo mestre</button>' +
                   '<button class="p92-btn" type="button" data-a="exportar">Exportar arquivo</button>' +
                   '<button class="p92-btn" type="button" data-a="importar">Importar arquivo</button>' +
                   '<button class="p92-btn p92-btn-no" type="button" data-a="excluir">Excluir</button>' +
@@ -48017,6 +48019,40 @@ if (document.readyState === 'loading') {
             return f;
           }
         
+          function baixarJsonMestre() {
+            var d = atual || fpdoNovo(null);
+            var out = {
+              obra: d.obra || '',
+              cliente: d.cliente || '',
+              local: d.local || d.cidadeUf || '',
+              responsavel: d.responsavel || '',
+              gestor: d.gestor || '',
+              mes_atual: d.mes || '',
+              mes_anterior: '',
+              data_relatorio: d.dataRelatorio || '',
+              titulo: d.titulo || '',
+              atividades_portico: d.atividadesPortico || '',
+              atividades_cliente: d.atividadesCliente || '',
+              proximas_portico: d.proximasPortico || '',
+              proximas_cliente: d.proximasCliente || '',
+              destaques: d.destaquesMes || '',
+              riscos: d.riscos || '',
+              pendencias: (d.pendencias || []).map(function (p) {
+                return { desc: p.desc || p.pavimento || '', responsavel: p.responsavel || '', prazo: p.prazo || '' };
+              })
+            };
+            try {
+              var a = document.createElement('a');
+              a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }));
+              a.download = 'fpdo_mestre_' + String(d.obra || 'obra').replace(/\s+/g, '_') + '.json';
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(function () {
+                try { URL.revokeObjectURL(a.href); document.body.removeChild(a); } catch (e2) {}
+              }, 400);
+            } catch (e) {}
+          }
+
           function fechar() {
             var f = document.getElementById('p92Fundo');
             if (f) { f.style.display = 'none'; }
@@ -48926,6 +48962,7 @@ if (document.readyState === 'loading') {
               if (typeof window.p192AbrirRelatorio === 'function') { window.p192AbrirRelatorio(); }
               return;
             }
+            if (a === 'jsonMestre') { baixarJsonMestre(); return; }
             if (a === 'sec') { sec = b.getAttribute('data-s') || 'dados'; render(); return; }
             if (a === 'relAnterior') { navegarRelatorio(-1); return; }
             if (a === 'relProximo') { navegarRelatorio(1); return; }
@@ -77256,6 +77293,114 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", botao);
   else botao();
+})();
+</script>
+
+
+<script id="patch193FpdoMestre">
+(function () {
+  if (window.__p193) return;
+  window.__p193 = true;
+  var KEY = "p193_fpdo_mestre";
+  function obraNome() {
+    try { if (window.obraAtual && window.obraAtual.nome) return String(window.obraAtual.nome); } catch (e) {}
+    return "";
+  }
+  function ler() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
+  function gravar(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
+  function val(id) { var e = document.getElementById(id); return e ? e.value : ""; }
+  function inp(id, lab, v) {
+    return '<label style="display:block;font-size:12px;color:#94a3b8">' + lab +
+      '<input id="' + id + '" value="' + String(v || "").replace(/"/g, "&quot;") +
+      '" style="display:block;width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid #334155;background:#020617;color:#fff"></label>';
+  }
+  function area(id, lab, v) {
+    return '<label style="display:block;margin-top:8px;font-size:12px;color:#94a3b8">' + lab +
+      '<textarea id="' + id + '" rows="3" style="display:block;width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid #334155;background:#020617;color:#fff">' +
+      String(v || "").replace(/</g, "&lt;") + "</textarea></label>";
+  }
+  function coletar() {
+    return {
+      obra: val("p193obra") || obraNome(),
+      cliente: val("p193cli"),
+      local: val("p193loc"),
+      responsavel: val("p193resp"),
+      gestor: val("p193ges"),
+      mes_anterior: val("p193ant"),
+      mes_atual: val("p193atu"),
+      fab: val("p193fab"),
+      exp: val("p193exp"),
+      inst: val("p193inst"),
+      resumo: val("p193resumo"),
+      avancos: val("p193avancos"),
+      pendencias: val("p193pend"),
+      fotos: val("p193fotos"),
+      proximas: val("p193prox")
+    };
+  }
+  function cmd(d) {
+    var out = "RELATORIO MENSAL - " + (d.obra || "OBRA") + " - " + (d.mes_atual || "MES") + ".pptx";
+    return "python gerar_relatorio_mensal.py --modelo \"MODELO_MESTRE_RELATORIO_MENSAL_DE_OBRAS_PORTICO.pptx\" --json \"fpdo_mestre_" +
+      String(d.obra || "obra").replace(/\\s+/g, "_") + ".json\" --obra \"" + (d.obra || "") +
+      "\" --cliente \"" + (d.cliente || "") + "\" --local \"" + (d.local || "") +
+      "\" --responsavel \"" + (d.responsavel || "") + "\" --gestor \"" + (d.gestor || "") +
+      "\" --mes-anterior " + (d.mes_anterior || "Agosto") + " --mes-atual " + (d.mes_atual || "Setembro") +
+      " --out \"" + out + "\"";
+  }
+  function abrir() {
+    var old = document.getElementById("p193Fundo");
+    if (old) old.parentNode.removeChild(old);
+    var d = ler();
+    if (!d.obra) d.obra = obraNome();
+    var f = document.createElement("div");
+    f.id = "p193Fundo";
+    f.style.cssText = "position:fixed;inset:0;z-index:2147483500;background:rgba(2,6,23,.72);display:flex;justify-content:center;padding:18px;overflow:auto";
+    f.innerHTML = '<div style="background:#0b1220;color:#e2e8f0;width:min(920px,100%);border-radius:16px;padding:18px 20px 24px;border:1px solid #1e293b;font:14px/1.45 system-ui">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0;letter-spacing:.08em">FPDO</h2>' +
+      '<button type="button" id="p193x" style="border:0;background:#1e293b;color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer">Fechar</button></div>' +
+      '<p style="margin:0 0 12px;color:#94a3b8">Mesma ordem do modelo mestre. A primeira edição do PPTX ainda leva o visual do arquivo da Pórtico.</p>' +
+      '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">01 IDENTIFICAÇÃO</h3>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+      inp("p193obra","Obra",d.obra) + inp("p193cli","Cliente",d.cliente) +
+      inp("p193loc","Local",d.local) + inp("p193resp","Responsável",d.responsavel) +
+      inp("p193ges","Gestor Pórtico",d.gestor || "Erick dos Santos") +
+      inp("p193atu","Competência",d.mes_atual || "Setembro") +
+      inp("p193ant","Mês anterior (fotos)",d.mes_anterior || "Agosto") + "</div>" +
+      '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">02 STATUS</h3>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">' +
+      inp("p193fab","Fabricação %",d.fab) + inp("p193exp","Expedição %",d.exp) + inp("p193inst","Instalação %",d.inst) + "</div>" +
+      area("p193resumo","Resumo executivo",d.resumo) +
+      area("p193avancos","Avanço físico (etapa / % / leitura)",d.avancos) +
+      '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">03 PENDÊNCIAS</h3>' +
+      area("p193pend","Descrição · responsável · impacto · prazo",d.pendencias) +
+      '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">04 FOTOS</h3>' +
+      area("p193fotos","Frentes do comparativo mensal",d.fotos) +
+      '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">05 PRÓXIMAS ETAPAS</h3>' +
+      area("p193prox","Ações do próximo período",d.proximas) +
+      '<textarea id="p193cmd" readonly style="width:100%;height:70px;margin-top:14px;background:#020617;color:#93c5fd;border:1px solid #1e293b;border-radius:8px;padding:8px;font:11px ui-monospace,Consolas,monospace"></textarea>' +
+      '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+      '<button type="button" id="p193save" style="background:#c9a227;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Salvar no painel</button>' +
+      '<button type="button" id="p193json" style="background:#2563eb;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Baixar JSON</button>' +
+      '<button type="button" id="p193copy" style="background:#1e293b;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Copiar comando PPTX</button></div></div>';
+    document.body.appendChild(f);
+    function sync() { document.getElementById("p193cmd").value = cmd(coletar()); }
+    f.querySelectorAll("input,textarea").forEach(function (el) { if (el.id !== "p193cmd") el.addEventListener("input", sync); });
+    sync();
+    document.getElementById("p193x").onclick = function () { f.parentNode.removeChild(f); };
+    f.addEventListener("click", function (ev) { if (ev.target === f) f.parentNode.removeChild(f); });
+    document.getElementById("p193save").onclick = function () { gravar(coletar()); this.textContent = "Salvo"; };
+    document.getElementById("p193json").onclick = function () {
+      var x = coletar(); gravar(x);
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(x, null, 2)], { type: "application/json" }));
+      a.download = "fpdo_mestre_" + String(x.obra || "obra").replace(/\\s+/g, "_") + ".json";
+      document.body.appendChild(a); a.click();
+    };
+    document.getElementById("p193copy").onclick = function () {
+      try { navigator.clipboard.writeText(document.getElementById("p193cmd").value); this.textContent = "Copiado"; } catch (e) {}
+    };
+  }
+  window.p193Abrir = abrir;
 })();
 </script>
 
