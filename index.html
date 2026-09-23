@@ -77335,7 +77335,9 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
       '<button type="button" id="p193save" style="background:#c9a227;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Salvar no painel</button>' +
       '<button type="button" id="p193json" style="background:#2563eb;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Baixar JSON</button>' +
-      '<button type="button" id="p193copy" style="background:#1e293b;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Copiar comando PPTX</button></div></div>';
+      '<button type="button" id="p193copy" style="background:#1e293b;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Copiar comando PPTX</button>' +
+      '<button type="button" id="p193pdf" style="background:#0f766e;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Imprimir / PDF</button>' +
+      '<button type="button" id="p193html" style="background:#334155;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Baixar relatório (HTML)</button></div></div>';
     document.body.appendChild(f);
     function refreshGal() {
       document.getElementById("p193gal").innerHTML = painelFotos((ler().imagens) || {});
@@ -77382,6 +77384,40 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     };
     document.getElementById("p193copy").onclick = function () {
       try { navigator.clipboard.writeText(document.getElementById("p193cmd").value); this.textContent = "Copiado"; } catch (e) {}
+    };
+    function htmlRelatorio(d) {
+      d = d || coletar();
+      var imgs = d.imagens || {};
+      function fig(k, lab) {
+        if (!imgs[k]) return "";
+        return '<figure style="margin:0 0 12px;break-inside:avoid"><img src="'+imgs[k]+'" style="width:100%;max-height:280px;object-fit:cover;border:1px solid #ccc"><figcaption style="font-size:12px;color:#334155">'+lab+'</figcaption></figure>';
+      }
+      return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>FPDO - '+(d.obra||"")+
+        '</title><style>body{font:14px/1.45 Calibri,Arial,sans-serif;color:#0f172a;max-width:900px;margin:24px auto;padding:0 16px}h1{font-size:22px;margin:0 0 6px}h2{color:#8a6d12;font-size:13px;letter-spacing:.06em;margin:22px 0 8px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} .kpi{background:#0b1220;color:#fff;padding:10px;border-radius:8px;text-align:center} @media print {button{display:none}}</style></head><body>' +
+        '<h1>RELATÓRIO MENSAL DE OBRA</h1><p><b>'+(d.obra||"")+'</b> · '+(d.mes_atual||"")+'</p>' +
+        '<p>Cliente: '+(d.cliente||"—")+'<br>Local: '+(d.local||"—")+'<br>Responsável: '+(d.responsavel||"—")+'<br>Gestor Pórtico: '+(d.gestor||"—")+'</p>' +
+        '<h2>02 STATUS</h2><div class="grid"><div class="kpi">Fabricação<br><b>'+(d.fab||"—")+'%</b></div><div class="kpi">Expedição<br><b>'+(d.exp||"—")+'%</b></div><div class="kpi">Instalação<br><b>'+(d.inst||"—")+'%</b></div></div>' +
+        '<p>'+String(d.resumo||"").replace(/\n/g,"<br>")+'</p><p>'+String(d.avancos||"").replace(/\n/g,"<br>")+'</p>' +
+        '<h2>03 PENDÊNCIAS</h2><p>'+String(d.pendencias||"").replace(/\n/g,"<br>")+'</p>' +
+        '<h2>04 FOTOS</h2><div class="grid">'+fig("capa","Capa")+fig("sul_ant","Frente 1 · mês anterior")+fig("sul_atu","Frente 1 · mês atual")+fig("norte_ant","Frente 2 · mês anterior")+fig("norte_atu","Frente 2 · mês atual")+fig("extra","Registro extra")+'</div>' +
+        '<h2>05 PRÓXIMAS ETAPAS</h2><p>'+String(d.proximas||"").replace(/\n/g,"<br>")+'</p>' +
+        '<p style="margin-top:28px;font-size:12px;color:#64748b">PÓRTICO ESQUADRIAS · Relatório mensal</p></body></html>';
+    }
+    document.getElementById("p193pdf").onclick = function () {
+      gravar(coletar());
+      var w = window.open("", "_blank");
+      if (!w) { alert("Permita pop-up para imprimir."); return; }
+      w.document.open();
+      w.document.write(htmlRelatorio());
+      w.document.close();
+      setTimeout(function(){ try { w.focus(); w.print(); } catch(e){} }, 400);
+    };
+    document.getElementById("p193html").onclick = function () {
+      var d = coletar(); gravar(d);
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([htmlRelatorio(d)], { type: "text/html" }));
+      a.download = "RELATORIO MENSAL - " + (d.obra || "OBRA") + " - " + (d.mes_atual || "") + ".html";
+      document.body.appendChild(a); a.click();
     };
   }
   window.p193Abrir = abrir;
