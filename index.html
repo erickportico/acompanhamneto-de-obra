@@ -77441,8 +77441,8 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       prs.defineLayout({ name:"A", width:13.33, height:7.5 });
       prs.layout = "A";
       function capaEscura(s) {
-        s.addShape(prs.ShapeType.rect, { x:0, y:0, w:13.33, h:7.5, fill:{ color:"0B1B33" } });
-        s.addShape(prs.ShapeType.rect, { x:0, y:0, w:13.33, h:0.12, fill:{ color:"C9A227" } });
+        s.addShape('rect', { x:0, y:0, w:13.33, h:7.5, fill:{ color:"0B1B33" } });
+        s.addShape('rect', { x:0, y:0, w:13.33, h:0.12, fill:{ color:"C9A227" } });
       }
       var s1 = prs.addSlide(); capaEscura(s1);
       s1.addText("RELATÓRIO MENSAL DE OBRA", { x:0.6, y:1.4, w:12, h:0.35, fontSize:14, color:"C9A227", bold:true });
@@ -77451,7 +77451,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       var s2 = prs.addSlide(); capaEscura(s2);
       s2.addText("02 STATUS", { x:0.6, y:0.35, w:12, h:0.3, fontSize:14, color:"C9A227", bold:true });
       [["Fabricação", d.fab],["Expedição", d.exp],["Instalação", d.inst]].forEach(function(k,i){
-        s2.addShape(prs.ShapeType.rect, { x:0.6+i*4.1, y:1.1, w:3.8, h:1.6, fill:{ color:"12203A" } });
+        s2.addShape('rect', { x:0.6+i*4.1, y:1.1, w:3.8, h:1.6, fill:{ color:"12203A" } });
         s2.addText(k[0], { x:0.6+i*4.1, y:1.2, w:3.8, h:0.35, align:"center", color:"94A3B8", fontSize:12 });
         s2.addText(String(k[1]||"—")+"%", { x:0.6+i*4.1, y:1.55, w:3.8, h:0.8, align:"center", color:"C9A227", fontSize:28, bold:true });
       });
