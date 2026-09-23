@@ -77420,9 +77420,22 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       a.download = "RELATORIO MENSAL - " + (d.obra || "OBRA") + " - " + (d.mes_atual || "") + ".html";
       document.body.appendChild(a); a.click();
     };
+    function ctorPptx() {
+      return window.PptxGenJS || window.pptxgen || window.PptxGen || null;
+    }
+    function carregarPptxLib(cb) {
+      if (typeof ctorPptx() === "function") { cb(); return; }
+      var u = "https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js";
+      var s = document.createElement("script");
+      s.src = u;
+      s.onload = function () { cb(); };
+      s.onerror = function () { alert("Nao consegui carregar a biblioteca PPTX. Use Imprimir / PDF."); };
+      document.head.appendChild(s);
+    }
     document.getElementById("p193pptx").onclick = function () {
       var d = coletar(); gravar(d);
-      var Ctor = window.PptxGenJS || window.pptxgen;
+      carregarPptxLib(function () {
+      var Ctor = ctorPptx();
       if (typeof Ctor !== "function") { alert("Biblioteca PPTX nao carregou. Use Imprimir / PDF."); return; }
       var prs = new Ctor();
       prs.defineLayout({ name:"A", width:13.33, height:7.5 });
@@ -77465,6 +77478,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       sF.addText("05 PRÓXIMAS ETAPAS", { x:0.6, y:0.4, w:12, h:0.3, fontSize:14, color:"C9A227", bold:true });
       sF.addText(d.proximas || "", { x:0.6, y:1.0, w:12, h:5, fontSize:16, color:"FFFFFF" });
       prs.writeFile({ fileName: "RELATORIO MENSAL - "+(d.obra||"OBRA")+" - "+(d.mes_atual||"")+".pptx" });
+      });
     };
 
   }
