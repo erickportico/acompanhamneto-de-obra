@@ -77299,15 +77299,15 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 
 <script id="patch193FpdoMestre">
 (function () {
-  if (window.__p193) return;
-  window.__p193 = true;
+  if (window.__p193b) return;
+  window.__p193b = true;
   var KEY = "p193_fpdo_mestre";
   function obraNome() {
     try { if (window.obraAtual && window.obraAtual.nome) return String(window.obraAtual.nome); } catch (e) {}
     return "";
   }
   function ler() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
-  function gravar(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
+  function gravar(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { alert("Nao deu para salvar as fotos (memoria cheia). Use menos imagens ou compacte."); } }
   function val(id) { var e = document.getElementById(id); return e ? e.value : ""; }
   function inp(id, lab, v) {
     return '<label style="display:block;font-size:12px;color:#94a3b8">' + lab +
@@ -77319,7 +77319,24 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       '<textarea id="' + id + '" rows="3" style="display:block;width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid #334155;background:#020617;color:#fff">' +
       String(v || "").replace(/</g, "&lt;") + "</textarea></label>";
   }
+  function comprimir(file, cb) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var w = img.width, h = img.height, max = 1400;
+        if (w > max || h > max) { var k = Math.min(max / w, max / h); w = Math.round(w * k); h = Math.round(h * k); }
+        var c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        cb(c.toDataURL("image/jpeg", 0.72));
+      };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(file);
+  }
   function coletar() {
+    var d = ler();
     return {
       obra: val("p193obra") || obraNome(),
       cliente: val("p193cli"),
@@ -77335,17 +77352,41 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       avancos: val("p193avancos"),
       pendencias: val("p193pend"),
       fotos: val("p193fotos"),
-      proximas: val("p193prox")
+      proximas: val("p193prox"),
+      imagens: d.imagens || {}
     };
   }
   function cmd(d) {
     var out = "RELATORIO MENSAL - " + (d.obra || "OBRA") + " - " + (d.mes_atual || "MES") + ".pptx";
-    return "python gerar_relatorio_mensal.py --modelo \"MODELO_MESTRE_RELATORIO_MENSAL_DE_OBRAS_PORTICO.pptx\" --json \"fpdo_mestre_" +
-      String(d.obra || "obra").replace(/\\s+/g, "_") + ".json\" --obra \"" + (d.obra || "") +
+    return "python gerar_relatorio_mensal.py --modelo \"MODELO_MESTRE_RELATORIO_MENSAL_DE_OBRAS_PORTICO.pptx\" --obra \"" + (d.obra || "") +
       "\" --cliente \"" + (d.cliente || "") + "\" --local \"" + (d.local || "") +
       "\" --responsavel \"" + (d.responsavel || "") + "\" --gestor \"" + (d.gestor || "") +
       "\" --mes-anterior " + (d.mes_anterior || "Agosto") + " --mes-atual " + (d.mes_atual || "Setembro") +
       " --out \"" + out + "\"";
+  }
+  var SLOTS = [
+    ["capa", "Capa"],
+    ["sul_ant", "Fachada / frente 1 — mês anterior"],
+    ["sul_atu", "Fachada / frente 1 — mês atual"],
+    ["norte_ant", "Fachada / frente 2 — mês anterior"],
+    ["norte_atu", "Fachada / frente 2 — mês atual"],
+    ["extra", "Registro visual extra"]
+  ];
+  function painelFotos(imgs) {
+    imgs = imgs || {};
+    var h = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+    SLOTS.forEach(function (s) {
+      var k = s[0], lab = s[1], src = imgs[k] || "";
+      h += '<div style="border:1px solid #334155;border-radius:10px;padding:8px;background:#020617">' +
+        '<div style="font-size:12px;color:#c9a227;margin-bottom:6px">' + lab + "</div>" +
+        (src ? '<img src="' + src + '" style="width:100%;height:120px;object-fit:cover;border-radius:8px">' : '<div style="height:120px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px">Sem foto</div>') +
+        '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">' +
+        '<label style="background:#2563eb;color:#fff;border-radius:6px;padding:6px 8px;font-size:12px;cursor:pointer">Escolher<input type="file" accept="image/*" data-slot="' + k + '" style="display:none"></label>' +
+        '<label style="background:#0f766e;color:#fff;border-radius:6px;padding:6px 8px;font-size:12px;cursor:pointer">Tirar foto<input type="file" accept="image/*" capture="environment" data-slot="' + k + '" style="display:none"></label>' +
+        (src ? '<button type="button" data-del="' + k + '" style="background:#7f1d1d;color:#fff;border:0;border-radius:6px;padding:6px 8px;font-size:12px;cursor:pointer">Excluir</button>' : "") +
+        "</div></div>";
+    });
+    return h + "</div>";
   }
   function abrir() {
     var old = document.getElementById("p193Fundo");
@@ -77358,7 +77399,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     f.innerHTML = '<div style="background:#0b1220;color:#e2e8f0;width:min(920px,100%);border-radius:16px;padding:18px 20px 24px;border:1px solid #1e293b;font:14px/1.45 system-ui">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0;letter-spacing:.08em">FPDO</h2>' +
       '<button type="button" id="p193x" style="border:0;background:#1e293b;color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer">Fechar</button></div>' +
-      '<p style="margin:0 0 12px;color:#94a3b8">Mesma ordem do modelo mestre. A primeira edição do PPTX ainda leva o visual do arquivo da Pórtico.</p>' +
+      '<p style="margin:0 0 12px;color:#94a3b8">Mesma ordem do modelo mestre. Fotos anexa aqui (camera ou arquivo), como no FPDO antigo.</p>' +
       '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">01 IDENTIFICAÇÃO</h3>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
       inp("p193obra","Obra",d.obra) + inp("p193cli","Cliente",d.cliente) +
@@ -77374,7 +77415,8 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">03 PENDÊNCIAS</h3>' +
       area("p193pend","Descrição · responsável · impacto · prazo",d.pendencias) +
       '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">04 FOTOS</h3>' +
-      area("p193fotos","Frentes do comparativo mensal",d.fotos) +
+      '<div id="p193gal">' + painelFotos(d.imagens) + "</div>" +
+      area("p193fotos","Legendas das frentes",d.fotos) +
       '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">05 PRÓXIMAS ETAPAS</h3>' +
       area("p193prox","Ações do próximo período",d.proximas) +
       '<textarea id="p193cmd" readonly style="width:100%;height:70px;margin-top:14px;background:#020617;color:#93c5fd;border:1px solid #1e293b;border-radius:8px;padding:8px;font:11px ui-monospace,Consolas,monospace"></textarea>' +
@@ -77383,17 +77425,47 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       '<button type="button" id="p193json" style="background:#2563eb;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Baixar JSON</button>' +
       '<button type="button" id="p193copy" style="background:#1e293b;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Copiar comando PPTX</button></div></div>';
     document.body.appendChild(f);
+    function refreshGal() {
+      document.getElementById("p193gal").innerHTML = painelFotos((ler().imagens) || {});
+      ligarFotos();
+    }
+    function ligarFotos() {
+      f.querySelectorAll("input[data-slot]").forEach(function (inp) {
+        inp.addEventListener("change", function () {
+          var file = inp.files && inp.files[0];
+          if (!file) return;
+          comprimir(file, function (url) {
+            var cur = ler();
+            cur.imagens = cur.imagens || {};
+            cur.imagens[inp.getAttribute("data-slot")] = url;
+            gravar(Object.assign(coletar(), { imagens: cur.imagens }));
+            refreshGal();
+          });
+        });
+      });
+      f.querySelectorAll("[data-del]").forEach(function (bt) {
+        bt.addEventListener("click", function () {
+          var cur = ler();
+          if (cur.imagens) delete cur.imagens[bt.getAttribute("data-del")];
+          gravar(Object.assign(coletar(), { imagens: cur.imagens || {} }));
+          refreshGal();
+        });
+      });
+    }
     function sync() { document.getElementById("p193cmd").value = cmd(coletar()); }
-    f.querySelectorAll("input,textarea").forEach(function (el) { if (el.id !== "p193cmd") el.addEventListener("input", sync); });
+    f.querySelectorAll("input,textarea").forEach(function (el) { if (el.id !== "p193cmd" && !el.getAttribute("data-slot")) el.addEventListener("input", sync); });
     sync();
+    ligarFotos();
     document.getElementById("p193x").onclick = function () { f.parentNode.removeChild(f); };
     f.addEventListener("click", function (ev) { if (ev.target === f) f.parentNode.removeChild(f); });
     document.getElementById("p193save").onclick = function () { gravar(coletar()); this.textContent = "Salvo"; };
     document.getElementById("p193json").onclick = function () {
-      var x = coletar(); gravar(x);
+      var x = coletar();
+      var leve = Object.assign({}, x);
+      delete leve.imagens;
       var a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(x, null, 2)], { type: "application/json" }));
-      a.download = "fpdo_mestre_" + String(x.obra || "obra").replace(/\\s+/g, "_") + ".json";
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(leve, null, 2)], { type: "application/json" }));
+      a.download = "fpdo_mestre_" + String(x.obra || "obra").replace(/\s+/g, "_") + ".json";
       document.body.appendChild(a); a.click();
     };
     document.getElementById("p193copy").onclick = function () {
