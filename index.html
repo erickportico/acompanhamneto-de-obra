@@ -77211,8 +77211,8 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 
 <script id="patch193FpdoMestre">
 (function () {
-  if (window.__p193b) return;
-  window.__p193b = true;
+  if (window.__p193c) return;
+  window.__p193c = true;
   var KEY = "p193_fpdo_mestre";
   function obraNome() {
     try { if (window.obraAtual && window.obraAtual.nome) return String(window.obraAtual.nome); } catch (e) {}
@@ -77331,14 +77331,11 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       area("p193fotos","Legendas das frentes",d.fotos) +
       '<h3 style="color:#c9a227;font-size:13px;margin:14px 0 8px">05 PRÓXIMAS ETAPAS</h3>' +
       area("p193prox","Ações do próximo período",d.proximas) +
-      '<textarea id="p193cmd" readonly style="width:100%;height:70px;margin-top:14px;background:#020617;color:#93c5fd;border:1px solid #1e293b;border-radius:8px;padding:8px;font:11px ui-monospace,Consolas,monospace"></textarea>' +
-      '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
-      '<button type="button" id="p193save" style="background:#c9a227;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Salvar no painel</button>' +
-      '<button type="button" id="p193json" style="background:#2563eb;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Baixar JSON</button>' +
-      '<button type="button" id="p193copy" style="background:#1e293b;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Copiar comando PPTX</button>' +
-      '<button type="button" id="p193pdf" style="background:#0f766e;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Imprimir / PDF</button>' +
-      '<button type="button" id="p193html" style="background:#334155;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Baixar relatório (HTML)</button>' +
-      '<button type="button" id="p193pptx" style="background:#c9a227;color:#0b1220;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">Baixar PPTX com fotos</button></div></div>';
+      '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center">' +
+      '<button type="button" id="p193gerar" style="background:#c9a227;color:#0b1220;border:0;border-radius:8px;padding:12px 18px;font-weight:800;cursor:pointer;font-size:15px">Gerar relatório</button>' +
+      '<button type="button" id="p193save" style="background:#1e293b;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer">Salvar rascunho</button>' +
+      '<button type="button" id="p193x2" style="background:transparent;color:#94a3b8;border:1px solid #334155;border-radius:8px;padding:10px 14px;cursor:pointer">Fechar</button></div>' +
+      '<p style="margin:10px 0 0;color:#64748b;font-size:12px">Gera o PowerPoint com as fotos e abre o PDF na mesma cara (Salvar como PDF no Chrome).</p></div>';
     document.body.appendChild(f);
     function refreshGal() {
       document.getElementById("p193gal").innerHTML = painelFotos((ler().imagens) || {});
@@ -77367,25 +77364,25 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
         });
       });
     }
-    function sync() { document.getElementById("p193cmd").value = cmd(coletar()); }
+    function sync() { var c = document.getElementById("p193cmd"); if (c) c.value = cmd(coletar()); }
     f.querySelectorAll("input,textarea").forEach(function (el) { if (el.id !== "p193cmd" && !el.getAttribute("data-slot")) el.addEventListener("input", sync); });
     sync();
     ligarFotos();
     document.getElementById("p193x").onclick = function () { f.parentNode.removeChild(f); };
     f.addEventListener("click", function (ev) { if (ev.target === f) f.parentNode.removeChild(f); });
     document.getElementById("p193save").onclick = function () { gravar(coletar()); this.textContent = "Salvo"; };
-    document.getElementById("p193json").onclick = function () {
-      var x = coletar();
-      var leve = Object.assign({}, x);
-      delete leve.imagens;
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(leve, null, 2)], { type: "application/json" }));
-      a.download = "fpdo_mestre_" + String(x.obra || "obra").replace(/\s+/g, "_") + ".json";
-      document.body.appendChild(a); a.click();
-    };
-    document.getElementById("p193copy").onclick = function () {
-      try { navigator.clipboard.writeText(document.getElementById("p193cmd").value); this.textContent = "Copiado"; } catch (e) {}
-    };
+    var x2=document.getElementById("p193x2");
+    if(x2) x2.onclick=function(){ if(f.parentNode) f.parentNode.removeChild(f); };
+
+    function abrirPdf() {
+      gravar(coletar());
+      var w = window.open("", "_blank");
+      if (!w) { alert("Permita pop-up para o PDF."); return; }
+      w.document.open();
+      w.document.write(htmlRelatorio());
+      w.document.close();
+      setTimeout(function(){ try { w.focus(); w.print(); } catch(e){} }, 500);
+    }
     function htmlRelatorio(d) {
       d = d || coletar();
       var imgs = d.imagens || {};
@@ -77394,7 +77391,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
         return '<figure style="margin:0 0 12px;break-inside:avoid"><img src="'+imgs[k]+'" style="width:100%;max-height:280px;object-fit:cover;border:1px solid #ccc"><figcaption style="font-size:12px;color:#334155">'+lab+'</figcaption></figure>';
       }
       return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>FPDO - '+(d.obra||"")+
-        '</title><style>@page{size:landscape;margin:12mm}body{font:14px/1.4 Calibri,Arial,sans-serif;color:#0b1220;margin:0;background:#fff} .folha{width:100%;min-height:90vh;padding:18px 22px;box-sizing:border-box;page-break-after:always} .topo{background:#0b1b33;color:#fff;padding:16px 18px;border-radius:8px;margin-bottom:14px} .topo small{color:#c9a227;letter-spacing:.12em} h1{margin:6px 0 0;font-size:26px} h2{color:#c9a227;font-size:12px;letter-spacing:.14em;margin:18px 0 8px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} .kpi{background:#0b1b33;color:#fff;padding:14px;border-radius:8px;text-align:center} .kpi b{display:block;font-size:22px;color:#c9a227} figure{margin:0} img{width:100%;height:220px;object-fit:cover;border-radius:6px} figcaption{font-size:11px;color:#334155;margin-top:4px} @media print{body{background:#fff}}</style></head><body><div class="folha">' +
+        '</title><style>@page{size:landscape;margin:10mm}body{font:14px/1.4 Calibri,Arial,sans-serif;color:#fff;margin:0;background:#0b1b33} .folha{background:#0b1b33;color:#fff;width:100%;min-height:88vh;padding:22px;box-sizing:border-box;page-break-after:always} h1{margin:8px 0 4px;font-size:26px} h2{color:#c9a227;font-size:12px;letter-spacing:.14em;margin:18px 0 8px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} .kpi{background:#12203A;color:#fff;padding:14px;border-radius:8px;text-align:center} .kpi b{display:block;font-size:22px;color:#c9a227} figure{margin:0} img{width:100%;height:220px;object-fit:cover;border-radius:6px} figcaption{font-size:11px;color:#cbd5e1;margin-top:4px}</style></head><body><div class="folha">' +
         '<h1>RELATÓRIO MENSAL DE OBRA</h1><p><b>'+(d.obra||"")+'</b> · '+(d.mes_atual||"")+'</p>' +
         '<p>Cliente: '+(d.cliente||"—")+'<br>Local: '+(d.local||"—")+'<br>Responsável: '+(d.responsavel||"—")+'<br>Gestor Pórtico: '+(d.gestor||"—")+'</p>' +
         '<h2>02 STATUS</h2><div class="grid"><div class="kpi">Fabricação<br><b>'+(d.fab||"—")+'%</b></div><div class="kpi">Expedição<br><b>'+(d.exp||"—")+'%</b></div><div class="kpi">Instalação<br><b>'+(d.inst||"—")+'%</b></div></div>' +
@@ -77404,22 +77401,6 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
         '<h2>05 PRÓXIMAS ETAPAS</h2><p>'+String(d.proximas||"").replace(/\n/g,"<br>")+'</p>' +
         '<p style="margin-top:28px;font-size:12px;color:#64748b">PÓRTICO ESQUADRIAS · Relatório mensal</p></div></body></html>';
     }
-    document.getElementById("p193pdf").onclick = function () {
-      gravar(coletar());
-      var w = window.open("", "_blank");
-      if (!w) { alert("Permita pop-up para imprimir."); return; }
-      w.document.open();
-      w.document.write(htmlRelatorio());
-      w.document.close();
-      setTimeout(function(){ try { w.focus(); w.print(); } catch(e){} }, 400);
-    };
-    document.getElementById("p193html").onclick = function () {
-      var d = coletar(); gravar(d);
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([htmlRelatorio(d)], { type: "text/html" }));
-      a.download = "RELATORIO MENSAL - " + (d.obra || "OBRA") + " - " + (d.mes_atual || "") + ".html";
-      document.body.appendChild(a); a.click();
-    };
     function ctorPptx() {
       return window.PptxGenJS || window.pptxgen || window.PptxGen || null;
     }
@@ -77432,7 +77413,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       s.onerror = function () { alert("Nao consegui carregar a biblioteca PPTX. Use Imprimir / PDF."); };
       document.head.appendChild(s);
     }
-    document.getElementById("p193pptx").onclick = function () {
+    function gerarPptxDoPainel() {
       var d = coletar(); gravar(d);
       carregarPptxLib(function () {
       var Ctor = ctorPptx();
@@ -77479,6 +77460,12 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
       sF.addText(d.proximas || "", { x:0.6, y:1.0, w:12, h:5, fontSize:16, color:"FFFFFF" });
       prs.writeFile({ fileName: "RELATORIO MENSAL - "+(d.obra||"OBRA")+" - "+(d.mes_atual||"")+".pptx" });
       });
+    }
+    var ger = document.getElementById("p193gerar");
+    if (ger) ger.onclick = function () {
+      gravar(coletar());
+      abrirPdf();
+      gerarPptxDoPainel();
     };
 
   }
