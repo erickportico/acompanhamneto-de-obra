@@ -5622,7 +5622,8 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                     <h1 id="obraTitle">BURJ LAVIE</h1>
                     <p>Painel de Acompanhamento de Produção e Instalação</p>
                 </div>
-                <div class="header-badges-right">
+                <div class="header-badges-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+                    <div style="display:flex;gap:8px;align-items:center;">
                     <div class="contract-badge">
                         <span class="label">Contrato Global</span>
                         <span class="val" id="headerValorContrato">R$ 0,00</span>
@@ -5631,27 +5632,26 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                         <span class="label">Nº Contrato</span>
                         <span class="val" id="headerNumContrato">—</span>
                     </div>
-
-                </div>
-            </div>
-            <div class="project-selector">
+                    </div>
+                    <div class="project-selector" style="display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px;">
                 <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
-                <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem (Render.com)" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
+                <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
                 <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
-                <div class="settings-menu">
-                    <button type="button" class="secondary" onclick="toggleSettingsMenu()">⚙ Configurações</button>
-                    <div id="settingsMenu" class="settings-dropdown">
-                        <button class="secondary" onclick="exportarDados()">💾 Backup</button>
-                        <button class="secondary" onclick="document.getElementById('fileRestoreInput').click()">📥 Restaurar</button>
-                        <button class="warning" onclick="abrirRecuperacaoDados()">🧿 Recuperar Dados Antigos</button>
-                        <button class="primary" onclick="abrirBancoCompartilhado()">🌐 Banco Compartilhado</button>
+                <button class="secondary" onclick="if(window.salvarAgora)salvarAgora();else if(window.salvarBancoNaNuvem)salvarBancoNaNuvem();">💾 Salvar agora</button>
+                <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
                     </div>
                 </div>
-                <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
+            </div>
+            <div class="project-selector" style="justify-content:flex-start;">
+                <details id="menu-obra" style="position:relative;z-index:10000;">
+                    <summary style="cursor:pointer;padding:8px 16px;background:#1e293b;color:#fff;border-radius:6px;font-weight:bold;width:fit-content;user-select:none;border:1px solid rgba(255,255,255,0.2);list-style:none;">Obra</summary>
+                    <div style="display:flex;flex-direction:column;position:absolute;top:100%;left:0;background:#121826;padding:10px;border-radius:8px;margin-top:6px;gap:6px;min-width:260px;border:1px solid rgba(255,255,255,0.15);box-shadow:0 10px 25px rgba(0,0,0,0.7);">
                 <select id="selectObra" onchange="trocarObra(this.value)"></select>
                 <button class="warning" style="color:#000" onclick="abrirModalObra()">⚙️ Gerenciar Obra</button>
                 <button class="success" onclick="abrirModalNovaObra()">+ Nova Obra</button>
                 <button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button>
+                    </div>
+                </details>
             </div>
         </header>
         <!-- INÍCIO DO MENU LATERAL E CONTEÚDO -->
@@ -5678,6 +5678,10 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                         <button class="tab-btn" id="btn-tab-custo" onclick="trocarAba('custo')">📊 Centro de Custos</button>
                         <button class="tab-btn" id="btn-tab-fpdo" type="button" onclick="if (window.p92AbrirFpdo) { window.p92AbrirFpdo(); } else { alert('O Relatório FPDO ainda está carregando. Tente novamente.'); }">📋 Relatório FPDO</button>
                         <button class="tab-btn" id="btn-tab-fpdo-mestre" type="button" onclick="if (window.p193Abrir) window.p193Abrir();">FPDO</button>
+                        <button class="tab-btn" type="button" onclick="exportarDados()">💾 Backup</button>
+                        <button class="tab-btn" type="button" onclick="document.getElementById('fileRestoreInput').click()">📥 Restaurar</button>
+                        <button class="tab-btn" type="button" onclick="abrirRecuperacaoDados()">🧿 Recuperar Dados Antigos</button>
+                        <button class="tab-btn" type="button" onclick="abrirBancoCompartilhado()">🌐 Banco Compartilhado</button>
                         <button class="tab-btn" id="btn-tab-admin" style="display:none" onclick="trocarAba('admin')">🔧 Administração</button>
                     </div>
 
@@ -42884,7 +42888,9 @@ janelaImpressao.document.write(
   cssImpressao +
   '</head><body>' +
   h +
-  '</body></html>'
+  '
+<style id="p194ui">#p178btn,#p180btn{display:none!important}#p129Selo{font-size:10px!important;padding:2px 8px!important;bottom:8px!important}</style>
+</body></html>'
 );
 } catch(e) { console.error('[P84] Erro impressão:', e); janelaImpressao.document.write('<!doctype html><html>' + '<head><meta charset=UTF-8><title>Erro</title></head>' + '<body><p style=color:red>Erro ao gerar impressão.</p></body></html>'); janelaImpressao.document.close(); }
 janelaImpressao.document.close();
@@ -47989,7 +47995,7 @@ if (document.readyState === 'loading') {
                   '<h3 id="p92Tit">Relatório <span>FPDO</span> &mdash; Fique por dentro da obra</h3>' +
                   '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
                     '<button class="p92-btn" type="button" data-a="lista">Relatórios salvos</button>' +
-                    '<button class="p92-btn p92-btn-ok" type="button" data-a="mestre">Modelo mestre PPTX</button>' +
+                    '' +
                     '<button class="p92-btn" type="button" data-a="fechar">Fechar</button>' +
                   '</div>' +
                 '</header>' +
@@ -48958,10 +48964,6 @@ if (document.readyState === 'loading') {
             ev.preventDefault();
         
             if (a === 'fechar') { fechar(); return; }
-            if (a === 'mestre') {
-              if (typeof window.p192AbrirRelatorio === 'function') { window.p192AbrirRelatorio(); }
-              return;
-            }
             if (a === 'jsonMestre') { baixarJsonMestre(); return; }
             if (a === 'sec') { sec = b.getAttribute('data-s') || 'dados'; render(); return; }
             if (a === 'relAnterior') { navegarRelatorio(-1); return; }
@@ -65463,7 +65465,7 @@ if (document.readyState === 'loading') {
             var st = document.createElement('style');
             st.id = 'p129Estilo';
             st.textContent = [
-              '#p129Selo{position:fixed;left:14px;bottom:14px;z-index:2147481000;display:none;background:#1e293b;color:#fff;border-radius:999px;padding:6px 12px;font:12px Segoe UI,Arial,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.25)}',
+              '#p129Selo{position:fixed;left:10px;bottom:8px;z-index:2147481000;display:none;background:#1e293b;color:#cbd5e1;border-radius:8px;padding:2px 8px;font:10px Segoe UI,Arial,sans-serif;opacity:.85;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
               '#p129Selo.on{display:block}',
               '#p129Solta{position:fixed;right:14px;top:14px;z-index:2147483400;display:none;background:#b91c1c;color:#fff;border:0;border-radius:999px;padding:8px 14px;font:600 12px Segoe UI,Arial,sans-serif;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.3)}',
               '#p129Solta.on{display:block}',
@@ -65484,7 +65486,7 @@ if (document.readyState === 'loading') {
               d.setAttribute('data-html2canvas-ignore', 'true');
               document.body.appendChild(d);
             }
-            if (ligado) { d.textContent = texto || 'Atualizacao em espera - voce esta preenchendo'; d.classList.add('on'); }
+            if (ligado) { d.textContent = texto || 'Em espera'; d.classList.add('on'); }
             else { d.classList.remove('on'); }
           }
         
@@ -76224,6 +76226,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     var b=document.createElement('button');
     b.id='p178btn';
     b.textContent='\uD83E\uDDF9 Limpeza';
+    b.style.display='none';
     b.title='Limpar cache e dados obsoletos do painel';
     b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:2147483646;background:#0ea5e9;color:#fff;border:0;border-radius:20px;padding:8px 14px;cursor:pointer;font:12px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);';
     b.addEventListener('click', montar);
@@ -76497,6 +76500,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     var b=document.createElement('button');
     b.id='p180btn';
     b.textContent='\u267B\uFE0F Recuperar obras';
+    b.style.display='none';
     b.title='Vasculha backups locais e devolve obras que sumiram';
     b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:2147483646;background:#16a34a;color:#fff;border:0;border-radius:20px;padding:8px 14px;cursor:pointer;font:12px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);';
     b.addEventListener('click', montar);
@@ -77198,103 +77202,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 </script>
 
 
-<script id="patch192RelatorioMensal">
-(function () {
-  if (window.__p192Rel) return;
-  window.__p192Rel = true;
 
-  function obraNome() {
-    try {
-      if (window.obraAtual && window.obraAtual.nome) return String(window.obraAtual.nome);
-      var s = document.getElementById("obraSelect") || document.querySelector("select[id*='obra' i]");
-      if (s && s.value) return s.options[s.selectedIndex] ? s.options[s.selectedIndex].text : s.value;
-    } catch (e) {}
-    return "OBRA";
-  }
-
-  function campo(cx, rotulo, id, val) {
-    var l = document.createElement("label");
-    l.style.cssText = "display:block;font:600 12px system-ui;margin:8px 0 4px;color:#334155";
-    l.textContent = rotulo;
-    var i = document.createElement("input");
-    i.id = id;
-    i.value = val || "";
-    i.style.cssText = "width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font:14px system-ui";
-    cx.appendChild(l);
-    cx.appendChild(i);
-    return i;
-  }
-
-  function abrir() {
-    if (document.getElementById("p192Fundo")) return;
-    var fundo = document.createElement("div");
-    fundo.id = "p192Fundo";
-    fundo.style.cssText = "position:fixed;inset:0;z-index:2147483600;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px";
-    var cx = document.createElement("div");
-    cx.style.cssText = "background:#fff;max-width:520px;width:100%;border-radius:14px;padding:18px 18px 14px;box-shadow:0 20px 50px rgba(0,0,0,.25);font:14px system-ui;color:#0f172a";
-    cx.innerHTML = "<h2 style='margin:0 0 6px;font-size:18px'>Relatório mensal</h2><p style='margin:0 0 10px;color:#64748b;font-size:13px'>Isto não gera o PPTX no navegador. Monta o comando para o modelo mestre no PC. Feche com Esc.</p>";
-    var nome = obraNome();
-    var iObra = campo(cx, "Obra", "p192obra", nome);
-    var iCli = campo(cx, "Cliente", "p192cli", "");
-    var iLoc = campo(cx, "Local", "p192loc", "");
-    var iResp = campo(cx, "Responsável", "p192resp", "");
-    var iGes = campo(cx, "Gestor Pórtico", "p192ges", "Erick dos Santos");
-    var iAnt = campo(cx, "Mês anterior", "p192ant", "Agosto");
-    var iAtu = campo(cx, "Mês atual", "p192atu", "Setembro");
-    var pre = document.createElement("textarea");
-    pre.readOnly = true;
-    pre.style.cssText = "width:100%;height:90px;margin-top:12px;font:12px ui-monospace,Consolas,monospace;border:1px solid #e2e8f0;border-radius:8px;padding:8px";
-    cx.appendChild(pre);
-    function cmd() {
-      var out = "RELATORIO MENSAL - " + (iObra.value || "OBRA") + " - " + (iAtu.value || "MES") + ".pptx";
-      pre.value = "python gerar_relatorio_mensal.py --modelo \"MODELO_MESTRE_RELATORIO_MENSAL_DE_OBRAS_PORTICO.pptx\" --obra \"" + iObra.value + "\" --cliente \"" + iCli.value + "\" --local \"" + iLoc.value + "\" --responsavel \"" + iResp.value + "\" --gestor \"" + iGes.value + "\" --mes-anterior " + iAnt.value + " --mes-atual " + iAtu.value + " --out \"" + out + "\"";
-    }
-    [iObra, iCli, iLoc, iResp, iGes, iAnt, iAtu].forEach(function (el) {
-      el.addEventListener("input", cmd);
-    });
-    cmd();
-    var row = document.createElement("div");
-    row.style.cssText = "display:flex;gap:8px;margin-top:12px;justify-content:flex-end";
-    var copiar = document.createElement("button");
-    copiar.type = "button";
-    copiar.textContent = "Copiar comando";
-    copiar.style.cssText = "padding:8px 12px;border:0;border-radius:8px;background:#2563eb;color:#fff;font:600 13px system-ui;cursor:pointer";
-    copiar.onclick = function () {
-      try { navigator.clipboard.writeText(pre.value); copiar.textContent = "Copiado"; } catch (e) { pre.select(); }
-    };
-    var fechar = document.createElement("button");
-    fechar.type = "button";
-    fechar.textContent = "Fechar";
-    fechar.style.cssText = "padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:600 13px system-ui;cursor:pointer";
-    function sumir() { if (fundo.parentNode) fundo.parentNode.removeChild(fundo); }
-    fechar.onclick = sumir;
-    fundo.addEventListener("click", function (ev) { if (ev.target === fundo) sumir(); });
-    document.addEventListener("keydown", function esc(ev) {
-      if (ev.key === "Escape") { sumir(); document.removeEventListener("keydown", esc); }
-    });
-    row.appendChild(fechar);
-    row.appendChild(copiar);
-    cx.appendChild(row);
-    fundo.appendChild(cx);
-    document.body.appendChild(fundo);
-  }
-
-  window.p192AbrirRelatorio = abrir;
-  function botao() {
-    if (document.getElementById("p192Btn")) return;
-    var b = document.createElement("button");
-    b.id = "p192Btn";
-    b.type = "button";
-    b.textContent = "Relatório mensal";
-    b.title = "Monta o comando do PPTX mestre";
-    b.style.cssText = "position:fixed;right:16px;bottom:72px;z-index:2147483000;padding:10px 14px;border:0;border-radius:999px;background:#0f172a;color:#fff;font:600 13px system-ui;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25)";
-    b.onclick = abrir;
-    document.body.appendChild(b);
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", botao);
-  else botao();
-})();
-</script>
 
 
 <script id="patch193FpdoMestre">
