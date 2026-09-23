@@ -5612,6 +5612,10 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
 
 <!-- PATCH 161: TOOLTIP FIX + DADOS DA TAREFA -->
 <body class="dark-mode">
+<script>
+window.p92AbrirFpdo=function(){};
+</script>
+
 <script id="v21Cleanup">/* v23: removido - removia nos de texto de scripts */</script>
 
 
@@ -5622,8 +5626,7 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                     <h1 id="obraTitle">BURJ LAVIE</h1>
                     <p>Painel de Acompanhamento de Produção e Instalação</p>
                 </div>
-                <div class="header-badges-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-                    <div style="display:flex;gap:8px;align-items:center;">
+                <div class="header-badges-right" style="display:flex;align-items:center;gap:8px;">
                     <div class="contract-badge">
                         <span class="label">Contrato Global</span>
                         <span class="val" id="headerValorContrato">R$ 0,00</span>
@@ -5632,16 +5635,9 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                         <span class="label">Nº Contrato</span>
                         <span class="val" id="headerNumContrato">—</span>
                     </div>
-                    </div>
-                    <div class="project-selector" style="display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px;margin-top:28px;">
-                <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
-                <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
-                <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
-                <button class="secondary" onclick="if(window.salvarAgora)salvarAgora();else if(window.salvarBancoNaNuvem)salvarBancoNaNuvem();">💾 Salvar agora</button>
-                <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
-                    </div>
                 </div>
             </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;">
             <div class="project-selector" style="justify-content:flex-start;">
                 <details id="menu-obra" style="position:relative;z-index:10000;margin:10px 0 0 0;">
                     <summary style="cursor:pointer;padding:8px 16px;background:#1e293b;color:#fff;border-radius:6px;font-weight:bold;width:fit-content;user-select:none;border:1px solid rgba(255,255,255,0.2);box-shadow:0 4px 10px rgba(0,0,0,0.3);font-family:inherit;font-size:inherit;list-style:none;">☰ Obra</summary>
@@ -5652,6 +5648,14 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                 <button class="danger" title="Excluir Obra" onclick="excluirObraAtual()">🗑️</button>
                     </div>
                 </details>
+            </div>
+                    <div class="project-selector" style="display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px;">
+                <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
+                <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
+                <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
+                <button class="secondary" onclick="if(window.salvarAgora)salvarAgora();else if(window.salvarBancoNaNuvem)salvarBancoNaNuvem();">💾 Salvar agora</button>
+                <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
+                    </div>
             </div>
         </header>
         <!-- INÍCIO DO MENU LATERAL E CONTEÚDO -->
@@ -5676,7 +5680,6 @@ body.dark-mode #painelMultiplasTarefas tr:hover td{background:#1e293b}
                         <button class="tab-btn" id="btn-tab-pagamento" onclick="trocarAba('pagamento')">💰 Pagamento de Produção</button>
                         <button class="tab-btn" id="btn-tab-ctm" onclick="trocarAba('ctm')">🔲 Contramarco (CTM)</button>
                         <button class="tab-btn" id="btn-tab-custo" onclick="trocarAba('custo')">📊 Centro de Custos</button>
-                        <button class="tab-btn" id="btn-tab-fpdo" type="button" onclick="if (window.p92AbrirFpdo) { window.p92AbrirFpdo(); } else { alert('O Relatório FPDO ainda está carregando. Tente novamente.'); }">📋 Relatório FPDO</button>
                         <button class="tab-btn" id="btn-tab-fpdo-mestre" type="button" onclick="if (window.p193Abrir) window.p193Abrir();">FPDO</button>
                         <button class="tab-btn" type="button" onclick="exportarDados()">💾 Backup</button>
                         <button class="tab-btn" type="button" onclick="document.getElementById('fileRestoreInput').click()">📥 Restaurar</button>
@@ -42888,32 +42891,7 @@ janelaImpressao.document.write(
   cssImpressao +
   '</head><body>' +
   h +
-  '
-<style id="p194ui">#p178btn,#p180btn{display:none!important}#p129Selo{font-size:10px!important;padding:2px 8px!important;bottom:8px!important}</style>
-<style id="p195ui">
-#menu-obra summary,#meu-menu-abas summary{
-  cursor:pointer;padding:8px 16px;background:#1e293b;color:#fff;border-radius:6px;
-  font-weight:700;width:fit-content;user-select:none;border:1px solid rgba(255,255,255,.2);
-  box-shadow:0 4px 10px rgba(0,0,0,.3);font:700 14px/1.2 system-ui,Segoe UI,Arial,sans-serif;
-  list-style:none;
-}
-#menu-obra summary::-webkit-details-marker,#meu-menu-abas summary::-webkit-details-marker{display:none}
-#p178btn,#p180btn{display:none!important;visibility:hidden!important;pointer-events:none!important}
-</style>
-<script>
-(function(){
-  function some(){
-    ["p178btn","p180btn"].forEach(function(id){
-      var b=document.getElementById(id);
-      if(b&&b.parentNode)b.parentNode.removeChild(b);
-    });
-  }
-  some();
-  setTimeout(some,800);
-  setTimeout(some,2500);
-})();
-</script>
-</body></html>'
+  '</body></html>'
 );
 } catch(e) { console.error('[P84] Erro impressão:', e); janelaImpressao.document.write('<!doctype html><html>' + '<head><meta charset=UTF-8><title>Erro</title></head>' + '<body><p style=color:red>Erro ao gerar impressão.</p></body></html>'); janelaImpressao.document.close(); }
 janelaImpressao.document.close();
@@ -49164,6 +49142,7 @@ if (document.readyState === 'loading') {
           }
         
           function colocarBotao() {
+            return;
             var fixo = document.getElementById('btn-tab-fpdo');
             var antigo = document.getElementById('p92Botao');
             if (fixo) {
@@ -49199,7 +49178,7 @@ if (document.readyState === 'loading') {
             window.__varreduraUnica(colocarBotao);
           }
         
-          window.p92AbrirFpdo = function () { abrir(); };
+          window.__p92Mort = function () { abrir(); };
         
           if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', iniciar);
@@ -55822,7 +55801,7 @@ if (document.readyState === 'loading') {
           }
         
           function envolverFpdo() {
-            var ant = window.p92AbrirFpdo;
+            var ant = window.__p92Mort;
             if (typeof ant !== 'function' || ant.__p103) { return; }
             var nova = function () {
               if (!podeVer('fpdo')) {
@@ -55832,7 +55811,7 @@ if (document.readyState === 'loading') {
               return ant.apply(this, arguments);
             };
             nova.__p103 = true;
-            try { window.p92AbrirFpdo = nova; } catch (e) { /* ignora */ }
+            try { window.__p92Mort = nova; } catch (e) { /* ignora */ }
           }
         
           function cairNaPrimeira() {
@@ -76245,6 +76224,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   window.__p178abrir = montar;
 
   function botaoFixo(){
+    return;
     if(byId('p178btn')) return;
     var b=document.createElement('button');
     b.id='p178btn';
@@ -76519,6 +76499,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   window.__p180abrir = montar;
 
   function botaoFixo(){
+    return;
     if(byId('p180btn')) return;
     var b=document.createElement('button');
     b.id='p180btn';
