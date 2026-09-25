@@ -188,7 +188,7 @@
           if (window.__varreduraUnica) { return; }
         
           var tarefas = [];
-          var INTERVALO = 4000; /* PATCH186: varredura unica mais lenta */
+          var INTERVALO = 8000; /* limpeza estrutural: varredura de manutenção em baixa frequência */
           var pendente = false;
         
           function rodarTodas() {
@@ -54966,11 +54966,10 @@ if (document.readyState === 'loading') {
         
             try {
               var mo = new MutationObserver(function () { pedir(); });
-              mo.observe(document.body, { childList: true, subtree: true, attributes: true,
-                attributeFilter: ['style', 'class'] });
+              mo.observe(document.body, { childList: true, subtree: true });
             } catch (e3) {}
         
-            setInterval(passar, 900);
+            setInterval(passar, 5000);
             pedir();
           }
         
@@ -56741,12 +56740,12 @@ if (document.readyState === 'loading') {
             }
             try {
               var obs = new MutationObserver(agendar);
-              obs.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+              obs.observe(document.body, { childList: true, subtree: true });
             } catch (e) {}
             window.addEventListener('resize', agendar);
             window.addEventListener('online', agendar);
             window.addEventListener('offline', agendar);
-            setInterval(aplicar, 2000);
+            setInterval(aplicar, 10000);
             void ALTURA;
           }
         
@@ -67517,7 +67516,7 @@ if (document.readyState === 'loading') {
           function comecar() {
             ligarFechamento();
             passo();
-            window.setInterval(passo, 700);
+            window.setInterval(function () { if (window.__painelAbaVisivel && !window.__painelAbaVisivel('tab-custo')) return; passo(); }, 5000);
             try { console.log('[PATCH132] caixas liberadas e Centro de Custos vigiado. Use P132.conferir()'); }
             catch (e) { }
           }
@@ -68081,7 +68080,7 @@ if (document.readyState === 'loading') {
         
           function comecar() {
             passo();
-            window.setInterval(passo, 1500);
+            window.setInterval(function () { if (window.__painelAbaVisivel && !window.__painelAbaVisivel('tab-cronograma')) return; passo(); }, 5000);
             try {
               console.log('[PATCH133] plano ligado a producao. Modo: ' + estado.modo +
                 '. Use P133.ver(), P133.aplicar(), P133.desfazer(), P133.modo("automatico").');
@@ -68560,7 +68559,7 @@ if (document.readyState === 'loading') {
         
           function comecar() {
             passo();
-            window.setInterval(passo, 1200);
+            window.setInterval(function () { if (window.__painelAbaVisivel && !window.__painelAbaVisivel('tab-cronograma')) return; passo(); }, 5000);
             try { console.log('[PATCH134] plano lido no painel. Use P134.resumo(), P134.fases(), P134.atrasos()'); }
             catch (e) { }
           }
@@ -69372,7 +69371,7 @@ if (document.readyState === 'loading') {
         
           function comecar() {
             passo();
-            window.setInterval(passo, 1500);
+            window.setInterval(function () { if (window.__painelAbaVisivel && !window.__painelAbaVisivel('tab-cronograma')) return; passo(); }, 5000);
             try {
               console.log('[PATCH135] curva de avanco e custo previsto no ar. Use P135.curva(), P135.custos()');
             } catch (e) { }
@@ -71965,11 +71964,11 @@ if (document.readyState === 'loading') {
                 }, 120);
               });
               observador.observe(document.body, {
-                attributes: true, attributeFilter: ['style', 'class', 'hidden'],
+                attributes: false,
                 childList: true, subtree: true
               });
             } catch (e) { }
-            try { setInterval(function () { organizar(); }, 3000); } catch (e2) { }
+            try { setInterval(function () { organizar(); }, 10000); } catch (e2) { }
             try {
               console.log('[PATCH141] caixas em ordem. Use P141.varredura() para ver o mapa.');
             } catch (e3) { }
