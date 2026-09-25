@@ -5607,11 +5607,11 @@ window.p92AbrirFpdo=function(){};
                             </div>
                         </details>
 
-                        <div class="menu-section-title" style="margin:10px 8px 2px;padding:8px 4px 5px;color:#7f8da8;font-size:0.82rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.08);">⚙️ CONFIGURAÇÕES</div>
-                        <button class="tab-btn" id="btn-tab-admin" style="display:none" onclick="trocarAba('admin'); document.getElementById('meu-menu-abas').open=false;">🔧 Administrador</button>
-                        <button class="tab-btn" type="button" onclick="abrirRecuperacaoDados(); document.getElementById('meu-menu-abas').open=false;">🧿 Recuperar Dados Antigos</button>
-                        <button class="tab-btn" type="button" onclick="salvarAgora(); document.getElementById('meu-menu-abas').open=false;">💾 Salvar agora</button>
-                        <button class="tab-btn" type="button" onclick="abrirHistorico(); document.getElementById('meu-menu-abas').open=false;">📜 Histórico de alterações</button>
+                        <div id="menu-configuracoes-titulo" class="menu-section-title" style="margin:10px 8px 2px;padding:10px 4px 7px;color:#94a3c5;font-size:0.84rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.10);">⚙️ CONFIGURAÇÕES</div>
+                        <button class="tab-btn" id="btn-tab-admin" type="button" onclick="abrirAdministradorProtegido();">🔧 Administrador</button>
+                        <button class="tab-btn" id="btn-menu-recuperar-dados" type="button" onclick="abrirRecuperacaoDados(); document.getElementById('meu-menu-abas').open=false;">🧿 Recuperar Dados Antigos</button>
+                        <button class="tab-btn" id="btn-menu-salvar-agora" type="button" onclick="salvarAgora(); document.getElementById('meu-menu-abas').open=false;">💾 Salvar agora</button>
+                        <button class="tab-btn" id="btn-menu-historico" type="button" title="Ver quem alterou o painel e o que foi alterado" onclick="abrirHistorico(); document.getElementById('meu-menu-abas').open=false;">📜 Histórico de alterações</button>
                     </div>
 
                     <!-- 3. Seu conteúdo principal ocupa a tela inteira -->
@@ -39491,9 +39491,10 @@ function renderLancamentosPgto() {
                   /* ---------------------------------------------------------------- *
                    * 7) modal de senha do administrador
                    * ---------------------------------------------------------------- */
-                  function modalSenha(titulo) {
+                  function modalSenha(titulo, aoLiberar, opcoes) {
                     var c = config();
-                    if (c.modo === 'bloqueado' && !noServidor()) {
+                    opcoes = opcoes || {};
+                    if (!opcoes.adminPainel && c.modo === 'bloqueado' && !noServidor()) {
                       novoModal('Exclusao bloqueada');
                       toast('Exclusoes so no computador servidor.', 'err');
                       fecharModal();
@@ -39525,6 +39526,7 @@ function renderLancamentosPgto() {
                       fecharModal();
                       barra();
                       toast('Exclusoes liberadas por ' + MIN_LIB + ' minutos.', 'ok');
+                      if (typeof aoLiberar === 'function') { try { aoLiberar(quemFoi); } catch (e107cb) {} }
                     }
                 
                     function ok() {
@@ -39589,6 +39591,22 @@ function renderLancamentosPgto() {
                     setTimeout(function () { try { is.focus(); } catch (e) {} }, 60);
                   }
                 
+                  /* ================================================================ *
+                   * Acesso protegido ao painel de Administrador
+                   * O menu mostra o item para todos, mas a abertura exige credencial
+                   * de administrador. Apos a validacao, abre a tela administrativa.
+                   * ================================================================ */
+                  window.abrirAdministradorProtegido = function () {
+                    try {
+                      modalSenha('Autorizacao do administrador', function () {
+                        try { trocarAba('admin'); } catch (e1) {}
+                        try { var m = document.getElementById('meu-menu-abas'); if (m) { m.open = false; } } catch (e2) {}
+                      }, { adminPainel: true });
+                    } catch (e) {
+                      try { alert('Nao foi possivel abrir a autorizacao do administrador.'); } catch (e2) {}
+                    }
+                  };
+
                   /* ---------------------------------------------------------------- *
                    * 8) trocar senha
                    * ---------------------------------------------------------------- */
@@ -41740,7 +41758,9 @@ function atualVis(){
   try{if(!adm&&window.PainelNucleo&&typeof window.PainelNucleo.ehAdmin==='function')adm=window.PainelNucleo.ehAdmin();}catch(e2){}
   try{if(!adm){var s=window.PainelNucleo?window.PainelNucleo.sessao():null;if(s&&String(s.perfil||'').toLowerCase()==='admin')adm=true;}}catch(e3){}
   try{if(!adm&&window.P128&&window.P128.estado&&window.P128.estado.perfil){adm=String(window.P128.estado.perfil||'').toLowerCase()==='admin';}}catch(e4){}
-  btn.style.display=adm?'':'none';
+  /* O item Administrador e uma porta protegida por senha; fica visivel para todos.
+     A tela administrativa somente abre depois da autenticacao. */
+  btn.style.display='';
   /* esconder botoes p87 e p103 se admin */
   if(adm){var b87=document.getElementById('p87Botao'),b103=document.getElementById('p103Botao');if(b87)b87.style.display='none';if(b103)b103.style.display='none';}
 }
@@ -46960,12 +46980,15 @@ if (document.readyState === 'loading') {
         
           function colocarBotao() {
             var cx = caixaMenu();
-            var b = document.getElementById('p88Botao');
+            /* Reaproveita o botao fixo da secao CONFIGURACOES.
+               Isso impede que o PATCH de historico crie uma segunda copia. */
+            var b = document.getElementById('btn-menu-historico') || document.getElementById('p88Botao');
             if (!b) {
               b = document.createElement('button');
               b.id = 'p88Botao';
               b.type = 'button';
-              b.textContent = 'Hist\u00f3rico de altera\u00e7\u00f5es';
+              b.className = 'tab-btn';
+              b.textContent = '📜 Histórico de alterações';
               b.setAttribute('title', 'Ver quem mexeu no painel e o que foi alterado');
               b.addEventListener('click', function (ev) {
                 ev.preventDefault();
@@ -46973,12 +46996,17 @@ if (document.readyState === 'loading') {
                 abrirHistorico();
               });
             }
-            if (cx) {
-              if (b.parentNode !== cx) { cx.appendChild(b); }
+            if (cx && b.parentNode !== cx) {
+              var alvo = document.getElementById('btn-menu-salvar-agora');
+              if (alvo && alvo.parentNode === cx) {
+                alvo.insertAdjacentElement('afterend', b);
+              } else {
+                cx.appendChild(b);
+              }
+            }
+            if (b) {
               b.style.position = '';
-            } else if (!b.parentNode) {
-              b.style.cssText += ';position:fixed;right:14px;bottom:152px;z-index:2147482000;';
-              document.body.appendChild(b);
+              b.style.display = '';
             }
           }
         
