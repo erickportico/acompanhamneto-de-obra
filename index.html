@@ -5567,9 +5567,7 @@ window.p92AbrirFpdo=function(){};
             </div>
                     <div class="project-selector" style="display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px;">
                 <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
-                <button class="secondary" onclick="carregarBancoDaNuvem()" title="Carregar dados da nuvem" style="margin-left:4px;font-size:0.75rem;">☁️ Carregar Nuvem</button>
                 <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
-                <button class="secondary" onclick="if(window.salvarAgora)salvarAgora();else if(window.salvarBancoNaNuvem)salvarBancoNaNuvem();">💾 Salvar agora</button>
                 <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
                     </div>
             </div>
@@ -5597,11 +5595,23 @@ window.p92AbrirFpdo=function(){};
                         <button class="tab-btn" id="btn-tab-ctm" onclick="trocarAba('ctm')">🔲 Contramarco (CTM)</button>
                         <button class="tab-btn" id="btn-tab-custo" onclick="trocarAba('custo')">📊 Centro de Custos</button>
                         <button class="tab-btn" id="btn-tab-fpdo-mestre" type="button" onclick="if (window.p193Abrir) window.p193Abrir();">FPDO</button>
-                        <button class="tab-btn" type="button" onclick="exportarDados()">💾 Backup</button>
-                        <button class="tab-btn" type="button" onclick="document.getElementById('fileRestoreInput').click()">📥 Restaurar</button>
-                        <button class="tab-btn" type="button" onclick="abrirRecuperacaoDados()">🧿 Recuperar Dados Antigos</button>
-                        <button class="tab-btn" type="button" onclick="abrirBancoCompartilhado()">🌐 Banco Compartilhado</button>
-                        <button class="tab-btn" id="btn-tab-admin" style="display:none" onclick="trocarAba('admin')">🔧 Administração</button>
+
+                        <details id="menu-dados-backup" style="position:relative;">
+                            <summary style="cursor:pointer;padding:9px 12px;background:#1e293b;color:#fff;border-radius:6px;font-weight:700;user-select:none;border:1px solid rgba(255,255,255,.12);">💾 Dados &amp; Backup</summary>
+                            <div style="display:flex;flex-direction:column;gap:5px;padding:7px 0 0 0;">
+                                <button class="tab-btn" type="button" onclick="exportarDados(); document.getElementById('meu-menu-abas').open=false;">💾 Fazer Backup</button>
+                                <button class="tab-btn" type="button" onclick="document.getElementById('fileRestoreInput').click(); document.getElementById('meu-menu-abas').open=false;">📥 Restaurar Backup</button>
+                                <button class="tab-btn" type="button" onclick="salvarAgora(); document.getElementById('meu-menu-abas').open=false;">☁️ Salvar na Nuvem</button>
+                                <button class="tab-btn" type="button" onclick="carregarBancoDaNuvem(); document.getElementById('meu-menu-abas').open=false;">☁️ Carregar da Nuvem</button>
+                                <button class="tab-btn" type="button" onclick="abrirBancoCompartilhado(); document.getElementById('meu-menu-abas').open=false;">🌐 Banco Compartilhado</button>
+                            </div>
+                        </details>
+
+                        <div class="menu-section-title" style="margin:10px 8px 2px;padding:8px 4px 5px;color:#7f8da8;font-size:0.82rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.08);">⚙️ CONFIGURAÇÕES</div>
+                        <button class="tab-btn" id="btn-tab-admin" style="display:none" onclick="trocarAba('admin'); document.getElementById('meu-menu-abas').open=false;">🔧 Administrador</button>
+                        <button class="tab-btn" type="button" onclick="abrirRecuperacaoDados(); document.getElementById('meu-menu-abas').open=false;">🧿 Recuperar Dados Antigos</button>
+                        <button class="tab-btn" type="button" onclick="salvarAgora(); document.getElementById('meu-menu-abas').open=false;">💾 Salvar agora</button>
+                        <button class="tab-btn" type="button" onclick="abrirHistorico(); document.getElementById('meu-menu-abas').open=false;">📜 Histórico de alterações</button>
                     </div>
 
                     <!-- 3. Seu conteúdo principal ocupa a tela inteira -->
@@ -7287,18 +7297,44 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
             </div>
 
             <div class="modal-bg" id="modalBancoCompartilhado">
-                <div class="modal">
-                    <h3>🌐 Banco Compartilhado / Multi-Browser</h3>
-                    <p id="statusBancoMultiBrowser" style="margin-bottom:12px; font-size:0.85rem; color:var(--text-light);"></p>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
-                        <button class="success" onclick="exportarBancoMultiBrowser()">💾 Exportar Banco Completo (.json)</button>
-                        <button class="secondary" onclick="document.getElementById('fileMultiBrowser').click()">📥 Importar Banco (.json)
-                        </button>
-                        <input type="file" id="fileMultiBrowser" accept=".json" style="display:none" onchange="importarBancoMultiBrowser(event)">
+                <div class="modal" style="max-width:760px;">
+                    <h3 style="margin-bottom:6px;">💾 Dados, Backup e Banco Compartilhado</h3>
+                    <p id="statusBancoMultiBrowser" style="margin:0 0 16px; font-size:0.85rem; color:var(--text-light);"></p>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;">
+                        <div style="border:1px solid var(--border,#dbe2ea);border-radius:10px;padding:14px;">
+                            <strong>📁 Backup local</strong>
+                            <p style="font-size:.78rem;color:var(--text-light);margin:6px 0 12px;">Salve ou restaure uma cópia completa do banco em arquivo JSON.</p>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button class="success" type="button" onclick="exportarBancoMultiBrowser()">💾 Fazer Backup</button>
+                                <button class="secondary" type="button" onclick="document.getElementById('fileMultiBrowser').click()">📥 Restaurar Backup</button>
+                            </div>
+                        </div>
+
+                        <div style="border:1px solid var(--border,#dbe2ea);border-radius:10px;padding:14px;">
+                            <strong>☁️ Banco na nuvem</strong>
+                            <p style="font-size:.78rem;color:var(--text-light);margin:6px 0 12px;">Sincronize o banco compartilhado entre navegadores e computadores.</p>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button class="success" type="button" onclick="salvarAgora()">☁️ Salvar na Nuvem</button>
+                                <button class="secondary" type="button" onclick="carregarBancoDaNuvem()">☁️ Carregar da Nuvem</button>
+                            </div>
+                        </div>
+
+                        <div style="border:1px solid var(--border,#dbe2ea);border-radius:10px;padding:14px;">
+                            <strong>🌐 Banco Compartilhado</strong>
+                            <p style="font-size:.78rem;color:var(--text-light);margin:6px 0 12px;">Transfira o banco completo para outro navegador ou computador usando JSON.</p>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button class="success" type="button" onclick="exportarBancoMultiBrowser()">🌐 Exportar Banco</button>
+                                <button class="secondary" type="button" onclick="document.getElementById('fileMultiBrowser').click()">📥 Importar Banco</button>
+                            </div>
+                        </div>
                     </div>
-                    <div style="display:flex; justify-content:flex-end;">
-                        <button class="secondary" onclick="fecharBancoCompartilhado()">Fechar</button>
+
+                    <div style="border-top:1px solid var(--border,#dbe2ea);padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <button class="secondary" type="button" onclick="abrirRecuperacaoDados()">🧿 Recuperar Dados Antigos</button>
+                        <button class="secondary" type="button" onclick="fecharBancoCompartilhado()">Fechar</button>
                     </div>
+                    <input type="file" id="fileMultiBrowser" accept=".json" style="display:none" onchange="importarBancoMultiBrowser(event)">
                 </div>
             </div>
 
