@@ -159,107 +159,15 @@
             try { window.MutationObserver = Guardado; } catch (e) { /* ignora */ }
             try { window.WebKitMutationObserver = Guardado; } catch (e2) { /* ignora */ }
           }
-        
           /* ================================================================ *
-           * 2) tarefas repetidas (setInterval)
-           *    mede o tempo gasto e pula rodadas de quem exagerar
+           * 2) setInterval
+           *    A agenda central do PATCH119 ja consolida os timers do painel
+           *    em um unico relogio. Portanto nao ha necessidade de envolver
+           *    novamente window.setInterval aqui.
            * ================================================================ */
-          var origInterval = window.setInterval;
-        
-          if (typeof origInterval === 'function') {
-            window.setInterval = function (fn, ms) {
-              if (typeof fn !== 'function') {
-                return origInterval.apply(window, arguments);
-              }
-              var reg = novo('tarefa repetida', fn, 'cada ' + (Number(ms) || 0) + 'ms');
-              var extras = Array.prototype.slice.call(arguments, 2);
-              var envolvida = function () {
-                reg.chamadas++;
-                if (reg.dentro) { reg.puladas++; return; }
-                if (!temFolga(reg)) { reg.puladas++; return; }
-                try {
-                  if (typeof window.__p191DevePular === 'function' && window.__p191DevePular(fn)) {
-                    reg.puladas++;
-                    return;
-                  }
-                } catch (e191) {}
-                try { medir(reg, fn, window, extras); } catch (e) { /* ignora */ }
-              };
-              return origInterval.call(window, envolvida, ms);
-            };
-          }
-        
-          /* ================================================================ *
-           * 3) relatorio - Ctrl + Alt + D
-           * ================================================================ */
-          function ordenados() {
-            var l = registros.slice(0);
-            l.sort(function (a, b) { return b.ms - a.ms; });
-            return l;
-          }
-        
-          function texto() {
-            var l = ordenados();
-            var fora = [];
-            var i;
-            fora.push('RELATORIO DE DESEMPENHO DO PAINEL (patch 90)');
-            fora.push('vigias e tarefas registrados: ' + registros.length);
-            fora.push('');
-            for (i = 0; i < l.length && i < 15; i++) {
-              var r = l[i];
-              fora.push((i + 1) + ') ' + r.tipo + ' | ' + (r.onde || '-'));
-              fora.push('   tempo total: ' + r.ms + ' ms | rodou: ' + r.execucoes +
-                        ' | chamado: ' + r.chamadas + ' | pulado: ' + r.puladas +
-                        (r.limitado ? ' | FREADO' : ''));
-              fora.push('   codigo: ' + r.cod);
-            }
-            return fora.join('\n');
-          }
-        
-          function caixa() {
-            var v = document.getElementById('p90Caixa');
-            if (v) { v.parentNode.removeChild(v); return; }
-            var fundo = document.createElement('div');
-            fundo.id = 'p90Caixa';
-            fundo.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.72);' +
-              'display:flex;align-items:center;justify-content:center;padding:18px;';
-            var cx = document.createElement('div');
-            cx.style.cssText = 'background:#0f172a;color:#e2e8f0;border:1px solid #33415a;border-radius:12px;' +
-              'max-width:900px;width:100%;max-height:86vh;overflow:auto;padding:16px;' +
-              'font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;';
-            cx.textContent = texto();
-            var bt = document.createElement('button');
-            bt.type = 'button';
-            bt.textContent = 'Fechar';
-            bt.style.cssText = 'margin-top:12px;padding:8px 14px;border-radius:8px;border:0;' +
-              'background:#2563eb;color:#fff;cursor:pointer;font:600 13px system-ui;';
-            bt.addEventListener('click', function () {
-              if (fundo.parentNode) { fundo.parentNode.removeChild(fundo); }
-            });
-            cx.appendChild(document.createElement('br'));
-            cx.appendChild(bt);
-            fundo.appendChild(cx);
-            fundo.addEventListener('click', function (ev) {
-              if (ev.target === fundo) { fundo.parentNode.removeChild(fundo); }
-            });
-            (document.body || document.documentElement).appendChild(fundo);
-          }
-        
-          window.p90Relatorio = function () {
-            try { caixa(); } catch (e) { /* ignora */ }
-            return texto();
-          };
-        
-          document.addEventListener('keydown', function (ev) {
-            if (!ev.ctrlKey || !ev.altKey) { return; }
-            var k = String(ev.key || '').toLowerCase();
-            if (k !== 'd') { return; }
-            ev.preventDefault();
-            try { caixa(); } catch (e) { /* ignora */ }
-          }, true);
-        
-        })();
-    </script>
+          })();
+         
+</script>
 
     <!-- PATCH_VARREDURA_UNICA_OK -->
     <script>
@@ -304,7 +212,9 @@
           setInterval(rodarTodas, INTERVALO);
         
           window.__varreduraUnica = function (fn) {
-            if (typeof fn === 'function') { tarefas.push(fn); }
+            if (typeof fn !== 'function') return;
+            if (tarefas.indexOf(fn) !== -1) return;
+            tarefas.push(fn);
           };
         })();
     </script>
@@ -372,6 +282,12 @@
                 continue;
               }
               a.prox = t + a.ms;
+              /* Limpeza estrutural: timers de modulos ocultos ficam em espera. */
+              try {
+                if (typeof window.__p191DevePular === 'function' && window.__p191DevePular(a.fn)) {
+                  continue;
+                }
+              } catch (eGate) { /* nunca deixa o limitador afetar o painel */ }
               var ini = agora();
               try {
                 a.fn.apply(window, a.extras);
@@ -55161,7 +55077,7 @@ if (document.readyState === 'loading') {
               var mo = new MutationObserver(function () { estilo(); frente(); });
               mo.observe(document.body, { childList: true, subtree: false });
             } catch (e) {}
-            setInterval(function () { estilo(); frente(); }, 1500);
+            setInterval(function () { estilo(); frente(); }, 8000);
           }
         
           if (document.readyState === 'loading') {
@@ -58619,7 +58535,7 @@ if (document.readyState === 'loading') {
               obs.observe(document.body, { childList: true, subtree: false });
             } catch (e) {}
         
-            setInterval(function () { ligar(); sincronizar(); }, 1200);
+            setInterval(function () { ligar(); sincronizar(); }, 5000);
           }
         
           if (document.readyState === 'loading') {
@@ -65817,7 +65733,7 @@ if (document.readyState === 'loading') {
             if (preso && !janelaAberta()) { soltar(); }
           }, 3000);
         
-          setInterval(function () { testarServidor(); }, 30000);
+          setInterval(function () { if (window.__painelAbaVisivel && !window.__painelAbaVisivel('tab-custo')) { return; } testarServidor(); }, 30000);
         
           /* ================================================================ *
            * porta de servico para conferir no console
@@ -66267,8 +66183,8 @@ if (document.readyState === 'loading') {
             rodada();
             try { ajustarMes(); } catch (e) {}
             testarInternet();
-            setInterval(rodada, 1200);
-            setInterval(testarInternet, 45000);
+            setInterval(function(){ if (window.__painelAbaVisivel && !window.__painelAbaVisivel('tab-custo')) return; rodada(); }, 1200);
+            setInterval(function(){ if (window.__painelAbaVisivel && !window.__painelAbaVisivel('tab-custo')) return; testarInternet(); }, 45000);
             window.addEventListener('online', function () { estado.falhasSeguidas = 0; testarInternet(); }, false);
             window.addEventListener('offline', function () { testarInternet(); }, false);
           }
@@ -66969,7 +66885,27 @@ if (document.readyState === 'loading') {
     <!-- PATCH154_HIDDEN: <!-- FIM PATCH131_CADASTRO_BLOQUEIO -->-->
     <!-- PATCH154: P131 DESABILITADO – FIM -->
 
-    <!-- INI PATCH132_CAIXAS_E_DATAS -->
+    <!-- LIMPEZA ESTRUTURAL ETAPA 2: helper de visibilidade para vigias -->
+<script id="limpezaEstruturalVisibilidade">
+(function(){
+  if (window.__painelAbaVisivel) return;
+  window.__painelAbaVisivel = function(ids){
+    try {
+      if (!Array.isArray(ids)) ids = [ids];
+      for (var i=0;i<ids.length;i++){
+        var el=document.getElementById(ids[i]);
+        if (!el) continue;
+        if (el.style && el.style.display === 'none') continue;
+        if (el.hidden) continue;
+        if (el.offsetParent !== null) return true;
+      }
+    } catch(e){}
+    return false;
+  };
+})();
+</script>
+
+<!-- INI PATCH132_CAIXAS_E_DATAS -->
     <style id="p132Estilo">
         /* a tarja antiga sai de cena: era ela que o patch 130 tentava liberar */
         html body #p125Aviso { display: none !important; }
@@ -68566,6 +68502,7 @@ if (document.readyState === 'loading') {
         
           function passo() {
             try {
+              if (window.__painelAbaVisivel && !window.__painelAbaVisivel(['tab-itens','tab-geral','tab-p118dash'])) { return; }
               var r = resumo();
               var a = assinatura(r);
               if (a === ultimo && porId('p134Avanco')) { return; }
@@ -69383,6 +69320,7 @@ if (document.readyState === 'loading') {
         
           function passo() {
             try {
+              if (window.__painelAbaVisivel && !window.__painelAbaVisivel(['tab-itens','tab-geral','tab-p118dash','tab-custo'])) { return; }
               var s = assinatura();
               var faltaCurva = !porId('p135Curva');
               var faltaCusto = !porId('p135Custo');
@@ -73270,7 +73208,7 @@ if (document.readyState === 'loading') {
         
           instalar();
           /* o cliente pode ser criado depois da entrada no sistema */
-          setInterval(instalar, 4000);
+          setInterval(instalar, 10000);
         
           /* depois de salvar, a copia guardada nao vale mais */
           document.addEventListener('visibilitychange', function () {
@@ -73821,7 +73759,7 @@ if (document.readyState === 'loading') {
           ligarNavegacao('trocarSubTabPgtoNovo');
           setTimeout(function () { ligarNavegacao('trocarAba'); ligarNavegacao('trocarSubAbaFEM'); ligarNavegacao('trocarSubTabPgtoNovo'); }, 1200);
           setInterval(function () {
-            var aba = document.getElementById('tab-custo');
+            if (window.__painelAbaVisivel && !window.__painelAbaVisivel('tab-custo')) return;
             limparEmailDosCamposRegiao();
           }, 2000);
         }
@@ -75461,7 +75399,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     var mo = new MutationObserver(function () { setTimeout(aplicarGuardadas, 30); });
     mo.observe(document.body, { childList: true, subtree: false });
   } catch (e) {}
-  setInterval(aplicarGuardadas, 800);
+  setInterval(aplicarGuardadas, 2500);
   setTimeout(aplicarGuardadas, 300);
 })();
 </script>
@@ -77166,7 +77104,14 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   window.__p191Tick = true;
 
   function codigo(fn) {
-    try { return Function.prototype.toString.call(fn); } catch (e) { return ""; }
+    if (!fn) return "";
+    try {
+      if (fn.__p191CodigoCache !== undefined) return fn.__p191CodigoCache;
+      var c = Function.prototype.toString.call(fn);
+      try { Object.defineProperty(fn, "__p191CodigoCache", { value: c, configurable: true }); }
+      catch (e0) { try { fn.__p191CodigoCache = c; } catch (e1) {} }
+      return c;
+    } catch (e) { return ""; }
   }
   function painelLigado(id) {
     var el = document.getElementById(id);
@@ -77180,6 +77125,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     if (/p94Lupa|p94Fundo|p94-folha|p99-edit|data-p99h|__PS99|patch172|patch173|p99Estilo/.test(s)) return "fpdo";
     if (/custoFilterMes|renderCustoDashboard|custoBarChart|getCustosFiltered|__p120|tab-custo/.test(s)) return "custo";
     if (/tab-pagamento|panelPgto|pgtoLanc|renderPagamento|sub-tab-pgto|p54auto/.test(s)) return "pgto";
+    if (/P133|P134|P135|p133|p134|p135/.test(s)) return "crono";
     return "";
   }
   function deveRodar(k) {
@@ -77188,6 +77134,7 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     if (k === "fpdo") return painelLigado("p94Lupa") || painelLigado("p94Fundo");
     if (k === "custo") return painelLigado("tab-custo");
     if (k === "pgto") return painelLigado("tab-pagamento");
+    if (k === "crono") return painelLigado("tab-cronograma");
     return true;
   }
 
@@ -77198,6 +77145,10 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   };
 
   var orig = window.setInterval;
+  if (orig && orig.__p90Leve) {
+    try { console.log("[PATCH191] usando o limitador leve de timers ja instalado"); } catch (e0) {}
+    return;
+  }
   window.setInterval = function (fn, ms) {
     if (typeof fn !== "function") return orig.apply(window, arguments);
     var tipo = classe(codigo(fn));
@@ -77623,12 +77574,341 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
         }
     })();
 </script>
+<!-- PATCH201: Filtros de Pagamento de Produção + ocultar colaborador no resumo -->
+<style>
+  /* PATCH201 */
+  #tab-pagamento .p201-filtros {
+    display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end;
+    padding:10px 12px; margin:0 0 12px 0;
+    background:var(--card-bg,#fff); border:1px solid var(--border,#e2e8f0);
+    border-radius:10px; box-sizing:border-box;
+  }
+  #tab-pagamento .p201-filtro { flex:1 1 180px; min-width:170px; }
+  #tab-pagamento .p201-filtro label {
+    display:block; margin:0 0 4px; font-size:.72rem; font-weight:800;
+    color:var(--text-light,#64748b); text-transform:uppercase; letter-spacing:.03em;
+  }
+  #tab-pagamento .p201-filtro select {
+    width:100%; min-height:34px; padding:6px 9px; border:1px solid #cbd5e1;
+    border-radius:7px; background:#fff; color:#334155; box-sizing:border-box;
+  }
+  #tab-pagamento .p201-filtro-actions { display:flex; gap:6px; align-items:center; flex:0 0 auto; }
+  #tab-pagamento .p201-btn-limpar,
+  #tab-pagamento .p201-btn-ocultos {
+    min-height:34px; padding:6px 10px; border-radius:7px; cursor:pointer;
+    font-size:.75rem; font-weight:800; border:1px solid #cbd5e1; background:#fff; color:#475569;
+  }
+  #tab-pagamento .p201-btn-limpar:hover,
+  #tab-pagamento .p201-btn-ocultos:hover { background:#f8fafc; }
+  #tab-pagamento .p201-status-filtro {
+    flex:1 1 100%; font-size:.74rem; color:#64748b; margin-top:-2px;
+  }
+  #tab-pagamento .p201-oculto-colab { opacity:.45; }
+  #tab-pagamento .p201-oculto-colab td:first-child { text-decoration:line-through; }
+  #tab-pagamento .p201-hide-colab {
+    border:1px solid #cbd5e1; background:#fff; color:#475569; border-radius:6px;
+    padding:4px 7px; cursor:pointer; font-size:.74rem; font-weight:700; white-space:nowrap;
+  }
+  #tab-pagamento .p201-hide-colab:hover { background:#f1f5f9; }
+  body.dark-mode #tab-pagamento .p201-filtros { background:var(--card-bg,#1e293b); border-color:var(--border,#334155); }
+  body.dark-mode #tab-pagamento .p201-filtro select,
+  body.dark-mode #tab-pagamento .p201-btn-limpar,
+  body.dark-mode #tab-pagamento .p201-btn-ocultos,
+  body.dark-mode #tab-pagamento .p201-hide-colab { background:var(--input-bg,#0f172a); color:var(--text,#f8fafc); border-color:var(--border,#334155); }
+  body.dark-mode #tab-pagamento .p201-status-filtro { color:var(--text-light,#94a3b8); }
+  @media (max-width:700px) {
+    #tab-pagamento .p201-filtro { min-width:100%; }
+    #tab-pagamento .p201-filtro-actions { width:100%; }
+    #tab-pagamento .p201-btn-limpar, #tab-pagamento .p201-btn-ocultos { flex:1; }
+  }
+</style>
+<script>
+(function(){
+  'use strict';
+  if (window.__p201PgtoFiltros) return;
+  window.__p201PgtoFiltros = true;
+
+  var KEY_OCULTOS = 'painel_pgto_resumo_colaboradores_ocultos_v1';
+  var estado = { colaborador:'', material:'', obra:'' };
+
+  function id(x){ return document.getElementById(x); }
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function lerOcultos(){
+    try { var v=JSON.parse(localStorage.getItem(KEY_OCULTOS)||'[]'); return Array.isArray(v)?v:[]; }
+    catch(e){ return []; }
+  }
+  function salvarOcultos(lista){
+    try { localStorage.setItem(KEY_OCULTOS, JSON.stringify(lista)); } catch(e){}
+  }
+  function estaOculto(cid){ return lerOcultos().indexOf(String(cid)) !== -1; }
+  function alternarOculto(cid){
+    cid=String(cid); var a=lerOcultos(), i=a.indexOf(cid);
+    if(i>=0) a.splice(i,1); else a.push(cid);
+    salvarOcultos(a);
+    renderResumoSeguro();
+  }
+  function limparOcultos(){ salvarOcultos([]); renderResumoSeguro(); }
+
+  function nomeColab(cid){
+    try {
+      var c=(typeof getColaboradoresAll==='function'?getColaboradoresAll():[]).find(function(x){return String(x.id)===String(cid);});
+      return c ? (c.nome||cid) : cid;
+    } catch(e){ return cid; }
+  }
+  function lancTemColab(l,cid){
+    if(!cid) return true;
+    var alvo=String(cid);
+    return (l.profissionais||[]).some(function(x){return String(x)===alvo;}) ||
+           (l.ajudantes||[]).some(function(x){return String(x)===alvo;});
+  }
+  function lancPassaFiltro(l){
+    if(estado.obra && String(l._obraId)!==String(estado.obra)) return false;
+    if(estado.material && String(l.material||'')!==String(estado.material)) return false;
+    if(estado.colaborador && !lancTemColab(l,estado.colaborador)) return false;
+    return true;
+  }
+
+  function coletarLancamentosMes(){
+    var mesKey = typeof getChaveMesPgto==='function' ? getChaveMesPgto() : '';
+    var out=[];
+    if(!window.db || !Array.isArray(db.obras)) return out;
+    db.obras.forEach(function(obra){
+      try { if(typeof initLancamentosProducao==='function') initLancamentosProducao(obra); } catch(e){}
+      var ls = typeof getLancamentosMes==='function' ? getLancamentosMes(obra,mesKey) : (obra.lancamentosProducao||[]).filter(function(l){return l.mesAnoKey===mesKey;});
+      (ls||[]).forEach(function(l){ out.push(Object.assign({},l,{_obraId:obra.id,_obraNome:obra.nome})); });
+    });
+    return out;
+  }
+
+  function preencherSelect(sel, itens, placeholder, value){
+    if(!sel) return;
+    var atual=value==null?sel.value:value;
+    var html='<option value="">'+esc(placeholder)+'</option>';
+    itens.forEach(function(it){ html+='<option value="'+esc(it.value)+'">'+esc(it.label)+'</option>'; });
+    sel.innerHTML=html;
+    if(itens.some(function(it){return String(it.value)===String(atual);})) sel.value=atual; else sel.value='';
+  }
+
+  function construirFiltros(painelId, resumo){
+    var painel=id(painelId); if(!painel) return;
+    var old=id(resumo?'p201FiltrosResumo':'p201FiltrosLanc');
+    if(old) old.remove();
+    var bar=document.createElement('div');
+    bar.className='p201-filtros';
+    bar.id=resumo?'p201FiltrosResumo':'p201FiltrosLanc';
+    bar.innerHTML=
+      '<div class="p201-filtro"><label>Colaborador</label><select id="p201FiltroColaborador'+(resumo?'Resumo':'Lanc')+'"></select></div>'+
+      '<div class="p201-filtro"><label>Material</label><select id="p201FiltroMaterial'+(resumo?'Resumo':'Lanc')+'"></select></div>'+
+      '<div class="p201-filtro"><label>Obra</label><select id="p201FiltroObra'+(resumo?'Resumo':'Lanc')+'"></select></div>'+
+      '<div class="p201-filtro-actions">'+
+      '<button type="button" class="p201-btn-limpar" onclick="window.PGTO201.limparFiltros()">✖ Limpar filtros</button>'+
+      (resumo?'<button type="button" class="p201-btn-ocultos" onclick="window.PGTO201.limparOcultos()">👁 Mostrar todos</button>':'')+
+      '</div>'+
+      '<div class="p201-status-filtro" id="p201Status'+(resumo?'Resumo':'Lanc')+'"></div>';
+    var alvo;
+    if(resumo){
+      var titulo=painel.querySelector('.resumo-flex'); alvo=titulo||painel.firstElementChild;
+    } else {
+      alvo=painel.querySelector('#painelMultiplasTarefas') || painel.querySelector('#containerLancamentosPgto');
+    }
+    if(alvo) painel.insertBefore(bar,alvo); else painel.appendChild(bar);
+
+    ['Colaborador','Material','Obra'].forEach(function(tipo){
+      var prefix='p201Filtro'+tipo+(resumo?'Resumo':'Lanc');
+      var el=id(prefix); if(!el) return;
+      el.onchange=function(){
+        estado[tipo.toLowerCase()]=el.value;
+        renderSeguro();
+      };
+    });
+  }
+
+  function popularFiltros(resumo){
+    var all=coletarLancamentosMes(), colabs={}, mats={}, obras={};
+    all.forEach(function(l){
+      (l.profissionais||[]).concat(l.ajudantes||[]).forEach(function(cid){ colabs[String(cid)]=nomeColab(cid); });
+      var m=String(l.material||'').trim(); if(m) mats[m]=true;
+      if(l._obraId!=null) obras[String(l._obraId)]=l._obraNome||String(l._obraId);
+    });
+    var colabItems=Object.keys(colabs).sort(function(a,b){return colabs[a].localeCompare(colabs[b],'pt-BR');}).map(function(k){return {value:k,label:colabs[k]};});
+    var matItems=Object.keys(mats).sort(function(a,b){return a.localeCompare(b,'pt-BR');}).map(function(k){return {value:k,label:k};});
+    var obraItems=Object.keys(obras).sort(function(a,b){return obras[a].localeCompare(obras[b],'pt-BR');}).map(function(k){return {value:k,label:obras[k]};});
+    var suf=resumo?'Resumo':'Lanc';
+    preencherSelect(id('p201FiltroColaborador'+suf),colabItems,'Todos os colaboradores',estado.colaborador);
+    preencherSelect(id('p201FiltroMaterial'+suf),matItems,'Todos os materiais',estado.material);
+    preencherSelect(id('p201FiltroObra'+suf),obraItems,'Todas as obras',estado.obra);
+  }
+
+  function atualizarStatus(resumo, total){
+    var e=id('p201Status'+(resumo?'Resumo':'Lanc')); if(!e) return;
+    var partes=[];
+    if(estado.colaborador) partes.push('Colaborador: '+nomeColab(estado.colaborador));
+    if(estado.material) partes.push('Material: '+estado.material);
+    if(estado.obra){
+      var o=(db.obras||[]).find(function(x){return String(x.id)===String(estado.obra);});
+      partes.push('Obra: '+(o?o.nome:estado.obra));
+    }
+    e.textContent=(partes.length?partes.join('  •  ')+'  |  ':'')+'Registros encontrados: '+total;
+  }
+
+  function instalarBarraLanc(){ construirFiltros('panelPgtoLancamentos',false); popularFiltros(false); }
+  function instalarBarraResumo(){ construirFiltros('panelPgtoResumo',true); popularFiltros(true); }
+
+  var origLanc=null, origResumo=null;
+  function envolver(){
+    if(typeof window.renderLancamentosPgto==='function' && !window.renderLancamentosPgto.__p201){
+      origLanc=window.renderLancamentosPgto;
+      var f=function(){
+        try { instalarBarraLanc(); } catch(e){}
+        var r=origLanc.apply(this,arguments);
+        try {
+          /* A renderização original já terminou. Esconde visualmente linhas que não passam pelo filtro. */
+          var container=id('containerLancamentosPgto');
+          if(container){
+            var todosFiltrados=coletarLancamentosMes().filter(lancPassaFiltro);
+            var grupos=container.querySelectorAll('.lanc-obra-group');
+            grupos.forEach(function(g){
+              var rows=g.querySelectorAll('tbody tr[data-lanc-row]'), vis=0;
+              var grupoM2=0, grupoProf=0, grupoAjud=0;
+              rows.forEach(function(row){
+                var l=todosFiltrados.find(function(x){return String(x.id)===String(row.getAttribute('data-lanc-row'));});
+                var ok=!!l; row.style.display=ok?'':'none';
+                if(ok){
+                  vis++;
+                  if(!l.oculto){
+                    grupoM2+=Number(l.instalacaoM2)||0;
+                    if((l.profissionais||[]).length && l.valorProf>0) grupoProf+=(l.profissionais||[]).length*l.valorProf;
+                    if((l.ajudantes||[]).length && l.valorAjud>0) grupoAjud+=(l.ajudantes||[]).length*l.valorAjud;
+                  }
+                }
+              });
+              g.style.display=vis?'':'none';
+              var totalRow=g.querySelector('tfoot tr.lanc-totals-row');
+              if(totalRow){
+                var cells=totalRow.children;
+                if(cells[1]) cells[1].innerHTML='<strong>'+grupoM2.toLocaleString('pt-BR')+'</strong>';
+                if(cells[3]) cells[3].innerHTML='<strong>R$ '+grupoProf.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong>';
+                if(cells[4]) cells[4].innerHTML='<strong>R$ '+grupoAjud.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong>';
+              }
+            });
+            var n=todosFiltrados.length;
+            atualizarStatus(false,n);
+          }
+          popularFiltros(false);
+        } catch(e){}
+        return r;
+      };
+      f.__p201=true; window.renderLancamentosPgto=f;
+    }
+    if(typeof window.renderResumoPgto==='function' && !window.renderResumoPgto.__p201){
+      origResumo=window.renderResumoPgto;
+      var fr=function(){
+        try { instalarBarraResumo(); } catch(e){}
+        /* O resumo original calcula tudo. Para manter os totais corretos sob filtros,
+           substituímos o conteúdo da tabela e dos totais após o cálculo original. */
+        var r=origResumo.apply(this,arguments);
+        try { renderResumoFiltrado(); } catch(e){}
+        return r;
+      };
+      fr.__p201=true; window.renderResumoPgto=fr;
+    }
+  }
+
+  function renderResumoFiltrado(){
+    var container=id('containerResumoPgto'), totais=id('containerTotaisPgto');
+    if(!container||!totais) return;
+    var all=coletarLancamentosMes().filter(lancPassaFiltro).filter(function(l){return !l.oculto;});
+    var totalM2=0,totalProf=0,totalAjud=0,valorPagoTotal=0;
+    var map={};
+    all.forEach(function(l){
+      var profVisiveis=(l.profissionais||[]).filter(function(cid){return !estaOculto(cid);});
+      var ajudVisiveis=(l.ajudantes||[]).filter(function(cid){return !estaOculto(cid);});
+      if(profVisiveis.length || ajudVisiveis.length) totalM2+=Number(l.instalacaoM2)||0;
+      if(profVisiveis.length&&l.valorProf>0) totalProf+=profVisiveis.length*Number(l.valorProf||0);
+      if(ajudVisiveis.length&&l.valorAjud>0) totalAjud+=ajudVisiveis.length*Number(l.valorAjud||0);
+      profVisiveis.forEach(function(cid){
+        var k=String(cid); if(!map[k]) map[k]={id:k,nome:nomeColab(cid),totalProf:0,totalAjud:0}; map[k].totalProf+=Number(l.valorProf)||0;
+      });
+      ajudVisiveis.forEach(function(cid){
+        var k=String(cid); if(!map[k]) map[k]={id:k,nome:nomeColab(cid),totalProf:0,totalAjud:0}; map[k].totalAjud+=Number(l.valorAjud)||0;
+      });
+    });
+    var lista=Object.keys(map).map(function(k){return map[k];});
+    lista.sort(function(a,b){return a.nome.localeCompare(b.nome,'pt-BR');});
+
+    /* Valor pago: respeita a obra filtrada quando houver uma obra específica. */
+    lista.forEach(function(c){
+      var vp=0;
+      (db.obras||[]).forEach(function(obra){
+        if(estado.obra && String(obra.id)!==String(estado.obra)) return;
+        (obra.colaboradoresPgto||[]).forEach(function(entry){
+          if(String(entry.id)===String(c.id) && entry.valorPagoManual){ vp+=Number(entry.valorPagoManual[getChaveMesPgto()])||0; }
+        });
+      });
+      c.valorPago=vp; valorPagoTotal+=vp;
+    });
+
+    var custoTotal=totalProf+totalAjud;
+    var html='<table class="resumo-table"><thead><tr><th>Colaborador</th><th>Total Profissional</th><th>Total Ajudante</th><th>Total a Receber</th><th>Valor Pago</th><th style="width:110px">Ação</th></tr></thead><tbody>';
+    if(!lista.length){ html+='<tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8">Nenhum colaborador encontrado com os filtros atuais.</td></tr>'; }
+    lista.forEach(function(c){
+      var tr=c.totalProf+c.totalAjud;
+      html+='<tr><td>'+esc(c.nome)+'</td>';
+      html+='<td>R$ '+c.totalProf.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</td>';
+      html+='<td>R$ '+c.totalAjud.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</td>';
+      html+='<td><strong>R$ '+tr.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong></td>';
+      html += "<td class='valor-pago-cell'><input type='number' step='0.01' min='0' value='"+(c.valorPago||0)+"' onchange='window.PGTO201.atualizarPago(\""+esc(c.id)+"\",this.value)' style='width:90px;padding:4px 6px;border:2px solid #22c55e;border-radius:4px;text-align:right;font-size:.85rem;box-sizing:border-box;'></td>";
+      html += "<td><button type='button' class='p201-hide-colab' onclick='window.PGTO201.ocultarColaborador(\""+esc(c.id)+"\")'>👁 Ocultar</button></td></tr>";
+    });
+    html+='</tbody></table>'; container.innerHTML=html;
+
+    totais.innerHTML=
+      '<div class="totais-item"><span>Metragem Total</span><span class="totais-value">'+totalM2.toLocaleString('pt-BR')+' m²</span></div>'+
+      '<div class="totais-item"><span>Total Profissionais</span><span class="totais-value">R$ '+totalProf.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span></div>'+
+      '<div class="totais-item totais-red"><span>Total Ajudantes</span><span class="totais-value">R$ '+totalAjud.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span></div>'+
+      '<div class="totais-item totais-yellow"><span>Custo Total Produção</span><span class="totais-value">R$ '+custoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span></div>'+
+      '<div class="totais-item totais-green"><span>Valor Pago</span><span class="totais-value">R$ '+valorPagoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span></div>'+
+      '<div class="totais-item"><span>Saldo</span><span class="totais-value'+(custoTotal-valorPagoTotal>0?' totais-red':'')+'">R$ '+(custoTotal-valorPagoTotal).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span></div>';
+    atualizarStatus(true,all.length);
+    popularFiltros(true);
+  }
+
+  function renderSeguro(){
+    try {
+      if(typeof window.renderPagamento==='function') window.renderPagamento();
+      else { if(pgtoSubTab==='lancamentos' && origLanc) origLanc(); else if(pgtoSubTab==='resumo' && origResumo) origResumo(); }
+    } catch(e){ try { if(origLanc) origLanc(); } catch(x){} }
+  }
+  function renderResumoSeguro(){
+    try { if(typeof window.renderResumoPgto==='function') window.renderResumoPgto(); else renderResumoFiltrado(); } catch(e) { try{renderResumoFiltrado();}catch(x){} }
+  }
+
+  window.PGTO201={
+    limparFiltros:function(){ estado={colaborador:'',material:'',obra:''}; renderSeguro(); },
+    ocultarColaborador:function(cid){ alternarOculto(cid); },
+    limparOcultos:function(){ limparOcultos(); },
+    atualizarPago:function(cid,valor){
+      var obraId=estado.obra||'';
+      if(obraId && typeof atualizarValorPagoPgto==='function') { atualizarValorPagoPgto(cid,obraId,valor); return; }
+      /* Sem obra selecionada, preserva a regra existente: lança no primeiro registro disponível. */
+      var alvo='';
+      (db.obras||[]).some(function(o){ var e=(o.colaboradoresPgto||[]).find(function(c){return String(c.id)===String(cid);}); if(e){alvo=o.id;return true;} return false; });
+      if(typeof atualizarValorPagoPgto==='function') atualizarValorPagoPgto(cid,alvo,valor);
+    }
+  };
+
+  function iniciar(){
+    envolver();
+    try { if(pgtoSubTab==='lancamentos') renderLancamentosPgto(); else if(pgtoSubTab==='resumo') renderResumoPgto(); } catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){setTimeout(iniciar,1200);});
+  else setTimeout(iniciar,1200);
+  setTimeout(envolver,2500); setTimeout(envolver,5000);
+})();
+</script>
 </body>
 </html>
-<!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
-<!-- PATCH171 aplicado em 2026-09-18 14:07:32 -->
-<!-- PATCH172 aplicado em 2026-09-18 16:42:44 -->
-<!-- PATCH175 aplicado em 2026-09-19 13:37:40 -->
-<!-- PATCH183: desativar backup completo em localStorage quando a cota exceder -->
-<!-- PATCH184: Diario integrado com obras, itens, colaboradores e calculo automatico de m2 -->
-<!-- PATCH185: itens por referencia, tipologia, equipe multipla e calculo de quantidade instalada -->
