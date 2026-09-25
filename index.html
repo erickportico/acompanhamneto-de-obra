@@ -6192,6 +6192,13 @@ window.p92AbrirFpdo=function(){};
 
                 <!-- TAB 3: BOLETIM DE MEDIÇÃO DETALHADO -->
                 <div id="tab-medicoes" class="card" style="display:none;">
+                    <div id="medPrintHeader" class="med-print-header">
+                        <div class="med-print-header-spacer"></div>
+                        <div class="med-print-header-titulo">CONTROLE DE MEDIÇÃO — <span id="medPrintObraNome"></span></div>
+                        <div class="med-print-header-logo">
+                            <img id="medPrintLogoImg" src="" alt="Logo" style="display:none;">
+                        </div>
+                    </div>
                     <div class="print-style-bar">
                         <div class="print-card">
                             <span class="title" style="text-align:center;">NAVEGAR MEDIÇÃO
@@ -6231,6 +6238,8 @@ window.p92AbrirFpdo=function(){};
                             <label id="lblMedicaoFinal" title="Marque para devolver toda a retenção retida nesta medição (medição final)" style="display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:bold;padding:6px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;">
                                 <input type="checkbox" id="chkMedicaoFinal" onchange="toggleMedicaoFinal(this.checked)" style="width:16px;height:16px;cursor:pointer;"> 🏁 Medição Final (devolver retenção retida)</label>
                             <button class="secondary" onclick="abrirModalImportarExcel('medicao')">📋 Colar Medição (Excel)</button>
+                            <button type="button" class="secondary" title="Escolher a logo que aparece no cabeçalho da impressão" onclick="document.getElementById('medLogoFileInput').click()">🖼️ Logo</button>
+                            <input type="file" id="medLogoFileInput" accept="image/*" style="display:none;" onchange="p200EscolherLogoMedicao(this)">
                             <button class="secondary" onclick="imprimirPagina()">🖨️ Imprimir / Gerar PDF</button>
                         </div>
                     </div>
@@ -9869,7 +9878,7 @@ ${Number(m.saldo||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}</td>
                                 <td><div class="td-content">${item.qtd}</div></td>
                                 <td><div class="td-content"><b>${areaTotalItem.toFixed(2)}</b></div></td>
                                 <td><div class="td-content" style="background:rgba(255,255,255,0.05);">${m2Anterior.toFixed(2)}</div></td>
-                                <td><input type="number" step="0.01" style="background:#fef9c3; color:#000; font-weight:bold;" value="${m2Atual.toFixed(2)}" onchange="editarM2Medicao(${item.id}, this.value)"></td>
+                                <td><input type="number" step="0.01" class="med-input-atual" style="background:#fef9c3; color:#000; font-weight:bold;" value="${m2Atual.toFixed(2)}" onchange="editarM2Medicao(${item.id}, this.value)"></td>
                                 <td><div class="td-content"><b>${m2TotalAcumulado.toFixed(2)}</b></div></td>
                                 <td><div class="td-content">${saldoM2.toFixed(2)}</div></td>
                                 <td><div class="td-content">R$ ${valorMedicaoAtualItem.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></td>
@@ -77473,6 +77482,147 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
 })();
 </script>
 
+<!-- PATCH 200: Cabecalho de impressao (com logo) e correcao de cores/encaixe do
+     Boletim de Medicao (aba tab-medicoes) na folha A4 paisagem. Nao mexe em
+     nenhum outro relatorio/aba. -->
+<style id="pPrintMedicaoOnly">
+    #medPrintHeader { display: none; }
+
+    @media print {
+        /* Garante que as cores de fundo dos cabecalhos coloridos realmente
+           saiam no papel (senao o texto branco da RETENCAO fica invisivel
+           em fundo branco). */
+        #tab-medicoes, #tab-medicoes * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+
+        #tab-medicoes #medPrintHeader {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            border: 1px solid #000;
+            background: #f0f0f0 !important;
+            padding: 8px 16px;
+            margin-bottom: 10px;
+        }
+        #tab-medicoes #medPrintHeader .med-print-header-spacer,
+        #tab-medicoes #medPrintHeader .med-print-header-logo {
+            flex: 0 0 150px;
+        }
+        #tab-medicoes #medPrintHeader .med-print-header-titulo {
+            flex: 1 1 auto;
+            text-align: center;
+            font-weight: 800;
+            font-size: 13pt;
+            color: #000 !important;
+        }
+        #tab-medicoes #medPrintHeader .med-print-header-logo {
+            text-align: right;
+        }
+        #tab-medicoes #medPrintHeader .med-print-header-logo img {
+            max-height: 36px;
+            max-width: 150px;
+        }
+
+        /* Restaura as cores dos cabecalhos da tabela (a regra geral de
+           impressao forca fundo branco/texto preto em todo th/td). */
+        #tab-medicoes th.head-base { background:#e2e8f0 !important; color:#1c2536 !important; }
+        #tab-medicoes th.head-med-base { background:#facc15 !important; color:#000 !important; }
+        #tab-medicoes th.head-med-atual { background:#4ade80 !important; color:#000 !important; }
+        #tab-medicoes th.head-med-fin { background:#a3e635 !important; color:#000 !important; }
+        #tab-medicoes th.head-med-retenca { background:#f87171 !important; color:#fff !important; }
+
+        /* A coluna "M2 Medicao Selecionada" e um <input>, e todo <input>
+           some na impressao -- por isso parecia "sem nada digitado".
+           Mostra o valor como texto simples. */
+        #tab-medicoes input.med-input-atual {
+            display: inline-block !important;
+            border: none !important;
+            background: transparent !important;
+            color: #000 !important;
+            font-weight: bold;
+            width: 100% !important;
+            text-align: center;
+            padding: 0 !important;
+            font-size: 6.8pt !important;
+        }
+
+        /* Encolhe a tabela (14 colunas) para caber numa folha A4 paisagem. */
+        #tab-medicoes table {
+            font-size: 6.8pt !important;
+            width: 100% !important;
+        }
+        #tab-medicoes th .th-content,
+        #tab-medicoes td .td-content {
+            padding: 2px 3px !important;
+            white-space: normal !important;
+            min-width: 0 !important;
+        }
+        #tab-medicoes th, #tab-medicoes td {
+            padding: 1px !important;
+        }
+    }
+</style>
+<script>
+    (function () {
+        var LOGO_KEY = 'painelLogoImpressaoMedicao';
+
+        function p200AtualizarCabecalhoImpressaoMedicao(obra) {
+            try {
+                var elNome = document.getElementById('medPrintObraNome');
+                if (elNome) {
+                    var nomeObra = (obra && obra.nome) ? obra.nome :
+                        ((typeof getObraAtual === 'function' && getObraAtual()) ? getObraAtual().nome : '');
+                    elNome.innerText = nomeObra || '';
+                }
+            } catch (e) { /* ignora */ }
+        }
+
+        window.p200EscolherLogoMedicao = function (inputEl) {
+            var file = inputEl && inputEl.files && inputEl.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var dataUrl = e.target.result;
+                try { localStorage.setItem(LOGO_KEY, dataUrl); } catch (err) { /* ignora */ }
+                var img = document.getElementById('medPrintLogoImg');
+                if (img) { img.src = dataUrl; img.style.display = 'inline-block'; }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        function p200CarregarLogoSalva() {
+            try {
+                var salva = localStorage.getItem(LOGO_KEY);
+                if (salva) {
+                    var img = document.getElementById('medPrintLogoImg');
+                    if (img) { img.src = salva; img.style.display = 'inline-block'; }
+                }
+            } catch (e) { /* ignora */ }
+        }
+
+        /* Atualiza o titulo do cabecalho toda vez que o boletim e renderizado */
+        if (typeof window.renderBoletimMedicao === 'function' && !window.renderBoletimMedicao.__p200) {
+            var _origRenderBoletimMedicao = window.renderBoletimMedicao;
+            var novoRender = function (obra) {
+                var r = _origRenderBoletimMedicao.apply(this, arguments);
+                p200AtualizarCabecalhoImpressaoMedicao(obra);
+                return r;
+            };
+            novoRender.__p200 = true;
+            window.renderBoletimMedicao = novoRender;
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', p200CarregarLogoSalva);
+        } else {
+            p200CarregarLogoSalva();
+        }
+    })();
+</script>
 </body>
 </html>
 <!-- PATCH170 aplicado em 2026-09-18 13:06:54 -->
