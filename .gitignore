@@ -13,3 +13,18 @@ _historico_patches/
 _backup_pre_fase97/
 RELATORIO_LIMPEZA_*.txt
 scripts_fase99.txt
+# Arquivos locais e backups
+data/backups/
+data/banco.json
+data/*.bak*
+*.bak
+*.bak-*
+*.bkp
+*.backup
+
+# Arquivos temporários de trabalho
+nulgit
+
+# Relatórios e arquivos gerados localmente
+*.pptx
+*.json
