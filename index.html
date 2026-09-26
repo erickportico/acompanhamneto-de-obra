@@ -742,6 +742,75 @@ body, main, .app-container {
             letter-spacing: -0.5px;
         }
 
+        /* TESTE: troca rápida de obra pelo próprio título */
+        .obra-title-switcher {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+        #obraTitle {
+            cursor: pointer;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        #obraTitle::after {
+            content: '▾';
+            font-size: .78em;
+            opacity: .65;
+            transform: translateY(1px);
+        }
+        #obraTitle:hover {
+            opacity: .88;
+        }
+        #obraTitleMenu {
+            display: none;
+            position: absolute;
+            left: 0;
+            top: calc(100% + 8px);
+            z-index: 100000;
+            min-width: 290px;
+            max-width: min(420px, 80vw);
+            max-height: 360px;
+            overflow-y: auto;
+            padding: 8px;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 10px;
+            box-shadow: 0 14px 35px rgba(0,0,0,.45);
+        }
+        #obraTitleMenu.open { display: flex; flex-direction: column; gap: 5px; }
+        #obraTitleMenu button {
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            color: #e5e7eb;
+            border: 1px solid transparent;
+            padding: 8px 10px;
+            border-radius: 7px;
+            box-shadow: none;
+        }
+        #obraTitleMenu button:hover {
+            background: #1e3a8a;
+            transform: none;
+        }
+        #obraTitleMenu button.active {
+            background: #2563eb;
+            color: #fff;
+        }
+        .header-theme-toggle {
+            width: 100%;
+            margin-top: 7px;
+            padding: 6px 10px;
+            font-size: .72rem;
+            border-radius: 7px;
+        }
+        body.dark-mode .header-theme-toggle {
+            background: #475569;
+            color: #fff;
+        }
+
         .header-title-info p {
             font-size: 0.85rem;
             opacity: 0.75;
@@ -5503,13 +5572,17 @@ window.p92AbrirFpdo=function(){};
         <header>
             <div class="header-title-container">
                 <div class="header-title-info">
-                    <h1 id="obraTitle">BURJ LAVIE</h1>
+                    <div class="obra-title-switcher">
+                        <h1 id="obraTitle" onclick="toggleObraTitleMenu(event)" title="Clique para trocar de obra">BURJ LAVIE</h1>
+                        <div id="obraTitleMenu" role="menu" aria-label="Selecionar obra"></div>
+                    </div>
                     <p>Painel de Acompanhamento de Produção e Instalação</p>
                 </div>
                 <div class="header-badges-right" style="display:flex;align-items:center;gap:8px;">
                     <div class="contract-badge">
                         <span class="label">Contrato Global</span>
                         <span class="val" id="headerValorContrato">R$ 0,00</span>
+                        <button class="secondary header-theme-toggle" onclick="alternarTema()" id="btnThemeToggle" type="button">☀️ Modo Claro</button>
                     </div>
                     <div class="contract-badge" id="headerNumContratoBadge" style="display:none;">
                         <span class="label">Nº Contrato</span>
@@ -5518,7 +5591,7 @@ window.p92AbrirFpdo=function(){};
                 </div>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;">
-            <div class="project-selector" style="justify-content:flex-start;">
+            <div id="headerObraLegacy" class="project-selector" style="justify-content:flex-start;">
                 <details id="menu-obra" style="position:relative;z-index:10000;margin:10px 0 0 0;">
                     <summary style="cursor:pointer;padding:8px 16px;background:#1e293b;color:#fff;border-radius:6px;font-weight:bold;width:fit-content;user-select:none;border:1px solid rgba(255,255,255,0.2);box-shadow:0 4px 10px rgba(0,0,0,0.3);font-family:inherit;font-size:inherit;list-style:none;">☰ Obra</summary>
                     <div style="display:flex;flex-direction:column;position:absolute;top:100%;left:0;background:#121826;padding:10px;border-radius:8px;margin-top:6px;gap:6px;min-width:260px;border:1px solid rgba(255,255,255,0.15);box-shadow:0 10px 25px rgba(0,0,0,0.7);">
@@ -5531,7 +5604,6 @@ window.p92AbrirFpdo=function(){};
             </div>
                     <div class="project-selector" style="display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px;">
                 <span id="statusNuvem" style="padding:4px 8px; border-radius:6px; font-size:0.75rem; background:#5f6b7a; color:#fff;">☁️ Local</span>
-                <button class="secondary" onclick="alternarTema()" id="btnThemeToggle">☀️ Modo Claro</button>
                 <input type="file" id="fileRestoreInput" accept=".json" style="display:none" onchange="restaurarBackupJSON(event)">
                     </div>
             </div>
@@ -5565,17 +5637,9 @@ window.p92AbrirFpdo=function(){};
                             <div style="display:flex;flex-direction:column;gap:5px;padding:7px 0 0 0;">
                                 <button class="tab-btn" type="button" onclick="exportarDados(); document.getElementById('meu-menu-abas').open=false;">💾 Fazer Backup</button>
                                 <button class="tab-btn" type="button" onclick="document.getElementById('fileRestoreInput').click(); document.getElementById('meu-menu-abas').open=false;">📥 Restaurar Backup</button>
-                                <button class="tab-btn" type="button" onclick="salvarAgora(); document.getElementById('meu-menu-abas').open=false;">☁️ Salvar na Nuvem</button>
-                                <button class="tab-btn" type="button" onclick="carregarBancoDaNuvem(); document.getElementById('meu-menu-abas').open=false;">☁️ Carregar da Nuvem</button>
-                                <button class="tab-btn" id="btn-menu-permitir-apagar" type="button" title="Autorizar exclusões com a senha do administrador" onclick="modalSenha('Autorizacao para apagar'); document.getElementById('meu-menu-abas').open=false;">🔐 Permitir apagar</button>
                             </div>
                         </details>
 
-                        <div id="menu-configuracoes-titulo" class="menu-section-title" style="margin:10px 8px 2px;padding:10px 4px 7px;color:#94a3c5;font-size:0.84rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.10);">⚙️ CONFIGURAÇÕES</div>
-                        <button class="tab-btn" id="btn-tab-admin" type="button" onclick="abrirAdministradorProtegido();">🔧 Administrador</button>
-                        <button class="tab-btn" id="btn-menu-recuperar-dados" type="button" onclick="abrirRecuperacaoDados(); document.getElementById('meu-menu-abas').open=false;">🧿 Recuperar Dados Antigos</button>
-                        <button class="tab-btn" id="btn-menu-salvar-agora" type="button" onclick="salvarAgora(); document.getElementById('meu-menu-abas').open=false;">💾 Salvar agora</button>
-                        <button class="tab-btn" id="btn-menu-historico" type="button" title="Ver quem alterou o painel e o que foi alterado" onclick="abrirHistorico(); document.getElementById('meu-menu-abas').open=false;">📜 Histórico de alterações</button>
                     </div>
 
                     <!-- 3. Seu conteúdo principal ocupa a tela inteira -->
@@ -6879,7 +6943,7 @@ window.p92AbrirFpdo=function(){};
             </div>
 
             <div id="tab-admin" class="card" style="display:none;">
-                <h3 style="margin-top:0;color:var(--text,#fff);">🔧 Administração</h3>
+                <h3 style="margin-top:0;color:var(--text,#fff);">⚙️ CONFIGURAÇÕES ADM</h3>
 
                 <!-- Sub-abas -->
                 <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
@@ -7293,7 +7357,6 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                     </div>
 
                     <div style="border-top:1px solid var(--border,#dbe2ea);padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-                        <button class="secondary" type="button" onclick="abrirRecuperacaoDados()">🧿 Recuperar Dados Antigos</button>
                         <button class="secondary" type="button" onclick="fecharBancoCompartilhado()">Fechar</button>
                     </div>
                     <input type="file" id="fileMultiBrowser" accept=".json" style="display:none" onchange="importarBancoMultiBrowser(event)">
@@ -8134,6 +8197,53 @@ COMPONENTES&#9;PAR42X13CP - NATURAL&#9;1310&#9;Parafuso auto atarraxante 4,2 x 1
                     return o;
                 }
             
+                function fecharObraTitleMenu() {
+                    const menu = document.getElementById('obraTitleMenu');
+                    if (menu) menu.classList.remove('open');
+                }
+
+                function toggleObraTitleMenu(ev) {
+                    if (ev && ev.stopPropagation) ev.stopPropagation();
+                    const menu = document.getElementById('obraTitleMenu');
+                    if (!menu) return;
+                    if (menu.classList.contains('open')) {
+                        fecharObraTitleMenu();
+                        return;
+                    }
+
+                    menu.innerHTML = '';
+                    const obras = Array.isArray(db.obras) ? db.obras : [];
+                    obras.forEach(function(o) {
+                        const bt = document.createElement('button');
+                        bt.type = 'button';
+                        bt.setAttribute('role', 'menuitem');
+                        bt.textContent = '🏗️ ' + titleCase(o.nome || 'Obra sem nome');
+                        if (String(o.id) === String(db.obraAtualId)) bt.classList.add('active');
+                        bt.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            if (String(db.obraAtualId) !== String(o.id)) {
+                                trocarObra(o.id);
+                            }
+                            fecharObraTitleMenu();
+                        });
+                        menu.appendChild(bt);
+                    });
+
+                    if (!obras.length) {
+                        const vazio = document.createElement('div');
+                        vazio.style.cssText = 'padding:10px;color:#94a3b8;font-size:.8rem;';
+                        vazio.textContent = 'Nenhuma obra cadastrada.';
+                        menu.appendChild(vazio);
+                    }
+                    menu.classList.add('open');
+                }
+
+                document.addEventListener('click', function(ev) {
+                    const menu = document.getElementById('obraTitleMenu');
+                    const wrap = document.querySelector('.obra-title-switcher');
+                    if (menu && wrap && !wrap.contains(ev.target)) fecharObraTitleMenu();
+                });
+
                 function trocarObra(id) {
                     db.obraAtualId = id;
                     cronogramaInitialized = false;
@@ -13392,16 +13502,57 @@ function trocarSubTabPgtoNovo(tab) {
               return String(itemId) + '|' + String(mesKey);
             }
             
+            function _normalizarMesLancamento(l) {
+              if (!l) return '';
+              var chave = String(l.mesAnoKey || l.mesAno || l.mesKey || '').trim();
+              if (chave) {
+                var m = chave.match(/^(\d{4})[-\/](\d{1,2})$/);
+                if (m) return m[1] + '-' + String(m[2]).padStart(2, '0');
+                m = chave.match(/^(\d{1,2})[-\/](\d{4})$/);
+                if (m) return m[2] + '-' + String(m[1]).padStart(2, '0');
+              }
+              var raw = l.data || l.dataLancamento || l.dataPagamento || l.dataProducao || l.createdAt || '';
+              if (!raw) return '';
+              var iso = String(raw).trim();
+              var mi = iso.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+              if (mi) return mi[1] + '-' + String(mi[2]).padStart(2, '0');
+              var br = iso.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+              if (br) return br[3] + '-' + String(br[2]).padStart(2, '0');
+              var d = new Date(raw);
+              if (!isNaN(d.getTime())) return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
+              return '';
+            }
+
             function getLancamentosMes(obra, mesKey) {
               initLancamentosProducao(obra);
-              return (obra.lancamentosProducao || []).filter(l => l.mesAnoKey === mesKey);
+              var alvo = String(mesKey || '').trim();
+              return (obra.lancamentosProducao || []).filter(function(l) {
+                return _normalizarMesLancamento(l) === alvo;
+              });
             }
             
+            // FASE 93 — diagnóstico seguro da origem dos lançamentos do mês.
+            // Não altera dados; apenas permite conferir quantos registros existem
+            // e quantos são recuperáveis pelo mês informado.
+            window.__fase93DiagnosticoPagamento = function(mesKey) {
+              var alvo = mesKey || getChaveMesPgto();
+              var bruto = 0, recuperados = 0;
+              (db.obras || []).forEach(function(obra) {
+                initLancamentosProducao(obra);
+                bruto += (obra.lancamentosProducao || []).length;
+                recuperados += getLancamentosMes(obra, alvo).length;
+              });
+              return { mes: alvo, registrosBrutos: bruto, registrosDoMes: recuperados };
+            };
+
             // --- Auto-import from Painel Geral de Produção ---
             // Items with instalado > 0 are candidates. dataInstalacao is auto-set
             // when instalado changes in the Painel Geral; fallback to today if missing.
             function autoImportarItensPgto() {
               const mesKey = getChaveMesPgto();
+              let houveAlteracao = false;
+              let novosLancamentos = 0;
+
               db.obras.forEach(obra => {
                 initLancamentosProducao(obra);
                 const itens = (obra.itens || []).filter(it => {
@@ -13414,10 +13565,18 @@ function trocarSubTabPgtoNovo(tab) {
                   if (iKey !== mesKey) return false;
                   const chaveExcl = _chaveLancImportado(it.id, mesKey);
                   if ((obra.lancExcluidos || []).indexOf(chaveExcl) !== -1) return false;
-                  // Already imported? Check if lancamento exists for this itemId
-                  const jaExiste = obra.lancamentosProducao.find(l => l.itemId === it.id && l.importado);
+
+                  // FASE 92: a chave de importação é item + mês.
+                  // Assim o mesmo item pode ter novo lançamento em outro mês,
+                  // mas nunca duplica dentro do mesmo mês.
+                  const jaExiste = obra.lancamentosProducao.some(l =>
+                    l && l.importado &&
+                    String(l.itemId) === String(it.id) &&
+                    _normalizarMesLancamento(l) === String(mesKey)
+                  );
                   return !jaExiste;
                 });
+
                 itens.forEach(it => {
                   const qtdInst = Number(it.instalado) || 0;
                   const m2 = qtdInst * (Number(it.larg) || 0) * (Number(it.alt) || 0);
@@ -13440,10 +13599,26 @@ function trocarSubTabPgtoNovo(tab) {
                     itemId: it.id
                   };
                   obra.lancamentosProducao.push(lanc);
+                  houveAlteracao = true;
+                  novosLancamentos++;
                 });
               });
-              // salvarDB() removido — autoImportarItensPgto é chamado dentro de renderPagamento(),
-              // e a própria função já está dentro do ciclo render(). Salvar aqui causava escrita redundante.
+
+              // FASE 92 — persistência controlada.
+              // Esta função roda dentro de renderPagamento(), portanto NÃO pode
+              // chamar salvarDB() com o padrão (que renderiza novamente).
+              // salvarDB(false) grava localmente e sincroniza com Supabase sem
+              // disparar um novo ciclo de renderização.
+              if (houveAlteracao && typeof salvarDB === 'function') {
+                try {
+                  salvarDB(false);
+                  console.info('[FASE 92] Lançamentos de pagamento persistidos:', novosLancamentos);
+                } catch (erroPersistencia) {
+                  console.error('[FASE 92] Falha ao persistir lançamentos automáticos:', erroPersistencia);
+                }
+              }
+
+              return novosLancamentos;
             }
             
             // --- Add lançamento manually ---
@@ -13941,6 +14116,12 @@ function renderLancamentosPgto() {
             
               totaisContainer.innerHTML = thtml;
             }
+
+            /* Funções administrativas expostas explicitamente para a gaveta. */
+            window.abrirBancoCompartilhado = abrirBancoCompartilhado;
+            window.salvarDB = salvarDB;
+            window.carregarBancoDaNuvem = carregarBancoDaNuvem;
+            window.restaurarBackupJSON = restaurarBackupJSON;
             </script>
 
             <!-- Modal Importar Esquadrias / Lista de Corte -->
@@ -28182,7 +28363,49 @@ function renderLancamentosPgto() {
                 }
                 
                 body.or-aberto { overflow: hidden !important; }
-                
+                /* FASE 92: controles antigos passam a viver na gaveta. */
+                #headerObraLegacy { display: none !important; }
+                .or-controles {
+                  flex: 0 0 auto;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
+                  padding: 9px 12px 12px 12px;
+                  border-top: 1px solid rgba(255,255,255,.07);
+                  background: #0d1424;
+                  max-height: 42vh;
+                  overflow-y: auto;
+                }
+                .or-controles-titulo {
+                  font: 700 10px/1 inherit;
+                  letter-spacing: 1.1px;
+                  color: #7f92b5;
+                  margin: 0 3px 2px;
+                }
+                .or-controles #menu-obra { position: relative !important; z-index: auto !important; margin: 0 !important; }
+                .or-controles #menu-obra > summary {
+                  width: 100% !important; box-sizing: border-box !important; padding: 9px 12px !important;
+                  margin: 0 !important; background: #1e293b !important; border-radius: 8px !important;
+                }
+                .or-controles #menu-obra > div {
+                  position: static !important; min-width: 0 !important; width: auto !important;
+                  margin: 6px 0 0 !important; padding: 7px !important; box-shadow: none !important;
+                  border-color: rgba(255,255,255,.08) !important;
+                }
+                .or-controles #menu-obra select,
+                .or-controles #menu-obra button,
+                .or-controle-btn,
+                .or-controles #btnThemeToggle {
+                  width: 100% !important; min-height: 34px; box-sizing: border-box;
+                }
+                .or-controles #statusNuvem {
+                  display: block !important; text-align: center; width: 100%; box-sizing: border-box;
+                }
+                .or-controle-btn {
+                  padding: 8px 10px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+                  background: #475569; color: #fff; font: 600 12px/1.2 inherit; cursor: pointer;
+                }
+                .or-controle-btn:hover { background: #56657a; }
                 @media (max-width: 520px) {
                   .or-launcher .or-atual { display: none; }
                   .or-painel { width: 290px !important; }
@@ -28429,6 +28652,9 @@ function renderLancamentosPgto() {
                           '<input type="text" class="or-busca" id="orBusca" placeholder="Buscar aba..." autocomplete="off">' +
                         '</div>' +
                         '<div class="or-lista" id="orLista"></div>' +
+                        '<div class="or-controles" id="orControles">' +
+                          '<div class="or-controles-titulo">CONTROLES DO PAINEL</div>' +
+                        '</div>' +
                       '</div>';
                     D.body.appendChild(g);
                 
@@ -28451,7 +28677,55 @@ function renderLancamentosPgto() {
                   }
                 
                   function caixaLista() { return el('orLista'); }
-                
+
+                  function montarControlesPainel() {
+                    var caixa = el('orControles');
+                    if (!caixa) { return; }
+                    var antigo = el('menu-obra');
+                    if (antigo && antigo.parentNode !== caixa) {
+                      caixa.appendChild(antigo);
+                      try { antigo.open = false; } catch (e) {}
+                    }
+                    var theme = el('btnThemeToggle');
+                    var status = el('statusNuvem');
+                    var restore = el('fileRestoreInput');
+                    if (status && status.parentNode !== caixa) { caixa.appendChild(status); }
+                    if (theme && theme.parentNode !== caixa) { caixa.appendChild(theme); }
+                    if (restore && restore.parentNode !== caixa) { caixa.appendChild(restore); }
+                    var salvar = el('orSalvarAgora');
+                    if (!salvar) {
+                      salvar = D.createElement('button');
+                      salvar.type = 'button';
+                      salvar.id = 'orSalvarAgora';
+                      salvar.className = 'or-controle-btn';
+                      salvar.textContent = '💾 Salvar agora';
+                      salvar.addEventListener('click', function () {
+                        try {
+                          if (window.P175 && typeof window.P175.salvarAgora === 'function') { window.P175.salvarAgora(); return; }
+                          if (typeof window.salvarDB === 'function') { window.salvarDB(false); return; }
+                          if (typeof window.sincronizarBancoNuvem === 'function') { window.sincronizarBancoNuvem(); return; }
+                          console.error('Funcao de salvamento nao encontrada.');
+                        } catch (e) { console.error('Erro ao salvar:', e); }
+                      });
+                    }
+                    if (salvar.parentNode !== caixa) { caixa.appendChild(salvar); }
+                    var carregar = el('orCarregarNuvem');
+                    if (!carregar) {
+                      carregar = D.createElement('button');
+                      carregar.type = 'button';
+                      carregar.id = 'orCarregarNuvem';
+                      carregar.className = 'or-controle-btn';
+                      carregar.textContent = '☁️ Carregar Nuvem';
+                      carregar.addEventListener('click', function () {
+                        try {
+                          M.fechar();
+                          if (typeof window.carregarBancoDaNuvem === 'function') window.carregarBancoDaNuvem();
+                        } catch (e) { console.error('Erro ao carregar nuvem:', e); }
+                      });
+                    }
+                    if (carregar.parentNode !== caixa) { caixa.appendChild(carregar); }
+                  }
+
                   function noTitulo(txt) {
                     var n = titulos[txt];
                     if (!n) {
@@ -28515,19 +28789,78 @@ function renderLancamentosPgto() {
                   var CONFIG_ADM = [
                     { id: 'banco', ico: '🌐', texto: 'Banco Compartilhado', acao: function () {
                         M.fechar();
-                        if (typeof window.abrirBancoCompartilhado === 'function') { window.abrirBancoCompartilhado(); }
+                        if (typeof window.abrirBancoCompartilhado === 'function') {
+                          window.abrirBancoCompartilhado();
+                        } else {
+                          console.error('Função abrirBancoCompartilhado não encontrada.');
+                        }
+                      } },
+                    { id: 'salvar', ico: '💾', texto: 'Salvar agora', acao: function () {
+                        M.fechar();
+                        /* Chama diretamente o salvamento do banco na nuvem, evitando
+                           conflitos com outras funções antigas chamadas salvarAgora. */
+                        if (typeof window.salvarDB === 'function') {
+                          window.salvarDB(false);
+                        } else if (typeof window.sincronizarBancoNuvem === 'function') {
+                          window.sincronizarBancoNuvem();
+                        } else if (typeof window.salvarAgora === 'function') {
+                          window.salvarAgora();
+                        }
+                      } },
+                    { id: 'carregar-nuvem', ico: '☁️', texto: 'Carregar da Nuvem', acao: function () {
+                        M.fechar();
+                        if (typeof window.carregarBancoDaNuvem === 'function') {
+                          window.carregarBancoDaNuvem();
+                        } else {
+                          console.error('Função carregarBancoDaNuvem não encontrada.');
+                        }
+                      } },
+                    { id: 'restaurar-backup', ico: '📥', texto: 'Restaurar Backup', acao: function () {
+                        M.fechar();
+                        var inp = document.getElementById('fileRestoreInput');
+                        if (inp) { inp.value = ''; inp.click(); }
+                        else { console.error('Campo de restauração de backup não encontrado.'); }
+                      } },
+                    { id: 'permitir-apagar', ico: '🔐', texto: 'Permitir apagar', acao: function () {
+                        M.fechar();
+                        if (typeof window.modalSenha === 'function') {
+                          window.modalSenha('Autorizacao para apagar');
+                        }
+                      } },
+                    { id: 'backups-nuvem', ico: '🛟', texto: 'Backups na nuvem', acao: function () {
+                        M.fechar();
+                        if (typeof window.abrirBackups === 'function') {
+                          window.abrirBackups();
+                        } else if (typeof window.p124AbrirBackups === 'function') {
+                          window.p124AbrirBackups();
+                        } else {
+                          console.error('Função de Backups na nuvem não encontrada.');
+                        }
                       } },
                     { id: 'admin', ico: '🔧', texto: 'Administrador', acao: function () {
                         M.fechar();
                         if (typeof window.abrirAdministradorProtegido === 'function') { window.abrirAdministradorProtegido(); }
-                      } },
-                    { id: 'recuperar', ico: '🧿', texto: 'Recuperar Dados Antigos', acao: function () {
+                      } }, { id: 'trocar-senha', ico: '🔑', texto: 'Trocar senha', acao: function () {
+        M.fechar();
+        try {
+          var ss = null;
+          try { ss = JSON.parse(sessionStorage.getItem('painel_seg_sessao_v1') || 'null'); } catch (e1) {}
+          if (!ss) {
+            try { ss = JSON.parse(localStorage.getItem('painel_seg_sessao_v1') || 'null'); } catch (e2) {}
+          }
+          var usuario = (ss && ss.usuario) ? ss.usuario : '';
+          if (typeof window.modalTrocarSenha === 'function') {
+            window.modalTrocarSenha(usuario, false);
+          } else {
+            console.error('Função modalTrocarSenha não encontrada.');
+          }
+        } catch (e) {
+          console.error('Erro ao abrir Trocar senha:', e);
+        }
+      } },
+                    { id: 'liberar-acesso', ico: '🔓', texto: 'Liberar acesso', acao: function () {
                         M.fechar();
                         if (typeof window.abrirRecuperacaoDados === 'function') { window.abrirRecuperacaoDados(); }
-                      } },
-                    { id: 'salvar', ico: '💾', texto: 'Salvar agora', acao: function () {
-                        M.fechar();
-                        if (typeof window.salvarAgora === 'function') { window.salvarAgora(); }
                       } },
                     { id: 'historico', ico: '📜', texto: 'Histórico de alterações', acao: function () {
                         M.fechar();
@@ -28585,7 +28918,7 @@ function renderLancamentosPgto() {
                     var IDs_CONFIG = {
                       'banco-compartilhado': 1,
                       'admin': 1,
-                      'recuperar-dados-antigos': 1,
+                      'liberar-acesso': 1,
                       'salvar-agora': 1,
                       'historico': 1
                     };
@@ -28595,8 +28928,12 @@ function renderLancamentosPgto() {
                       var txtCfg = String(d.texto || '').toLowerCase();
                       var cfgAntigo = (txtCfg.indexOf('banco compartilhado') >= 0 ||
                                        txtCfg === 'administrador' ||
-                                       txtCfg.indexOf('recuperar dados antigos') >= 0 ||
+                                       txtCfg.indexOf('liberar acesso') >= 0 ||
                                        txtCfg === 'salvar agora' ||
+                                       txtCfg.indexOf('carregar da nuvem') >= 0 ||
+                                       txtCfg.indexOf('permitir apagar') >= 0 ||
+                                       txtCfg.indexOf('backups na nuvem') >= 0 ||
+                                       txtCfg.indexOf('restaurar backup') >= 0 ||
                                        txtCfg.indexOf('histórico de alterações') >= 0 ||
                                        txtCfg.indexOf('historico de alteracoes') >= 0);
                       if (!usados[d.aba] && !cfgAntigo) { sobra.push(d); }
@@ -28693,6 +29030,7 @@ function renderLancamentosPgto() {
                     /* conferencia barata: se alguma aba mudou desde a ultima leitura, remonta */
                     if (montada && !sujo && assinatura() !== sigAtual) { sujo = true; }
                     if (!montada || sujo) { montarLista(); marcarAtivo(); filtrar(valorBusca()); }
+                    montarControlesPainel();
                     return g;
                   }
                   M.preparar = prepararGaveta;
@@ -39547,6 +39885,7 @@ function renderLancamentosPgto() {
                       try { alert('Nao foi possivel abrir a autorizacao do administrador.'); } catch (e2) {}
                     }
                   };
+                  window.modalSenha = modalSenha;
 
                   /* ---------------------------------------------------------------- *
                    * 8) trocar senha
@@ -46988,6 +47327,7 @@ if (document.readyState === 'loading') {
             });
         
             window.p88Historico = function () { abrirHistorico(); return true; };
+            window.abrirHistorico = abrirHistorico;
             window.PainelHistorico = {
               abrir: abrirHistorico,
               lista: historico,
@@ -62955,22 +63295,10 @@ if (document.readyState === 'loading') {
            * ---------------------------------------------------------------- */
         
           function garantirBotao() {
-            if (document.getElementById('p124BtnBackups')) { return; }
-            var menu = document.getElementById('settingsMenu');
-            var bt = document.createElement('button');
-            bt.id = 'p124BtnBackups';
-            bt.type = 'button';
-            bt.className = 'secondary';
-            bt.textContent = '🛟 Backups na nuvem';
-            bt.title = 'Retrato do painel guardado por dia, com opcao de voltar';
-            bt.addEventListener('click', function (ev) { ev.preventDefault(); abrirBackups(); });
-        
-            if (menu) {
-              menu.appendChild(bt);
-              return;
-            }
-            var alvo = document.querySelector('.project-selector');
-            if (alvo) { alvo.appendChild(bt); }
+            /* Backups na nuvem agora pertence exclusivamente à gaveta, em
+               CONFIGURAÇÕES ADM. Não recriar o botão no cabeçalho. */
+            var existente = document.getElementById('p124BtnBackups');
+            if (existente && existente.parentNode) { existente.parentNode.removeChild(existente); }
           }
         
           function comecar() {
@@ -62999,6 +63327,7 @@ if (document.readyState === 'loading') {
         
           /* atalhos para uso manual */
           window.p124AbrirBackups = abrirBackups;
+          window.abrirBackups = abrirBackups;
           window.p124BackupAgora = function () { return backupDoDia(true); };
           window.p124Listar = listarCopias;
           window.p124Estado = function () {
@@ -74063,8 +74392,6 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   }
 })();
 </script>
-\n
-
 
 <script id="modulo160RegiaoColaborador">
 (function(){
@@ -75378,12 +75705,9 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
     b.textContent = '\uD83D\uDCBE Salvar agora';
     b.addEventListener('click', function (ev) { ev.preventDefault(); salvarAgora(); });
 
-    var ref = document.querySelector('button[onclick^="carregarBancoDaNuvem"]');
-    if (ref && ref.parentNode) { ref.parentNode.insertBefore(b, ref.nextSibling); return; }
-    var st = document.getElementById('statusNuvem');
-    if (st && st.parentNode) { st.parentNode.insertBefore(b, st.nextSibling); return; }
-    var pai = document.querySelector('.project-selector');
-    if (pai) { pai.insertBefore(b, pai.firstChild); }
+    /* FASE 92: nao injeta mais um botao fisico no cabecalho.
+       O comando unico de salvamento fica dentro da gaveta de navegacao. */
+    return;
   }
 
   /* ---------------------------------------------------------------- *
@@ -77639,6 +77963,87 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){setTimeout(iniciar,1200);});
   else setTimeout(iniciar,1200);
   setTimeout(envolver,2500); setTimeout(envolver,5000);
+})();
+</script>
+
+<script id="fase75ReconEmpresa">
+(function(){
+  "use strict";
+  if (window.__fase75ReconEmpresa) return;
+  window.__fase75ReconEmpresa = true;
+  var stats = {executions:0, changed:0, matched:0, unresolved:0, saved:0};
+  function arr(v){ return Array.isArray(v) ? v : []; }
+  function norm(v){ return String(v == null ? "" : v).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim(); }
+  function nomeLimpo(v){ var s=String(v==null?"":v).replace(/\s+/g," ").trim(); s=s.replace(/\s*[\-–—]\s*[A-Za-z0-9Á-ú.&]+$/g,""); s=s.replace(/\s*\((profissional|ajudante|profissional\/ajudante)\)\s*$/i,""); return s.replace(/\s+/g," ").trim(); }
+  function semEmpresa(v){ var s=norm(v); return !s || s==="sem empresa" || s==="sem_empresa" || s==="nao informado" || s==="n/a"; }
+  function empresaValida(v){ return !semEmpresa(v); }
+  function mapaPessoas(obra){
+    var porId={}, porNome={}; if(!obra) return {porId:porId,porNome:porNome};
+    ["colaboradores","colaboradoresPgto"].forEach(function(k){ arr(obra[k]).forEach(function(p){
+      if(!p) return; var nome=String(p.nome||"").trim(), chave=norm(nomeLimpo(nome));
+      var rec={id:p.id!=null?String(p.id):"",nome:nome,empresa:String(p.empresa||"").trim()};
+      if(rec.id) porId[rec.id]=rec; if(chave&&!porNome[chave]) porNome[chave]=rec;
+    }); });
+    return {porId:porId,porNome:porNome};
+  }
+  function reconciliarLancamento(c,obra,mp){
+    if(!c||!obra) return false;
+    var antes=JSON.stringify({colaboradorId:c.colaboradorId||"",colaborador:c.colaborador||"",empresa:c.empresa||""}), p=null;
+    if(c.colaboradorId&&mp.porId[String(c.colaboradorId)]) p=mp.porId[String(c.colaboradorId)];
+    if(!p&&c.colaborador){ var chave=norm(nomeLimpo(c.colaborador)); if(chave) p=mp.porNome[chave]||null; }
+    if(p){ c.colaboradorId=p.id||c.colaboradorId||""; if(p.nome) c.colaborador=p.nome; if(empresaValida(p.empresa)) c.empresa=p.empresa; stats.matched++; }
+    else if(!empresaValida(c.empresa)) stats.unresolved++;
+    var depois=JSON.stringify({colaboradorId:c.colaboradorId||"",colaborador:c.colaborador||"",empresa:c.empresa||""});
+    return antes!==depois;
+  }
+  function reconciliarTudo(opcoes){
+    try{
+      if(!window.db||!Array.isArray(window.db.obras)) return {changed:0,total:0};
+      var changed=0,total=0;
+      window.db.obras.forEach(function(obra){ if(!obra)return; var mp=mapaPessoas(obra); arr(obra.centrosCusto).forEach(function(c){ total++; if(reconciliarLancamento(c,obra,mp)) changed++; }); });
+      stats.executions++; stats.changed+=changed;
+      if(changed&&(!opcoes||opcoes.salvar!==false)&&typeof window.salvarDB==='function'){ window.salvarDB(); stats.saved++; }
+      return {changed:changed,total:total};
+    }catch(e){ try{console.error("FASE 75 — reconciliação de empresa:",e);}catch(_){} return {changed:0,total:0,error:String(e&&e.message||e)}; }
+  }
+  window.__fase75ReconciliarEmpresas=function(){return reconciliarTudo({salvar:true});};
+  window.__fase75Status=function(){return JSON.parse(JSON.stringify(stats));};
+  function envolverSalvar(nome){
+    var fn=window[nome]; if(typeof fn!=="function"||fn.__fase75Wrapped)return false; var original=fn;
+    var wrapped=function(){var r=original.apply(this,arguments); try{reconciliarTudo({salvar:true});}catch(e){} return r;};
+    wrapped.__fase75Wrapped=true; wrapped.__fase75Original=original; window[nome]=wrapped;
+    try{if(nome==='salvarCusto') salvarCusto=wrapped;}catch(e){} try{if(nome==='salvarEdicaoCusto') salvarEdicaoCusto=wrapped;}catch(e){} return true;
+  }
+  function iniciar(){
+    reconciliarTudo({salvar:true}); envolverSalvar('salvarCusto'); envolverSalvar('salvarEdicaoCusto'); var n=0;
+    var t=setInterval(function(){n++; reconciliarTudo({salvar:true}); envolverSalvar('salvarCusto'); envolverSalvar('salvarEdicaoCusto'); if(n>=12)clearInterval(t);},500);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
+})();
+</script>
+
+<script id="fase92CorrecaoGavetaEResiduos">
+(function(){
+  'use strict';
+  if(window.__fase92CorrecaoGavetaEResiduos) return;
+  window.__fase92CorrecaoGavetaEResiduos=true;
+  function limparResiduos(){
+    try{
+      var walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false), remover=[];
+      while(walker.nextNode()){
+        var n=walker.currentNode, p=n.parentElement;
+        if(!p || p.closest('script,style,textarea,pre,code')) continue;
+        var s=String(n.nodeValue||'').replace(/ /g,' ').trim();
+        if(/^(?:→\s*){3,}(?:\\n)?$/.test(s)) remover.push(n);
+      }
+      remover.forEach(function(n){if(n.parentNode)n.parentNode.removeChild(n);});
+    }catch(e){try{console.warn('[FASE92] limpeza de residuos:',e);}catch(_) {}}
+  }
+  function iniciar(){
+    try{if(window.ORMENU&&typeof window.ORMENU.arrumar==='function')window.ORMENU.arrumar();}catch(e){}
+    limparResiduos(); setTimeout(limparResiduos,250); setTimeout(limparResiduos,1000);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
 })();
 </script>
 </body>
