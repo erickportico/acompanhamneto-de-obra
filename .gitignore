@@ -28,3 +28,13 @@ nulgit
 # Relatórios e arquivos gerados localmente
 *.pptx
 *.json
+# Patches e scripts temporarios de desenvolvimento
+gerar_fpdo_do_modelo.py
+gerar_relatorio_mensal.py
+limpeza_segura_painel.py
+patch180.py
+patch181.py
+patch182.py
+patch_centro-custo-dinamico.js
+patch_correcao.js
+patch_relocate_header_buttons.js
