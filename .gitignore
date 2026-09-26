@@ -1,4 +1,15 @@
 node_modules/
 .env
-backup_painel_dados_*.json
+.env.*
+!.env.example
 *.log
+*.tmp
+*.temp
+__pycache__/
+*.pyc
+.pytest_cache/
+_historico_limpeza/
+_historico_patches/
+_backup_pre_fase97/
+RELATORIO_LIMPEZA_*.txt
+scripts_fase99.txt
