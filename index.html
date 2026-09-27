@@ -43150,409 +43150,7 @@ janelaImpressao.document.write(
   cssImpressao +
   '</head><body>' +
   h +
-  '
-<script>
-/* PATCH: Integração Lançamentos <-> Centro de Custos
- * Data: 2026-09-26
- *
- * OBJETIVO:
- * - Mostrar no módulo "Pagamento de Produção > Lançamentos" as despesas
- *   que já existem em obra.centrosCusto.
- * - NÃO altera, move, duplica ou converte dados de centrosCusto.
- * - Usa o mesmo mês selecionado em Lançamentos.
- * - Respeita os filtros existentes de Colaborador, Material e Obra.
- * - Despesas do Centro de Custos aparecem em uma seção separada.
- *
- * Aplicação: inserir este arquivo no index.html antes de </body>.
- */
-
-(function () {
-  'use strict';
-
-  if (window.__patchIntegracaoLancamentosCentroCustos20260926) return;
-  window.__patchIntegracaoLancamentosCentroCustos20260926 = true;
-
-  var NS = 'pCCLanc20260926';
-
-  function esc(v) {
-    return String(v == null ? '' : v)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  function num(v) {
-    var n = Number(v);
-    return isFinite(n) ? n : 0;
-  }
-
-  function mesAtualLanc() {
-    try {
-      if (typeof window.getChaveMesPgto === 'function') {
-        return String(window.getChaveMesPgto() || '');
-      }
-    } catch (e) {}
-    return '';
-  }
-
-  function obras() {
-    return window.db && Array.isArray(window.db.obras) ? window.db.obras : [];
-  }
-
-  function nomeColaboradorPorId(id) {
-    if (!id) return '';
-    try {
-      if (typeof window.getColaboradoresAll === 'function') {
-        var lista = window.getColaboradoresAll() || [];
-        var c = lista.find(function (x) {
-          return String(x.id) === String(id);
-        });
-        return c ? String(c.nome || '') : '';
-      }
-    } catch (e) {}
-    return '';
-  }
-
-  function filtroAtual() {
-    var estado = window.__p201PgtoFiltrosEstado;
-    if (estado) {
-      return {
-        colaborador: String(estado.colaborador || ''),
-        material: String(estado.material || ''),
-        obra: String(estado.obra || '')
-      };
-    }
-
-    function valor(id) {
-      var el = document.getElementById(id);
-      return el ? String(el.value || '') : '';
-    }
-
-    return {
-      colaborador: valor('p201FiltroColaboradorLanc'),
-      material: valor('p201FiltroMaterialLanc'),
-      obra: valor('p201FiltroObraLanc')
-    };
-  }
-
-  function custoTemColaborador(c, filtroId) {
-    if (!filtroId) return true;
-
-    var nomeSelecionado = nomeColaboradorPorId(filtroId).trim().toLowerCase();
-    var nomeCusto = String(c.colaborador || '').trim().toLowerCase();
-
-    /* Centro de Custos normalmente guarda o nome do colaborador.
-       Também aceita id caso algum registro antigo tenha sido salvo assim. */
-    if (nomeCusto && nomeSelecionado && nomeCusto === nomeSelecionado) return true;
-    if (String(c.colaborador || '') === String(filtroId)) return true;
-
-    return false;
-  }
-
-  function custoTemMaterial(c, filtro) {
-    if (!filtro) return true;
-    var alvo = String(filtro).trim().toLowerCase();
-    var descricao = String(c.descricao || '').trim().toLowerCase();
-    var categoria = String(c.categoria || '').trim().toLowerCase();
-
-    return descricao === alvo ||
-           categoria === alvo ||
-           descricao.indexOf(alvo) !== -1 ||
-           categoria.indexOf(alvo) !== -1;
-  }
-
-  function custosDoMes() {
-    var mes = mesAtualLanc();
-    var out = [];
-
-    obras().forEach(function (obra) {
-      (obra.centrosCusto || []).forEach(function (c) {
-        if (!c) return;
-
-        var data = String(c.data || '').trim();
-        if (mes && data.substring(0, 7) !== mes) return;
-
-        out.push({
-          _obraId: obra.id,
-          _obraNome: obra.nome || 'Obra sem nome',
-          id: c.id,
-          data: data,
-          categoria: c.categoria || '',
-          descricao: c.descricao || '',
-          valor: num(c.valor),
-          regiao: c.regiao || '',
-          colaborador: c.colaborador || '',
-          empresa: c.empresa || ''
-        });
-      });
-    });
-
-    return out;
-  }
-
-  function custosFiltrados() {
-    var f = filtroAtual();
-
-    return custosDoMes().filter(function (c) {
-      if (f.obra && String(c._obraId) !== String(f.obra)) return false;
-      if (f.colaborador && !custoTemColaborador(c, f.colaborador)) return false;
-      if (f.material && !custoTemMaterial(c, f.material)) return false;
-      return true;
-    });
-  }
-
-  function garantirOpcao(selectId, value, label) {
-    var sel = document.getElementById(selectId);
-    if (!sel || !value) return;
-
-    var existe = Array.from(sel.options).some(function (o) {
-      return String(o.value) === String(value);
-    });
-
-    if (!existe) {
-      var op = document.createElement('option');
-      op.value = value;
-      op.textContent = label || value;
-      sel.appendChild(op);
-    }
-  }
-
-  function ampliarFiltrosComCentroDeCustos() {
-    var custos = custosDoMes();
-
-    var obrasMap = {};
-    var materiaisMap = {};
-    var colaboradoresMap = {};
-
-    custos.forEach(function (c) {
-      if (c._obraId != null) {
-        obrasMap[String(c._obraId)] = c._obraNome;
-      }
-
-      [c.descricao, c.categoria].forEach(function (v) {
-        var s = String(v || '').trim();
-        if (s) materiaisMap[s] = true;
-      });
-
-      if (c.colaborador) {
-        colaboradoresMap[String(c.colaborador)] = true;
-      }
-    });
-
-    Object.keys(obrasMap).forEach(function (id) {
-      garantirOpcao('p201FiltroObraLanc', id, obrasMap[id]);
-      garantirOpcao('p201FiltroObraResumo', id, obrasMap[id]);
-    });
-
-    Object.keys(materiaisMap).forEach(function (m) {
-      garantirOpcao('p201FiltroMaterialLanc', m, m);
-      garantirOpcao('p201FiltroMaterialResumo', m, m);
-    });
-
-    Object.keys(colaboradoresMap).forEach(function (nome) {
-      var lista = [];
-      try {
-        lista = typeof window.getColaboradoresAll === 'function'
-          ? (window.getColaboradoresAll() || [])
-          : [];
-      } catch (e) {}
-
-      var encontrado = lista.find(function (c) {
-        return String(c.nome || '').trim().toLowerCase() === nome.trim().toLowerCase();
-      });
-
-      if (encontrado) {
-        garantirOpcao(
-          'p201FiltroColaboradorLanc',
-          String(encontrado.id),
-          String(encontrado.nome || nome)
-        );
-        garantirOpcao(
-          'p201FiltroColaboradorResumo',
-          String(encontrado.id),
-          String(encontrado.nome || nome)
-        );
-      }
-    });
-  }
-
-  function formatarData(data) {
-    if (!data) return '-';
-    var m = String(data).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (!m) return esc(data);
-    return m[3] + '/' + m[2] + '/' + m[1];
-  }
-
-  function formatarMoeda(v) {
-    return num(v).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  }
-
-  function removerSecaoAnterior() {
-    var antigo = document.getElementById(NS + '-secao');
-    if (antigo && antigo.parentNode) antigo.parentNode.removeChild(antigo);
-  }
-
-  function renderSecaoCentroDeCustos() {
-    var container = document.getElementById('containerLancamentosPgto');
-    if (!container) return;
-
-    removerSecaoAnterior();
-
-    var custos = custosFiltrados();
-
-    var box = document.createElement('div');
-    box.id = NS + '-secao';
-    box.style.cssText =
-      'margin-top:18px;' +
-      'border:1px solid #334155;' +
-      'border-radius:12px;' +
-      'overflow:hidden;' +
-      'background:var(--card-bg,#0f172a);';
-
-    var total = custos.reduce(function (s, c) {
-      return s + num(c.valor);
-    }, 0);
-
-    var html = '';
-    html += '<div style="padding:12px 16px;background:linear-gradient(90deg,#7c3aed,#4f46e5);color:#fff;font-weight:800;">';
-    html += '💰 Despesas do Centro de Custos';
-    html += '<span style="float:right;">' + custos.length + ' lançamento(s) · ' + esc(formatarMoeda(total)) + '</span>';
-    html += '</div>';
-
-    if (!custos.length) {
-      html += '<div style="padding:22px;text-align:center;color:#94a3b8;font-size:.9rem;">';
-      html += 'Nenhuma despesa do Centro de Custos encontrada para este mês/filtro.';
-      html += '</div>';
-      box.innerHTML = html;
-      container.appendChild(box);
-      return;
-    }
-
-    var grupos = {};
-    custos.forEach(function (c) {
-      var key = String(c._obraId);
-      if (!grupos[key]) {
-        grupos[key] = { nome: c._obraNome, itens: [] };
-      }
-      grupos[key].itens.push(c);
-    });
-
-    Object.keys(grupos).forEach(function (key) {
-      var g = grupos[key];
-      var subtotal = g.itens.reduce(function (s, c) {
-        return s + num(c.valor);
-      }, 0);
-
-      html += '<div style="padding:10px 14px;border-top:1px solid #334155;background:rgba(37,99,235,.12);color:#e2e8f0;font-weight:800;">';
-      html += esc(g.nome);
-      html += '<span style="float:right;">Subtotal: ' + esc(formatarMoeda(subtotal)) + '</span>';
-      html += '</div>';
-
-      html += '<div style="overflow:auto;">';
-      html += '<table style="width:100%;border-collapse:collapse;font-size:.82rem;">';
-      html += '<thead><tr>';
-      html += '<th style="padding:8px;text-align:left;">Data</th>';
-      html += '<th style="padding:8px;text-align:left;">Categoria</th>';
-      html += '<th style="padding:8px;text-align:left;">Descrição</th>';
-      html += '<th style="padding:8px;text-align:left;">Região</th>';
-      html += '<th style="padding:8px;text-align:left;">Colaborador</th>';
-      html += '<th style="padding:8px;text-align:right;">Valor</th>';
-      html += '</tr></thead><tbody>';
-
-      g.itens.forEach(function (c) {
-        html += '<tr style="border-top:1px solid rgba(148,163,184,.18);">';
-        html += '<td style="padding:8px;">' + formatarData(c.data) + '</td>';
-        html += '<td style="padding:8px;">' + esc(c.categoria || '-') + '</td>';
-        html += '<td style="padding:8px;">' + esc(c.descricao || '-') + '</td>';
-        html += '<td style="padding:8px;">' + esc(c.regiao || '-') + '</td>';
-        html += '<td style="padding:8px;">' + esc(c.colaborador || '-') + '</td>';
-        html += '<td style="padding:8px;text-align:right;font-weight:800;">' + esc(formatarMoeda(c.valor)) + '</td>';
-        html += '</tr>';
-      });
-
-      html += '</tbody></table></div>';
-    });
-
-    html += '<div style="padding:10px 14px;border-top:2px solid #475569;text-align:right;font-weight:900;color:#f8fafc;">';
-    html += 'TOTAL DESPESAS DO CENTRO DE CUSTOS: ' + esc(formatarMoeda(total));
-    html += '</div>';
-
-    box.innerHTML = html;
-    container.appendChild(box);
-  }
-
-  function atualizarStatusComCC() {
-    var custos = custosFiltrados();
-    var status = document.getElementById('p201StatusLanc');
-    if (!status) return;
-
-    var texto = status.textContent || '';
-    if (texto.indexOf('Despesas CC:') !== -1) {
-      texto = texto.replace(/\s*·\s*Despesas CC:.*$/, '');
-    }
-
-    status.textContent = texto + ' · Despesas CC: ' + custos.length;
-  }
-
-  function instalar() {
-    if (typeof window.renderLancamentosPgto !== 'function') return false;
-    if (window.renderLancamentosPgto.__patchCC20260926) return true;
-
-    var original = window.renderLancamentosPgto;
-
-    var wrapped = function () {
-      var retorno = original.apply(this, arguments);
-
-      try {
-        ampliarFiltrosComCentroDeCustos();
-        renderSecaoCentroDeCustos();
-        atualizarStatusComCC();
-      } catch (e) {
-        console.warn('[PATCH CC] Falha ao renderizar despesas do Centro de Custos:', e);
-      }
-
-      return retorno;
-    };
-
-    wrapped.__patchCC20260926 = true;
-    wrapped.__original = original;
-    window.renderLancamentosPgto = wrapped;
-
-    return true;
-  }
-
-  function inicializar() {
-    if (instalar()) return;
-
-    var tentativas = 0;
-    var timer = setInterval(function () {
-      tentativas++;
-      if (instalar() || tentativas >= 40) {
-        clearInterval(timer);
-      }
-    }, 500);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', inicializar);
-  } else {
-    inicializar();
-  }
-
-  window.PatchCentroCustosLancamentos20260926 = {
-    render: renderSecaoCentroDeCustos,
-    custosDoMes: custosDoMes,
-    custosFiltrados: custosFiltrados
-  };
-})();
-
-</script>
-</body></html>'
+  '</body></html>'
 );
 } catch(e) { console.error('[P84] Erro impressão:', e); janelaImpressao.document.write('<!doctype html><html>' + '<head><meta charset=UTF-8><title>Erro</title></head>' + '<body><p style=color:red>Erro ao gerar impressão.</p></body></html>'); janelaImpressao.document.close(); }
 janelaImpressao.document.close();
@@ -78447,6 +78045,685 @@ body.dark-mode #tab-pagamento .historico-colab-tag{background:#1e293b;color:#e2e
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
 })();
+</script>
+
+<script>
+/* PATCH 20260926 - SEPARAR CENTRO DE CUSTOS DOS LANÇAMENTOS DE PRODUÇÃO
+ *
+ * OBJETIVO
+ * - NÃO exibir despesas de obra.centrosCusto dentro de:
+ *   Pagamento de Produção > Lançamentos.
+ * - NÃO alterar, mover, duplicar ou excluir dados do Centro de Custos.
+ * - Criar uma área independente "Lançamentos (CC)" para consultar as despesas.
+ * - Se o patch anterior estiver instalado, ele será neutralizado apenas
+ *   visualmente dentro de Lançamentos de Produção.
+ *
+ * APLICAÇÃO
+ * Inserir este arquivo no index.html antes do ÚLTIMO </body>.
+ */
+
+(function () {
+  'use strict';
+
+  if (window.__patchLancamentosCCSeparado20260926) return;
+  window.__patchLancamentosCCSeparado20260926 = true;
+
+  var BTN_ID = 'btn-tab-lancamentos-cc-20260926';
+  var PANEL_ID = 'tab-lancamentos-cc-20260926';
+  var STYLE_ID = 'style-lancamentos-cc-20260926';
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function moeda(v) {
+    return 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2
+    });
+  }
+
+  function mesSelecionado() {
+    try {
+      if (typeof getChaveMesPgto === 'function') {
+        var m = getChaveMesPgto();
+        if (m) return m;
+      }
+    } catch (e) {}
+
+    var d = new Date();
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0');
+  }
+
+  function mesCusto(c) {
+    var s = String(
+      c.data ||
+      c.dataDespesa ||
+      c.dataLancamento ||
+      ''
+    );
+
+    var m = s.match(/^(\d{4})-(\d{2})/);
+    if (m) return m[1] + '-' + m[2];
+
+    var b = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (b) return b[3] + '-' + b[2];
+
+    return '';
+  }
+
+  function todosCustos() {
+    var lista = [];
+
+    var obras = (
+      window.db &&
+      Array.isArray(window.db.obras)
+    ) ? window.db.obras : [];
+
+    obras.forEach(function (obra) {
+      (obra.centrosCusto || []).forEach(function (c) {
+        if (!c) return;
+
+        var item = Object.assign({}, c);
+        item._obraId = obra.id;
+        item._obraNome = obra.nome || 'Obra sem nome';
+
+        lista.push(item);
+      });
+    });
+
+    return lista;
+  }
+
+  /*
+   * Remove SOMENTE a seção criada pelo patch anterior dentro
+   * de #containerLancamentosPgto.
+   *
+   * Nenhum registro de db.obras[].centrosCusto é alterado.
+   */
+  function limparCCDosLancamentosProducao() {
+    var container = document.getElementById('containerLancamentosPgto');
+    if (!container) return;
+
+    Array.prototype.slice.call(container.children).forEach(function (child) {
+      var texto = String(child.textContent || '');
+
+      if (
+        texto.indexOf('Despesas do Centro de Custos') !== -1 &&
+        texto.indexOf('Subtotal:') !== -1
+      ) {
+        child.remove();
+      }
+    });
+  }
+
+  function instalarBloqueioVisual() {
+    limparCCDosLancamentosProducao();
+
+    if (
+      typeof window.renderLancamentosPgto === 'function' &&
+      !window.renderLancamentosPgto.__patchSeparacaoCC20260926
+    ) {
+      var original = window.renderLancamentosPgto;
+
+      var wrapped = function () {
+        var resultado = original.apply(this, arguments);
+
+        setTimeout(limparCCDosLancamentosProducao, 0);
+        setTimeout(limparCCDosLancamentosProducao, 150);
+
+        return resultado;
+      };
+
+      wrapped.__patchSeparacaoCC20260926 = true;
+      wrapped.__original = original;
+
+      window.renderLancamentosPgto = wrapped;
+    }
+  }
+
+  function instalarEstilo() {
+    if (document.getElementById(STYLE_ID)) return;
+
+    var style = document.createElement('style');
+    style.id = STYLE_ID;
+
+    style.textContent =
+      '#' + PANEL_ID + ' { margin-top: 12px; }' +
+      '#' + PANEL_ID + ' .pcc-table {' +
+        'width:100%;border-collapse:collapse;background:#fff;color:#0f172a;' +
+      '}' +
+      '#' + PANEL_ID + ' .pcc-table th {' +
+        'background:#e2e8f0;padding:9px;text-align:left;font-size:.78rem;' +
+      '}' +
+      '#' + PANEL_ID + ' .pcc-table td {' +
+        'padding:9px;border-bottom:1px solid #cbd5e1;font-size:.82rem;' +
+      '}' +
+      '#' + PANEL_ID + ' .pcc-total {' +
+        'font-weight:800;background:#fef08a;' +
+      '}';
+
+    document.head.appendChild(style);
+  }
+
+  function instalarAba() {
+    var menu = document.getElementById('meu-menu-abas');
+    if (!menu) return false;
+
+    if (!document.getElementById(BTN_ID)) {
+      var botao = document.createElement('button');
+
+      botao.id = BTN_ID;
+      botao.type = 'button';
+      botao.className = 'tab-btn';
+      botao.textContent = '💸 Lançamentos (CC)';
+      botao.onclick = function () {
+        abrirLancamentosCC();
+      };
+
+      var botaoCusto = document.getElementById('btn-tab-custo');
+
+      if (botaoCusto && botaoCusto.parentNode) {
+        botaoCusto.parentNode.insertBefore(
+          botao,
+          botaoCusto.nextSibling
+        );
+      } else {
+        menu.appendChild(botao);
+      }
+    }
+
+    if (!document.getElementById(PANEL_ID)) {
+      var painel = document.createElement('div');
+
+      painel.id = PANEL_ID;
+      painel.className = 'card';
+      painel.style.display = 'none';
+
+      painel.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">' +
+          '<h2 style="margin:0;">💸 Lançamentos do Centro de Custos</h2>' +
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+            '<select id="pccMes" style="padding:8px;border-radius:8px;border:1px solid #94a3b8;"></select>' +
+            '<select id="pccObra" style="padding:8px;border-radius:8px;border:1px solid #94a3b8;"></select>' +
+            '<select id="pccColab" style="padding:8px;border-radius:8px;border:1px solid #94a3b8;"></select>' +
+            '<button type="button" class="btn-action" onclick="window.PatchLancamentosCC20260926.render()">🔄 Atualizar</button>' +
+          '</div>' +
+        '</div>' +
+        '<div id="pccResumo" style="margin:14px 0;font-weight:700;"></div>' +
+        '<div id="pccTabela"></div>';
+
+      var painelCusto = document.getElementById('tab-custo');
+
+      if (painelCusto && painelCusto.parentNode) {
+        painelCusto.parentNode.insertBefore(
+          painel,
+          painelCusto.nextSibling
+        );
+      }
+    }
+
+    instalarEstilo();
+    popularFiltros();
+
+    return true;
+  }
+
+  function popularFiltros() {
+    var mes = document.getElementById('pccMes');
+    var obra = document.getElementById('pccObra');
+    var colab = document.getElementById('pccColab');
+
+    if (!mes || !obra || !colab) return;
+
+    var lista = todosCustos();
+    var atual = mesSelecionado();
+    var meses = {};
+
+    lista.forEach(function (c) {
+      var m = mesCusto(c);
+      if (m) meses[m] = true;
+    });
+
+    meses[atual] = true;
+
+    var listaMeses = Object.keys(meses).sort().reverse();
+
+    mes.innerHTML = listaMeses.map(function (m) {
+      return '<option value="' + esc(m) + '">' + esc(m) + '</option>';
+    }).join('');
+
+    mes.value = atual;
+
+    var obras = {};
+    var colaboradores = {};
+
+    lista.forEach(function (c) {
+      obras[String(c._obraId)] = c._obraNome;
+
+      if (c.colaborador) {
+        colaboradores[String(c.colaborador)] = String(c.colaborador);
+      }
+    });
+
+    obra.innerHTML =
+      '<option value="">Todas as obras</option>' +
+      Object.keys(obras)
+        .sort(function (a, b) {
+          return obras[a].localeCompare(obras[b], 'pt-BR');
+        })
+        .map(function (id) {
+          return '<option value="' + esc(id) + '">' +
+            esc(obras[id]) +
+            '</option>';
+        })
+        .join('');
+
+    colab.innerHTML =
+      '<option value="">Todos os colaboradores</option>' +
+      Object.keys(colaboradores)
+        .sort(function (a, b) {
+          return colaboradores[a].localeCompare(
+            colaboradores[b],
+            'pt-BR'
+          );
+        })
+        .map(function (nome) {
+          return '<option value="' + esc(nome) + '">' +
+            esc(nome) +
+            '</option>';
+        })
+        .join('');
+  }
+
+  function render() {
+    if (!instalarAba()) return;
+
+    popularFiltros();
+
+    var mes = document.getElementById('pccMes').value;
+    var obra = document.getElementById('pccObra').value;
+    var colab = document.getElementById('pccColab').value;
+
+    var lista = todosCustos().filter(function (c) {
+      if (mes && mesCusto(c) !== mes) return false;
+
+      if (
+        obra &&
+        String(c._obraId) !== String(obra)
+      ) {
+        return false;
+      }
+
+      if (
+        colab &&
+        String(c.colaborador || '') !== String(colab)
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    var total = lista.reduce(function (s, c) {
+      return s + (Number(c.valor) || 0);
+    }, 0);
+
+    var resumo = document.getElementById('pccResumo');
+
+    if (resumo) {
+      resumo.textContent =
+        lista.length +
+        ' lançamento(s) • ' +
+        moeda(total);
+    }
+
+    var tabela = document.getElementById('pccTabela');
+
+    if (!tabela) return;
+
+    if (!lista.length) {
+      tabela.innerHTML =
+        '<div style="padding:28px;text-align:center;color:#64748b;">' +
+        'Nenhuma despesa do Centro de Custos encontrada para os filtros atuais.' +
+        '</div>';
+
+      return;
+    }
+
+    lista.sort(function (a, b) {
+      return String(a.data || '').localeCompare(
+        String(b.data || '')
+      );
+    });
+
+    var html =
+      '<div style="overflow:auto;">' +
+      '<table class="pcc-table">' +
+      '<thead><tr>' +
+      '<th>Data</th>' +
+      '<th>Obra</th>' +
+      '<th>Categoria</th>' +
+      '<th>Descrição</th>' +
+      '<th>Região</th>' +
+      '<th>Colaborador</th>' +
+      '<th>Valor</th>' +
+      '</tr></thead><tbody>';
+
+    lista.forEach(function (c) {
+      html +=
+        '<tr>' +
+        '<td>' + esc(c.data || '-') + '</td>' +
+        '<td>' + esc(c._obraNome) + '</td>' +
+        '<td>' + esc(c.categoria || '-') + '</td>' +
+        '<td>' + esc(c.descricao || '-') + '</td>' +
+        '<td>' + esc(c.regiao || '-') + '</td>' +
+        '<td>' + esc(c.colaborador || '-') + '</td>' +
+        '<td><strong>' + moeda(c.valor) + '</strong></td>' +
+        '</tr>';
+    });
+
+    html +=
+      '</tbody>' +
+      '<tfoot>' +
+      '<tr class="pcc-total">' +
+      '<td colspan="6">TOTAL</td>' +
+      '<td>' + moeda(total) + '</td>' +
+      '</tr>' +
+      '</tfoot>' +
+      '</table></div>';
+
+    tabela.innerHTML = html;
+  }
+
+  function abrirLancamentosCC() {
+    var painel = document.getElementById(PANEL_ID);
+
+    if (!painel) {
+      instalarAba();
+      painel = document.getElementById(PANEL_ID);
+    }
+
+    if (!painel) return;
+
+    /*
+     * Esconde as demais áreas sem tocar nos dados.
+     */
+    document.querySelectorAll('.card').forEach(function (el) {
+      if (el.id !== PANEL_ID) {
+        el.style.display = 'none';
+      }
+    });
+
+    painel.style.display = '';
+
+    document.querySelectorAll('.tab-btn').forEach(function (btn) {
+      btn.classList.remove('active');
+    });
+
+    var botao = document.getElementById(BTN_ID);
+
+    if (botao) {
+      botao.classList.add('active');
+    }
+
+    render();
+  }
+
+  window.PatchLancamentosCC20260926 = {
+    render: render,
+    limpar: limparCCDosLancamentosProducao,
+    abrir: abrirLancamentosCC
+  };
+
+  function iniciar() {
+    instalarAba();
+    instalarBloqueioVisual();
+
+    setTimeout(instalarBloqueioVisual, 300);
+    setTimeout(instalarBloqueioVisual, 1000);
+    setTimeout(instalarBloqueioVisual, 2000);
+
+    /*
+     * Garante que, se outro patch voltar a envolver
+     * renderLancamentosPgto, a seção CC continue fora.
+     */
+    var tentativas = 0;
+
+    var timer = setInterval(function () {
+      tentativas++;
+
+      instalarBloqueioVisual();
+
+      if (tentativas >= 20) {
+        clearInterval(timer);
+      }
+    }, 500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      iniciar,
+      { once: true }
+    );
+  } else {
+    iniciar();
+  }
+})();
+
+</script>
+
+<script>
+PATCH AJUSTE MENU CONFIGURAÇÕES ADM
+Data: 2026-09-27
+
+OBJETIVO:
+- Remover somente o botão "Trocar senha" da lista CONFIGURAÇÕES ADM.
+- Manter "Permitir apagar" exatamente como está.
+- Alterar somente o texto exibido de "Recuperar Dados Antigos" para "Liberar acesso".
+- Manter a função original de Recuperar Dados Antigos.
+- Remover somente o botão "Backups na nuvem" da lista CONFIGURAÇÕES ADM.
+- NÃO alterar banco de dados.
+- NÃO alterar permissões.
+- NÃO alterar funções existentes.
+- NÃO alterar o botão Administrador.
+- NÃO alterar o botão Permitir apagar.
+- NÃO alterar os dados do painel.
+
+APLICAÇÃO:
+Este patch deve ser inserido no index.html antes de </body>.
+
+(function () {
+  'use strict';
+
+  if (window.__patchMenuConfigAdm20260927) return;
+  window.__patchMenuConfigAdm20260927 = true;
+
+  function aplicar() {
+    try {
+      var botoes = document.querySelectorAll('.or-item');
+
+      for (var i = 0; i < botoes.length; i++) {
+        var botao = botoes[i];
+        var texto = botao.querySelector('.or-txt');
+
+        if (!texto) continue;
+
+        var atual = String(texto.textContent || '').trim().toLowerCase();
+
+        /* Remove somente "Trocar senha". */
+        if (atual === 'trocar senha') {
+          botao.remove();
+          continue;
+        }
+
+        /* "Recuperar Dados Antigos" passa a se chamar "Liberar acesso".
+           O clique original NÃO é alterado. */
+        if (
+          atual === 'recuperar dados antigos' ||
+          atual === 'liberar acesso'
+        ) {
+          texto.textContent = 'Liberar acesso';
+          continue;
+        }
+
+        /* Remove somente "Backups na nuvem". */
+        if (atual === 'backups na nuvem') {
+          botao.remove();
+          continue;
+        }
+      }
+    } catch (e) {
+      console.error('[PATCH MENU ADM 20260927] Erro:', e);
+    }
+  }
+
+  function iniciar() {
+    aplicar();
+
+    var tentativas = 0;
+    var timer = setInterval(function () {
+      tentativas++;
+      aplicar();
+
+      if (tentativas >= 20) {
+        clearInterval(timer);
+      }
+    }, 500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciar, { once: true });
+  } else {
+    iniciar();
+  }
+
+  window.PatchMenuConfigAdm20260927 = {
+    aplicar: aplicar
+  };
+})();
+
+</script>
+
+<script>
+/* PATCH: remover apenas os botoes duplicados do topo de CONFIGURACOES ADM
+ * Data: 2026-09-27
+ *
+ * Remove SOMENTE:
+ * - Salvar agora
+ * - Carregar da Nuvem
+ *
+ * dentro da secao CONFIGURACOES ADM.
+ *
+ * Mantem intactos os botoes equivalentes em CONTROLES DO PAINEL,
+ * na parte inferior do menu.
+ */
+
+(function () {
+  'use strict';
+
+  if (window.__patchRemoverBotoesTopoConfigAdm20260927) return;
+  window.__patchRemoverBotoesTopoConfigAdm20260927 = true;
+
+  function normalizar(v) {
+    return String(v || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function localizarTexto(exato) {
+    var alvo = normalizar(exato);
+    var encontrados = [];
+
+    document.querySelectorAll('body *').forEach(function (el) {
+      if (normalizar(el.textContent) === alvo) encontrados.push(el);
+    });
+
+    return encontrados;
+  }
+
+  function estaEntre(el, inicio, fim) {
+    if (!inicio || !fim || !el) return false;
+
+    var depoisDoInicio =
+      !!(inicio.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+    var antesDoFim =
+      !!(el.compareDocumentPosition(fim) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+    return depoisDoInicio && antesDoFim;
+  }
+
+  function obterAlvoClicavel(el) {
+    if (!el) return null;
+
+    var clicavel = el.closest('button, a, [role="button"]');
+    if (clicavel) return clicavel;
+
+    return el;
+  }
+
+  function aplicar() {
+    var config = localizarTexto('CONFIGURAÇÕES ADM')[0];
+    var controles = localizarTexto('CONTROLES DO PAINEL')[0];
+
+    if (!config || !controles) return false;
+
+    var removidos = 0;
+
+    ['Salvar agora', 'Carregar da Nuvem'].forEach(function (nome) {
+      localizarTexto(nome).forEach(function (el) {
+        if (!estaEntre(el, config, controles)) return;
+
+        var alvo = obterAlvoClicavel(el);
+        if (!alvo) return;
+
+        alvo.style.setProperty('display', 'none', 'important');
+        alvo.setAttribute('data-patch-config-adm-20260927', 'hidden');
+        removidos++;
+      });
+    });
+
+    return removidos > 0;
+  }
+
+  function iniciar() {
+    var tentativas = 0;
+    var timer = null;
+
+    function tentar() {
+      tentativas++;
+
+      if (aplicar() || tentativas >= 40) {
+        if (timer) clearInterval(timer);
+      }
+    }
+
+    tentar();
+
+    if (tentativas < 40) {
+      timer = setInterval(tentar, 500);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciar, { once: true });
+  } else {
+    iniciar();
+  }
+
+  window.PatchRemoverBotoesTopoConfigAdm20260927 = {
+    aplicar: aplicar
+  };
+})();
+
 </script>
 </body>
 </html>
